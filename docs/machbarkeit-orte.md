@@ -1,0 +1,115 @@
+# Machbarkeitstest Orte (M2a)
+
+Frage: Gibt es in der Umgebung von Greiz genug familientaugliche Orte in OpenStreetMap, um daraus jederzeit
+**3 gute Vorschläge** zu bilden – auch in einem Dorf wie Reudnitz?
+
+> **Stand: Messung steht noch aus.** Das Skript ist fertig und getestet, aber die Overpass API war aus der
+> Cloud-Umgebung nicht zuverlässig erreichbar (siehe [Stand der Messung](#stand-der-messung)). Die Abschnitte
+> „Ergebnisse" und „Einschätzung" sind deshalb noch leer. Es stehen hier bewusst **keine** geschätzten Zahlen.
+
+## Vorgehen
+
+**Skript:** `scripts/feasibility-places.ts` (nur ein Test, keine App-Funktion).
+Es fragt die Overpass API von OpenStreetMap ab und schreibt die Auswertung als Markdown nach
+`scripts/.cache/report.md` (nicht im Repo). Die Tabellen daraus kommen in den Abschnitt „Ergebnisse".
+
+```bash
+npm run places:test                # abfragen und auswerten (Node 22.18 oder neuer)
+npm run places:test -- --offline   # nur aus dem Zwischenspeicher auswerten
+npm run places:test -- --selftest  # Rechenfunktionen prüfen, braucht kein Netz
+```
+
+Mit der Umgebungsvariable `OVERPASS_URL` lässt sich ein anderer Overpass-Server eintragen
+(Standard: `https://overpass-api.de/api/interpreter`).
+
+### Testorte
+
+| Ort | Mittelpunkt in OSM | gerundet (wie später in der App) |
+|---|---|---|
+| Greiz (Stadt) | 50,6563 / 12,2009 | 50,66 / 12,20 |
+| Reudnitz (Ortsteil von Mohlsdorf-Teichwolframsdorf) | 50,6777 / 12,2781 | 50,68 / 12,28 |
+
+Beide Mittelpunkte hat das Skript selbst in OSM gefunden. Greiz hat dort noch einen zweiten Eintrag (Gemeinde,
+50,6478 / 12,1735), der bewusst ignoriert wird. **Die beiden Orte liegen nur etwa 6 km auseinander.** Bei 15 und
+30 km überlappen sich die Umkreise daher fast vollständig. Der Unterschied „Stadt gegen Dorf" zeigt sich vor allem
+im Umkreis von 5 km.
+
+### Umkreise
+
+5, 15 und 30 km **Luftlinie** (Overpass `around`). Bei Flächen zählt, ob irgendein Teil im Umkreis liegt. Die
+Fahrzeit ist nicht berücksichtigt.
+
+### Kategorien und OSM-Merkmale
+
+| Kategorie | Unterarten (OSM-Merkmal) |
+|---|---|
+| Spielplätze | `leisure=playground` (ohne private und Hallen-Spielplätze) |
+| Parks | `leisure=park` (ohne private) |
+| Schwimm- und Freibäder | `leisure=water_park`; benannte `leisure=swimming_pool` (nicht privat); `leisure=sports_centre` mit `sport=swimming` |
+| Freizeitparks | `tourism=theme_park`; `leisure=miniature_golf` |
+| Zoos und Tierparks | `tourism=zoo`; `tourism=aquarium` |
+| Museen | `tourism=museum` |
+| Sehenswürdigkeiten | benannte: `tourism=attraction`, `tourism=viewpoint`, Aussichtstürme (`man_made=tower` + `tower:type=observation`), `historic=castle`, `historic=ruins` |
+| Naturerlebnisse | Wanderwege (`route=hiking`); benannte Naturschutzgebiete und Seen/Teiche/Stauseen; `leisure=bathing_place`; `tourism=picnic_site` |
+| Indoor-Angebote | `leisure=indoor_play`; Spielplätze mit `indoor=yes`; `leisure=trampoline_park`; Kletter-/Boulderhallen; `leisure=bowling_alley`; `leisure=ice_rink`; `leisure=escape_game`; `amenity=cinema`; `amenity=library` |
+
+Kino und Bibliothek sind eine Ergänzung zur ursprünglichen Liste, weil sie bei schlechtem Wetter oft die
+realistischsten Ziele sind. Hallenbäder stehen unter „Schwimm- und Freibäder" und zählen dort auch als Regen-Option.
+
+### Zählweise
+
+- **Doppelte werden zusammengefasst:** Gleicher Name in derselben Kategorie und näher als 150 m gilt als ein Ort
+  (z. B. ein Freibad, das als Punkt und als Fläche eingetragen ist). Namenlose Einträge gleicher Art näher als 40 m
+  ebenfalls.
+- **Kategorien überschneiden sich** teilweise (eine Burg kann auch ein Museum sein). Deshalb gibt es zusätzlich
+  die Zeile „Summe ohne Mehrfachzählung".
+- **Wanderwege** sind Routen ohne einen einzelnen Standort. Sie werden mitgezählt, bekommen aber keine Entfernung.
+- Bei Sehenswürdigkeiten, benannten Becken, Naturschutzgebieten und Seen zählen nur Einträge **mit Namen**,
+  weil man unbenannte Dinge nicht sinnvoll vorschlagen kann. Bei Spielplätzen und Parks zählen auch namenlose.
+- **Gemessen wird:** Anzahl pro Kategorie und Umkreis, Anteil mit Namen, mit `opening_hours`, mit Website
+  (`website`, `contact:website` oder `url`) und mit mindestens einem von beiden, außerdem je 3 Beispiele.
+
+### Rücksicht auf die Overpass API
+
+Insgesamt nur **7 Abfragen** (1× Ortsmitten, je Ort 3× Umkreis), nacheinander mit mindestens 10 s Pause, mit
+Statusprüfung, eigenem User-Agent und höchstens einem Wiederholungsversuch nach 60 s. Jede Antwort wird in
+`scripts/.cache/` gespeichert, ein zweiter Lauf fragt nichts erneut ab.
+
+## Stand der Messung
+
+Aus der Cloud-Umgebung, in der das Skript entwickelt wurde, kam nur die kleine Ortsmitten-Abfrage durch:
+
+- HTTPS zu `overpass-api.de` wurde in allen Versuchen nach etwa 7 s von der Gegenseite abgebrochen.
+- Über HTTP (Port 80) kam ein großer Teil der Aufrufe nur mit „503 upstream connect error" zurück.
+- Erreichte eine Umkreis-Abfrage Overpass, antwortete der Server mit 504 (zu beschäftigt), auch bei der kleinen
+  5-km-Abfrage (nur IDs). Die Ortsmitten-Abfrage dauerte schon 5,6 s, der Server war also langsam.
+
+Nach vier Läufen habe ich weitere Versuche eingestellt, um den öffentlichen Server nicht zu belasten. Das Skript
+ist davon nicht betroffen: Auf einem normalen Rechner mit HTTPS läuft es ohne Sonderbehandlung.
+
+## Ergebnisse
+
+_Noch nicht gemessen._ Hier kommen nach dem Lauf die Tabellen aus `scripts/.cache/report.md` hin: je Testort
+Anzahl pro Kategorie (5/15/30 km), Anteil mit Öffnungszeiten/Website, Unterarten und Beispiele.
+
+## Einschätzung: Reicht das für 3 gute Vorschläge?
+
+_Folgt nach der Messung._ Geprüft werden soll an typischen Fällen, zum Beispiel:
+
+1. 2 Stunden, Regen, Kleinkind (Indoor und Bäder im 15-km-Umkreis).
+2. Halber Tag, Sonne, Schulkind (Natur, Ausflugsziele im 30-km-Umkreis).
+3. 1 Stunde, wenig Energie, Dorf (alles innerhalb von 5 km).
+
+Kriterien: Gibt es für jeden Fall mindestens drei sinnvolle Orte? Reicht die Datenqualität (Öffnungszeiten),
+um „geschlossen" auszuschließen? Wo muss der Fallback aus der CLAUDE.md greifen (Umkreis vergrößern, dann
+Aktivitäten für zu Hause)?
+
+## Grenzen dieses Tests
+
+- Luftlinie statt Fahrzeit.
+- OpenStreetMap ist von Freiwilligen gepflegt. Eine fehlende Öffnungszeit heißt nicht, dass der Ort keine hat.
+  Bei frei zugänglichen Orten (Spielplatz, Park, Wanderweg) sind Öffnungszeiten ohnehin nicht zu erwarten.
+- `opening_hours` wird hier nur gezählt, nicht ausgewertet. „Jetzt geöffnet?" zu berechnen ist Thema von
+  M10 und braucht voraussichtlich eine Bibliothek (vorher Rückfrage).
+- Keine Preise, keine Angaben zur Altersgrenze, keine Veranstaltungen (die kommen mit M2b/M11).
+- Eine Momentaufnahme: Die Daten ändern sich laufend.
