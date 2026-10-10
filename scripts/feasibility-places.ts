@@ -10,11 +10,16 @@
  *   npm run places:test -- --offline    # nur aus dem Zwischenspeicher auswerten, kein Netz
  *   npm run places:test -- --refresh    # Zwischenspeicher ignorieren und neu abfragen
  *   npm run places:test -- --selftest   # Rechenfunktionen prüfen, kein Netz
+ *   npm run places:test -- --print-queries   # die Overpass-Abfragen im Klartext zeigen, kein Netz
  *
  * Nutzungsregeln der Overpass API (https://wiki.openstreetmap.org/wiki/Overpass_API):
- * - Insgesamt nur 7 Abfragen (1x Ortsmitte, je Ort 3x Umkreis), nacheinander und mit Pause dazwischen.
+ * - Leicht für den Server: Rechteck (bbox) um 30 km statt Kreis, wenige grobe Zeilen pro Abfrage, Zeit- und
+ *   Speichergrenze in der Abfrage. Die Entfernung (5/15/30 km) rechnet das Skript selbst aus dem Mittelpunkt
+ *   jedes Treffers. Wanderwege werden getrennt und ohne Geometrie abgefragt.
+ * - Insgesamt nur 11 Abfragen (1x Ortsmitten, je Ort 2x Orte + 3x Wanderwege), nacheinander und mit
+ *   mindestens 10 s Pause dazwischen.
  * - Vor jeder Abfrage wird /api/status geprüft; ist kein Platz frei, wird höchstens einmal gewartet.
- * - Bei Überlastung (429/502/503/504) gibt es genau einen weiteren Versuch, keine Schleifen.
+ * - Bei Überlastung (429/500/502/503/504) gibt es genau einen weiteren Versuch, keine Schleifen.
  * - Antworten landen in scripts/.cache/ (steht in .gitignore). Ein zweiter Lauf fragt nichts mehr ab.
  * - Eigener User-Agent mit Projektbezug.
  *
@@ -94,6 +99,7 @@ type Filter = {
   exclude?: Record<string, string[]>; // Ausschluss, z. B. access=private
   requireName?: boolean;
   elements?: 'nwr' | 'rel'; // nwr = Punkte, Linien/Flächen, Relationen
+  queryKey?: string; // Schlüssel für die grobe Abfrage, wenn nicht der erste (der seltenere ist schneller)
 };
 
 type Category = { id: CategoryId; label: string; filters: Filter[] };
@@ -158,7 +164,12 @@ const CATEGORIES: Category[] = [
     filters: [
       { label: 'Sehenswürdigkeit', tags: { tourism: 'attraction' }, requireName: true },
       { label: 'Aussichtspunkt', tags: { tourism: 'viewpoint' }, requireName: true },
-      { label: 'Aussichtsturm', tags: { man_made: 'tower', 'tower:type': 'observation' }, requireName: true },
+      {
+        label: 'Aussichtsturm',
+        tags: { man_made: 'tower', 'tower:type': 'observation' },
+        requireName: true,
+        queryKey: 'tower:type', // man_made=tower gibt es sehr oft, tower:type=observation selten
+      },
       { label: 'Burg/Schloss', tags: { historic: 'castle' }, requireName: true },
       { label: 'Ruine', tags: { historic: 'ruins' }, requireName: true },
     ],
@@ -202,27 +213,66 @@ const CATEGORIES: Category[] = [
 // Overpass-Abfrage bauen und Treffer zuordnen
 // ---------------------------------------------------------------------------------------------
 
-function listRegex(values: string[]): string {
-  return `(^|;)(${values.join('|')})(;|$)`;
+// Leicht für den Server: ein Rechteck (bbox) statt Kreis, wenige grobe Zeilen, kleine Abfragen, passende
+// Grenzen für Zeit (120 s) und Speicher (128 MB). Die Entfernung rechnet das Skript danach selbst aus.
+const QL_SETTINGS = '[out:json][timeout:120][maxsize:134217728]';
+
+type Box = [number, number, number, number]; // Süd, West, Nord, Ost
+
+/** Rechteck um die Ortsmitte. 1 Breitengrad sind etwa 111,32 km, ein Längengrad entsprechend weniger. */
+function bboxFor(lat: number, lon: number, radiusKm: number): Box {
+  const dLat = radiusKm / 111.32;
+  const dLon = radiusKm / (111.32 * Math.cos((lat * Math.PI) / 180));
+  return [lat - dLat, lon - dLon, lat + dLat, lon + dLon];
 }
 
-/** Eine Zeile Overpass QL für einen Filter, z. B. nwr["leisure"="playground"](around:5000,50.66,12.20); */
-function filterToQl(filter: Filter, radiusM: number, lat: number, lon: number): string {
-  const parts: string[] = [];
-  for (const [key, cond] of Object.entries(filter.tags)) {
-    parts.push(Array.isArray(cond) ? `["${key}"~"${listRegex(cond)}"]` : `["${key}"="${cond}"]`);
+const boxQl = (box: Box) => `(${box.map((v) => v.toFixed(4)).join(',')})`;
+
+type CoarseGroup = { key: string; values: string[]; needName: boolean };
+
+/**
+ * Fasst die Filter nach Schlüssel zusammen (z. B. alles mit tourism=…), damit Overpass nur wenige Zeilen
+ * auswerten muss. Die Abfrage ist absichtlich gröber als die Filter: Das genaue Zuordnen
+ * (Ausschlüsse, zweite Bedingungen) macht danach matchesFilter im Skript.
+ */
+function coarseGroups(): CoarseGroup[] {
+  const groups = new Map<string, CoarseGroup>();
+  for (const cat of CATEGORIES) {
+    for (const f of cat.filters) {
+      if (f.elements === 'rel') continue; // Wanderwege haben eigene Abfragen
+      const key = f.queryKey ?? Object.keys(f.tags)[0];
+      const cond = f.tags[key];
+      const group = groups.get(key) ?? { key, values: [], needName: true };
+      for (const v of Array.isArray(cond) ? cond : [cond]) {
+        if (!group.values.includes(v)) group.values.push(v);
+      }
+      group.needName = group.needName && Boolean(f.requireName);
+      groups.set(key, group);
+    }
   }
-  for (const [key, values] of Object.entries(filter.exclude ?? {})) {
-    parts.push(`["${key}"!~"${listRegex(values)}"]`);
-  }
-  if (filter.requireName) parts.push('["name"]');
-  return `${filter.elements ?? 'nwr'}${parts.join('')}(around:${radiusM},${lat.toFixed(2)},${lon.toFixed(2)});`;
+  return [...groups.values()];
 }
 
-function buildAreaQuery(lat: number, lon: number, radiusKm: number, mode: 'tags' | 'ids'): string {
-  const lines = CATEGORIES.flatMap((c) => c.filters.map((f) => `  ${filterToQl(f, radiusKm * 1000, lat, lon)}`));
-  const out = mode === 'tags' ? 'out tags center;' : 'out ids;';
-  return `[out:json][timeout:90];\n(\n${lines.join('\n')}\n);\n${out}`;
+function groupToQl(group: CoarseGroup, box: Box): string {
+  const value = group.values.length === 1 ? `="${group.values[0]}"` : `~"^(${group.values.join('|')})$"`;
+  return `  nwr["${group.key}"${value}]${group.needName ? '["name"]' : ''}${boxQl(box)};`;
+}
+
+/** Zwei Abfragen pro Ort: "leisure" (viele Treffer) getrennt vom Rest. Ausgabe mit Mittelpunkt, ohne Geometrie. */
+function buildPlaceQueries(lat: number, lon: number): { label: string; query: string }[] {
+  const box = bboxFor(lat, lon, 30);
+  const groups = coarseGroups();
+  const make = (list: CoarseGroup[]) =>
+    `${QL_SETTINGS};\n(\n${list.map((g) => groupToQl(g, box)).join('\n')}\n);\nout tags center;`;
+  return [
+    { label: 'Freizeit (leisure)', query: make(groups.filter((g) => g.key === 'leisure')) },
+    { label: 'Tourismus, Geschichte, Kino/Bibliothek, Seen', query: make(groups.filter((g) => g.key !== 'leisure')) },
+  ];
+}
+
+/** Wanderwege getrennt: nur die Routen im Rechteck, ohne Geometrie (mode "ids" ist noch leichter). */
+function buildHikingQuery(lat: number, lon: number, radiusKm: number, mode: 'tags' | 'ids'): string {
+  return `${QL_SETTINGS};\nrel["route"="hiking"]${boxQl(bboxFor(lat, lon, radiusKm))};\nout ${mode};`;
 }
 
 /** Eine Abfrage für die Ortsmitten aller Testorte. */
@@ -510,17 +560,43 @@ function statsPerRadius(clusters: Cluster[], inRadius: Record<Radius, Set<string
   return result;
 }
 
+/** Mittelpunkt eines Elements: Punkte exakt, Linien/Flächen/Relationen aus "out center". Wanderwege haben keinen. */
+function pointOf(el: OsmElement): { lat: number; lon: number } | null {
+  if (el.lat !== undefined && el.lon !== undefined) return { lat: el.lat, lon: el.lon };
+  return el.center ?? null;
+}
+
+/**
+ * Entfernung wird hier ausgerechnet, nicht von Overpass: Welche Elemente liegen mit ihrem Mittelpunkt in
+ * 5, 15 und 30 km Luftlinie? Elemente ohne Mittelpunkt (Wanderwege) und die Ecken des Rechtecks fehlen.
+ */
+function radiusSets(
+  elements: OsmElement[],
+  lat: number,
+  lon: number,
+): { near: OsmElement[]; sets: Record<Radius, Set<string>> } {
+  const sets = { 5: new Set<string>(), 15: new Set<string>(), 30: new Set<string>() } as Record<Radius, Set<string>>;
+  const near: OsmElement[] = [];
+  for (const el of elements) {
+    const p = pointOf(el);
+    if (!p) continue;
+    const d = haversineKm(lat, lon, p.lat, p.lon);
+    if (d > 30) continue;
+    near.push(el);
+    for (const r of RADII) if (d <= r) sets[r].add(`${el.type}/${el.id}`);
+  }
+  return { near, sets };
+}
+
 function toItem(el: OsmElement, subtype: string): Item {
   const tags = el.tags ?? {};
-  const isRelation = el.type === 'relation';
-  const lat = isRelation ? null : (el.lat ?? el.center?.lat ?? null);
-  const lon = isRelation ? null : (el.lon ?? el.center?.lon ?? null);
+  const point = pointOf(el);
   return {
     key: `${el.type}/${el.id}`,
     subtype,
     name: tags.name?.trim() || null,
-    lat,
-    lon,
+    lat: point?.lat ?? null,
+    lon: point?.lon ?? null,
     hasHours: Boolean(tags.opening_hours),
     hasWebsite: hasWebsite(tags),
   };
@@ -554,7 +630,8 @@ function analyze(
     }
     if (!matchedAny) unmatched++;
   }
-  if (unmatched > 0) console.warn(`  Warnung: ${unmatched} Treffer passen zu keinem Filter (Abfrage und Zuordnung weichen ab).`);
+  // Die Abfrage an Overpass ist absichtlich grob, deshalb fallen hier Treffer heraus (z. B. benötigter Name fehlt)
+  if (unmatched > 0) console.log(`  ${unmatched} grobe Treffer passen zu keinem genauen Filter und werden verworfen.`);
 
   const distance = (c: Cluster) => (c.lat !== null && c.lon !== null ? haversineKm(lat, lon, c.lat, c.lon) : null);
 
@@ -695,17 +772,31 @@ async function main(): Promise<void> {
   for (const place of PLACES) {
     const { lat, lon } = centers.get(place.id)!;
     console.log(`2) ${place.label} (${lat.toFixed(2)} / ${lon.toFixed(2)})`);
-    // Kleine Abfragen zuerst: Sie zeigen früh, ob es klappt, und jede Antwort wird sofort zwischengespeichert.
-    const ids5 = await runQuery(buildAreaQuery(lat, lon, 5, 'ids'), `${place.label}: 5 km (nur IDs)`);
-    const ids15 = await runQuery(buildAreaQuery(lat, lon, 15, 'ids'), `${place.label}: 15 km (nur IDs)`);
-    const full = await runQuery(buildAreaQuery(lat, lon, 30, 'tags'), `${place.label}: 30 km mit allen Angaben`);
-    for (const res of [ids5, ids15, full]) {
+    // Orte: zwei Abfragen für das 30-km-Rechteck. Jede Antwort wird sofort zwischengespeichert.
+    const placeResponses: OverpassResponse[] = [];
+    for (const q of buildPlaceQueries(lat, lon)) {
+      placeResponses.push(await runQuery(q.query, `${place.label}: ${q.label}`));
+    }
+    // Wanderwege getrennt: nur Routen im Rechteck um 5, 15 und 30 km, ohne Geometrie
+    const hike5 = await runQuery(buildHikingQuery(lat, lon, 5, 'ids'), `${place.label}: Wanderwege 5 km`);
+    const hike15 = await runQuery(buildHikingQuery(lat, lon, 15, 'ids'), `${place.label}: Wanderwege 15 km`);
+    const hike30 = await runQuery(buildHikingQuery(lat, lon, 30, 'tags'), `${place.label}: Wanderwege 30 km`);
+
+    for (const res of [...placeResponses, hike5, hike15, hike30]) {
       servers.add(hostOf(res._server ?? OVERPASS_URLS[0]));
       if (res.osm3s?.timestamp_osm_base) dataStates.add(res.osm3s.timestamp_osm_base);
     }
-    const toSet = (res: OverpassResponse) => new Set(res.elements.map((e) => `${e.type}/${e.id}`));
-    const inRadius: Record<Radius, Set<string>> = { 5: toSet(ids5), 15: toSet(ids15), 30: toSet(full) };
-    results.push(analyze(place, lat, lon, full.elements, inRadius));
+
+    // Ein Objekt kann in beiden Orte-Abfragen vorkommen: zusammenführen, dann die Entfernung selbst rechnen
+    const merged = new Map<string, OsmElement>();
+    for (const res of placeResponses) {
+      for (const el of res.elements) merged.set(`${el.type}/${el.id}`, el);
+    }
+    const { near, sets } = radiusSets([...merged.values()], lat, lon);
+    for (const [radius, res] of [[5, hike5], [15, hike15], [30, hike30]] as const) {
+      for (const el of res.elements) sets[radius].add(`${el.type}/${el.id}`);
+    }
+    results.push(analyze(place, lat, lon, [...near, ...hike30.elements], sets));
   }
 
   const date = new Date().toISOString().slice(0, 10);
@@ -730,14 +821,57 @@ function selftest(): void {
   assert.ok(d > 6.9 && d < 7.2, `haversine: ${d}`);
   assert.equal(haversineKm(50, 12, 50, 12), 0);
 
-  // Abfrage-Text
-  const ql = filterToQl(CATEGORIES[0].filters[0], 5000, 50.664, 12.201);
-  assert.equal(
-    ql,
-    'nwr["leisure"="playground"]["access"!~"(^|;)(private|no|customers)(;|$)"]["indoor"!~"(^|;)(yes)(;|$)"](around:5000,50.66,12.20);',
+  // Rechteck: 30 km Breite sind etwa 0,27 Grad, die Ecke liegt rund 30 km nördlich der Mitte
+  const [south, west, north, east] = bboxFor(50.66, 12.2, 30);
+  assert.ok(Math.abs(north - south - (2 * 30) / 111.32) < 1e-9 && west < 12.2 && east > 12.2);
+  const edge = haversineKm(50.66, 12.2, north, 12.2);
+  assert.ok(edge > 29.9 && edge < 30.1, `Rechteck: ${edge}`);
+
+  // Abfragen: wenige grobe Zeilen mit Rechteck, kein Kreis, passende Grenzen, Wanderwege getrennt
+  const [leisureQuery, restQuery] = buildPlaceQueries(50.66, 12.2).map((q) => q.query);
+  const lines = (query: string) => query.split('\n').filter((l) => l.startsWith('  nwr'));
+  assert.ok(leisureQuery.startsWith('[out:json][timeout:120][maxsize:134217728];'));
+  assert.ok(leisureQuery.endsWith('out tags center;'));
+  assert.equal(lines(leisureQuery).length, 1);
+  assert.ok(lines(restQuery).length <= 6, 'wenige Zeilen');
+  const valuesOf = (query: string, key: string) =>
+    (new RegExp(`nwr\\["${key}"~"\\^\\(([^)]*)\\)\\$"\\]`).exec(query)?.[1] ?? '').split('|').sort();
+  assert.deepEqual(valuesOf(restQuery, 'tourism'), [
+    'aquarium', 'attraction', 'museum', 'picnic_site', 'theme_park', 'viewpoint', 'zoo',
+  ]);
+  assert.ok(valuesOf(leisureQuery, 'leisure').includes('playground'));
+  assert.ok(valuesOf(leisureQuery, 'leisure').includes('sports_hall'), 'auch Kletterhallen in Sporthallen');
+  assert.ok(restQuery.includes('nwr["tower:type"="observation"]["name"]'));
+  assert.ok(restQuery.includes('nwr["natural"="water"]["name"]'));
+  assert.ok(!leisureQuery.includes('around') && !restQuery.includes('around'));
+  assert.ok(!leisureQuery.includes('"route"') && !restQuery.includes('"route"'));
+  const hiking = buildHikingQuery(50.66, 12.2, 5, 'ids');
+  assert.ok(hiking.includes('rel["route"="hiking"](') && hiking.endsWith('out ids;'));
+  // Jeder Filter (außer Wanderwegen) muss in der groben Abfrage vorkommen
+  for (const cat of CATEGORIES) {
+    for (const f of cat.filters.filter((x) => x.elements !== 'rel')) {
+      const key = f.queryKey ?? Object.keys(f.tags)[0];
+      const first = [f.tags[key]].flat()[0];
+      assert.ok((leisureQuery + restQuery).includes(`"${key}"`) && (leisureQuery + restQuery).includes(first), f.label);
+    }
+  }
+
+  // Entfernung selbst rechnen: 1 km, 11 km, 28 km, 35 km (zu weit) und ein Wanderweg ohne Mittelpunkt
+  const near = radiusSets(
+    [
+      { type: 'node', id: 1, lat: 50.67, lon: 12.2 },
+      { type: 'way', id: 2, center: { lat: 50.76, lon: 12.2 } },
+      { type: 'node', id: 3, lat: 50.66, lon: 12.6 },
+      { type: 'node', id: 4, lat: 50.66, lon: 12.7 },
+      { type: 'relation', id: 5 },
+    ],
+    50.66,
+    12.2,
   );
-  assert.ok(buildAreaQuery(50.66, 12.2, 5, 'ids').endsWith('out ids;'));
-  assert.ok(buildAreaQuery(50.66, 12.2, 30, 'tags').includes('rel["route"="hiking"](around:30000'));
+  assert.equal(near.near.length, 3);
+  assert.deepEqual([...near.sets[5]], ['node/1']);
+  assert.deepEqual([...near.sets[15]], ['node/1', 'way/2']);
+  assert.deepEqual([...near.sets[30]], ['node/1', 'way/2', 'node/3']);
 
   // Zuordnung der Tags
   const climbing = CATEGORIES.find((c) => c.id === 'indoor')!.filters.find((f) => f.label === 'Kletterhalle')!;
@@ -772,8 +906,17 @@ function selftest(): void {
   console.log('Selbsttest bestanden.');
 }
 
+/** Zeigt die Abfragen für Greiz (50.66 / 12.20) im Klartext, ohne Netz. */
+function printQueries(): void {
+  for (const q of buildPlaceQueries(50.66, 12.2)) console.log(`--- ${q.label}\n${q.query}\n`);
+  console.log(`--- Wanderwege 5 km\n${buildHikingQuery(50.66, 12.2, 5, 'ids')}\n`);
+  console.log(`--- Wanderwege 30 km\n${buildHikingQuery(50.66, 12.2, 30, 'tags')}`);
+}
+
 if (args.has('--selftest')) {
   selftest();
+} else if (args.has('--print-queries')) {
+  printQueries();
 } else {
   main().catch((error: unknown) => {
     console.error(`\nFehler: ${error instanceof Error ? error.message : String(error)}`);

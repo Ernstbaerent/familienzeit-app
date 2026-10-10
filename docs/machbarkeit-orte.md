@@ -38,8 +38,15 @@ im Umkreis von 5 km.
 
 ### Umkreise
 
-5, 15 und 30 km **Luftlinie** (Overpass `around`). Bei Flächen zählt, ob irgendein Teil im Umkreis liegt. Die
-Fahrzeit ist nicht berücksichtigt.
+5, 15 und 30 km **Luftlinie vom Ortsmittelpunkt**. Die Fahrzeit ist nicht berücksichtigt.
+
+Overpass bekommt ein Rechteck (bbox) mit ±30 km um die Ortsmitte, nicht einen Kreis. Die Entfernung rechnet das
+Skript danach selbst aus dem **Mittelpunkt** jedes Treffers. Bei Punkten ist das exakt, bei Flächen (Park, See,
+Naturschutzgebiet) der Mittelpunkt der Fläche. Eine große Fläche, deren Rand schon näher liegt, kann deshalb
+etwas zu weit weg einsortiert werden.
+
+**Wanderwege** haben keinen Mittelpunkt. Sie zählen, wenn die Route ein Quadrat mit halber Kantenlänge 5, 15 oder
+30 km um die Ortsmitte berührt. Das ist etwas großzügiger als ein Kreis und bekommt keine Entfernung.
 
 ### Kategorien und OSM-Merkmale
 
@@ -65,7 +72,8 @@ realistischsten Ziele sind. Hallenbäder stehen unter „Schwimm- und Freibäder
   ebenfalls.
 - **Kategorien überschneiden sich** teilweise (eine Burg kann auch ein Museum sein). Deshalb gibt es zusätzlich
   die Zeile „Summe ohne Mehrfachzählung".
-- **Wanderwege** sind Routen ohne einen einzelnen Standort. Sie werden mitgezählt, bekommen aber keine Entfernung.
+- **Wanderwege** sind Routen ohne einen einzelnen Standort. Sie werden mitgezählt (Rechteck, siehe oben),
+  bekommen aber keine Entfernung. Lange Fernwanderwege zählen genauso wie kurze Rundwege.
 - Bei Sehenswürdigkeiten, benannten Becken, Naturschutzgebieten und Seen zählen nur Einträge **mit Namen**,
   weil man unbenannte Dinge nicht sinnvoll vorschlagen kann. Bei Spielplätzen und Parks zählen auch namenlose.
 - **Gemessen wird:** Anzahl pro Kategorie und Umkreis, Anteil mit Namen, mit `opening_hours`, mit Website
@@ -73,9 +81,17 @@ realistischsten Ziele sind. Hallenbäder stehen unter „Schwimm- und Freibäder
 
 ### Rücksicht auf die Overpass API
 
-Insgesamt nur **7 Abfragen** (1× Ortsmitten, je Ort 3× Umkreis), nacheinander mit mindestens 10 s Pause, mit
-Statusprüfung, eigenem User-Agent und höchstens einem Wiederholungsversuch nach 60 s. Jede Antwort wird in
+Insgesamt **11 Abfragen** (1× Ortsmitten, je Ort 2× Orte und 3× Wanderwege), nacheinander mit mindestens 10 s Pause,
+mit Statusprüfung, eigenem User-Agent und höchstens einem Wiederholungsversuch nach 60 s. Jede Antwort wird in
 `scripts/.cache/` gespeichert, ein zweiter Lauf fragt nichts erneut ab.
+
+Die Abfragen sind bewusst leicht gehalten (`npm run places:test -- --print-queries` zeigt sie im Klartext):
+
+- Rechteck statt Kreis, Entfernung lokal.
+- Pro Abfrage nur 1 bis 5 grobe Zeilen (alle `tourism=…` in einer Zeile usw.). Das genaue Zuordnen mit
+  Ausschlüssen und Namenspflicht macht das Skript danach.
+- `leisure` (viele Treffer) getrennt vom Rest, Wanderwege getrennt und ohne Geometrie.
+- `[timeout:120]` und `[maxsize:134217728]` (128 MB) in jeder Abfrage.
 
 ## Stand der Messung
 
@@ -91,6 +107,12 @@ antworteten kurz nach einer ersten normalen Statusantwort nur noch mit „500 In
 reinen Statusseite, über etwa 10 Minuten. Die Versuche wurden dann eingestellt, um die öffentlichen Server nicht
 unnötig zu belasten. Die Messung läuft stattdessen lokal auf einem normalen Rechner mit HTTPS. Das Skript ist von
 den Verbindungsproblemen der Cloud-Umgebung nicht betroffen.
+
+**Erster lokaler Lauf (Chromebook, HTTPS):** Die Verbindung klappte, und die Ortsmitten kamen in 4,7 s. Die erste
+Umkreis-Abfrage endete aber nach 97 s mit Overpass' „runtime error: Query timed out". Der Grund: 29 einzelne
+Kreis-Abfragen (`around`) in einer einzigen Anfrage waren für den ausgelasteten Server zu schwer, schon im
+5-km-Umkreis. Daraufhin wurden die Abfragen neu gebaut (Rechteck, grobe Zeilen, mehrere kleine Abfragen,
+Wanderwege getrennt, siehe oben). Ob die neue Form durchkommt, zeigt erst der nächste lokale Lauf.
 
 ## Ergebnisse
 
