@@ -1,7 +1,7 @@
 # Aktivitäten (M4)
 
 Aktivitäten sind die Ideen, aus denen die App 3 Vorschläge auswählt (ab M5). Dieser Schritt legt das
-Datenmodell an und liefert 20 Beispiele zum Testen. Die App zeigt noch nichts davon an.
+Datenmodell an und liefert 20 Beispiele zum Testen. Wie die App daraus auswählt, steht in `docs/suggestions.md`.
 
 ## Wo was liegt
 
@@ -23,14 +23,14 @@ In der App: `loadActivities()` gibt alle Aktivitäten mit Status `approved` zur�
 | Feld              | Bedeutung |
 | ----------------- | --------- |
 | `id`              | Eindeutig, nie ändern (der Verlauf in M7 verweist darauf). |
-| `category`        | `craft`, `game`, `movement`, `experiment`, `nature`, `cooking`, `outing`. Bestimmt später das Symbol, wenn kein Bild da ist. |
+| `category`        | `craft`, `game`, `movement`, `experiment`, `nature`, `cooking`, `outing`. Bestimmt das Symbol auf den Karten (`CategoryIcon.tsx`). |
 | `topics`          | Themen der Aktivität. **Dieselben Schlüssel wie Interessen und Abneigungen** in den Kinderprofilen (`preferences.ts`). Siehe unten. |
 | `translations`    | Pro Sprache `title`, `summary`, `steps`, optional `safetyNote`. **`de` und `en` sind Pflicht.** |
 | `ageMin`, `ageMax`| Alter in vollen Jahren, **beide Grenzen inklusive**, 0–16. Ein Kind mit 2 Jahren und 11 Monaten zählt als 2. |
 | `durationMin`, `durationMax` | Minuten. Ein halber Tag sind etwa 180–240. |
 | `setting`         | `indoor`, `outdoor` oder `both`. |
 | `weather`         | `needsDry` (nur bei Trockenheit), `betterInSun` (bei Sonne schöner). Beides `false` = wetterunabhängig. |
-| `dayParts`        | **Freiwillig.** Nur zu diesen Tageszeiten: `morning`, `afternoon`, `evening`. **Fehlt das Feld, passt die Aktivität zu jeder Tageszeit.** Beispiel: „Sterne beobachten“ hat `["evening"]`. Die Uhrzeit-Grenzen legt M5 fest. |
+| `dayParts`        | **Freiwillig.** Nur zu diesen Tageszeiten: `morning`, `afternoon`, `evening`. **Fehlt das Feld, passt die Aktivität zu jeder Tageszeit.** Beispiel: „Sterne beobachten“ hat `["evening"]`. Uhrzeit-Grenzen und Regeln: `docs/suggestions.md`. |
 | `energy`          | Energie, die Eltern brauchen: `low`, `medium`, `high`. |
 | `cost`            | 0 = kostenlos, 1 = wenig, 2 = mehr. |
 | `materials`       | Schlüssel aus `materials.ts`. Die Texte stehen unter `materials` in `de.json` und `en.json`. |
@@ -96,4 +96,4 @@ npx expo lint
 `activities:check` zeigt alle Aktivitäten als Tabelle (zum Durchlesen), zählt, was die Daten abdecken,
 und meldet Fehler: kaputte Einträge, fehlende Texte, `approved` ohne bestandene Checkliste.
 Aktivitäten mit Status `draft`, die die Checkliste nicht bestehen, werden aufgelistet und bleiben `draft`.
-Automatische Tests (Jest) kommen mit M5.
+Die Vorschlagslogik und die Anzeige-Hilfen haben automatische Tests (`npm test`, siehe `docs/suggestions.md`).

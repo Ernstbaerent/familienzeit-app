@@ -73,4 +73,5 @@ Das Formular steckt in `src/features/profiles/ChildForm.tsx`, der Zugriff auf di
 ## Testen
 
 Die Logik (Alter, Auswahl, Aufräumen) besteht aus reinen Funktionen in `profiles.ts` und `preferences.ts`.
-Automatische Tests (Jest) kommen mit M5. Bis dahin von Hand mit `npx expo start` und Expo Go ausprobieren.
+Jest ist seit M5 eingerichtet (`npm test`), eigene Tests für die Profil-Funktionen gibt es noch nicht.
+Bis dahin von Hand mit `npx expo start` und Expo Go ausprobieren.

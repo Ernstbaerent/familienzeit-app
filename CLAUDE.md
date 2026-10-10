@@ -38,7 +38,8 @@ Team: Clemens (Technik, programmiert mit dir), Ani (Design, Ideen).
 - **Wetter:** Bright Sky API (DWD-Daten, ohne Schlüssel)
 - **Orte:** OpenStreetMap Overpass API (Ergebnisse cachen, sparsam abfragen)
 - **Veranstaltungen:** German Tourism Knowledge Graph
-- **Tests:** Jest für Logik (vor allem die Vorschlagslogik)
+- **Symbole:** @expo/vector-icons (Ionicons, nur Linien-Varianten `…-outline`), Zuordnung Kategorie → Symbol nur in `src/features/activities/CategoryIcon.tsx`
+- **Tests:** Jest (über `jest-expo`) für Logik (vor allem die Vorschlagslogik)
 
 ## Befehle
 
@@ -84,18 +85,24 @@ docs/                 # Konzept und Anleitungen
 
 ## Vorschlagslogik
 
+Umgesetzt in `src/features/suggestions/`, Gewichte und Details in `docs/suggestions.md`.
+
 **Harte Ausschlüsse (nur diese):**
 - nicht altersgerecht für mindestens ein ausgewähltes Kind
 - dauert länger als die verfügbare Zeit (inkl. Anfahrt)
+- passt nicht zur Tageszeit (`dayParts` der Aktivität)
 - draußen bei Gefahr (Gewitter, Sturm, Unwetterwarnung)
+- braucht Trockenheit (`needsDry`), es regnet oder gewittert
 - Kurse oder Voranmeldung über heute hinaus
 - geschlossen oder bereits vorbei
 
 **Gewichtung (nur Reihenfolge):** Interessen/Abneigungen, Wetter-Eignung, Entfernung, Kosten,
-Energie der Eltern, Abwechslung (kürzlich Gemachtes nach hinten), Eignung für Geschwister.
+Energie der Eltern, Abwechslung (verschiedene Kategorien unter den 3 Vorschlägen; kürzlich Gemachtes nach hinten),
+Eignung für Geschwister.
 
 **Fallback:** Zu wenig Orte/Veranstaltungen → Umkreis vergrößern (z. B. 5 → 15 → 30 km) und das anzeigen.
-Danach mit Aktivitäten für zu Hause auffüllen. Ergebnis immer genau 3.
+Danach mit Aktivitäten für zu Hause auffüllen. Ergebnis immer genau 3. Bleiben nach den harten Ausschlüssen
+weniger als 3 übrig, zeigt die App die vorhandenen mit einem freundlichen Hinweis (Sicherheit wird nie aufgeweicht).
 
 ## Datenmodell Aktivität
 
@@ -146,7 +153,7 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
 - [ ] **M2b Machbarkeitstest Veranstaltungen (Knowledge Graph):** Skript, das den Knowledge Graph für eine Region abfragt und das Ergebnis zusammenfasst (nur Test, keine App-Funktion). ⏸ wartet auf den API-Schlüssel
 - [x] **M3 Kinderprofile:** Einstieg ohne Konto, mehrere Kinder anlegen/bearbeiten, lokal speichern
 - [x] **M4 Aktivitäten:** Datenmodell, 20 Beispiel-Aktivitäten in `data/`, lokal laden
-- [ ] **M5 Vorschläge:** Zeit + Energie wählen, Vorschlagslogik mit Tests, 3 Vorschläge anzeigen
+- [x] **M5 Vorschläge:** Zeit + Energie wählen, Vorschlagslogik mit Tests, 3 Vorschläge anzeigen
 - [ ] **M5b Startbestand Aktivitäten:** Claude Code schreibt weitere Aktivitäten vollständig in eigenen Worten (Titel, Kurzbeschreibung, Schritte, Material, Altersangaben, Sicherheitshinweise, Deutsch und Englisch), in Paketen zu je 20–25, bis mindestens 100 erreicht sind. Ideen dürfen bekannte Klassiker sein, Texte werden nie von Websites übernommen. Jede Aktivität durchläuft nach dem Schreiben die Sicherheits-Checkliste (`docs/sicherheits-checkliste.md`); nur wer besteht, wird `approved`. Bilder sind nicht Teil von M5b
 - [ ] **M6 Wetter und Standort:** Bright Sky und Standortabfrage in die Vorschlagslogik einbinden
 - [ ] **M7 Details und Feedback:** Detailansicht, Daumen hoch/runter, Verlauf lokal
@@ -180,3 +187,4 @@ Konto und Familie teilen, Premium/Abo, Radiosender-Kooperationen, Nachbarländer
 - 2026-10-10 – M3 abgeschlossen: Kinderprofile nur lokal (AsyncStorage, Schlüssel `profiles.v1`), Details in `docs/profiles.md`. Pflicht sind nur Geburtsjahr und -monat; Spitzname, Interessen und Abneigungen sind freiwillig. Alter unter 2 Jahren in Monaten, ab 2 Jahren in Jahren. Interesse und Abneigung schließen sich gegenseitig aus. Mindestens ein Kind ist nötig (ohne Kind leitet der Start zum Anlegen weiter). Auswahllisten stehen in `src/features/profiles/preferences.ts` (neues Thema = 1 Zeile + Texte in de/en). AsyncStorage ist die einzige neue Bibliothek. Jest ist noch nicht eingerichtet, kommt mit M5
 - 2026-10-10 – M4 abgeschlossen: Datenmodell in `src/features/activities/`, 20 Beispiele in `data/sample-activities.json` (alle `approved`, aber als Beispieldaten markiert: `isSample`, IDs `sample-…`), Details in `docs/activities.md`. Neue Felder gegenüber dem Entwurf: `topics` (gleiche Schlüssel wie Interessen/Abneigungen, damit M5 zuordnen kann), `dayParts` (freiwillig, Tageszeit; fehlt = jederzeit), `image` (freiwillig; ohne Bild später Kategorie-Symbol), `isSample`. Material ist eine feste Liste mit Gefahren und Allergenen (`materials.ts`); daraus prüft `npm run activities:check` die Sicherheits-Checkliste. Dafür ist `allowImportingTsExtensions` in `tsconfig.json` gesetzt, damit das Skript Code aus `src/` nutzen kann. Jest kommt weiter mit M5
 - 2026-10-10 – Entscheidung zu Aktivitäten: Keine Freigabe durch Ani. Es gilt die Sicherheits-Checkliste (`docs/sicherheits-checkliste.md`) für M5b und den KI-Wochenlauf; bestanden = `approved`, sonst bleibt es `draft`. Vor der Beta (M12) liest ein Mensch alle Aktivitäten einmal durch. Team-Zeile: Ani macht Design und Ideen
+- 2026-10-10 – M5 abgeschlossen: „Was machen wir?“ (`app/suggestions/`) mit Kindern (alle vorausgewählt), Zeit (30 Min./1 Std./2 Std./halber Tag = 240 Min.), Energie (freiwillig) und 3 Karten mit „Andere Vorschläge“. Details in `docs/suggestions.md`. Entscheidungen: Tageszeit (`dayParts`) und `needsDry` bei Regen/Gewitter sind harte Ausschlüsse (Machbarkeit; „Sortieren statt aussortieren“ zielt auf zu wenige Orte auf dem Land, bei Regen gibt es genug für drinnen). Zeit schließt nur aus, wenn schon `durationMin` nicht passt. Bei Gewitter bleibt `both` (drinnen machbar). Tageszeit-Grenzen: Morgen ab 5, Nachmittag ab 12, Abend ab 17 Uhr. Abwechslung über Abzug je gleicher Kategorie in der Dreiergruppe. Weniger als 3 Treffer: vorhandene zeigen plus Hinweis, Tipps nur, wenn sie wirklich helfen. Wetter und Tageszeit sind bis M6 eine Test-Auswahl, alle Stellen mit `TEST (M6)` markiert. Neue Pakete: `@expo/vector-icons` (Ionicons, Linien-Stil), `jest`, `jest-expo`, `@types/jest`. In `tsconfig.json` steht `"types": ["jest"]`, weil TypeScript 6 Typ-Pakete nicht mehr automatisch einbindet. Gemeinsamer Baustein `Section` in `src/components/`
