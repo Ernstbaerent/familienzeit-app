@@ -19,6 +19,9 @@
  * - Eigener User-Agent mit Projektbezug.
  *
  * Optional: OVERPASS_URL überschreibt den Server (Standard: https://overpass-api.de/api/interpreter).
+ * Es darf eine kommagetrennte Liste sein: Der eine Wiederholungsversuch geht dann an den nächsten Server,
+ * ohne Wartezeit. Beispiel:
+ *   OVERPASS_URL=https://overpass.kumi.systems/api/interpreter,https://overpass.private.coffee/api/interpreter
  */
 /// <reference types="node" />
 import assert from 'node:assert/strict';
@@ -29,8 +32,12 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 // Einstellungen
 // ---------------------------------------------------------------------------------------------
 
-const OVERPASS_URL = process.env.OVERPASS_URL ?? 'https://overpass-api.de/api/interpreter';
-const STATUS_URL = OVERPASS_URL.replace(/interpreter\/?$/, 'status');
+const OVERPASS_URLS = (process.env.OVERPASS_URL ?? 'https://overpass-api.de/api/interpreter')
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
+const statusUrl = (url: string) => url.replace(/interpreter\/?$/, 'status');
+const hostOf = (url: string) => new URL(url).host;
 const USER_AGENT =
   'familienzeit-app-feasibility-test/0.1 (https://github.com/Ernstbaerent/familienzeit-app; Machbarkeitstest, wenige Abfragen)';
 const CACHE_DIR = 'scripts/.cache';
@@ -236,7 +243,12 @@ type OsmElement = {
   tags?: Record<string, string>;
 };
 
-type OverpassResponse = { elements: OsmElement[]; remark?: string };
+type OverpassResponse = {
+  elements: OsmElement[];
+  remark?: string;
+  osm3s?: { timestamp_osm_base?: string }; // Datenstand von OpenStreetMap
+  _server?: string; // von uns ergänzt: welcher Server hat geantwortet
+};
 
 function tagMatches(value: string | undefined, cond: TagCondition): boolean {
   if (value === undefined) return false;
@@ -359,10 +371,10 @@ function parseStatus(text: string): { slots: number; waitSeconds: number } {
   return { slots, waitSeconds };
 }
 
-async function waitForFreeSlot(): Promise<void> {
+async function waitForFreeSlot(serverUrl: string): Promise<void> {
   let text: string;
   try {
-    const res = await fetch(STATUS_URL, {
+    const res = await fetch(statusUrl(serverUrl), {
       headers: { 'User-Agent': USER_AGENT },
       signal: AbortSignal.timeout(30_000),
     });
@@ -376,19 +388,26 @@ async function waitForFreeSlot(): Promise<void> {
   const { slots, waitSeconds } = parseStatus(text);
   if (slots > 0) return;
   if (waitSeconds === 0 || waitSeconds > MAX_SLOT_WAIT_S) {
-    throw new Error('Overpass hat gerade keinen freien Platz. Bitte später noch einmal starten.');
+    // zählt wie ein Problem des Servers: der eine Wiederholungsversuch geht dann an den nächsten Server
+    throw new Error('Kein freier Platz auf dem Server.');
   }
   console.log(`  Kein Platz frei, warte ${waitSeconds + 1} s ...`);
   await sleep((waitSeconds + 1) * 1000); // einmal warten, dann einfach abfragen
 }
 
+/**
+ * Genau zwei Versuche. Gibt es mehrere Server, geht der zweite Versuch an den nächsten Server (ohne Wartezeit),
+ * sonst an denselben nach RETRY_WAIT_MS.
+ */
 async function postQuery(query: string): Promise<OverpassResponse> {
   for (let attempt = 1; attempt <= 2; attempt++) {
+    const serverUrl = OVERPASS_URLS[(attempt - 1) % OVERPASS_URLS.length];
     let problem: string;
     const startedAt = Date.now();
     const after = () => `nach ${((Date.now() - startedAt) / 1000).toFixed(0)} s`;
     try {
-      const res = await fetch(OVERPASS_URL, {
+      await waitForFreeSlot(serverUrl);
+      const res = await fetch(serverUrl, {
         method: 'POST',
         headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
         body: new URLSearchParams({ data: query }),
@@ -399,11 +418,11 @@ async function postQuery(query: string): Promise<OverpassResponse> {
         if (json.remark && /error|exceeded|timed out/i.test(json.remark)) {
           throw new Error(`Overpass meldet: ${json.remark}`);
         }
-        return json;
+        return { ...json, _server: serverUrl };
       }
       const body = (await res.text()).slice(0, 300);
-      // Überlastung (429/502/503/504) darf einmal wiederholt werden, alles andere nicht
-      if (![429, 502, 503, 504].includes(res.status)) throw new Error(`Overpass-Fehler ${res.status}: ${body}`);
+      // Überlastung und Serverfehler (429/500/502/503/504) dürfen einmal wiederholt werden, alles andere nicht
+      if (![429, 500, 502, 503, 504].includes(res.status)) throw new Error(`Overpass-Fehler ${res.status}: ${body}`);
       problem = `HTTP ${res.status} ${after()} (${body.replace(/\s+/g, ' ').slice(0, 80)})`;
     } catch (error) {
       if (error instanceof Error && /^Overpass/.test(error.message)) throw error;
@@ -411,9 +430,14 @@ async function postQuery(query: string): Promise<OverpassResponse> {
       const text = error instanceof Error ? `${error.message} ${error.cause instanceof Error ? error.cause.message : ''}` : String(error);
       problem = `${text.trim()} ${after()}`;
     }
-    if (attempt === 2) throw new Error(`Overpass nicht erreichbar: ${problem}`);
-    console.log(`  Problem: ${problem}. Ein weiterer Versuch in ${RETRY_WAIT_MS / 1000} s ...`);
-    await sleep(RETRY_WAIT_MS);
+    const failed = `${hostOf(serverUrl)}: ${problem}`;
+    if (attempt === 2) throw new Error(`Overpass nicht erreichbar – ${failed}`);
+    if (OVERPASS_URLS.length > 1) {
+      console.log(`  Problem bei ${failed}. Weiter mit ${hostOf(OVERPASS_URLS[1])} ...`);
+    } else {
+      console.log(`  Problem bei ${failed}. Ein weiterer Versuch in ${RETRY_WAIT_MS / 1000} s ...`);
+      await sleep(RETRY_WAIT_MS);
+    }
   }
   throw new Error('unerreichbar'); // nur für TypeScript
 }
@@ -429,11 +453,10 @@ async function runQuery(query: string, label: string): Promise<OverpassResponse>
   const gap = lastRequestAt + MIN_GAP_MS - Date.now();
   if (lastRequestAt > 0 && gap > 0) await sleep(gap);
   console.log(`  [Overpass] ${label} ...`);
-  await waitForFreeSlot();
   const started = Date.now();
   const json = await postQuery(query);
   lastRequestAt = Date.now();
-  console.log(`    ${json.elements.length} Elemente in ${((lastRequestAt - started) / 1000).toFixed(1)} s`);
+  console.log(`    ${json.elements.length} Elemente in ${((lastRequestAt - started) / 1000).toFixed(1)} s (${hostOf(json._server ?? OVERPASS_URLS[0])})`);
   mkdirSync(CACHE_DIR, { recursive: true });
   writeFileSync(file, JSON.stringify(json));
   return json;
@@ -662,11 +685,13 @@ async function findCenters(): Promise<Map<string, Center>> {
 }
 
 async function main(): Promise<void> {
-  console.log(`Overpass: ${OVERPASS_URL}${REFRESH ? ' (neu abfragen)' : ''}${OFFLINE ? ' (offline)' : ''}`);
+  console.log(`Overpass: ${OVERPASS_URLS.join(', ')}${REFRESH ? ' (neu abfragen)' : ''}${OFFLINE ? ' (offline)' : ''}`);
   console.log('1) Ortsmitten');
   const centers = await findCenters();
 
   const results: PlaceResult[] = [];
+  const servers = new Set<string>();
+  const dataStates = new Set<string>();
   for (const place of PLACES) {
     const { lat, lon } = centers.get(place.id)!;
     console.log(`2) ${place.label} (${lat.toFixed(2)} / ${lon.toFixed(2)})`);
@@ -674,13 +699,20 @@ async function main(): Promise<void> {
     const ids5 = await runQuery(buildAreaQuery(lat, lon, 5, 'ids'), `${place.label}: 5 km (nur IDs)`);
     const ids15 = await runQuery(buildAreaQuery(lat, lon, 15, 'ids'), `${place.label}: 15 km (nur IDs)`);
     const full = await runQuery(buildAreaQuery(lat, lon, 30, 'tags'), `${place.label}: 30 km mit allen Angaben`);
+    for (const res of [ids5, ids15, full]) {
+      servers.add(hostOf(res._server ?? OVERPASS_URLS[0]));
+      if (res.osm3s?.timestamp_osm_base) dataStates.add(res.osm3s.timestamp_osm_base);
+    }
     const toSet = (res: OverpassResponse) => new Set(res.elements.map((e) => `${e.type}/${e.id}`));
     const inRadius: Record<Radius, Set<string>> = { 5: toSet(ids5), 15: toSet(ids15), 30: toSet(full) };
     results.push(analyze(place, lat, lon, full.elements, inRadius));
   }
 
   const date = new Date().toISOString().slice(0, 10);
-  const report = `# Ergebnis Machbarkeitstest Orte (${date})\n\nServer: ${OVERPASS_URL}\n\n${results.map(renderPlace).join('\n')}`;
+  const header =
+    `Server: ${[...servers].join(', ')}\n\n` +
+    `Datenstand OpenStreetMap: ${[...dataStates].sort().join(', ') || 'unbekannt'}`;
+  const report = `# Ergebnis Machbarkeitstest Orte (${date})\n\n${header}\n\n${results.map(renderPlace).join('\n')}`;
   mkdirSync(CACHE_DIR, { recursive: true });
   writeFileSync(`${CACHE_DIR}/report.md`, report);
   writeFileSync(`${CACHE_DIR}/summary.json`, JSON.stringify(results, null, 2));
