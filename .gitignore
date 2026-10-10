@@ -170,3 +170,6 @@ expo-env.d.ts
 
 # macOS
 .DS_Store
+
+# Zwischenspeicher der Machbarkeitstests (scripts/feasibility-*.ts)
+scripts/.cache/
