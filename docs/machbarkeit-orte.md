@@ -20,7 +20,9 @@ npm run places:test -- --selftest  # Rechenfunktionen prüfen, braucht kein Netz
 ```
 
 Mit der Umgebungsvariable `OVERPASS_URL` lässt sich ein anderer Overpass-Server eintragen
-(Standard: `https://overpass-api.de/api/interpreter`).
+(Standard: `https://overpass-api.de/api/interpreter`). Es darf eine kommagetrennte Liste sein: Der eine erlaubte
+Wiederholungsversuch geht dann ohne Wartezeit an den nächsten Server, zum Beispiel
+`OVERPASS_URL=https://overpass.kumi.systems/api/interpreter,https://overpass.private.coffee/api/interpreter npm run places:test`.
 
 ### Testorte
 
@@ -84,8 +86,11 @@ Aus der Cloud-Umgebung, in der das Skript entwickelt wurde, kam nur die kleine O
 - Erreichte eine Umkreis-Abfrage Overpass, antwortete der Server mit 504 (zu beschäftigt), auch bei der kleinen
   5-km-Abfrage (nur IDs). Die Ortsmitten-Abfrage dauerte schon 5,6 s, der Server war also langsam.
 
-Nach vier Läufen habe ich weitere Versuche eingestellt, um den öffentlichen Server nicht zu belasten. Das Skript
-ist davon nicht betroffen: Auf einem normalen Rechner mit HTTPS läuft es ohne Sonderbehandlung.
+Danach wurden zwei Ausweich-Server freigegeben (`overpass.kumi.systems`, `overpass.private.coffee`). Beide
+antworteten kurz nach einer ersten normalen Statusantwort nur noch mit „500 Internal Server Error", auch auf der
+reinen Statusseite, über etwa 10 Minuten. Die Versuche wurden dann eingestellt, um die öffentlichen Server nicht
+unnötig zu belasten. Die Messung läuft stattdessen lokal auf einem normalen Rechner mit HTTPS. Das Skript ist von
+den Verbindungsproblemen der Cloud-Umgebung nicht betroffen.
 
 ## Ergebnisse
 
