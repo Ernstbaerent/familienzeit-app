@@ -2,11 +2,12 @@
 // Später (M8) kommen sie aus Supabase mit Offline-Cache; die App ruft dann weiter loadActivities() auf.
 
 import activitiesM4 from '../../../data/activities-m4.json';
+import activitiesM5b1 from '../../../data/activities-m5b-1.json';
 import { parseActivities, type Activity } from './activities.ts';
 
 // Alle Datenquellen. Neue Datei in data/: hier eintragen.
 // `npm run activities:check` prüft alle Dateien in data/ und erinnert daran, falls eine fehlt.
-const rawActivities: unknown[] = [...activitiesM4];
+const rawActivities: unknown[] = [...activitiesM4, ...activitiesM5b1];
 
 let cache: Activity[] | null = null;
 

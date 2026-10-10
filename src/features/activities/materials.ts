@@ -53,6 +53,7 @@ export const materials = {
   marbles: { hazards: ['smallParts'] },
   oldShirt: {},
   scarf: { flammable: true },
+  watercolors: {},
   // Haushalt
   towel: {},
   blanket: {},
@@ -73,6 +74,8 @@ export const materials = {
   dishSoap: {},
   stone: {},
   freezerBags: {},
+  plate: {},
+  paperTowels: { flammable: true },
   // Draußen und Spielen
   ball: {},
   rope: {},
@@ -90,6 +93,8 @@ export const materials = {
   puddles: { hazards: ['water'] },
   ice: {},
   ledLight: {}, // LED-Licht oder Laternenstab: das einzige Licht für Laternen und alles aus Papier (Punkt 7)
+  playingCards: {},
+  balloon: { hazards: ['smallParts'] },
   // Zutaten
   yogurt: { allergens: ['milk'] },
   cream: { allergens: ['milk'] },
@@ -109,6 +114,13 @@ export const materials = {
   cocoa: {},
   bakingSoda: {},
   vinegar: {},
+  milk: { allergens: ['milk'] },
+  oats: { allergens: ['gluten'] },
+  raisins: { hazards: ['smallParts'] },
+  lemon: {},
+  pepper: {},
+  sparklingWater: {},
+  cressSeeds: {},
   // Nur kleine Mengen zum Anrühren, Trinken oder Pinselauswaschen (Glas, Becher, Teller).
   // Alles, worin ein Kind planschen kann, ist `water`.
   tapWater: {},
@@ -119,6 +131,7 @@ export const materials = {
   candle: { hazards: ['fire'] },
   // Werkzeug und Technik
   screwdriver: { hazards: ['sharp'] },
+  blender: { hazards: ['sharp'] },
   // Nur kleine batteriebetriebene Geräte, Batterien vorher heraus. Nie mit Netzstecker (Punkt 6).
   oldDevice: { hazards: ['electric'] },
 } as const satisfies Record<string, MaterialInfo>;

@@ -219,7 +219,20 @@
     "candle": "Kerze",
     "screwdriver": "Schraubenzieher",
     "oldDevice": "Altes batteriebetriebenes Gerät",
-    "tapWater": "Leitungswasser"
+    "tapWater": "Leitungswasser",
+    "watercolors": "Wasserfarben",
+    "plate": "Teller",
+    "paperTowels": "Küchenpapier",
+    "playingCards": "Spielkarten",
+    "balloon": "Luftballon",
+    "milk": "Milch",
+    "oats": "Haferflocken",
+    "raisins": "Rosinen",
+    "lemon": "Zitronen",
+    "pepper": "Gemahlener Pfeffer",
+    "sparklingWater": "Mineralwasser mit Kohlensäure",
+    "cressSeeds": "Kressesamen",
+    "blender": "Mixer oder Pürierstab"
   },
   "allergens": {
     "milk": "Milch",

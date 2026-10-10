@@ -219,7 +219,20 @@
     "candle": "Candle",
     "screwdriver": "Screwdriver",
     "oldDevice": "Old battery-powered device",
-    "tapWater": "Tap water"
+    "tapWater": "Tap water",
+    "watercolors": "Watercolors",
+    "plate": "Plate",
+    "paperTowels": "Paper towels",
+    "playingCards": "Playing cards",
+    "balloon": "Balloon",
+    "milk": "Milk",
+    "oats": "Rolled oats",
+    "raisins": "Raisins",
+    "lemon": "Lemons",
+    "pepper": "Ground pepper",
+    "sparklingWater": "Sparkling water",
+    "cressSeeds": "Cress seeds",
+    "blender": "Blender or hand blender"
   },
   "allergens": {
     "milk": "Milk",
