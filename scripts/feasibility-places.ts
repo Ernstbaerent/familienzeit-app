@@ -35,7 +35,7 @@ const USER_AGENT =
   'familienzeit-app-feasibility-test/0.1 (https://github.com/Ernstbaerent/familienzeit-app; Machbarkeitstest, wenige Abfragen)';
 const CACHE_DIR = 'scripts/.cache';
 const MIN_GAP_MS = 10_000; // Pause zwischen zwei echten Abfragen
-const RETRY_WAIT_MS = 30_000; // Wartezeit vor dem einen Wiederholungsversuch
+const RETRY_WAIT_MS = 60_000; // Wartezeit vor dem einen Wiederholungsversuch
 const MAX_SLOT_WAIT_S = 60; // länger warten wir auf einen freien Slot nicht
 const REQUEST_TIMEOUT_MS = 150_000;
 
