@@ -13,6 +13,7 @@ export const colors = {
   primary: '#333333', // Hauptknöpfe, Hervorhebungen
   onPrimary: '#FFFFFF', // Text auf `primary`
   border: '#D9D9D9', // Linien, Rahmen
+  danger: '#B3261E', // Löschen, Fehlermeldungen
 } as const;
 
 export const fontSize = {
@@ -39,6 +40,11 @@ export const spacing = {
   md: 16,
   lg: 24,
   xl: 32,
+} as const;
+
+// Durchsichtigkeit (0 = unsichtbar, 1 = voll sichtbar).
+export const opacity = {
+  disabled: 0.4, // nicht auswählbare Knöpfe und Chips
 } as const;
 
 // Für borderRadius (auch borderTopStartRadius usw.).

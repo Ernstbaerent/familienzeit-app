@@ -134,7 +134,7 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
 - [x] **M1 Grundgerüst:** Expo-Projekt mit TypeScript, Expo Router, Ordnerstruktur, i18next mit de/en, RTL-Vorbereitung, Startbildschirm
 - [x] **M2a Machbarkeitstest Orte (OpenStreetMap):** Skript `scripts/feasibility-places.ts` fragt über die Overpass API familientaugliche Orte für zwei Testorte (Greiz, Reudnitz) in 5/15/30 km ab; Ergebnis in `docs/machbarkeit-orte.md` (nur Test, keine App-Funktion)
 - [ ] **M2b Machbarkeitstest Veranstaltungen (Knowledge Graph):** Skript, das den Knowledge Graph für eine Region abfragt und das Ergebnis zusammenfasst (nur Test, keine App-Funktion). ⏸ wartet auf den API-Schlüssel
-- [ ] **M3 Kinderprofile:** Einstieg ohne Konto, mehrere Kinder anlegen/bearbeiten, lokal speichern
+- [x] **M3 Kinderprofile:** Einstieg ohne Konto, mehrere Kinder anlegen/bearbeiten, lokal speichern
 - [ ] **M4 Aktivitäten:** Datenmodell, 20 Beispiel-Aktivitäten in `data/`, lokal laden
 - [ ] **M5 Vorschläge:** Zeit + Energie wählen, Vorschlagslogik mit Tests, 3 Vorschläge anzeigen
 - [ ] **M6 Wetter und Standort:** Bright Sky und Standortabfrage in die Vorschlagslogik einbinden
@@ -164,3 +164,6 @@ Konto und Familie teilen, Premium/Abo, Radiosender-Kooperationen, Nachbarländer
 - 2026-10-10 – RTL nur, wenn die angezeigte Sprache RTL ist. Bis eine RTL-Übersetzung kommt, ist Spiegeln in `app.json` ausgeschaltet
 - 2026-10-10 – Roadmap: M2 aufgeteilt in M2a (Orte, OpenStreetMap, jetzt) und M2b (Veranstaltungen, wartet auf API-Schlüssel). M10 „Orte" bleibt die spätere App-Funktion
 - 2026-10-10 – M2a abgeschlossen: Rund um Greiz und Reudnitz gibt es in OSM genug Orte für 3 Vorschläge, aber dünn im Dorf (5 km), bei Regen (keine Kinder-Indoor-Ziele im 15-km-Umkreis) und bei Öffnungszeiten (nur ca. ein Drittel der Bäder, Museen, Zoos, Indoor-Angebote). Die öffentlichen Overpass-Server sind langsam und schwankend: Orte live aus der App abzufragen ist riskant, vor M10 klären, ob sie vorab geladen werden. Die 5 Erkenntnisse stehen bei M10
+- 2026-10-10 – Entscheidung aus M2a: Orte werden nicht live aus der App abgefragt, sondern im Hintergrund vorab geladen und in unserer Datenbank (Supabase) abgelegt. Die App liest nur von dort (Details bei M10)
+- 2026-10-10 – Entscheidung aus M2a: Für die Auswertung der Öffnungszeiten darf in M10 eine Bibliothek verwendet werden. Welche, wird vor M10 kurz mit Clemens abgestimmt; für alle anderen neuen Bibliotheken gilt weiter die Rückfrage
+- 2026-10-10 – M3 abgeschlossen: Kinderprofile nur lokal (AsyncStorage, Schlüssel `profiles.v1`), Details in `docs/profiles.md`. Pflicht sind nur Geburtsjahr und -monat; Spitzname, Interessen und Abneigungen sind freiwillig. Alter unter 2 Jahren in Monaten, ab 2 Jahren in Jahren. Interesse und Abneigung schließen sich gegenseitig aus. Mindestens ein Kind ist nötig (ohne Kind leitet der Start zum Anlegen weiter). Auswahllisten stehen in `src/features/profiles/preferences.ts` (neues Thema = 1 Zeile + Texte in de/en). AsyncStorage ist die einzige neue Bibliothek. Jest ist noch nicht eingerichtet, kommt mit M5
