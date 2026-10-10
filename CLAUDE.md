@@ -19,6 +19,14 @@ Team: Clemens (Technik, programmiert mit dir), Ani (Design, Ideen).
 5. **Handy weg:** Die App ist schnell erledigt. Keine Endlos-Feeds, keine Bindungstricks.
 6. **Datenschutz zuerst:** Ohne Konto nutzbar, persönliche Daten nur auf dem Gerät.
 
+## Positionierung und Design-Leitlinien
+
+- **Kern:** Zeit, Energie, Wetter und Ort werden zu einer Entscheidung, zu Hause genauso wie draußen (Wettbewerb: `docs/wettbewerb.md`).
+- Ruhig und warm statt bunt und verspielt. Keine Punkte, Abzeichen, Level oder ungefragten Benachrichtigungen.
+- Die Entscheidung steht im Mittelpunkt: ein Hauptknopf, drei klare Karten, kein Scrollen durch lange Listen.
+- Zu Hause und draußen gleichwertig zeigen, die App soll nicht wie eine reine Ausflugs-App wirken.
+- Datenschutz sichtbar machen („ohne Konto, alles bleibt auf deinem Handy“).
+
 ## Arbeitsweise mit Clemens
 
 - Clemens ist Einsteiger mit erster App-Erfahrung. Antworte auf **Deutsch**, kurz und verständlich.
@@ -171,7 +179,9 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
 ## Später (nicht jetzt bauen)
 
 Weitere Sprachen (ar, tr, uk, ro), Kind-Modus, Erinnerungen mit Fotos, Wochenend-Push,
-Konto und Familie teilen, Premium/Abo, Radiosender-Kooperationen, Nachbarländer.
+Konto und Familie teilen, Premium/Abo, Radiosender-Kooperationen, Nachbarländer,
+Anbieter-Portal (lokale Anbieter tragen Angebote und Termine selbst ein), Widget „Idee für heute“,
+Vorschläge für einen anderen Ort (z. B. Urlaubsort).
 
 ## Notizen und Entscheidungen
 
