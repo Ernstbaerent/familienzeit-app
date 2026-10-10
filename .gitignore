@@ -147,3 +147,26 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Expo
+.expo/
+web-build/
+expo-env.d.ts
+
+# Native Ordner (erzeugt Expo selbst, nicht von Hand ändern)
+/ios
+/android
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Metro
+.metro-health-check*
+
+# macOS
+.DS_Store
