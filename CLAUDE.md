@@ -8,7 +8,7 @@ Halte sie kurz und aktuell. Details gehören in `docs/`, nicht hierher.
 Eine App für iPhone und Android, die Eltern in unter 30 Sekunden 3 passende Vorschläge gibt,
 was sie jetzt oder heute mit ihren Kindern (0–16 Jahre) machen können: Basteln, Spiele, Ausflüge, Veranstaltungen.
 Sie berücksichtigt verfügbare Zeit, Energie der Eltern, Alter und Vorlieben der Kinder, Wetter und Standort.
-Team: Clemens (Technik, programmiert mit dir), Ani (Design, Ideen, Freigabe der Aktivitäten).
+Team: Clemens (Technik, programmiert mit dir), Ani (Design, Ideen).
 
 ## Produktprinzipien (bei jeder Entscheidung beachten)
 
@@ -49,6 +49,7 @@ npx tsc --noEmit       # TypeScript prüfen
 npm test               # Tests ausführen
 npx expo lint          # Code-Stil prüfen
 npm run places:test    # M2a: Machbarkeitstest Orte (Overpass API, braucht Node 22+, Zwischenspeicher in scripts/.cache/)
+npm run activities:check  # M4: prüft alle Aktivitäten in data/ (Form, Sicherheits-Checkliste, Texte), braucht Node 22+
 ```
 
 ## Ordnerstruktur (Ziel)
@@ -96,26 +97,32 @@ Energie der Eltern, Abwechslung (kürzlich Gemachtes nach hinten), Eignung für 
 **Fallback:** Zu wenig Orte/Veranstaltungen → Umkreis vergrößern (z. B. 5 → 15 → 30 km) und das anzeigen.
 Danach mit Aktivitäten für zu Hause auffüllen. Ergebnis immer genau 3.
 
-## Datenmodell Aktivität (Entwurf)
+## Datenmodell Aktivität
+
+Umgesetzt in `src/features/activities/`, Felder und Regeln in `docs/activities.md`.
 
 ```ts
 type Activity = {
   id: string;
   category: 'craft' | 'game' | 'movement' | 'experiment' | 'nature' | 'cooking' | 'outing';
-  translations: Record<string, { title: string; summary: string; steps: string[]; safetyNote?: string }>;
-  ageMin: number;            // Jahre
+  topics: TopicKey[];        // Themen, gleiche Schlüssel wie Interessen/Abneigungen der Kinderprofile
+  translations: Record<string, { title: string; summary: string; steps: string[]; safetyNote?: string }>;  // de + en Pflicht
+  ageMin: number;            // Jahre, inklusive
   ageMax: number;
   durationMin: number;       // Minuten
   durationMax: number;
   setting: 'indoor' | 'outdoor' | 'both';
   weather: { needsDry: boolean; betterInSun: boolean };
+  dayParts?: ('morning' | 'afternoon' | 'evening')[];   // freiwillig: nur zu diesen Tageszeiten; fehlt = jederzeit
   energy: 'low' | 'medium' | 'high';   // Energie, die Eltern brauchen
   cost: 0 | 1 | 2;           // 0 = kostenlos, 1 = wenig, 2 = mehr
-  materials: string[];       // Schlüssel, übersetzt über locales
+  materials: MaterialKey[];  // Schlüssel aus materials.ts (mit Gefahren und Allergenen), übersetzt über locales
   siblingFriendly: boolean;
   status: 'draft' | 'approved' | 'rejected';   // nur 'approved' erscheint in der App
   source: 'ai' | 'manual';
   createdAt: string;
+  image?: string;            // freiwillig: Web-Adresse; ohne Bild zeigt die App das Symbol der Kategorie
+  isSample?: true;           // Beispieldaten (`data/sample-activities.json`), später durch die echte Datenbank ersetzen
 };
 ```
 
@@ -123,7 +130,10 @@ type Activity = {
 
 - Einmal pro Woche (GitHub Action) erstellt ein Skript 10–20 neue Aktivitäten mit der Claude API.
 - Berücksichtigt Jahreszeit, Feiertage und Stichwort-Ideen aus der Tabelle `activity_ideas`.
-- Neue Aktivitäten immer mit `status: 'draft'`. **Ani gibt frei** – sie schreibt keine Anleitungen selbst.
+- Neue Aktivitäten starten immer mit `status: 'draft'`. Statt einer Freigabe durch Menschen gilt die
+  **Sicherheits-Checkliste** (`docs/sicherheits-checkliste.md`): Was besteht, wird automatisch `approved`.
+  Was nicht besteht, bleibt `draft` und wird im Prüfskript (`npm run activities:check`) aufgelistet.
+- Den Status `draft` behalten wir trotzdem, damit wir eine Freigabe durch Menschen später wieder einführen können.
 - Die KI liefert Titel, Anleitung, Altersgrenzen und Sicherheitshinweise vollständig.
 
 ## Roadmap erste Version
@@ -135,12 +145,13 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
 - [x] **M2a Machbarkeitstest Orte (OpenStreetMap):** Skript `scripts/feasibility-places.ts` fragt über die Overpass API familientaugliche Orte für zwei Testorte (Greiz, Reudnitz) in 5/15/30 km ab; Ergebnis in `docs/machbarkeit-orte.md` (nur Test, keine App-Funktion)
 - [ ] **M2b Machbarkeitstest Veranstaltungen (Knowledge Graph):** Skript, das den Knowledge Graph für eine Region abfragt und das Ergebnis zusammenfasst (nur Test, keine App-Funktion). ⏸ wartet auf den API-Schlüssel
 - [x] **M3 Kinderprofile:** Einstieg ohne Konto, mehrere Kinder anlegen/bearbeiten, lokal speichern
-- [ ] **M4 Aktivitäten:** Datenmodell, 20 Beispiel-Aktivitäten in `data/`, lokal laden
+- [x] **M4 Aktivitäten:** Datenmodell, 20 Beispiel-Aktivitäten in `data/`, lokal laden
 - [ ] **M5 Vorschläge:** Zeit + Energie wählen, Vorschlagslogik mit Tests, 3 Vorschläge anzeigen
+- [ ] **M5b Startbestand Aktivitäten:** Claude Code schreibt weitere Aktivitäten vollständig in eigenen Worten (Titel, Kurzbeschreibung, Schritte, Material, Altersangaben, Sicherheitshinweise, Deutsch und Englisch), in Paketen zu je 20–25, bis mindestens 100 erreicht sind. Ideen dürfen bekannte Klassiker sein, Texte werden nie von Websites übernommen. Jede Aktivität durchläuft nach dem Schreiben die Sicherheits-Checkliste (`docs/sicherheits-checkliste.md`); nur wer besteht, wird `approved`. Bilder sind nicht Teil von M5b
 - [ ] **M6 Wetter und Standort:** Bright Sky und Standortabfrage in die Vorschlagslogik einbinden
 - [ ] **M7 Details und Feedback:** Detailansicht, Daumen hoch/runter, Verlauf lokal
 - [ ] **M8 Supabase:** Aktivitäten aus der Datenbank laden (nur `approved`), Offline-Cache
-- [ ] **M9 KI-Wochenlauf:** Generator-Skript, GitHub Action, `activity_ideas`, 150–200 Start-Aktivitäten
+- [ ] **M9 KI-Wochenlauf:** Generator-Skript, GitHub Action, `activity_ideas`. Der Wochenlauf ergänzt laufend neue Aktivitäten zum Bestand aus M5b
 - [ ] **M10 Orte:** OpenStreetMap-Abfrage für Spielplätze, Museen, Bäder usw. Erkenntnisse aus M2a (Zahlen und Begründung: `docs/machbarkeit-orte.md`):
   1. Orte ohne Öffnungszeiten nicht ausschließen, sondern mit dem Hinweis „Öffnungszeiten vorher prüfen" anzeigen.
   2. Bäder mit drinnen/draußen kennzeichnen und eine Saison berücksichtigen (keine Freibäder außerhalb der Saison).
@@ -148,7 +159,7 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
   4. Kategorien nach Kindertauglichkeit gewichten (z. B. Rastplätze und kleine Sehenswürdigkeiten niedrig).
   5. Bei Regen sind Indoor-Orte vor Ort selten: Die Aktivitäten für zu Hause sind dann besonders wichtig.
 - [ ] **M11 Veranstaltungen:** Knowledge Graph in die Vorschläge einbinden
-- [ ] **M12 Beta:** Datenschutzerklärung, Impressum, Testversionen für Freunde und Familie
+- [ ] **M12 Beta:** Datenschutzerklärung, Impressum, Testversionen für Freunde und Familie. Vorher liest ein Mensch alle Aktivitäten einmal durch
 
 ## Später (nicht jetzt bauen)
 
@@ -167,3 +178,5 @@ Konto und Familie teilen, Premium/Abo, Radiosender-Kooperationen, Nachbarländer
 - 2026-10-10 – Entscheidung aus M2a: Orte werden nicht live aus der App abgefragt, sondern im Hintergrund vorab geladen und in unserer Datenbank (Supabase) abgelegt. Die App liest nur von dort (Details bei M10)
 - 2026-10-10 – Entscheidung aus M2a: Für die Auswertung der Öffnungszeiten darf in M10 eine Bibliothek verwendet werden. Welche, wird vor M10 kurz mit Clemens abgestimmt; für alle anderen neuen Bibliotheken gilt weiter die Rückfrage
 - 2026-10-10 – M3 abgeschlossen: Kinderprofile nur lokal (AsyncStorage, Schlüssel `profiles.v1`), Details in `docs/profiles.md`. Pflicht sind nur Geburtsjahr und -monat; Spitzname, Interessen und Abneigungen sind freiwillig. Alter unter 2 Jahren in Monaten, ab 2 Jahren in Jahren. Interesse und Abneigung schließen sich gegenseitig aus. Mindestens ein Kind ist nötig (ohne Kind leitet der Start zum Anlegen weiter). Auswahllisten stehen in `src/features/profiles/preferences.ts` (neues Thema = 1 Zeile + Texte in de/en). AsyncStorage ist die einzige neue Bibliothek. Jest ist noch nicht eingerichtet, kommt mit M5
+- 2026-10-10 – M4 abgeschlossen: Datenmodell in `src/features/activities/`, 20 Beispiele in `data/sample-activities.json` (alle `approved`, aber als Beispieldaten markiert: `isSample`, IDs `sample-…`), Details in `docs/activities.md`. Neue Felder gegenüber dem Entwurf: `topics` (gleiche Schlüssel wie Interessen/Abneigungen, damit M5 zuordnen kann), `dayParts` (freiwillig, Tageszeit; fehlt = jederzeit), `image` (freiwillig; ohne Bild später Kategorie-Symbol), `isSample`. Material ist eine feste Liste mit Gefahren und Allergenen (`materials.ts`); daraus prüft `npm run activities:check` die Sicherheits-Checkliste. Dafür ist `allowImportingTsExtensions` in `tsconfig.json` gesetzt, damit das Skript Code aus `src/` nutzen kann. Jest kommt weiter mit M5
+- 2026-10-10 – Entscheidung zu Aktivitäten: Keine Freigabe durch Ani. Es gilt die Sicherheits-Checkliste (`docs/sicherheits-checkliste.md`) für M5b und den KI-Wochenlauf; bestanden = `approved`, sonst bleibt es `draft`. Vor der Beta (M12) liest ein Mensch alle Aktivitäten einmal durch. Team-Zeile: Ani macht Design und Ideen

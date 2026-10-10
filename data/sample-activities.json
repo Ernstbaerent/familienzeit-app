@@ -1,0 +1,936 @@
+[
+  {
+    "id": "sample-yogurt-finger-paint",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft", "gettingDirty"],
+    "ageMin": 1,
+    "ageMax": 5,
+    "durationMin": 20,
+    "durationMax": 40,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["yogurt", "turmeric", "cocoa", "paper", "oldShirt", "tray", "bowl"],
+    "siblingFriendly": false,
+    "translations": {
+      "de": {
+        "title": "Fingerfarben aus Joghurt",
+        "summary": "Aus Joghurt und Küchengewürzen mischt ihr essbare Farben und malt direkt mit den Fingern.",
+        "steps": [
+          "Zieht ein altes T-Shirt an und legt ein großes Blatt Papier auf das Tablett.",
+          "Gebt in drei Schälchen je einen Esslöffel Joghurt.",
+          "Rührt in das erste Schälchen eine Prise Kurkuma, in das zweite etwas Kakao. Das dritte bleibt weiß.",
+          "Malt mit Fingern und Händen auf das Papier: Punkte, Streifen, Handabdrücke.",
+          "Lasst das Bild flach trocknen oder fotografiert es gleich. Wischt danach Hände und Tablett ab."
+        ],
+        "safetyNote": "Bleibt die ganze Zeit in der Nähe, besonders bei Kindern unter 2 Jahren: Die Farben sind essbar, aber nicht zum Essen gedacht. Joghurt enthält Milch. Bei einer Milchallergie lieber eine andere Aktivität wählen."
+      },
+      "en": {
+        "title": "Yogurt Finger Paint",
+        "summary": "Mix edible paint from yogurt and kitchen spices, then paint straight with your fingers.",
+        "steps": [
+          "Put on an old T-shirt and lay a big sheet of paper on the tray.",
+          "Spoon one tablespoon of yogurt into each of three small bowls.",
+          "Stir a pinch of turmeric into the first bowl and a little cocoa into the second. The third stays white.",
+          "Paint on the paper with your fingers and hands: dots, stripes, handprints.",
+          "Let the picture dry flat or take a photo right away. Then wipe hands and tray clean."
+        ],
+        "safetyNote": "Stay close the whole time, especially with children under 2: the paint is edible but not meant to be eaten. Yogurt contains milk. If your child has a milk allergy, pick a different activity."
+      }
+    }
+  },
+  {
+    "id": "sample-marble-run",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft", "building", "technology"],
+    "ageMin": 5,
+    "ageMax": 12,
+    "durationMin": 45,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["cardboardBox", "cardboardTubes", "tape", "scissors", "marbles"],
+    "siblingFriendly": false,
+    "translations": {
+      "de": {
+        "title": "Murmelbahn aus Papprollen",
+        "summary": "Aus Papprollen und Klebeband baut ihr eine Bahn, auf der Murmeln nach unten rollen.",
+        "steps": [
+          "Stellt einen großen Karton aufrecht hin. Er ist die Wand für eure Bahn.",
+          "Schneidet die Papprollen der Länge nach auf. Diese Rinnen halten die Murmeln auf der Bahn.",
+          "Klebt die Rinnen mit Klebeband schräg an den Karton, sodass die Murmel von einer in die nächste rollt.",
+          "Lasst oben eine Murmel los und schaut, wo sie hängen bleibt.",
+          "Ändert die Neigung, bis die Murmel unten ankommt. Baut dann Kurven und Tunnel dazu."
+        ],
+        "safetyNote": "Die Rollen schneidet ein Erwachsener auf oder ihr schneidet gemeinsam mit Erwachsenen. Murmeln sind Kleinteile: Sammelt sie nach dem Spiel wieder ein und haltet sie von jüngeren Geschwistern fern."
+      },
+      "en": {
+        "title": "Marble Run from Cardboard Tubes",
+        "summary": "Build a run from cardboard tubes and tape and watch marbles roll all the way down.",
+        "steps": [
+          "Stand a large cardboard box upright. It is the wall for your run.",
+          "Cut the cardboard tubes in half lengthwise. These channels keep the marbles on the track.",
+          "Tape the channels at a slant to the box so that the marble rolls from one into the next.",
+          "Let a marble go at the top and see where it gets stuck.",
+          "Change the slope until the marble reaches the bottom. Then add curves and tunnels."
+        ],
+        "safetyNote": "An adult cuts the tubes open, or you cut them together with adults. Marbles are small parts: collect them afterwards and keep them away from younger siblings."
+      }
+    }
+  },
+  {
+    "id": "sample-sock-puppet-theater",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft", "roleplay", "stories"],
+    "ageMin": 4,
+    "ageMax": 12,
+    "durationMin": 60,
+    "durationMax": 90,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["socks", "buttons", "glue", "markers", "wool", "scissors", "cardboardBox"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Sockenpuppen-Theater",
+        "summary": "Aus alten Socken werden Figuren, die in einem Kartontheater ihre eigene Geschichte spielen.",
+        "steps": [
+          "Jedes Kind sucht eine Socke aus und überlegt, wer sie sein soll.",
+          "Klebt Knöpfe als Augen und Wollfäden als Haare fest. Den Mund malt ihr mit Filzstift.",
+          "Während der Kleber trocknet, baut ihr die Bühne: Ein Erwachsener schneidet in einen umgedrehten Karton vorne ein Fenster.",
+          "Denkt euch eine kurze Geschichte mit Anfang, Streit und gutem Ende aus.",
+          "Führt das Stück für die Familie auf. Die Großen helfen den Kleinen beim Text."
+        ],
+        "safetyNote": "Scheren benutzen Kinder nur mit Erwachsenen. Klebt die Knöpfe so fest an, dass sie sich nicht lösen: Sie sind Kleinteile und nichts für jüngere Geschwister zum Spielen."
+      },
+      "en": {
+        "title": "Sock Puppet Theater",
+        "summary": "Turn old socks into characters and let them act out their own story in a cardboard theater.",
+        "steps": [
+          "Each child picks a sock and decides who it should be.",
+          "Glue on buttons as eyes and strands of yarn as hair. Draw the mouth with a marker.",
+          "While the glue dries, build the stage: an adult cuts a window into the front of an upside-down box.",
+          "Make up a short story with a beginning, an argument and a happy ending.",
+          "Perform the play for the family. The older ones help the little ones with the lines."
+        ],
+        "safetyNote": "Children use scissors only together with adults. Glue the buttons on firmly so they cannot come off: they are small parts and not for younger siblings to play with."
+      }
+    }
+  },
+  {
+    "id": "sample-tshirt-bag",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft"],
+    "ageMin": 13,
+    "ageMax": 16,
+    "durationMin": 45,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["oldShirt", "scissors", "markers"],
+    "siblingFriendly": false,
+    "translations": {
+      "de": {
+        "title": "Tasche aus einem alten T-Shirt",
+        "summary": "Ohne Nähen wird aus einem alten T-Shirt eine Tasche mit Fransen.",
+        "steps": [
+          "Legt das T-Shirt flach hin und schneidet die Ärmel an den Nähten ab.",
+          "Schneidet den Halsausschnitt rund und etwas größer aus. Das wird die Öffnung der Tasche.",
+          "Zeichnet unten mit dem Filzstift eine gerade Linie etwa 8 cm über dem Saum.",
+          "Schneidet von unten bis zur Linie im Abstand von 2 cm Streifen ein, durch beide Stofflagen zugleich.",
+          "Knotet jeweils einen vorderen und den passenden hinteren Streifen fest zusammen. Die Schulterstücke sind die Henkel."
+        ],
+        "safetyNote": "Führt die Schere beim Schneiden immer vom Körper weg. Jüngere Geschwister schneiden nur mit Erwachsenen."
+      },
+      "en": {
+        "title": "Bag from an Old T-Shirt",
+        "summary": "Turn an old T-shirt into a fringed bag without any sewing.",
+        "steps": [
+          "Lay the T-shirt flat and cut off the sleeves along the seams.",
+          "Cut out the neckline in a round shape, a little wider. This becomes the opening of the bag.",
+          "Draw a straight line near the bottom, about 8 cm above the hem.",
+          "Cut strips 2 cm wide from the hem up to the line, through both layers at once.",
+          "Knot each front strip tightly to the matching back strip. The shoulder parts are the handles."
+        ],
+        "safetyNote": "Always cut away from your body. Younger siblings cut only together with adults."
+      }
+    }
+  },
+  {
+    "id": "sample-treasure-basket",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "game",
+    "topics": ["games"],
+    "ageMin": 0,
+    "ageMax": 2,
+    "durationMin": 15,
+    "durationMax": 30,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["basket", "woodenSpoon", "whisk", "scarf", "plasticCup", "cardboardTubes"],
+    "siblingFriendly": false,
+    "translations": {
+      "de": {
+        "title": "Schatzkorb",
+        "summary": "Ein Korb voller Alltagsdinge zum Greifen, Klopfen und Entdecken.",
+        "steps": [
+          "Sucht 5 bis 8 Gegenstände aus, die verschieden aussehen und sich anders anfühlen: Löffel, Tuch, Becher, Rolle.",
+          "Prüft jeden Gegenstand: Er muss sauber und größer als eine Faust sein, ohne scharfe Kanten.",
+          "Legt alles in einen Korb und setzt euer Kind daneben auf den Boden.",
+          "Lasst es in Ruhe ausprobieren: greifen, klopfen, schütteln, in den Mund nehmen.",
+          "Sprecht ruhig mit: „Das ist weich.“ „Das klappert.“ Tauscht nach einer Weile ein paar Dinge aus."
+        ],
+        "safetyNote": "Nur Gegenstände, die nicht verschluckt werden können: keine Kleinteile, keine Batterien, keine Plastiktüten. Bleibt die ganze Zeit dabei."
+      },
+      "en": {
+        "title": "Treasure Basket",
+        "summary": "A basket full of everyday things to grab, bang and discover.",
+        "steps": [
+          "Pick 5 to 8 objects that look different and feel different: a spoon, a scarf, a cup, a tube.",
+          "Check every object: it must be clean and bigger than a fist, with no sharp edges.",
+          "Put everything in a basket and sit your child down next to it on the floor.",
+          "Let them explore in peace: grabbing, banging, shaking, putting things in the mouth.",
+          "Talk along quietly: “That is soft.” “That rattles.” Swap a few things after a while."
+        ],
+        "safetyNote": "Only objects that cannot be swallowed: no small parts, no batteries, no plastic bags. Stay close the whole time."
+      }
+    }
+  },
+  {
+    "id": "sample-pillow-fort",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "game",
+    "topics": ["building", "stories", "roleplay"],
+    "ageMin": 3,
+    "ageMax": 9,
+    "durationMin": 45,
+    "durationMax": 90,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "dayParts": ["afternoon", "evening"],
+    "energy": "low",
+    "cost": 0,
+    "materials": ["cushions", "blanket", "chairs", "flashlight"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Kissenburg und Taschenlampen-Geschichten",
+        "summary": "Ihr baut eine gemütliche Höhle und erzählt euch darin Geschichten im Taschenlampenlicht.",
+        "steps": [
+          "Schiebt Stühle oder das Sofa so zusammen, dass eine Höhle entsteht.",
+          "Legt Decken darüber und beschwert die Ränder mit Kissen.",
+          "Polstert den Boden mit Kissen und Decken aus.",
+          "Dunkelt den Raum etwas ab und krabbelt mit der Taschenlampe hinein.",
+          "Erzählt reihum eine Geschichte: Jeder sagt einen Satz, dann wandert die Taschenlampe weiter.",
+          "Zum Schluss baut ihr gemeinsam wieder ab."
+        ],
+        "safetyNote": "Die Stühle müssen stabil stehen, niemand klettert darauf. Legt die Decken locker auf, damit nichts auf die Kinder fällt."
+      },
+      "en": {
+        "title": "Pillow Fort and Flashlight Stories",
+        "summary": "Build a cozy den and tell each other stories inside by flashlight.",
+        "steps": [
+          "Push chairs or the sofa together so that a den takes shape.",
+          "Drape blankets over the top and weigh down the edges with cushions.",
+          "Pad the floor with cushions and blankets.",
+          "Dim the room a little and crawl in with the flashlight.",
+          "Tell a story in turns: everyone says one sentence, then the flashlight moves on.",
+          "At the end, take it down together."
+        ],
+        "safetyNote": "The chairs must stand firmly and nobody climbs on them. Lay the blankets on loosely so nothing can fall on the children."
+      }
+    }
+  },
+  {
+    "id": "sample-scavenger-hunt",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "game",
+    "topics": ["games", "movement", "outings"],
+    "ageMin": 4,
+    "ageMax": 10,
+    "durationMin": 30,
+    "durationMax": 60,
+    "setting": "outdoor",
+    "weather": { "needsDry": true, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["paper", "pencils", "cardboardBox"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Schnitzeljagd im Garten",
+        "summary": "Rätselzettel führen die Kinder von Versteck zu Versteck bis zur Schatzkiste.",
+        "steps": [
+          "Ein Erwachsener oder ein größeres Kind versteckt eine kleine Schatzkiste im Garten oder Hof.",
+          "Schreibt 4 bis 5 Hinweise auf Zettel. Für die Kleinen malt ihr Bilder statt Wörter.",
+          "Versteckt die Zettel so, dass jeder Hinweis zum nächsten Versteck führt.",
+          "Die Kinder starten mit dem ersten Zettel und folgen den Hinweisen.",
+          "Am Ende öffnet ihr die Kiste gemeinsam und teilt den Schatz."
+        ],
+        "safetyNote": "Bleibt im Garten oder in einem Bereich ohne Straße. Kinder unter 8 sind nur in Sichtweite von Erwachsenen unterwegs."
+      },
+      "en": {
+        "title": "Scavenger Hunt in the Yard",
+        "summary": "Riddle notes lead the children from hiding place to hiding place until they find the treasure box.",
+        "steps": [
+          "An adult or an older child hides a small treasure box in the yard.",
+          "Write 4 to 5 clues on slips of paper. For the little ones, draw pictures instead of words.",
+          "Hide the slips so that each clue leads to the next hiding place.",
+          "The children start with the first slip and follow the clues.",
+          "At the end you open the box together and share the treasure."
+        ],
+        "safetyNote": "Stay in the yard or in an area without a road. Children under 8 only go where adults can see them."
+      }
+    }
+  },
+  {
+    "id": "sample-who-am-i",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "game",
+    "topics": ["games", "roleplay"],
+    "ageMin": 7,
+    "ageMax": 16,
+    "durationMin": 20,
+    "durationMax": 45,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["paper", "pencils"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Wer bin ich?",
+        "summary": "Jeder errät mit Ja-Nein-Fragen, welche Figur auf seinem Zettel steht.",
+        "steps": [
+          "Jeder schreibt mehrere bekannte Figuren, Tiere oder Berufe auf eigene Zettel.",
+          "Faltet die Zettel und mischt sie.",
+          "Jeder zieht einen Zettel, ohne ihn zu lesen, und hält ihn sich vor die Stirn.",
+          "Reihum stellt ihr Ja-Nein-Fragen: „Bin ich ein Tier?“ Bei „Ja“ darf man weiterfragen.",
+          "Wer seine Figur errät, bekommt einen Punkt und zieht einen neuen Zettel."
+        ]
+      },
+      "en": {
+        "title": "Who Am I?",
+        "summary": "Everyone guesses which character is on their slip of paper by asking yes-or-no questions.",
+        "steps": [
+          "Everyone writes several well-known characters, animals or jobs on separate slips of paper.",
+          "Fold the slips and shuffle them.",
+          "Everyone draws a slip without reading it and holds it against their forehead.",
+          "Take turns asking yes-or-no questions: “Am I an animal?” After a “yes” you may keep asking.",
+          "Whoever guesses their character scores a point and draws a new slip."
+        ]
+      }
+    }
+  },
+  {
+    "id": "sample-dance-freeze",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "movement",
+    "topics": ["music", "movement"],
+    "ageMin": 1,
+    "ageMax": 12,
+    "durationMin": 15,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["musicPlayer"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Tanz-Freeze",
+        "summary": "Tanzen, bis die Musik stoppt, und dann erstarren wie eine Statue.",
+        "steps": [
+          "Räumt Platz frei und stellt Stolperfallen und scharfkantige Dinge beiseite.",
+          "Macht Musik an, die allen gefällt.",
+          "Alle tanzen, wie sie möchten.",
+          "Wer die Musik steuert, stoppt sie plötzlich: Alle erstarren wie Statuen.",
+          "Niemand scheidet aus. Wer wackelt, darf als Nächstes die Musik steuern.",
+          "Zum Schluss: Tanzt wie ein Elefant, wie eine Maus, wie ein Roboter."
+        ],
+        "safetyNote": "Tanzt barfuß oder auf Stoppersocken, nicht auf rutschigen Socken. Ganz kleine Kinder tanzen auf dem Arm oder an der Hand."
+      },
+      "en": {
+        "title": "Freeze Dance",
+        "summary": "Dance until the music stops, then freeze like a statue.",
+        "steps": [
+          "Clear some space and move away anything to trip over or with sharp edges.",
+          "Put on music that everyone likes.",
+          "Everyone dances however they like.",
+          "Whoever controls the music stops it suddenly: everyone freezes like a statue.",
+          "Nobody is out. Whoever wobbles gets to control the music next.",
+          "To finish: dance like an elephant, like a mouse, like a robot."
+        ],
+        "safetyNote": "Dance barefoot or in grip socks, not in slippery socks. The very little ones dance in your arms or hold your hand."
+      }
+    }
+  },
+  {
+    "id": "sample-obstacle-course",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "movement",
+    "topics": ["movement", "games"],
+    "ageMin": 2,
+    "ageMax": 8,
+    "durationMin": 20,
+    "durationMax": 40,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "high",
+    "cost": 0,
+    "materials": ["cushions", "blanket", "chairs", "cardboardBox", "tape"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Hindernisparcours im Flur",
+        "summary": "Kissen, Decken und Kartons werden zu einem Parcours zum Klettern, Kriechen und Balancieren.",
+        "steps": [
+          "Wählt Flur oder Wohnzimmer und räumt Zerbrechliches weg.",
+          "Baut Stationen auf: über Kissen steigen, unter einer Decke über zwei Stühlen durchkriechen, durch einen Karton robben, auf einer Klebebandlinie balancieren.",
+          "Geht den Parcours zuerst langsam vor, die Kleinen machen es nach.",
+          "Nun darf jeder durch, erst gemütlich, dann auf Zeit. Zählt laut mit.",
+          "Baut gemeinsam eine neue Station dazu."
+        ],
+        "safetyNote": "Stühle dienen nur als Stütze für die Decke, nicht zum Klettern. Legt Kissen als weiche Landung aus. Kleine Kinder sind immer in Reichweite."
+      },
+      "en": {
+        "title": "Hallway Obstacle Course",
+        "summary": "Cushions, blankets and boxes turn into a course for climbing, crawling and balancing.",
+        "steps": [
+          "Pick the hallway or the living room and put away anything breakable.",
+          "Set up stations: step over cushions, crawl under a blanket over two chairs, wriggle through a box, balance along a line of tape.",
+          "Go through the course slowly first, and the little ones copy you.",
+          "Now everyone gets a turn, first at a relaxed pace, then against the clock. Count out loud.",
+          "Add a new station together."
+        ],
+        "safetyNote": "Chairs are only a support for the blanket, not for climbing. Lay out cushions as a soft landing. Small children stay within arm’s reach."
+      }
+    }
+  },
+  {
+    "id": "sample-garden-olympics",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "movement",
+    "topics": ["movement", "games"],
+    "ageMin": 5,
+    "ageMax": 16,
+    "durationMin": 60,
+    "durationMax": 120,
+    "setting": "outdoor",
+    "weather": { "needsDry": true, "betterInSun": true },
+    "energy": "high",
+    "cost": 0,
+    "materials": ["ball", "rope", "chalk", "bucket", "woodenSpoon"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Draußen-Olympiade",
+        "summary": "Eine Familien-Olympiade mit Weitwurf, Zielwurf, Seilspringen und Löffellauf.",
+        "steps": [
+          "Wählt 4 bis 5 Disziplinen: Weitwurf mit dem Ball, Zielwurf in den Eimer, Seilspringen, Sprint, Löffellauf mit dem Ball auf dem Kochlöffel.",
+          "Malt mit Kreide Start- und Ziellinien auf den Boden.",
+          "Gleicht die Unterschiede aus: Die Kleinen starten näher am Ziel, die Großen werfen aus weiterer Entfernung.",
+          "Zählt Punkte für die ganze Familie als Team statt für jeden einzeln.",
+          "Zum Schluss gibt es für alle etwas zu trinken und eine Siegerehrung."
+        ],
+        "safetyNote": "Wickelt das Seil nie um Hals oder Körper und fesselt niemanden damit. Trinkt zwischendurch und cremt euch bei Sonne ein."
+      },
+      "en": {
+        "title": "Backyard Olympics",
+        "summary": "A family Olympics with long throw, target throw, jump rope and spoon race.",
+        "steps": [
+          "Pick 4 to 5 events: long throw with the ball, target throw into the bucket, jump rope, sprint, spoon race with the ball on a wooden spoon.",
+          "Draw start and finish lines on the ground with chalk.",
+          "Even things out: the little ones start closer to the finish, the big ones throw from farther away.",
+          "Score points for the whole family as a team instead of for each person.",
+          "To finish, everyone gets a drink and there is a medal ceremony."
+        ],
+        "safetyNote": "Never wrap the rope around anyone’s neck or body and never tie anyone up with it. Drink between events and put on sunscreen when it is sunny."
+      }
+    }
+  },
+  {
+    "id": "sample-float-or-sink",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "experiment",
+    "topics": ["experiments", "water"],
+    "ageMin": 3,
+    "ageMax": 8,
+    "durationMin": 20,
+    "durationMax": 30,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["bowl", "water", "apple", "sponge", "woodenSpoon", "plasticCup", "stone", "towel"],
+    "siblingFriendly": false,
+    "translations": {
+      "de": {
+        "title": "Schwimmt oder sinkt?",
+        "summary": "Kinder raten und testen, welche Dinge aus der Küche im Wasser schwimmen und welche untergehen.",
+        "steps": [
+          "Stellt eine große Schüssel auf ein Handtuch und füllt sie nur wenige Zentimeter hoch mit Wasser.",
+          "Legt Gegenstände bereit: Apfel, Schwamm, Kochlöffel, Plastikbecher und einen großen Stein.",
+          "Jedes Kind rät vorher: schwimmt oder sinkt?",
+          "Legt die Gegenstände einzeln ins Wasser und schaut nach.",
+          "Probiert aus: Was passiert, wenn ihr den Becher mit Wasser füllt?",
+          "Sortiert die Dinge in zwei Stapel: schwimmt und sinkt."
+        ],
+        "safetyNote": "Wasser und kleine Kinder: Erwachsene bleiben die ganze Zeit dabei, auch bei flachem Wasser. Leert die Schüssel gleich nach dem Spiel aus."
+      },
+      "en": {
+        "title": "Float or Sink?",
+        "summary": "Children guess and test which things from the kitchen float in water and which ones sink.",
+        "steps": [
+          "Put a large bowl on a towel and fill it with only a few centimeters of water.",
+          "Lay out some objects: an apple, a sponge, a wooden spoon, a plastic cup and a large stone.",
+          "Each child guesses first: float or sink?",
+          "Put the objects into the water one by one and look.",
+          "Try this: what happens when you fill the cup with water?",
+          "Sort the things into two piles: floats and sinks."
+        ],
+        "safetyNote": "Water and young children: an adult stays the whole time, even with shallow water. Empty the bowl right after you finish."
+      }
+    }
+  },
+  {
+    "id": "sample-baking-soda-volcano",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "experiment",
+    "topics": ["experiments", "gettingDirty"],
+    "ageMin": 5,
+    "ageMax": 12,
+    "durationMin": 30,
+    "durationMax": 45,
+    "setting": "both",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["bakingSoda", "vinegar", "plasticCup", "tray", "dishSoap"],
+    "siblingFriendly": false,
+    "translations": {
+      "de": {
+        "title": "Natron-Vulkan",
+        "summary": "Natron und Essig lassen einen Vulkan aus Schaum überlaufen.",
+        "steps": [
+          "Stellt ein Tablett nach draußen, auf den Küchenboden oder ins Waschbecken. Der Becher in der Mitte ist der Vulkan.",
+          "Gebt 2 Esslöffel Natron in den Becher und einen kleinen Spritzer Spülmittel dazu.",
+          "Gießt langsam Essig dazu: Jetzt schäumt es über.",
+          "Wiederholt es mit mehr oder weniger Natron und Essig. Was ändert sich?",
+          "Spült am Ende alles mit viel Wasser weg."
+        ],
+        "safetyNote": "Natron und Essig sind harmlos, reizen aber die Augen: Lasst nichts ins Gesicht spritzen und wascht danach die Hände. Nichts davon essen oder trinken."
+      },
+      "en": {
+        "title": "Baking Soda Volcano",
+        "summary": "Baking soda and vinegar make a volcano of foam spill over.",
+        "steps": [
+          "Put a tray outside, on the kitchen floor or in the sink. The cup in the middle is the volcano.",
+          "Add 2 tablespoons of baking soda to the cup and a small squirt of dish soap.",
+          "Slowly pour in vinegar: now it foams over.",
+          "Do it again with more or less baking soda and vinegar. What changes?",
+          "At the end, rinse everything away with plenty of water."
+        ],
+        "safetyNote": "Baking soda and vinegar are harmless but irritate the eyes: do not let anything splash into the face and wash your hands afterwards. Do not eat or drink any of it."
+      }
+    }
+  },
+  {
+    "id": "sample-ice-cream-in-a-bag",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "experiment",
+    "topics": ["experiments", "cooking"],
+    "ageMin": 6,
+    "ageMax": 16,
+    "durationMin": 20,
+    "durationMax": 30,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["cream", "sugar", "salt", "ice", "freezerBags", "towel"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Eis in der Tüte",
+        "summary": "Mit Eiswürfeln und Salz verwandelt ihr Sahne in einem Beutel in cremiges Eis.",
+        "steps": [
+          "Füllt einen kleinen Gefrierbeutel mit 100 ml Sahne und einem Esslöffel Zucker und verschließt ihn gut.",
+          "Füllt einen großen Beutel zur Hälfte mit Eiswürfeln und gebt 4 Esslöffel Salz dazu.",
+          "Legt den kleinen Beutel in den großen und verschließt auch diesen fest.",
+          "Wickelt alles in ein Handtuch und schüttelt es 8 bis 10 Minuten kräftig. Wechselt euch ab.",
+          "Öffnet den kleinen Beutel: Die Sahne ist zu Eis geworden. Löffelt es direkt heraus.",
+          "Salz macht das Eis kälter als 0 Grad. Deshalb kann die Sahne gefrieren."
+        ],
+        "safetyNote": "Das Salzeis wird sehr kalt: Schüttelt mit Handtuch oder Handschuhen, damit die Hände nicht auskühlen. Sahne enthält Milch."
+      },
+      "en": {
+        "title": "Ice Cream in a Bag",
+        "summary": "With ice cubes and salt you turn cream in a bag into creamy ice cream.",
+        "steps": [
+          "Fill a small freezer bag with 100 ml of cream and a tablespoon of sugar and seal it well.",
+          "Fill a large bag halfway with ice cubes and add 4 tablespoons of salt.",
+          "Put the small bag inside the large one and seal that one tightly too.",
+          "Wrap everything in a towel and shake it hard for 8 to 10 minutes. Take turns.",
+          "Open the small bag: the cream has turned into ice cream. Spoon it out right away.",
+          "Salt makes the ice colder than 0 degrees Celsius. That is why the cream can freeze."
+        ],
+        "safetyNote": "The salty ice gets very cold: shake with a towel or gloves so your hands do not get too cold. Cream contains milk."
+      }
+    }
+  },
+  {
+    "id": "sample-forest-day-picnic",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "nature",
+    "topics": ["natureAnimals", "outings", "movement", "longTrips"],
+    "ageMin": 3,
+    "ageMax": 14,
+    "durationMin": 180,
+    "durationMax": 240,
+    "setting": "outdoor",
+    "weather": { "needsDry": true, "betterInSun": true },
+    "dayParts": ["morning", "afternoon"],
+    "energy": "high",
+    "cost": 0,
+    "materials": ["backpack", "blanket", "drinkBottle", "paperBag", "magnifier"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Waldtag mit Picknick",
+        "summary": "Ein halber Tag im Wald oder Park mit Sammelaufgaben, Lupe und Picknick auf der Decke.",
+        "steps": [
+          "Packt den Rucksack: Picknick, Getränke, Decke, Lupe und Tüten zum Sammeln.",
+          "Geht zu einem Wald oder Park in der Nähe und plant Zeit für den Rückweg ein.",
+          "Gebt jedem Kind eine Sammelaufgabe: drei verschiedene Blätter, etwas Weiches, etwas Rundes.",
+          "Macht eine Pause auf der Decke und esst euer Picknick.",
+          "Betrachtet die Funde mit der Lupe. Wer entdeckt ein Tier?",
+          "Lasst die meisten Funde im Wald, nehmt nur ein Erinnerungsstück mit und eure Abfälle."
+        ],
+        "safetyNote": "Esst nichts Unbekanntes: Beeren, Pilze und Pflanzen werden nur angeschaut. Sucht danach den Körper nach Zecken ab. Kinder unter 6 bleiben in der Nähe von Erwachsenen, besonders an Bächen und Teichen."
+      },
+      "en": {
+        "title": "Forest Day with a Picnic",
+        "summary": "Half a day in the forest or a park with collecting tasks, a magnifying glass and a picnic on a blanket.",
+        "steps": [
+          "Pack the backpack: picnic, drinks, blanket, magnifying glass and bags for collecting.",
+          "Walk to a forest or park nearby and plan time for the way back.",
+          "Give each child a collecting task: three different leaves, something soft, something round.",
+          "Take a break on the blanket and eat your picnic.",
+          "Look at your finds through the magnifying glass. Who spots an animal?",
+          "Leave most finds in the forest, take just one keepsake and take your trash home."
+        ],
+        "safetyNote": "Do not eat anything you do not know: berries, mushrooms and plants are for looking only. Check everyone for ticks afterwards. Children under 6 stay close to adults, especially near streams and ponds."
+      }
+    }
+  },
+  {
+    "id": "sample-puddle-explorers",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "nature",
+    "topics": ["natureAnimals", "outings", "water", "gettingDirty"],
+    "ageMin": 2,
+    "ageMax": 10,
+    "durationMin": 30,
+    "durationMax": 60,
+    "setting": "outdoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["rainBoots", "rainJacket", "puddles", "bucket", "stick"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Pfützen-Forscher",
+        "summary": "Mit Gummistiefeln geht es raus in den Regen: Pfützen testen, Würmer und Schnecken suchen.",
+        "steps": [
+          "Zieht Gummistiefel und Regenjacke an und geht los, sobald es regnet oder geregnet hat.",
+          "Prüft jede Pfütze zuerst mit einem Stock: Nur flache Pfützen unter Stiefelhöhe sind zum Springen da.",
+          "Springt hinein. Wer macht den größten Spritzer?",
+          "Sucht Regenwürmer, Schnecken und Spuren im Matsch. Setzt Würmer vorsichtig an den Rand.",
+          "Sammelt Blätter und Zweige im Eimer und lasst sie in einer Pfütze schwimmen.",
+          "Zu Hause hängt ihr die nassen Sachen auf und zieht trockene an."
+        ],
+        "safetyNote": "Erwachsene bleiben die ganze Zeit dabei, vor allem bei kleinen Kindern: Pfützen, Gräben und Bäche können tiefer sein, als sie aussehen. Bei Gewitter geht ihr sofort hinein."
+      },
+      "en": {
+        "title": "Puddle Explorers",
+        "summary": "Head out into the rain in rain boots: test puddles and look for worms and snails.",
+        "steps": [
+          "Put on rain boots and a rain jacket and head out as soon as it rains or has rained.",
+          "Test every puddle with a stick first: only shallow puddles below boot height are for jumping.",
+          "Jump right in. Who makes the biggest splash?",
+          "Look for earthworms, snails and tracks in the mud. Gently put worms back at the edge.",
+          "Collect leaves and twigs in the bucket and let them float in a puddle.",
+          "At home, hang up the wet things and put on dry ones."
+        ],
+        "safetyNote": "An adult stays with the children the whole time, especially with the little ones: puddles, ditches and streams can be deeper than they look. Go inside at once if there is thunder."
+      }
+    }
+  },
+  {
+    "id": "sample-stargazing",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "nature",
+    "topics": ["natureAnimals", "stories"],
+    "ageMin": 6,
+    "ageMax": 16,
+    "durationMin": 45,
+    "durationMax": 90,
+    "setting": "outdoor",
+    "weather": { "needsDry": true, "betterInSun": false },
+    "dayParts": ["evening"],
+    "energy": "low",
+    "cost": 0,
+    "materials": ["blanket", "warmClothes", "flashlight"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Sterne beobachten",
+        "summary": "Auf einer Decke liegen, in den Abendhimmel schauen und eigene Sternbilder erfinden.",
+        "steps": [
+          "Wartet, bis es dunkel ist, und sucht einen Platz mit wenig Straßenlicht, zum Beispiel im Garten oder auf einer Wiese.",
+          "Zieht euch wärmer an, als ihr denkt, und nehmt eine Decke mit. Die Handys bleiben im Haus.",
+          "Legt euch hin und lasst die Augen 10 Minuten an die Dunkelheit gewöhnen. Die Taschenlampe bleibt aus.",
+          "Sucht den Mond, helle Sterne und Flugzeuge. Zählt, wie viele Sterne ihr entdeckt.",
+          "Erfindet eigene Sternbilder und erzählt euch, was sie bedeuten."
+        ],
+        "safetyNote": "Bleibt zusammen und nehmt für den Rückweg eine Taschenlampe mit. Kinder unter 10 sind im Dunkeln nie allein draußen."
+      },
+      "en": {
+        "title": "Stargazing",
+        "summary": "Lie on a blanket, look up at the evening sky and invent your own constellations.",
+        "steps": [
+          "Wait until it is dark and find a spot with little street light, for example the yard or a meadow.",
+          "Dress warmer than you think you need to and take a blanket. The phones stay indoors.",
+          "Lie down and give your eyes 10 minutes to get used to the dark. Keep the flashlight off.",
+          "Look for the moon, bright stars and airplanes. Count how many stars you spot.",
+          "Invent your own constellations and tell each other what they mean."
+        ],
+        "safetyNote": "Stay together and bring a flashlight for the way back. Children under 10 are never outside alone in the dark."
+      }
+    }
+  },
+  {
+    "id": "sample-banana-pancakes",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking"],
+    "ageMin": 3,
+    "ageMax": 10,
+    "durationMin": 30,
+    "durationMax": 40,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["banana", "egg", "fork", "bowl", "oil", "stove"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Bananen-Pfannkuchen",
+        "summary": "Kleine Pfannkuchen aus nur zwei Zutaten: reifen Bananen und Eiern.",
+        "steps": [
+          "Wascht euch die Hände. Zerdrückt 2 reife Bananen mit einer Gabel in einer Schüssel zu Brei.",
+          "Schlagt 2 Eier dazu und rührt, bis der Teig glatt ist.",
+          "Ein Erwachsener erhitzt etwas Öl in einer Pfanne bei mittlerer Hitze.",
+          "Gebt kleine Häufchen Teig in die Pfanne. Nach 2 bis 3 Minuten wendet ihr sie, wenn die Unterseite goldbraun ist.",
+          "Lasst die Pfannkuchen kurz abkühlen, bevor ihr sie esst."
+        ],
+        "safetyNote": "Der Herd ist nur mit Erwachsenen sicher: Kinder zerdrücken und rühren, Erwachsene backen und bleiben die ganze Zeit am Herd. Enthält Ei. Nach rohem Ei die Hände waschen."
+      },
+      "en": {
+        "title": "Banana Pancakes",
+        "summary": "Small pancakes made from just two ingredients: ripe bananas and eggs.",
+        "steps": [
+          "Wash your hands. Mash 2 ripe bananas to a puree with a fork in a bowl.",
+          "Add 2 eggs and stir until the batter is smooth.",
+          "An adult heats a little oil in a pan over medium heat.",
+          "Spoon small mounds of batter into the pan. After 2 to 3 minutes, flip them when the underside is golden brown.",
+          "Let the pancakes cool for a moment before you eat them."
+        ],
+        "safetyNote": "The stove is only safe with adults: children mash and stir, adults cook and stay at the stove the whole time. Contains egg. Wash your hands after touching raw egg."
+      }
+    }
+  },
+  {
+    "id": "sample-homemade-pizza",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking", "gettingDirty"],
+    "ageMin": 6,
+    "ageMax": 16,
+    "durationMin": 90,
+    "durationMax": 150,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "dayParts": ["afternoon", "evening"],
+    "energy": "high",
+    "cost": 1,
+    "materials": [
+      "flour",
+      "yeast",
+      "salt",
+      "oil",
+      "bowl",
+      "towel",
+      "tomatoSauce",
+      "cheese",
+      "vegetables",
+      "knife",
+      "oven",
+      "rollingPin",
+      "tray"
+    ],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Pizza selber machen",
+        "summary": "Vom Teig bis zum Belag macht ihr eure Pizza komplett selbst, jeder nach seinem Geschmack.",
+        "steps": [
+          "Mischt 500 g Mehl, 1 Päckchen Trockenhefe, 1 Teelöffel Salz, 3 Esslöffel Öl und etwa 300 ml lauwarmes Wasser. Knetet 10 Minuten, bis der Teig glatt ist.",
+          "Deckt die Schüssel mit einem Handtuch ab. Der Teig geht 45 Minuten an einem warmen Ort auf.",
+          "Ein Erwachsener heizt den Backofen auf 220 °C vor.",
+          "Teilt den Teig, rollt ihn mit dem Nudelholz aus und legt ihn aufs Blech.",
+          "Verteilt Tomatensauce und Käse. Die Größeren schneiden Gemüse klein, alle belegen ihre Pizza.",
+          "Backt die Pizza 12 bis 15 Minuten, bis der Rand goldbraun ist. Ein Erwachsener holt das Blech heraus.",
+          "Lasst die Pizza kurz abkühlen und teilt sie."
+        ],
+        "safetyNote": "Messer und Backofen gibt es nur mit Erwachsenen: Die Großen schneiden das Gemüse, ein Erwachsener holt das Blech aus dem Ofen. Blech und Ofentür bleiben heiß. Enthält Gluten (Mehl) und Milch (Käse)."
+      },
+      "en": {
+        "title": "Homemade Pizza",
+        "summary": "From dough to toppings, you make your pizza completely from scratch, everyone to their own taste.",
+        "steps": [
+          "Mix 500 g flour, 1 packet of dry yeast, 1 teaspoon of salt, 3 tablespoons of oil and about 300 ml of lukewarm water. Knead for 10 minutes until the dough is smooth.",
+          "Cover the bowl with a towel. Let the dough rise for 45 minutes in a warm place.",
+          "An adult preheats the oven to 220 °C (425 °F).",
+          "Divide the dough, roll it out with the rolling pin and lay it on the baking sheet.",
+          "Spread tomato sauce and cheese. The older ones chop vegetables, everyone tops their own pizza.",
+          "Bake the pizza for 12 to 15 minutes until the edge is golden brown. An adult takes the baking sheet out.",
+          "Let the pizza cool for a moment and share it."
+        ],
+        "safetyNote": "Knives and the oven are only for use with adults: the older ones cut the vegetables, an adult takes the baking sheet out of the oven. The sheet and the oven door stay hot. Contains gluten (flour) and milk (cheese)."
+      }
+    }
+  },
+  {
+    "id": "sample-shake-butter",
+    "isSample": true,
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T00:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking", "experiments"],
+    "ageMin": 3,
+    "ageMax": 12,
+    "durationMin": 15,
+    "durationMax": 25,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["cream", "jar", "salt", "bread"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Butter im Glas schütteln",
+        "summary": "Sahne wird durch kräftiges Schütteln zu Butter, die ihr gleich auf Brot probiert.",
+        "steps": [
+          "Füllt ein sauberes Schraubglas höchstens zur Hälfte mit Schlagsahne.",
+          "Schraubt den Deckel fest zu.",
+          "Schüttelt das Glas etwa 10 Minuten im Takt eurer Lieblingsmusik. Wechselt euch ab.",
+          "Zuerst wird die Sahne fest, dann klumpt sie: Es entstehen ein Butterklumpen und Buttermilch.",
+          "Gießt die Buttermilch ab, drückt die Butter mit einem Löffel zusammen und gebt eine Prise Salz dazu.",
+          "Streicht die Butter auf Brot und probiert."
+        ],
+        "safetyNote": "Schraubt das Glas fest zu. Für ganz Kleine ist ein Glas aus Kunststoff sicherer. Enthält Milch (Sahne) und Gluten (Brot)."
+      },
+      "en": {
+        "title": "Shake Butter in a Jar",
+        "summary": "Shaking cream hard turns it into butter that you taste on bread right away.",
+        "steps": [
+          "Fill a clean screw-top jar no more than halfway with heavy cream.",
+          "Screw the lid on tightly.",
+          "Shake the jar for about 10 minutes to the beat of your favorite music. Take turns.",
+          "First the cream gets stiff, then it clumps: you end up with a lump of butter and buttermilk.",
+          "Pour off the buttermilk, press the butter together with a spoon and add a pinch of salt.",
+          "Spread the butter on bread and taste it."
+        ],
+        "safetyNote": "Screw the lid on tightly. A plastic jar is safer for the very little ones. Contains milk (cream) and gluten (bread)."
+      }
+    }
+  }
+]
