@@ -55,6 +55,8 @@ export const materials = {
   scarf: { flammable: true },
   watercolors: {},
   brush: {},
+  dressUpClothes: { flammable: true },
+  cottonSwabs: {},
   // Haushalt
   towel: {},
   blanket: {},
@@ -80,6 +82,9 @@ export const materials = {
   pot: {},
   spoon: {},
   book: {},
+  aluminumFoil: {},
+  coins: { hazards: ['smallParts'] },
+  stuffedAnimals: {},
   // Draußen und Spielen
   ball: {},
   rope: {},
@@ -101,6 +106,10 @@ export const materials = {
   balloon: { hazards: ['smallParts'] },
   dice: { hazards: ['smallParts'] },
   phone: {},
+  flatStones: {},
+  straws: {},
+  bike: {},
+  stream: { hazards: ['water'] },
   // Zutaten
   yogurt: { allergens: ['milk'] },
   cream: { allergens: ['milk'] },
@@ -128,12 +137,16 @@ export const materials = {
   sparklingWater: {},
   cressSeeds: {},
   pasta: { allergens: ['gluten', 'egg'] },
+  cornstarch: {},
+  redCabbage: {},
   // Nur kleine Mengen zum Anrühren, Trinken oder Pinselauswaschen (Glas, Becher, Teller).
   // Alles, worin ein Kind planschen kann, ist `water`.
   tapWater: {},
-  // Küchengeräte mit Hitze
+  // Geräte mit Hitze
   stove: { hazards: ['heat'] },
   oven: { hazards: ['heat'] },
+  kettle: { hazards: ['heat'] },
+  iron: { hazards: ['heat'] },
   // Feuer
   candle: { hazards: ['fire'] },
   // Werkzeug und Technik

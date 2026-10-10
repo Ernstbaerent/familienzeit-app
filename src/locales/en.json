@@ -239,7 +239,20 @@
     "book": "Book or picture book",
     "dice": "Dice",
     "phone": "Phone, tablet or camera",
-    "pasta": "Pasta"
+    "pasta": "Pasta",
+    "dressUpClothes": "Old clothes for dressing up",
+    "cottonSwabs": "Cotton swabs",
+    "aluminumFoil": "Aluminum foil",
+    "coins": "Coins",
+    "stuffedAnimals": "Stuffed animals",
+    "flatStones": "Flat stones (hand-sized)",
+    "straws": "Straws",
+    "bike": "Bike and helmet",
+    "stream": "Stream with a bridge",
+    "cornstarch": "Cornstarch",
+    "redCabbage": "Red cabbage",
+    "kettle": "Kettle",
+    "iron": "Iron"
   },
   "allergens": {
     "milk": "Milk",

@@ -239,7 +239,20 @@
     "book": "Buch oder Bilderbuch",
     "dice": "Würfel",
     "phone": "Handy, Tablet oder Kamera",
-    "pasta": "Nudeln"
+    "pasta": "Nudeln",
+    "dressUpClothes": "Alte Kleidung zum Verkleiden",
+    "cottonSwabs": "Wattestäbchen",
+    "aluminumFoil": "Alufolie",
+    "coins": "Münzen",
+    "stuffedAnimals": "Kuscheltiere",
+    "flatStones": "Flache Steine (handgroß)",
+    "straws": "Strohhalme",
+    "bike": "Fahrrad und Helm",
+    "stream": "Bach mit Brücke",
+    "cornstarch": "Speisestärke",
+    "redCabbage": "Rotkohl",
+    "kettle": "Wasserkocher",
+    "iron": "Bügeleisen"
   },
   "allergens": {
     "milk": "Milch",
