@@ -1,4 +1,4 @@
-// Zentrale Gestaltungswerte der App: Farben, Schriftgrößen und Abstände.
+// Zentrale Gestaltungswerte der App: Farben, Schriftgrößen, Abstände und Eckenradien.
 // Bildschirme und Bausteine nehmen diese Werte NUR von hier, nie direkt im Style.
 // `npx expo lint` meldet direkt eingetragene Werte in app/, src/components/ und src/features/.
 //
@@ -39,4 +39,12 @@ export const spacing = {
   md: 16,
   lg: 24,
   xl: 32,
+} as const;
+
+// Für borderRadius (auch borderTopStartRadius usw.).
+export const radius = {
+  sm: 4,
+  md: 8,
+  lg: 16,
+  full: 9999, // ganz rund, z. B. für runde Knöpfe
 } as const;

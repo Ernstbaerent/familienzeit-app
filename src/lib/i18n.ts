@@ -6,6 +6,7 @@ import de from '@/locales/de.json';
 import en from '@/locales/en.json';
 
 // Alle Sprachen der App. Neue Sprache: JSON-Datei in src/locales anlegen und hier eintragen.
+// Rechts-nach-links-Sprache (z. B. Arabisch)? Dann zusätzlich docs/i18n.md beachten.
 // `satisfies typeof de` sorgt dafür, dass TypeScript fehlende Texte in en.json meldet.
 const resources = {
   de: { translation: de },
@@ -17,7 +18,7 @@ type AppLanguage = keyof typeof resources;
 const supportedLanguages = Object.keys(resources) as AppLanguage[];
 
 // Wird genommen, wenn keine Handysprache zur App passt.
-const fallbackLanguage: AppLanguage = 'de';
+const fallbackLanguage: AppLanguage = 'en';
 
 function isSupportedLanguage(code: string | null): code is AppLanguage {
   return supportedLanguages.includes(code as AppLanguage);

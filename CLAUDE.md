@@ -68,10 +68,11 @@ docs/                 # Konzept und Anleitungen
 
 - Code, Variablen und Dateinamen auf **Englisch**, Kommentare gern auf Deutsch.
 - **Keine festen Texte im UI.** Jeder sichtbare Text kommt aus `src/locales/*.json` über i18next.
-- **Keine festen Farben, Schriftgrößen oder Abstände im UI.** Nur aus `src/lib/theme.ts` nehmen;
+- **Keine festen Farben, Schriftgrößen, Abstände oder Eckenradien im UI.** Nur aus `src/lib/theme.ts` nehmen;
   fehlt ein Wert, dort ergänzen. `npx expo lint` prüft das in `app/`, `src/components/` und `src/features/`.
 - **Rechts-nach-links vorbereiten (Arabisch):** `marginStart`/`marginEnd` statt `marginLeft`/`marginRight`,
-  `start`/`end` statt `left`/`right`, Icons mit Richtung spiegeln.
+  `start`/`end` statt `left`/`right`, Icons mit Richtung spiegeln. Gespiegelt wird nur, wenn die
+  angezeigte Sprache rechts-nach-links ist; bis dahin ist es ausgeschaltet (siehe `docs/i18n.md`).
 - **Geheimnisse nie ins Repo:** API-Schlüssel nur in `.env` (steht in `.gitignore`) oder GitHub Secrets.
   In der App nur öffentliche Schlüssel (Supabase anon key, `EXPO_PUBLIC_*`).
 - **Datenschutz:** Kinderprofile, Feedback und Verlauf nur lokal speichern. Kein echter Name nötig,
@@ -150,5 +151,6 @@ Konto und Familie teilen, Premium/Abo, Radiosender-Kooperationen, Nachbarländer
 
 <!-- Hier kurze Einträge ergänzen, wenn etwas Wichtiges entschieden wurde. Format: Datum – Entscheidung -->
 - 2026-10-09 – Konzept festgelegt, Stack: Expo + Supabase + Claude API (Haiku)
-- 2026-10-10 – M1: Expo SDK 57, Bildschirme in `app/`, Pfad-Kürzel `@/` = `src/`. App-Sprache = erste passende Handysprache, sonst Deutsch (siehe `docs/i18n.md`)
-- 2026-10-10 – Zentrales Theme in `src/lib/theme.ts` mit neutralen Platzhalterwerten, bis Ani das Design festlegt
+- 2026-10-10 – M1: Expo SDK 57, Bildschirme in `app/`, Pfad-Kürzel `@/` = `src/`. App-Sprache = erste passende Handysprache, sonst Englisch (siehe `docs/i18n.md`)
+- 2026-10-10 – Zentrales Theme in `src/lib/theme.ts` (Farben, Schriftgrößen, Abstände, Eckenradien) mit neutralen Platzhalterwerten, bis Ani das Design festlegt. Breiten und Höhen bewusst nicht im Theme
+- 2026-10-10 – RTL nur, wenn die angezeigte Sprache RTL ist. Bis eine RTL-Übersetzung kommt, ist Spiegeln in `app.json` ausgeschaltet
