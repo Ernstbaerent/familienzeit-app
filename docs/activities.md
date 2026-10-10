@@ -55,9 +55,11 @@ und `longTrips` vor.
 
 ## Material und Sicherheit
 
-Material ist eine feste Liste (`materials.ts`) mit Merkmalen wie „Kleinteile“, „scharf“, „heiß“, „Wasser“
-und mit Allergenen. Daraus leitet die Sicherheits-Checkliste ab, welche Hinweise eine Aktivität braucht
-(siehe `docs/sicherheits-checkliste.md`).
+Material ist eine feste Liste (`materials.ts`) mit Merkmalen wie „Kleinteile“, „scharf“, „heiß“, „Feuer“,
+„Wasser“, „Elektrogerät“, „brennbar“ und mit Allergenen. Daraus leitet die Sicherheits-Checkliste ab,
+welche Hinweise eine Aktivität braucht (siehe `docs/sicherheits-checkliste.md`). Wichtig beim Schreiben:
+`water` ist Wasser zum Spielen (Schüssel, Eimer, Wanne), `tapWater` nur eine kleine Menge zum Anrühren oder Trinken.
+Seit M5b umfasst die Liste 122 Materialien, fast alle aus dem Haushalt.
 
 **Neues Material ergänzen:** Schlüssel in `materials.ts` eintragen und den Text unter `materials` in
 `de.json` **und** `en.json` ergänzen. `npm run activities:check` meldet einen fehlenden Text.
@@ -68,6 +70,28 @@ Schlüssel nie umbenennen, nur dazunehmen.
 | Datei                         | Inhalt |
 | ----------------------------- | ------ |
 | `data/activities-m4.json`     | Die 20 Aktivitäten aus M4. Sie waren zuerst Beispieldaten, bestehen die Checkliste und gehören seit M5b zum echten Bestand (ohne `isSample`, IDs ohne `sample-`). |
+| `data/activities-m5b-1.json`  | Paket 1: Regentag, drinnen, kurz, wenig Energie (21) |
+| `data/activities-m5b-2.json`  | Paket 2: Kleinkinder 0–2 und Jugendliche 13–16 (21) |
+| `data/activities-m5b-3.json`  | Paket 3: Draußen, allgemeine Ausflüge, Experimente, Rollenspiel (21) |
+| `data/activities-m5b-4.json`  | Paket 4: Jahreszeiten und Feste (mit `months`), Geschwister, Küche (21) |
+
+Zusammen **104 Aktivitäten**, alle `approved`. Die Zählung zeigt `npm run activities:check`. Stand nach M5b:
+
+| Was | Anzahl |
+| --- | ------ |
+| Kategorien | Spiele 22, Basteln 18, Experimente 15, Bewegung 14, Natur 14, Kochen 14, Ausflüge 7 |
+| Drinnen oder beides / bei Regen machbar (`needsDry` false) | 81 / 89 |
+| Wenig Elternenergie | 67 |
+| Passt in 30 Minuten / ganz fertig in 30 Minuten | 81 / 45 |
+| Für Babys unter 1 / für 1-Jährige / für 2-Jährige | 6 / 15 / 22 |
+| Für 14-Jährige / für 16-Jährige | 38 / 24 |
+| Geschwistertauglich / davon mit 10+ Jahren Altersspanne | 94 / 24 |
+| Saisonal (`months`) / mit Tageszeit (`dayParts`) | 17 / 10 |
+
+Alle 13 Interessen kommen vor, ebenso die Abneigungen `gettingDirty`, `crowds`, `loudPlaces` und `longTrips`.
+Ausflüge sind bewusst allgemein (Bücherei, Spielplatz-Tour, Bahnhof), konkrete Orte kommen mit M10.
+**Bewusst noch nicht dabei:** Ideen, die Schnee brauchen. Sie kommen, sobald das Wetter in M6 Schnee kennt,
+sonst würden sie im Januar auch ohne Schnee vorgeschlagen.
 
 Mit M8 kommen die Aktivitäten aus Supabase. Die Dateien in `data/` sind dann der Startbestand für die Datenbank.
 

@@ -121,5 +121,7 @@ Von Hand: `npx expo start`, mit Expo Go öffnen, „Was machen wir?“ antippen 
 
 - Gewitter: keine Ideen für draußen (Pfützen-Forscher, Waldtag mit Picknick, Draußen-Olympiade, Schnitzeljagd fehlen)
 - Abend + Kind ab 6: „Sterne beobachten“ taucht auf (nur September bis März), morgens nie
+- Monate: Im Oktober können „Kastanientiere“, „Laterne aus einer Papiertüte“ und „Bratäpfel“ kommen,
+  „Plätzchen ausstechen“ und „Ostereier färben“ nie (Monat kommt aus dem Datum des Handys)
 - Baby und Teenager zusammen: Hinweis statt Vorschläge
 - „Andere Vorschläge“ mehrmals: nach der letzten Gruppe kommt der Hinweis „von vorn“
