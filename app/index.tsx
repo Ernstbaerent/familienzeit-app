@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { colors, fontSize, lineHeight, spacing } from '@/lib/theme';
+
 export default function HomeScreen() {
   const { t } = useTranslation();
 
@@ -21,22 +23,23 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#FFF8F0',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 24,
-    gap: 12,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
   },
   greeting: {
-    fontSize: 32,
+    fontSize: fontSize.xxl,
+    lineHeight: lineHeight.xxl,
     fontWeight: '700',
-    color: '#2D2A26',
+    color: colors.text,
   },
   intro: {
-    fontSize: 18,
-    lineHeight: 26,
-    color: '#5C5650',
+    fontSize: fontSize.lg,
+    lineHeight: lineHeight.lg,
+    color: colors.textMuted,
   },
 });

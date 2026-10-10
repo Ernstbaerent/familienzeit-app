@@ -56,7 +56,7 @@ npx expo lint          # Code-Stil prüfen
 app/                  # Bildschirme (Expo Router)
 src/components/       # wiederverwendbare UI-Bausteine
 src/features/         # profiles, suggestions, activities, weather, places, events
-src/lib/              # supabase, i18n, storage, Hilfsfunktionen
+src/lib/              # supabase, i18n, storage, theme, Hilfsfunktionen
 src/locales/          # de.json, en.json, später ar, tr, uk, ro
 data/                 # Beispiel-Aktivitäten (JSON)
 scripts/              # z. B. generate-activities.ts (KI-Wochenlauf)
@@ -68,6 +68,8 @@ docs/                 # Konzept und Anleitungen
 
 - Code, Variablen und Dateinamen auf **Englisch**, Kommentare gern auf Deutsch.
 - **Keine festen Texte im UI.** Jeder sichtbare Text kommt aus `src/locales/*.json` über i18next.
+- **Keine festen Farben, Schriftgrößen oder Abstände im UI.** Nur aus `src/lib/theme.ts` nehmen;
+  fehlt ein Wert, dort ergänzen. `npx expo lint` prüft das in `app/`, `src/components/` und `src/features/`.
 - **Rechts-nach-links vorbereiten (Arabisch):** `marginStart`/`marginEnd` statt `marginLeft`/`marginRight`,
   `start`/`end` statt `left`/`right`, Icons mit Richtung spiegeln.
 - **Geheimnisse nie ins Repo:** API-Schlüssel nur in `.env` (steht in `.gitignore`) oder GitHub Secrets.
@@ -149,3 +151,4 @@ Konto und Familie teilen, Premium/Abo, Radiosender-Kooperationen, Nachbarländer
 <!-- Hier kurze Einträge ergänzen, wenn etwas Wichtiges entschieden wurde. Format: Datum – Entscheidung -->
 - 2026-10-09 – Konzept festgelegt, Stack: Expo + Supabase + Claude API (Haiku)
 - 2026-10-10 – M1: Expo SDK 57, Bildschirme in `app/`, Pfad-Kürzel `@/` = `src/`. App-Sprache = erste passende Handysprache, sonst Deutsch (siehe `docs/i18n.md`)
+- 2026-10-10 – Zentrales Theme in `src/lib/theme.ts` mit neutralen Platzhalterwerten, bis Ani das Design festlegt
