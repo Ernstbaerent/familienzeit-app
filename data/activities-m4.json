@@ -1,7 +1,6 @@
 [
   {
-    "id": "sample-yogurt-finger-paint",
-    "isSample": true,
+    "id": "yogurt-finger-paint",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -45,8 +44,7 @@
     }
   },
   {
-    "id": "sample-marble-run",
-    "isSample": true,
+    "id": "marble-run",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -90,8 +88,7 @@
     }
   },
   {
-    "id": "sample-sock-puppet-theater",
-    "isSample": true,
+    "id": "sock-puppet-theater",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -135,8 +132,7 @@
     }
   },
   {
-    "id": "sample-tshirt-bag",
-    "isSample": true,
+    "id": "tshirt-bag",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -180,8 +176,7 @@
     }
   },
   {
-    "id": "sample-treasure-basket",
-    "isSample": true,
+    "id": "treasure-basket",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -225,8 +220,7 @@
     }
   },
   {
-    "id": "sample-pillow-fort",
-    "isSample": true,
+    "id": "pillow-fort",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -273,8 +267,7 @@
     }
   },
   {
-    "id": "sample-scavenger-hunt",
-    "isSample": true,
+    "id": "scavenger-hunt",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -318,8 +311,7 @@
     }
   },
   {
-    "id": "sample-who-am-i",
-    "isSample": true,
+    "id": "who-am-i",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -361,8 +353,7 @@
     }
   },
   {
-    "id": "sample-dance-freeze",
-    "isSample": true,
+    "id": "dance-freeze",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -408,8 +399,7 @@
     }
   },
   {
-    "id": "sample-obstacle-course",
-    "isSample": true,
+    "id": "obstacle-course",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -453,8 +443,7 @@
     }
   },
   {
-    "id": "sample-garden-olympics",
-    "isSample": true,
+    "id": "garden-olympics",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -498,8 +487,7 @@
     }
   },
   {
-    "id": "sample-float-or-sink",
-    "isSample": true,
+    "id": "float-or-sink",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -545,8 +533,7 @@
     }
   },
   {
-    "id": "sample-baking-soda-volcano",
-    "isSample": true,
+    "id": "baking-soda-volcano",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -590,8 +577,7 @@
     }
   },
   {
-    "id": "sample-ice-cream-in-a-bag",
-    "isSample": true,
+    "id": "ice-cream-in-a-bag",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -637,8 +623,7 @@
     }
   },
   {
-    "id": "sample-forest-day-picnic",
-    "isSample": true,
+    "id": "forest-day-picnic",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -651,6 +636,7 @@
     "setting": "outdoor",
     "weather": { "needsDry": true, "betterInSun": true },
     "dayParts": ["morning", "afternoon"],
+    "months": [4, 5, 6, 7, 8, 9, 10],
     "energy": "high",
     "cost": 0,
     "materials": ["backpack", "blanket", "drinkBottle", "paperBag", "magnifier"],
@@ -685,8 +671,7 @@
     }
   },
   {
-    "id": "sample-puddle-explorers",
-    "isSample": true,
+    "id": "puddle-explorers",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -732,8 +717,7 @@
     }
   },
   {
-    "id": "sample-stargazing",
-    "isSample": true,
+    "id": "stargazing",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -746,6 +730,7 @@
     "setting": "outdoor",
     "weather": { "needsDry": true, "betterInSun": false },
     "dayParts": ["evening"],
+    "months": [9, 10, 11, 12, 1, 2, 3],
     "energy": "low",
     "cost": 0,
     "materials": ["blanket", "warmClothes", "flashlight"],
@@ -778,8 +763,7 @@
     }
   },
   {
-    "id": "sample-banana-pancakes",
-    "isSample": true,
+    "id": "banana-pancakes",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -823,8 +807,7 @@
     }
   },
   {
-    "id": "sample-homemade-pizza",
-    "isSample": true,
+    "id": "homemade-pizza",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",
@@ -887,8 +870,7 @@
     }
   },
   {
-    "id": "sample-shake-butter",
-    "isSample": true,
+    "id": "shake-butter",
     "status": "approved",
     "source": "ai",
     "createdAt": "2026-10-10T00:00:00.000Z",

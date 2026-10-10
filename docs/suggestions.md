@@ -120,6 +120,6 @@ Diese letzten Tests prüfen nur Regeln, keine einzelnen IDs. Sie laufen also auc
 Von Hand: `npx expo start`, mit Expo Go öffnen, „Was machen wir?“ antippen und z. B. ausprobieren:
 
 - Gewitter: keine Ideen für draußen (Pfützen-Forscher, Waldtag mit Picknick, Draußen-Olympiade, Schnitzeljagd fehlen)
-- Abend + Kind ab 6: „Sterne beobachten“ taucht auf, morgens nie
+- Abend + Kind ab 6: „Sterne beobachten“ taucht auf (nur September bis März), morgens nie
 - Baby und Teenager zusammen: Hinweis statt Vorschläge
 - „Andere Vorschläge“ mehrmals: nach der letzten Gruppe kommt der Hinweis „von vorn“

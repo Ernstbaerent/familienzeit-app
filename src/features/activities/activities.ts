@@ -74,7 +74,6 @@ export type Activity = {
   source: ActivitySource;
   createdAt: string; // ISO-Zeitpunkt
   image?: string; // freiwillig: Web-Adresse. Ohne Bild zeigt die App das Symbol der Kategorie.
-  isSample?: true; // Beispieldaten, werden später durch die echte Datenbank ersetzt
 };
 
 export type ParseResult =
@@ -261,9 +260,6 @@ export function parseActivity(raw: unknown): ParseResult {
   }
   if (raw.image !== undefined && !(isNonEmptyString(raw.image) && raw.image.startsWith('https://'))) {
     problems.push('image: Web-Adresse mit https:// erwartet (oder weglassen)');
-  }
-  if (raw.isSample !== undefined && raw.isSample !== true) {
-    problems.push('isSample: nur true oder weglassen');
   }
 
   if (problems.length > 0) return { ok: false, id, problems };

@@ -139,7 +139,6 @@ type Activity = {
   source: 'ai' | 'manual';
   createdAt: string;
   image?: string;            // freiwillig: Web-Adresse; ohne Bild zeigt die App das Symbol der Kategorie
-  isSample?: true;           // Beispieldaten (`data/sample-activities.json`), später durch die echte Datenbank ersetzen
 };
 ```
 

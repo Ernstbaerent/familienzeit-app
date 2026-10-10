@@ -7,7 +7,7 @@ Diese Checkliste gilt für **jede** neue Aktivität:
 - Aktivitäten, die jemand von Hand ergänzt.
 
 Eine Aktivität wird erst `approved` (und damit in der App sichtbar), wenn sie alle Punkte besteht.
-Sonst bleibt sie `draft` und wird im Prüfskript aufgelistet. Die Beispieldaten aus M4 (`isSample`) wurden
+Sonst bleibt sie `draft` und wird im Prüfskript aufgelistet. Die 20 Aktivitäten aus M4 wurden
 ebenfalls nach dieser Liste geschrieben.
 
 ## Die 5 Punkte

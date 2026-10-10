@@ -1,7 +1,7 @@
-# Aktivitäten (M4)
+# Aktivitäten (M4, M5b)
 
-Aktivitäten sind die Ideen, aus denen die App 3 Vorschläge auswählt (ab M5). Dieser Schritt legt das
-Datenmodell an und liefert 20 Beispiele zum Testen. Wie die App daraus auswählt, steht in `docs/suggestions.md`.
+Aktivitäten sind die Ideen, aus denen die App 3 Vorschläge auswählt (ab M5). M4 hat das Datenmodell angelegt,
+M5b den Startbestand geschrieben. Wie die App daraus auswählt, steht in `docs/suggestions.md`.
 
 ## Wo was liegt
 
@@ -11,7 +11,7 @@ Datenmodell an und liefert 20 Beispiele zum Testen. Wie die App daraus auswählt
 | Material, Gefahren, Allergene        | `src/features/activities/materials.ts`         |
 | Sicherheits-Checkliste (Code)        | `src/features/activities/safetyCheck.ts`       |
 | Laden (lokal)                        | `src/features/activities/loadActivities.ts`    |
-| 20 Beispiel-Aktivitäten              | `data/sample-activities.json`                  |
+| Aktivitäten (Bestand)                | `data/activities-*.json`                       |
 | Prüfskript                           | `scripts/check-activities.ts`                  |
 | Checkliste (Regeln)                  | `docs/sicherheits-checkliste.md`               |
 
@@ -40,7 +40,6 @@ In der App: `loadActivities()` gibt alle Aktivitäten mit Status `approved` zur�
 | `source`          | `ai` oder `manual`. |
 | `createdAt`       | ISO-Zeitpunkt. |
 | `image`           | **Freiwillig.** Web-Adresse (`https://…`) eines Bildes. Fehlt es, zeigt die App später ein Symbol der Kategorie. In M4 und M5b gibt es keine Bilder. |
-| `isSample`        | Nur bei Beispieldaten: `true`. |
 
 ### Verknüpfung mit den Interessen der Kinder
 
@@ -64,22 +63,15 @@ und mit Allergenen. Daraus leitet die Sicherheits-Checkliste ab, welche Hinweise
 `de.json` **und** `en.json` ergänzen. `npm run activities:check` meldet einen fehlenden Text.
 Schlüssel nie umbenennen, nur dazunehmen.
 
-## Beispieldaten
+## Bestand
 
-Die 20 Beispiele sind bewusst gemischt, damit M5 alle typischen Fälle testen kann: alle Kategorien außer
-`outing` (Ausflüge kommen später aus Orten und Veranstaltungen), Alter von 0–2 bis 13–16, Dauer von 15 bis
-240 Minuten, drinnen, draußen und wetterunabhängig, mit wenig und viel Elternenergie, mit und ohne
-Tageszeit und mit großen Altersunterschieden bei Geschwistern. Alle sind `approved`, weil es Testdaten sind.
+| Datei                         | Inhalt |
+| ----------------------------- | ------ |
+| `data/activities-m4.json`     | Die 20 Aktivitäten aus M4. Sie waren zuerst Beispieldaten, bestehen die Checkliste und gehören seit M5b zum echten Bestand (ohne `isSample`, IDs ohne `sample-`). |
 
-Sie sind dreifach als Beispieldaten markiert: Datei `data/sample-activities.json`, Feld `isSample: true`
-und IDs mit Präfix `sample-`.
+Mit M8 kommen die Aktivitäten aus Supabase. Die Dateien in `data/` sind dann der Startbestand für die Datenbank.
 
-**Beispiele später ersetzen** (spätestens mit M8, Supabase):
-
-1. Die Datei `data/sample-activities.json` löschen und in `loadActivities.ts` den Eintrag entfernen.
-2. Verweist der lokale Verlauf (ab M7) noch auf `sample-…`-IDs, beim Ersetzen aufräumen.
-
-## Neue Datei mit Aktivitäten ergänzen (z. B. ein M5b-Paket)
+## Neue Datei mit Aktivitäten ergänzen
 
 1. Datei in `data/` anlegen (Liste von Aktivitäten, gleiches Format).
 2. In `src/features/activities/loadActivities.ts` bei `rawActivities` eintragen.
