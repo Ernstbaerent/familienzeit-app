@@ -1,6 +1,83 @@
 {
   "home": {
     "greeting": "Hello!",
-    "intro": "What will you do together today? Soon you'll get 3 matching ideas here in 30 seconds."
+    "intro": "What will you do together today? Soon you'll get 3 matching ideas here in 30 seconds.",
+    "childrenTitle": "Your children"
+  },
+  "children": {
+    "defaultName": "Child {{number}}",
+    "edit": "Edit",
+    "add": "Add a child",
+    "newTitle": "Add a child",
+    "editTitle": "Edit child",
+    "welcomeTitle": "Welcome!",
+    "welcomeText": "Tell us a little about your child. Everything stays on your phone, and you don't need an account.",
+    "interestCount_one": "{{count}} interest",
+    "interestCount_other": "{{count}} interests",
+    "delete": "Delete child",
+    "deleteTitle": "Delete child?",
+    "deleteMessage": "The profile will be deleted from your phone. This can't be undone.",
+    "deleteConfirm": "Delete",
+    "deleteError": "Deleting didn't work. Please try again.",
+    "cancel": "Cancel"
+  },
+  "form": {
+    "required": "(required)",
+    "optional": "(optional)",
+    "nickname": "Nickname",
+    "nicknamePlaceholder": "e.g. Sunny",
+    "nicknameHint": "A real name isn't needed.",
+    "birth": "Year and month of birth",
+    "birthHint": "Only year and month, never the exact day.",
+    "year": "Year",
+    "month": "Month",
+    "birthMissing": "Please choose the year and month of birth.",
+    "interests": "What my child likes",
+    "interestsHint": "We show matching ideas higher up.",
+    "dislikes": "What my child tends to dislike",
+    "dislikesHint": "We don't rule anything out, such ideas just come further down.",
+    "save": "Save",
+    "saveError": "Saving didn't work. Please try again."
+  },
+  "age": {
+    "months_one": "{{count}} month",
+    "months_other": "{{count}} months",
+    "yearAndMonths_one": "1 year and {{count}} month",
+    "yearAndMonths_other": "1 year and {{count}} months",
+    "years_one": "{{count}} year",
+    "years_other": "{{count}} years"
+  },
+  "months": {
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
+  },
+  "preferences": {
+    "craft": "Crafts and painting",
+    "building": "Building and construction",
+    "natureAnimals": "Nature and animals",
+    "movement": "Movement and sports",
+    "water": "Water and swimming",
+    "music": "Music and dancing",
+    "experiments": "Experiments and discovering",
+    "cooking": "Cooking and baking",
+    "stories": "Stories and reading",
+    "roleplay": "Role play and dressing up",
+    "games": "Games and puzzles",
+    "technology": "Technology and vehicles",
+    "outings": "Trips and exploring",
+    "loudPlaces": "Loud places",
+    "crowds": "Lots of people",
+    "longTrips": "Long drives",
+    "gettingDirty": "Getting dirty"
   }
 }
