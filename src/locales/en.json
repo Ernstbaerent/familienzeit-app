@@ -214,7 +214,12 @@
     "bakingSoda": "Baking soda",
     "vinegar": "Vinegar",
     "stove": "Stove",
-    "oven": "Oven"
+    "oven": "Oven",
+    "ledLight": "LED light or lantern stick",
+    "candle": "Candle",
+    "screwdriver": "Screwdriver",
+    "oldDevice": "Old battery-powered device",
+    "tapWater": "Tap water"
   },
   "allergens": {
     "milk": "Milk",

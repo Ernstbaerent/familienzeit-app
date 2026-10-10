@@ -19,6 +19,7 @@ export const hazardKeys = [
   'heat', // Herd, Ofen, heiße Dinge
   'fire', // Feuer, Kerzen, Streichhölzer
   'water', // Wasser zum Spielen, Pfützen, Gewässer
+  'electric', // Elektrogerät zum Aufschrauben (Punkt 6 der Checkliste)
 ] as const;
 
 // Häufige Allergene. Neues Allergen: Schlüssel hier + Text unter "allergens" in de.json und en.json.
@@ -30,13 +31,16 @@ export type AllergenKey = (typeof allergenKeys)[number];
 type MaterialInfo = {
   hazards?: readonly HazardKey[];
   allergens?: readonly AllergenKey[];
+  // Brennt leicht (Papier, Pappe, Tücher). Darf nie mit Feuer zusammen vorkommen (Punkt 7 der Checkliste):
+  // Licht in Papier, z. B. in einer Laterne, nur mit LED.
+  flammable?: true;
 };
 
 export const materials = {
   // Papier und Basteln
-  paper: {},
-  cardboardBox: {},
-  cardboardTubes: {},
+  paper: { flammable: true },
+  cardboardBox: { flammable: true },
+  cardboardTubes: { flammable: true },
   tape: {},
   glue: {},
   scissors: { hazards: ['sharp'] },
@@ -48,7 +52,7 @@ export const materials = {
   buttons: { hazards: ['smallParts'] },
   marbles: { hazards: ['smallParts'] },
   oldShirt: {},
-  scarf: {},
+  scarf: { flammable: true },
   // Haushalt
   towel: {},
   blanket: {},
@@ -76,15 +80,16 @@ export const materials = {
   flashlight: {},
   backpack: {},
   drinkBottle: {},
-  paperBag: {},
+  paperBag: { flammable: true },
   magnifier: {},
   rainBoots: {},
   rainJacket: {},
   warmClothes: {},
   stick: {},
-  water: { hazards: ['water'] },
+  water: { hazards: ['water'] }, // zum Spielen: Schüssel, Eimer, Wanne (Punkt 2 und 3 der Checkliste)
   puddles: { hazards: ['water'] },
   ice: {},
+  ledLight: {}, // LED-Licht oder Laternenstab: das einzige Licht für Laternen und alles aus Papier (Punkt 7)
   // Zutaten
   yogurt: { allergens: ['milk'] },
   cream: { allergens: ['milk'] },
@@ -104,9 +109,18 @@ export const materials = {
   cocoa: {},
   bakingSoda: {},
   vinegar: {},
+  // Nur kleine Mengen zum Anrühren, Trinken oder Pinselauswaschen (Glas, Becher, Teller).
+  // Alles, worin ein Kind planschen kann, ist `water`.
+  tapWater: {},
   // Küchengeräte mit Hitze
   stove: { hazards: ['heat'] },
   oven: { hazards: ['heat'] },
+  // Feuer
+  candle: { hazards: ['fire'] },
+  // Werkzeug und Technik
+  screwdriver: { hazards: ['sharp'] },
+  // Nur kleine batteriebetriebene Geräte, Batterien vorher heraus. Nie mit Netzstecker (Punkt 6).
+  oldDevice: { hazards: ['electric'] },
 } as const satisfies Record<string, MaterialInfo>;
 
 export type MaterialKey = keyof typeof materials;
