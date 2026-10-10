@@ -57,6 +57,7 @@ export const materials = {
   brush: {},
   dressUpClothes: { flammable: true },
   cottonSwabs: {},
+  toothpicks: { hazards: ['sharp', 'smallParts'] },
   // Haushalt
   towel: {},
   blanket: {},
@@ -85,6 +86,8 @@ export const materials = {
   aluminumFoil: {},
   coins: { hazards: ['smallParts'] },
   stuffedAnimals: {},
+  bedsheet: { flammable: true },
+  cookieCutters: {},
   // Draußen und Spielen
   ball: {},
   rope: {},
@@ -110,6 +113,8 @@ export const materials = {
   straws: {},
   bike: {},
   stream: { hazards: ['water'] },
+  chestnuts: { hazards: ['smallParts'] },
+  birdSeed: { allergens: ['peanut', 'nuts'] }, // viele Mischungen enthalten Erdnüsse und Nüsse
   // Zutaten
   yogurt: { allergens: ['milk'] },
   cream: { allergens: ['milk'] },
@@ -139,6 +144,15 @@ export const materials = {
   pasta: { allergens: ['gluten', 'egg'] },
   cornstarch: {},
   redCabbage: {},
+  butter: { allergens: ['milk'] },
+  quark: { allergens: ['milk'] },
+  tortillas: { allergens: ['gluten'] },
+  fruit: {},
+  potato: {},
+  herbs: {},
+  cinnamon: {},
+  onionSkins: {},
+  coconutFat: {},
   // Nur kleine Mengen zum Anrühren, Trinken oder Pinselauswaschen (Glas, Becher, Teller).
   // Alles, worin ein Kind planschen kann, ist `water`.
   tapWater: {},
@@ -152,6 +166,7 @@ export const materials = {
   // Werkzeug und Technik
   screwdriver: { hazards: ['sharp'] },
   blender: { hazards: ['sharp'] },
+  skewer: { hazards: ['sharp'] },
   // Nur kleine batteriebetriebene Geräte, Batterien vorher heraus. Nie mit Netzstecker (Punkt 6).
   oldDevice: { hazards: ['electric'] },
 } as const satisfies Record<string, MaterialInfo>;

@@ -252,7 +252,22 @@
     "cornstarch": "Cornstarch",
     "redCabbage": "Red cabbage",
     "kettle": "Kettle",
-    "iron": "Iron"
+    "iron": "Iron",
+    "toothpicks": "Toothpicks",
+    "bedsheet": "Light-colored bedsheet",
+    "cookieCutters": "Cookie cutters",
+    "chestnuts": "Chestnuts",
+    "birdSeed": "Birdseed",
+    "butter": "Butter",
+    "quark": "Quark",
+    "tortillas": "Wraps (wheat tortillas)",
+    "fruit": "Soft fruit, e.g. berries",
+    "potato": "Large potatoes",
+    "herbs": "Fresh herbs",
+    "cinnamon": "Cinnamon",
+    "onionSkins": "Onion skins",
+    "coconutFat": "Solid coconut oil",
+    "skewer": "Wooden skewer"
   },
   "allergens": {
     "milk": "Milk",

@@ -252,7 +252,22 @@
     "cornstarch": "Speisestärke",
     "redCabbage": "Rotkohl",
     "kettle": "Wasserkocher",
-    "iron": "Bügeleisen"
+    "iron": "Bügeleisen",
+    "toothpicks": "Zahnstocher",
+    "bedsheet": "Helles Bettlaken",
+    "cookieCutters": "Ausstechformen",
+    "chestnuts": "Kastanien",
+    "birdSeed": "Vogelfutter (Körner)",
+    "butter": "Butter",
+    "quark": "Quark",
+    "tortillas": "Wraps (Weizentortillas)",
+    "fruit": "Weiches Obst, z. B. Beeren",
+    "potato": "Große Kartoffeln",
+    "herbs": "Frische Kräuter",
+    "cinnamon": "Zimt",
+    "onionSkins": "Zwiebelschalen",
+    "coconutFat": "Kokosfett",
+    "skewer": "Holzspieß"
   },
   "allergens": {
     "milk": "Milch",
