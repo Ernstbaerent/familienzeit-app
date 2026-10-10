@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Familienzeit",
+    "slug": "familienzeit-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "familienzeit",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      [
+        "expo-localization",
+        {
+          "supportsRTL": true
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
