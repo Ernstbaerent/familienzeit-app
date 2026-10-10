@@ -3,11 +3,12 @@
 
 import activitiesM4 from '../../../data/activities-m4.json';
 import activitiesM5b1 from '../../../data/activities-m5b-1.json';
+import activitiesM5b2 from '../../../data/activities-m5b-2.json';
 import { parseActivities, type Activity } from './activities.ts';
 
 // Alle Datenquellen. Neue Datei in data/: hier eintragen.
 // `npm run activities:check` prüft alle Dateien in data/ und erinnert daran, falls eine fehlt.
-const rawActivities: unknown[] = [...activitiesM4, ...activitiesM5b1];
+const rawActivities: unknown[] = [...activitiesM4, ...activitiesM5b1, ...activitiesM5b2];
 
 let cache: Activity[] | null = null;
 

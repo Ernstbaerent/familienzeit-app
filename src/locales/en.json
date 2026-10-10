@@ -232,7 +232,14 @@
     "pepper": "Ground pepper",
     "sparklingWater": "Sparkling water",
     "cressSeeds": "Cress seeds",
-    "blender": "Blender or hand blender"
+    "blender": "Blender or hand blender",
+    "brush": "Paintbrush",
+    "pot": "Pot",
+    "spoon": "Spoon",
+    "book": "Book or picture book",
+    "dice": "Dice",
+    "phone": "Phone, tablet or camera",
+    "pasta": "Pasta"
   },
   "allergens": {
     "milk": "Milk",

@@ -54,6 +54,7 @@ export const materials = {
   oldShirt: {},
   scarf: { flammable: true },
   watercolors: {},
+  brush: {},
   // Haushalt
   towel: {},
   blanket: {},
@@ -76,6 +77,9 @@ export const materials = {
   freezerBags: {},
   plate: {},
   paperTowels: { flammable: true },
+  pot: {},
+  spoon: {},
+  book: {},
   // Draußen und Spielen
   ball: {},
   rope: {},
@@ -95,6 +99,8 @@ export const materials = {
   ledLight: {}, // LED-Licht oder Laternenstab: das einzige Licht für Laternen und alles aus Papier (Punkt 7)
   playingCards: {},
   balloon: { hazards: ['smallParts'] },
+  dice: { hazards: ['smallParts'] },
+  phone: {},
   // Zutaten
   yogurt: { allergens: ['milk'] },
   cream: { allergens: ['milk'] },
@@ -121,6 +127,7 @@ export const materials = {
   pepper: {},
   sparklingWater: {},
   cressSeeds: {},
+  pasta: { allergens: ['gluten', 'egg'] },
   // Nur kleine Mengen zum Anrühren, Trinken oder Pinselauswaschen (Glas, Becher, Teller).
   // Alles, worin ein Kind planschen kann, ist `water`.
   tapWater: {},

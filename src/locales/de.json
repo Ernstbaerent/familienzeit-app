@@ -232,7 +232,14 @@
     "pepper": "Gemahlener Pfeffer",
     "sparklingWater": "Mineralwasser mit Kohlensäure",
     "cressSeeds": "Kressesamen",
-    "blender": "Mixer oder Pürierstab"
+    "blender": "Mixer oder Pürierstab",
+    "brush": "Pinsel",
+    "pot": "Kochtopf",
+    "spoon": "Löffel",
+    "book": "Buch oder Bilderbuch",
+    "dice": "Würfel",
+    "phone": "Handy, Tablet oder Kamera",
+    "pasta": "Nudeln"
   },
   "allergens": {
     "milk": "Milch",

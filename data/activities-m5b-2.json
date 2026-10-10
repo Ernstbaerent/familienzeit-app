@@ -1,0 +1,951 @@
+[
+  {
+    "id": "peekaboo",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["games"],
+    "ageMin": 0,
+    "ageMax": 2,
+    "durationMin": 5,
+    "durationMax": 15,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["scarf"],
+    "siblingFriendly": false,
+    "translations": {
+      "de": {
+        "title": "Guck-guck mit dem Tuch",
+        "summary": "Das erste Versteckspiel: Ein Tuch verschwindet, und darunter taucht ein lachendes Gesicht wieder auf.",
+        "steps": [
+          "Setzt euch dem Baby gegenüber auf Augenhöhe. Bei ganz Kleinen geht es auch im Liegen.",
+          "Haltet ein leichtes Tuch vor euer Gesicht und fragt: „Wo bin ich denn?“",
+          "Zieht das Tuch weg und ruft fröhlich: „Guck-guck!“",
+          "Legt das Tuch dann locker über einen Fuß des Babys und lasst es selbst wegziehen.",
+          "Ältere Babys verstecken sich gern selbst: Legt das Tuch kurz über ihren Kopf und staunt, wenn sie wieder auftauchen.",
+          "Hört auf, wenn das Baby wegschaut oder quengelt. Ein paar Minuten reichen völlig."
+        ],
+        "safetyNote": "Das Tuch liegt nur kurz und locker auf dem Gesicht, und Erwachsene bleiben die ganze Zeit dabei. Lasst nie ein Tuch beim Baby liegen."
+      },
+      "en": {
+        "title": "Peekaboo with a Cloth",
+        "summary": "The very first hiding game: a cloth disappears, and a laughing face pops up again.",
+        "steps": [
+          "Sit facing the baby at eye level. With very young babies, you can lie down too.",
+          "Hold a light cloth in front of your face and ask: “Where am I?”",
+          "Pull the cloth away and call out happily: “Peekaboo!”",
+          "Then drape the cloth loosely over the baby’s foot and let the baby pull it off.",
+          "Older babies love to hide themselves: lay the cloth over their head for a moment and act amazed when they reappear.",
+          "Stop when the baby looks away or fusses. A few minutes are plenty."
+        ],
+        "safetyNote": "The cloth only rests on a face briefly and loosely, and an adult stays the whole time. Never leave a cloth with the baby."
+      }
+    }
+  },
+  {
+    "id": "cup-towers",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["building", "games"],
+    "ageMin": 1,
+    "ageMax": 4,
+    "durationMin": 10,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["plasticCup", "socks"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Bechertürme bauen und umwerfen",
+        "summary": "Ihr stapelt Becher zu wackeligen Türmen, und das Schönste ist das Umwerfen.",
+        "steps": [
+          "Sammelt ein paar Plastikbecher und setzt euch auf den Boden.",
+          "Baut einen Turm: Stellt die Becher umgedreht aufeinander oder abwechselnd mit der Öffnung nach oben und nach unten.",
+          "Lasst das Kind den Turm umwerfen und jubelt gemeinsam, wenn alles purzelt.",
+          "Größere Kleinkinder stapeln selbst. Zählt die Becher laut mit.",
+          "Steckt die Becher ineinander, kippt sie aus, versteckt eine Socke unter einem Becher: Wo ist sie?",
+          "Zum Schluss: Wer schafft es, alle Becher wieder ineinanderzustecken?"
+        ]
+      },
+      "en": {
+        "title": "Build and Topple Cup Towers",
+        "summary": "Stack cups into wobbly towers, and the best part is knocking them down.",
+        "steps": [
+          "Gather a few plastic cups and sit on the floor.",
+          "Build a tower: stack the cups upside down, or alternate with the open side up and down.",
+          "Let your child knock the tower over and cheer together when everything tumbles.",
+          "Older toddlers stack the cups themselves. Count the cups out loud.",
+          "Nest the cups inside each other, tip them out, hide a sock under one cup: where is it?",
+          "To finish: who can stack all the cups back inside each other?"
+        ]
+      }
+    }
+  },
+  {
+    "id": "kitchen-concert",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["music"],
+    "ageMin": 0,
+    "ageMax": 4,
+    "durationMin": 10,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["pot", "woodenSpoon", "whisk", "plasticCup"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Küchen-Konzert",
+        "summary": "Töpfe, Kochlöffel und Becher werden zu Trommeln und Rasseln. Laut ist ausdrücklich erlaubt.",
+        "steps": [
+          "Stellt ein paar Töpfe umgedreht auf den Boden und legt Kochlöffel, einen Schneebesen und Plastikbecher dazu.",
+          "Lasst das Kind ausprobieren: Wie klingt der große Topf, wie der kleine? Und wie der Schneebesen?",
+          "Trommelt gemeinsam laut und leise, schnell und langsam. Das Kind macht nach, was ihr vormacht, und umgekehrt.",
+          "Singt ein Lied, das ihr kennt, und trommelt dazu.",
+          "Spielt Stopp: Wenn ihr die Hände hebt, ist alles still. Wer schafft es, ganz leise zu sein?",
+          "Babys, die noch nicht sitzen, liegen daneben und hören zu, oder ihr führt ihre Hand mit dem Löffel."
+        ],
+        "safetyNote": "Nehmt nur kalte, leichte Töpfe ohne Glasdeckel."
+      },
+      "en": {
+        "title": "Kitchen Concert",
+        "summary": "Pots, wooden spoons and cups become drums and shakers. Loud is absolutely allowed.",
+        "steps": [
+          "Turn a few pots upside down on the floor and put wooden spoons, a whisk and plastic cups next to them.",
+          "Let your child try things out: how does the big pot sound, how does the small one? And the whisk?",
+          "Drum together loud and soft, fast and slow. Your child copies what you do, and the other way round.",
+          "Sing a song you know and drum along.",
+          "Play stop: when you raise your hands, everything goes quiet. Who can be really quiet?",
+          "Babies who can’t sit yet lie next to you and listen, or you guide their hand with the spoon."
+        ],
+        "safetyNote": "Only use cold, light pots without glass lids."
+      }
+    }
+  },
+  {
+    "id": "picture-book-sounds",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["stories", "natureAnimals"],
+    "ageMin": 0,
+    "ageMax": 3,
+    "durationMin": 10,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["book"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Bilderbuch mit Geräuschen",
+        "summary": "Ihr schaut ein Bilderbuch an und macht zu jedem Bild das passende Geräusch: muh, brumm, platsch.",
+        "steps": [
+          "Sucht ein Bilderbuch mit Tieren, Fahrzeugen oder Alltagsdingen und macht es euch gemütlich, das Kind auf dem Schoß.",
+          "Zeigt auf ein Bild und benennt es: „Da ist eine Kuh.“",
+          "Macht das Geräusch dazu: „Muh!“ Das Auto brummt, der Regen macht platsch, das Baby lacht.",
+          "Lasst das Kind zeigen und fragt: „Wo ist der Hund?“ Größere Kleinkinder machen die Geräusche selbst.",
+          "Ihr müsst den Text nicht vorlesen. Erzählt in einfachen Worten, was ihr seht.",
+          "Hört auf, wenn das Kind keine Lust mehr hat. Das gleiche Buch darf es morgen wieder geben."
+        ]
+      },
+      "en": {
+        "title": "Picture Book with Sounds",
+        "summary": "Look at a picture book and make the right sound for every picture: moo, vroom, splash.",
+        "steps": [
+          "Find a picture book with animals, vehicles or everyday things and get comfy, with your child on your lap.",
+          "Point to a picture and name it: “There’s a cow.”",
+          "Add the sound: “Moo!” The car goes vroom, the rain goes splash, the baby laughs.",
+          "Let your child point and ask: “Where’s the dog?” Older toddlers make the sounds themselves.",
+          "You don’t have to read the text. Tell what you see in simple words.",
+          "Stop when your child has had enough. The same book can come back tomorrow."
+        ]
+      }
+    }
+  },
+  {
+    "id": "crawling-tunnel",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "movement",
+    "topics": ["movement", "building"],
+    "ageMin": 0,
+    "ageMax": 3,
+    "durationMin": 10,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["chairs", "blanket", "cushions", "ball"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Krabbeltunnel aus Stühlen",
+        "summary": "Eine Decke über ein paar Stühlen wird zum Tunnel, durch den Babys und Kleinkinder krabbeln, rollen und sich verstecken.",
+        "steps": [
+          "Stellt zwei oder drei Stühle mit etwas Abstand in eine Reihe und legt eine Decke darüber.",
+          "Legt Kissen in den Tunnel, damit es schön weich ist.",
+          "Setzt euch an ein Ende und lockt das Kind vom anderen Ende zu euch.",
+          "Rollt einen Ball durch den Tunnel. Wer holt ihn?",
+          "Spielt Guck-guck am Tunnelende: Hebt die Decke an und schaut hinein.",
+          "Babys, die noch nicht krabbeln, liegen am Eingang auf dem Bauch und schauen zu, wie der Ball hindurchrollt."
+        ],
+        "safetyNote": "Stellt die Stühle so, dass sie nicht kippen, und bleibt die ganze Zeit dabei. Die Decke liegt nur locker auf und darf nicht auf das Kind fallen."
+      },
+      "en": {
+        "title": "Crawling Tunnel",
+        "summary": "A blanket over a few chairs becomes a tunnel for babies and toddlers to crawl, roll and hide in.",
+        "steps": [
+          "Set up two or three chairs in a row with some space between them, and drape a blanket over them.",
+          "Put cushions inside the tunnel so it’s nice and soft.",
+          "Sit at one end and coax your child through from the other end.",
+          "Roll a ball through the tunnel. Who fetches it?",
+          "Play peekaboo at the end of the tunnel: lift the blanket and peek in.",
+          "Babies who can’t crawl yet lie on their tummies at the entrance and watch the ball roll through."
+        ],
+        "safetyNote": "Place the chairs so they can’t tip over and stay right there the whole time. The blanket only rests loosely on top and must not fall on your child."
+      }
+    }
+  },
+  {
+    "id": "sock-ball-toss",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "movement",
+    "topics": ["movement", "games"],
+    "ageMin": 1,
+    "ageMax": 5,
+    "durationMin": 10,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["socks", "basket"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Sockenbälle in den Korb",
+        "summary": "Zusammengerollte Socken sind die besten Bälle für drinnen: weich, leise und schnell gefunden.",
+        "steps": [
+          "Rollt Sockenpaare zu Bällen zusammen. Je mehr, desto besser.",
+          "Stellt einen Korb auf den Boden.",
+          "Werft die Sockenbälle hinein. Die Kleinsten stehen direkt davor, Größere weiter weg.",
+          "Zählt gemeinsam, wie viele im Korb landen. Dann holt ihr alle wieder heraus.",
+          "Abwandlung: Werft euch die Sockenbälle zu, oder das Kind sortiert sie nach Farben.",
+          "Zum Schluss fliegen alle Sockenbälle zurück in die Schublade."
+        ]
+      },
+      "en": {
+        "title": "Sock Ball Toss",
+        "summary": "Rolled-up socks make the best indoor balls: soft, quiet and quickly found.",
+        "steps": [
+          "Roll pairs of socks into balls. The more, the better.",
+          "Put a basket on the floor.",
+          "Throw the sock balls in. The littlest ones stand right in front of it, older kids farther away.",
+          "Count together how many land in the basket. Then take them all out again.",
+          "Variation: throw the sock balls to each other, or let your child sort them by color.",
+          "At the end, all the sock balls fly back into the drawer."
+        ]
+      }
+    }
+  },
+  {
+    "id": "knee-rides-and-finger-rhymes",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "movement",
+    "topics": ["music", "movement"],
+    "ageMin": 0,
+    "ageMax": 3,
+    "durationMin": 5,
+    "durationMax": 15,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": [],
+    "siblingFriendly": false,
+    "translations": {
+      "de": {
+        "title": "Kniereiter und Fingerspiele",
+        "summary": "Hopsen auf den Knien, krabbelnde Finger auf dem Bauch: kurze Reime mit Bewegung, die Babys und Kleinkinder lieben.",
+        "steps": [
+          "Setzt das Kind mit dem Gesicht zu euch auf eure Knie und haltet es gut an beiden Händen oder unter den Armen.",
+          "Sprecht oder singt einen Kniereiter, den ihr kennt, zum Beispiel „Hoppe, hoppe Reiter“, und wippt sanft im Takt.",
+          "An der Stelle, an der der Reiter fällt, lasst ihr das Kind sanft zwischen den Knien nach unten rutschen und fangt es auf.",
+          "Fingerspiel: Lasst zwei Finger wie ein Tierchen vom Bauch bis zum Hals krabbeln und kitzelt dort ganz leicht.",
+          "Wiederholt die Reime oft. Kleinkinder lieben es, wenn sie wissen, was gleich passiert.",
+          "Ihr kennt keine Reime? Erfindet einen: „Wir reiten in den Wald, und dann … plumps!“"
+        ],
+        "safetyNote": "Haltet das Kind die ganze Zeit gut fest und wippt nur sanft. Babys, die ihren Kopf noch nicht sicher halten, wippen nicht: Sie liegen auf dem Schoß und bekommen Fingerspiele."
+      },
+      "en": {
+        "title": "Knee Rides and Finger Rhymes",
+        "summary": "Bouncing on knees, fingers crawling up a tummy: short rhymes with movement that babies and toddlers love.",
+        "steps": [
+          "Sit your child on your knees facing you and hold them firmly by both hands or under the arms.",
+          "Say or sing a bouncing rhyme you know, like “This is the way the ladies ride”, and bounce gently to the beat.",
+          "At the part where the rider falls, let your child slide gently down between your knees and catch them.",
+          "Finger rhyme: walk two fingers like a little creature from tummy to neck and tickle very gently there.",
+          "Repeat the rhymes often. Toddlers love knowing what comes next.",
+          "Don’t know any rhymes? Make one up: “We ride into the woods, and then … whoops!”"
+        ],
+        "safetyNote": "Hold your child firmly the whole time and only bounce gently. Babies who can’t hold their head up steadily yet don’t bounce: they lie on your lap and get finger rhymes."
+      }
+    }
+  },
+  {
+    "id": "bathtub-lab",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "experiment",
+    "topics": ["water", "experiments"],
+    "ageMin": 1,
+    "ageMax": 5,
+    "durationMin": 15,
+    "durationMax": 30,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["water", "plasticCup", "sponge", "whisk", "dishSoap", "towel"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Badewannen-Labor",
+        "summary": "In der Badewanne wird geschüttet, gequetscht und geschäumt: Wasserforschung für die Kleinsten.",
+        "steps": [
+          "Lasst etwa eine Handbreit lauwarmes Wasser in die Wanne. Prüft die Temperatur mit dem Ellbogen.",
+          "Gebt Becher, einen Schwamm und einen Schneebesen dazu.",
+          "Schüttet Wasser von einem großen Becher in einen kleinen. Was passiert, wenn der kleine voll ist?",
+          "Saugt den Schwamm voll und quetscht ihn über der Hand aus. Wie viele Becher Wasser passen in einen Schwamm?",
+          "Gebt einen Tropfen Spülmittel ins Wasser und schlagt mit dem Schneebesen Schaum.",
+          "Danach gut abtrocknen und das Wasser sofort ablassen."
+        ],
+        "safetyNote": "Erwachsene bleiben die ganze Zeit dabei, auch nicht kurz zur Tür oder ans Handy: Kleinkinder können schon in wenigen Zentimetern Wasser ertrinken. Lasst das Wasser nach dem Spielen sofort ab. Kein Schaum in die Augen."
+      },
+      "en": {
+        "title": "Bathtub Lab",
+        "summary": "Pouring, squeezing and foaming in the bathtub: water research for the littlest ones.",
+        "steps": [
+          "Run about a hand’s width of lukewarm water into the tub. Check the temperature with your elbow.",
+          "Add cups, a sponge and a whisk.",
+          "Pour water from a big cup into a small one. What happens when the small one is full?",
+          "Soak the sponge and squeeze it out over your hand. How many cups of water fit into one sponge?",
+          "Add a drop of dish soap to the water and whisk up some foam.",
+          "Dry off well afterwards and drain the water right away."
+        ],
+        "safetyNote": "An adult stays the whole time, not even a quick trip to the door or the phone: toddlers can drown in just a few centimeters of water. Drain the water right after playing. Keep foam out of the eyes."
+      }
+    }
+  },
+  {
+    "id": "banana-yogurt",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking"],
+    "ageMin": 1,
+    "ageMax": 4,
+    "durationMin": 10,
+    "durationMax": 15,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["banana", "yogurt", "fork", "bowl", "spoon"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Bananen-Joghurt selbst gemacht",
+        "summary": "Die erste eigene Küchenarbeit: Banane zerdrücken, Joghurt einrühren und selbst löffeln.",
+        "steps": [
+          "Wascht euch die Hände und setzt das Kind an den Tisch, gern in den Hochstuhl.",
+          "Schält eine halbe Banane. Das Kind darf die Schale abziehen, wenn ihr sie oben anreißt.",
+          "Legt die Banane in eine Schüssel. Das Kind zerdrückt sie mit der Gabel, ihr helft mit.",
+          "Gebt drei bis vier Esslöffel Naturjoghurt dazu und lasst das Kind umrühren.",
+          "Jetzt wird gelöffelt, mit dem Löffel oder den Fingern. Kleckern gehört dazu."
+        ],
+        "safetyNote": "Enthält Milch (Joghurt). Kinder essen immer im Sitzen, und Erwachsene sind dabei."
+      },
+      "en": {
+        "title": "Homemade Banana Yogurt",
+        "summary": "The very first kitchen job: mash a banana, stir in yogurt and spoon it up yourself.",
+        "steps": [
+          "Wash your hands and seat your child at the table, in the high chair if you have one.",
+          "Peel half a banana. Your child can pull off the peel once you’ve started it at the top.",
+          "Put the banana in a bowl. Your child mashes it with the fork, and you help.",
+          "Add three to four tablespoons of plain yogurt and let your child stir.",
+          "Now it’s time to spoon it up, with a spoon or fingers. Mess is part of it."
+        ],
+        "safetyNote": "Contains milk (yogurt). Children always eat sitting down, with an adult close by."
+      }
+    }
+  },
+  {
+    "id": "painting-with-water",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft", "water"],
+    "ageMin": 1,
+    "ageMax": 5,
+    "durationMin": 15,
+    "durationMax": 30,
+    "setting": "outdoor",
+    "weather": { "needsDry": true, "betterInSun": true },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["water", "bucket", "brush"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Malen mit Wasser",
+        "summary": "Mit Pinsel und einem Eimer Wasser malen Kleinkinder auf Wände, Steine und Gehwege. In der Sonne verschwinden die Bilder von selbst.",
+        "steps": [
+          "Füllt einen Eimer etwa zwei Finger hoch mit Wasser und nehmt einen dicken Pinsel mit nach draußen.",
+          "Sucht euch eine Fläche: Hauswand, Gehweg, Gartenmauer, Treppe oder große Steine.",
+          "Taucht den Pinsel ein und malt: Striche, Kreise, Sonnen oder den eigenen Namen.",
+          "Schaut zu, wie das Wasser die Fläche dunkel färbt und dann langsam verschwindet.",
+          "Spielt „Wer ist schneller“: Malt eine neue Figur, bevor die vorige getrocknet ist.",
+          "Ohne Pinsel geht es auch: mit den Händen oder mit nassen Füßen."
+        ],
+        "safetyNote": "Erwachsene bleiben die ganze Zeit dabei, auch beim Eimer: Kleinkinder können schon in wenig Wasser ertrinken. Füllt nur wenig Wasser ein und kippt den Eimer am Ende aus."
+      },
+      "en": {
+        "title": "Painting with Water",
+        "summary": "With a brush and a bucket of water, toddlers paint on walls, stones and sidewalks. In the sun, the pictures disappear by themselves.",
+        "steps": [
+          "Fill a bucket with about two fingers of water and take a thick brush outside.",
+          "Find a surface: a house wall, the sidewalk, a garden wall, steps or large stones.",
+          "Dip the brush and paint: lines, circles, suns or your own name.",
+          "Watch the water turn the surface dark and then slowly vanish.",
+          "Play “who’s faster”: paint a new shape before the last one has dried.",
+          "No brush? Hands or wet feet work too."
+        ],
+        "safetyNote": "An adult stays the whole time, including near the bucket: toddlers can drown even in a little water. Only fill in a little water and tip the bucket out at the end."
+      }
+    }
+  },
+  {
+    "id": "watching-trains",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "outing",
+    "topics": ["technology", "outings", "loudPlaces"],
+    "ageMin": 1,
+    "ageMax": 6,
+    "durationMin": 30,
+    "durationMax": 60,
+    "setting": "outdoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["drinkBottle"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Züge gucken",
+        "summary": "Am Bahnhof oder auf einer Brücke über den Gleisen gibt es für kleine Fahrzeug-Fans viel zu sehen und zu hören.",
+        "steps": [
+          "Sucht einen sicheren Platz in der Nähe: einen Bahnsteig, eine Fußgängerbrücke über den Gleisen oder einen Weg mit Zaun neben der Strecke.",
+          "Nehmt eine Trinkflasche mit und zieht euch passend zum Wetter an.",
+          "Zählt die Züge, die vorbeikommen. Welche Farbe haben sie? Sind sie lang oder kurz?",
+          "Winkt den Zügen und hört genau hin: Wie klingt ein Zug, der hält, und einer, der durchfährt?",
+          "Ratet, wohin die Züge fahren. Größere Kinder lesen die Anzeige am Bahnsteig.",
+          "Erzählt zu Hause, was ihr gesehen habt, oder malt den schönsten Zug."
+        ],
+        "safetyNote": "Am Bahnsteig bleiben alle hinter der weißen Linie, und kleine Kinder halten eine Hand oder sitzen im Kinderwagen. Durchfahrende Züge sind sehr laut und ziehen einen starken Luftstoß hinter sich her."
+      },
+      "en": {
+        "title": "Watching Trains",
+        "summary": "At the station or on a bridge over the tracks, there is lots to see and hear for little vehicle fans.",
+        "steps": [
+          "Find a safe spot nearby: a platform, a footbridge over the tracks or a path with a fence next to the line.",
+          "Bring a water bottle and dress for the weather.",
+          "Count the trains that pass. What color are they? Are they long or short?",
+          "Wave at the trains and listen closely: how does a train sound when it stops, and when it rushes through?",
+          "Guess where the trains are going. Older children read the display on the platform.",
+          "At home, talk about what you saw or draw your favorite train."
+        ],
+        "safetyNote": "On the platform, everyone stays behind the white line, and small children hold a hand or sit in the stroller. Passing trains are very loud and pull a strong gust of wind behind them."
+      }
+    }
+  },
+  {
+    "id": "friendship-bracelets",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft"],
+    "ageMin": 8,
+    "ageMax": 16,
+    "durationMin": 30,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["wool", "scissors", "tape"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Freundschaftsbänder knüpfen",
+        "summary": "Aus bunten Wollfäden knüpft ihr Armbänder mit schrägen Streifen, zum Behalten oder Verschenken.",
+        "steps": [
+          "Schneidet vier Wollfäden in zwei Farben ab, jeden etwa so lang wie euer Arm.",
+          "Macht oben einen Knoten mit einer Schlaufe und klebt ihn mit Klebeband am Tisch fest.",
+          "Nehmt den linken Faden und knotet ihn zweimal um den Faden daneben: wie eine 4 darüberlegen, durchziehen, festziehen.",
+          "Knotet mit demselben Faden weiter über alle anderen Fäden, bis er ganz rechts liegt. Eine Reihe ist fertig.",
+          "Jetzt ist der neue linke Faden dran. Reihe für Reihe entsteht ein schräges Streifenmuster.",
+          "Passt das Band ums Handgelenk, macht ihr unten einen Knoten und bindet es mit den Fadenenden fest."
+        ],
+        "safetyNote": "Wer mit der Schere noch unsicher ist, schneidet zusammen mit Erwachsenen."
+      },
+      "en": {
+        "title": "Friendship Bracelets",
+        "summary": "Knot colorful yarn into bracelets with diagonal stripes, to keep or to give away.",
+        "steps": [
+          "Cut four pieces of yarn in two colors, each about as long as your arm.",
+          "Tie a knot with a loop at the top and tape it to the table.",
+          "Take the left strand and knot it twice around the strand next to it: lay it over like a 4, pull it through, tighten.",
+          "Keep knotting with the same strand over all the others until it’s on the far right. One row is done.",
+          "Now the new left strand takes its turn. Row by row, a diagonal stripe pattern appears.",
+          "Once the bracelet fits around a wrist, tie a knot at the bottom and fasten it with the loose ends."
+        ],
+        "safetyNote": "Anyone who isn’t confident with scissors yet cuts together with an adult."
+      }
+    }
+  },
+  {
+    "id": "stop-motion-film",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["technology", "stories", "craft"],
+    "ageMin": 8,
+    "ageMax": 16,
+    "durationMin": 45,
+    "durationMax": 90,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["phone", "paper", "pencils", "tape", "book"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Trickfilm mit dem Handy",
+        "summary": "Bild für Bild bewegt ihr Figuren ein kleines Stück weiter. Schnell hintereinander abgespielt, wird daraus euer eigener Trickfilm.",
+        "steps": [
+          "Denkt euch eine sehr kurze Geschichte aus, zum Beispiel: Eine Papierfigur entdeckt, dass sie fliegen kann.",
+          "Malt Figuren und einen Hintergrund auf Papier und reißt die Figuren grob aus.",
+          "Befestigt das Handy mit Klebeband an einem Stapel Bücher, sodass es von oben auf den Tisch schaut und sich nicht bewegt.",
+          "Macht ein Foto, bewegt die Figur ein winziges Stück und macht das nächste Foto. Für eine Sekunde Film braucht ihr etwa zehn Fotos.",
+          "Spielt die Fotos schnell hintereinander ab, zum Beispiel durch schnelles Wischen in der Galerie oder mit einer Trickfilm-App, falls ihr eine habt.",
+          "Zeigt den Film der Familie. Wer mag, macht die Geräusche live dazu."
+        ]
+      },
+      "en": {
+        "title": "Stop-Motion Film with a Phone",
+        "summary": "Move figures a tiny bit, picture by picture. Played back quickly, they turn into your own animated film.",
+        "steps": [
+          "Think up a very short story, for example: a paper figure discovers it can fly.",
+          "Draw figures and a background on paper and tear the figures out roughly.",
+          "Tape the phone to a stack of books so it looks down at the table and can’t move.",
+          "Take a photo, move the figure a tiny bit and take the next photo. One second of film needs about ten photos.",
+          "Play the photos back quickly, for example by swiping fast through the gallery, or with a stop-motion app if you have one.",
+          "Show the film to the family. If you like, do the sound effects live."
+        ]
+      }
+    }
+  },
+  {
+    "id": "city-country-river",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["games"],
+    "ageMin": 8,
+    "ageMax": 16,
+    "durationMin": 20,
+    "durationMax": 45,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["paper", "pencils"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Stadt, Land, Fluss",
+        "summary": "Der Klassiker mit Papier und Stift: Zu einem Buchstaben sucht ihr so schnell wie möglich eine Stadt, ein Land, einen Fluss und mehr.",
+        "steps": [
+          "Jeder zeichnet eine Tabelle mit den Spalten Stadt, Land, Fluss, Tier, Beruf und einer Spalte für Punkte.",
+          "Eigene Spalten machen es lustiger, zum Beispiel Essen, Popstar oder Ausrede fürs Zuspätkommen.",
+          "Eine Person sagt im Kopf das Alphabet auf, eine andere ruft „Stopp“. Der Buchstabe, bei dem sie gerade ist, gilt für diese Runde.",
+          "Alle füllen ihre Zeile aus. Wer zuerst fertig ist, ruft „Stopp“, und alle legen die Stifte hin.",
+          "Punkte: 10 für ein Wort, das nur ihr habt, 5, wenn jemand dasselbe hat, und 20, wenn ihr als Einzige etwas gefunden habt.",
+          "Jüngere Kinder spielen im Team mit einem Erwachsenen oder bekommen weniger Spalten."
+        ]
+      },
+      "en": {
+        "title": "City, Country, River",
+        "summary": "The classic with paper and pencil: for one letter, find a city, a country, a river and more as fast as you can.",
+        "steps": [
+          "Everyone draws a table with the columns city, country, river, animal, job and a column for points.",
+          "Your own columns make it funnier, for example food, pop star or excuse for being late.",
+          "One person silently runs through the alphabet in their head, and another says “stop”. The letter they’re on counts for this round.",
+          "Everyone fills in their row. Whoever finishes first calls “stop”, and everyone puts their pencils down.",
+          "Points: 10 for a word only you have, 5 if someone has the same, and 20 if you’re the only one who found anything.",
+          "Younger children play in a team with an adult or get fewer columns."
+        ]
+      }
+    }
+  },
+  {
+    "id": "escape-room-for-parents",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["games", "roleplay"],
+    "ageMin": 10,
+    "ageMax": 16,
+    "durationMin": 60,
+    "durationMax": 120,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["paper", "pencils", "cardboardBox", "jar", "book"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Escape-Room für die Eltern",
+        "summary": "Die Kinder bauen in der Wohnung ein Rätselspiel, und die Erwachsenen müssen es lösen. Die Eltern dürfen dabei sitzen und grübeln.",
+        "steps": [
+          "Die Kinder denken sich eine Geschichte aus: Ein Schatz ist versteckt, und die Eltern haben 30 Minuten Zeit, ihn zu finden.",
+          "Sie verstecken den „Schatz“ in einem Karton und schreiben 4 bis 6 Rätsel, die nacheinander zum Versteck führen.",
+          "Ideen für Rätsel: eine Geheimschrift, bei der jeder Buchstabe eine Zahl ist, ein Bilderrätsel oder eine Rechenaufgabe, deren Ergebnis eine Seitenzahl in einem Buch ist.",
+          "Jeder Hinweis führt zum nächsten Versteck: in ein Schraubglas, unter den Teppich, ins Bücherregal.",
+          "Die Eltern starten. Die Kinder leiten das Spiel und geben Tipps, wenn es hakt.",
+          "Beim nächsten Mal wird getauscht: Dann bauen die Eltern ein Rätsel für die Kinder."
+        ]
+      },
+      "en": {
+        "title": "Escape Room for the Parents",
+        "summary": "The kids build a puzzle game around the home, and the adults have to solve it. Parents get to sit and puzzle.",
+        "steps": [
+          "The kids come up with a story: a treasure has been hidden, and the parents have 30 minutes to find it.",
+          "They hide the “treasure” in a cardboard box and write 4 to 6 puzzles that lead to the hiding place one after another.",
+          "Puzzle ideas: a secret code where every letter is a number, a picture riddle, or a math problem whose answer is a page number in a book.",
+          "Each clue leads to the next hiding spot: into a screw-top jar, under the rug, onto the bookshelf.",
+          "The parents start. The kids run the game and give hints when someone gets stuck.",
+          "Next time, switch roles: the parents build a puzzle for the kids."
+        ]
+      }
+    }
+  },
+  {
+    "id": "parents-music-quiz",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["music", "games"],
+    "ageMin": 10,
+    "ageMax": 16,
+    "durationMin": 20,
+    "durationMax": 45,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["musicPlayer", "paper", "pencils"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Musik-Quiz: Die Hits der Eltern",
+        "summary": "Die Eltern spielen die Lieder ihrer Jugend, die Kinder raten mit, und danach wird getauscht.",
+        "steps": [
+          "Jede Seite sucht 5 bis 10 Lieder aus: die Eltern aus ihrer Jugend, die Kinder aus ihrer Lieblingsmusik.",
+          "Spielt jeweils nur die ersten zehn Sekunden an. Die anderen raten Titel, Sängerin, Sänger oder Band.",
+          "Punkte gibt es für den Titel, für die Band und für das richtige Jahrzehnt. Schreibt sie auf einen Zettel.",
+          "Schwerer wird es, wenn ihr das Lied nur summt, statt es abzuspielen.",
+          "Erzählt zu jedem Lied eine kurze Geschichte: Wo habt ihr es zum ersten Mal gehört?",
+          "Am Ende stellt jeder ein Gewinnerlied vor, das ihr einmal alle zusammen ganz anhört."
+        ]
+      },
+      "en": {
+        "title": "Music Quiz: Parents’ Greatest Hits",
+        "summary": "The parents play the songs of their youth, the kids guess along, and then you switch.",
+        "steps": [
+          "Each side picks 5 to 10 songs: the parents from their youth, the kids from their favorite music.",
+          "Play only the first ten seconds of each. The others guess the title, the singer or the band.",
+          "You score points for the title, the band and the right decade. Keep score on a sheet of paper.",
+          "It gets harder if you just hum the song instead of playing it.",
+          "Tell a short story about each song: where did you first hear it?",
+          "At the end, everyone presents one winning song that you all listen to once from start to finish."
+        ]
+      }
+    }
+  },
+  {
+    "id": "make-up-a-dance",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "movement",
+    "topics": ["music", "movement"],
+    "ageMin": 8,
+    "ageMax": 16,
+    "durationMin": 30,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["musicPlayer"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Eigenen Tanz erfinden",
+        "summary": "Zu einem Lieblingslied erfindet ihr eine Choreografie und führt sie am Ende vor.",
+        "steps": [
+          "Sucht ein Lied aus, das alle mögen, und hört es einmal ganz an.",
+          "Teilt das Lied in Abschnitte: Strophe, Refrain, Strophe. Für jeden Abschnitt erfindet ihr vier bis acht Bewegungen.",
+          "Übt jeden Abschnitt erst langsam ohne Musik, dann mit Musik.",
+          "Baut eine Überraschung ein: eine Drehung, einen Sprung oder eine Pose zum Schluss.",
+          "Wer mag, tanzt im Duett: Zwei machen die Bewegungen spiegelverkehrt.",
+          "Führt den Tanz der Familie vor und verbeugt euch."
+        ],
+        "safetyNote": "Räumt vorher Platz frei und tanzt nicht auf glatten Socken."
+      },
+      "en": {
+        "title": "Make Up Your Own Dance",
+        "summary": "Invent a choreography to a favorite song and perform it at the end.",
+        "steps": [
+          "Pick a song everyone likes and listen to it once all the way through.",
+          "Split the song into parts: verse, chorus, verse. Invent four to eight moves for each part.",
+          "Practice each part slowly without music first, then with music.",
+          "Add a surprise: a spin, a jump or a final pose.",
+          "If you like, dance as a duo: two people mirror each other’s moves.",
+          "Perform the dance for the family and take a bow."
+        ],
+        "safetyNote": "Clear some space first and don’t dance in slippery socks."
+      }
+    }
+  },
+  {
+    "id": "dice-workout",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "movement",
+    "topics": ["movement", "games"],
+    "ageMin": 6,
+    "ageMax": 16,
+    "durationMin": 15,
+    "durationMax": 30,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["dice", "paper", "pencils"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Würfel-Workout",
+        "summary": "Der Würfel entscheidet, welche Übung kommt und wie oft. Ein kurzes Training für die ganze Familie.",
+        "steps": [
+          "Schreibt sechs Übungen mit den Nummern 1 bis 6 auf: Hampelmann, Kniebeugen, Hüpfen auf einem Bein, Liegestütz an der Wand, Bergsteiger, Strecksprung.",
+          "Wer dran ist, würfelt zweimal: Der erste Wurf bestimmt die Übung, der zweite, wie oft. Für Größere wird die Zahl verdoppelt.",
+          "Alle machen die Übung gemeinsam, die Jüngsten in ihrem eigenen Tempo.",
+          "Spielt fünf bis zehn Runden und trinkt zwischendurch etwas.",
+          "Zum Schluss darf sich jeder eine Dehnübung oder eine Entspannung wünschen."
+        ],
+        "safetyNote": "Räumt Platz frei. Wer Schmerzen hat, setzt aus. Würfel sind Kleinteile: Lasst sie nicht liegen, wenn kleine Geschwister in der Nähe sind."
+      },
+      "en": {
+        "title": "Dice Workout",
+        "summary": "The die decides which exercise comes next and how many times. A short workout for the whole family.",
+        "steps": [
+          "Write down six exercises numbered 1 to 6: jumping jacks, squats, hopping on one leg, wall push-ups, mountain climbers, star jumps.",
+          "Whoever’s turn it is rolls twice: the first roll picks the exercise, the second says how many. Older kids double the number.",
+          "Everyone does the exercise together, the youngest at their own pace.",
+          "Play five to ten rounds and have a drink in between.",
+          "At the end, everyone gets to pick one stretch or relaxing move."
+        ],
+        "safetyNote": "Clear some space. Anyone in pain sits out. Dice are small parts: don’t leave them lying around when little siblings are nearby."
+      }
+    }
+  },
+  {
+    "id": "take-apart-an-old-device",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "experiment",
+    "topics": ["technology", "experiments"],
+    "ageMin": 10,
+    "ageMax": 16,
+    "durationMin": 45,
+    "durationMax": 90,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["oldDevice", "screwdriver", "tray", "magnifier"],
+    "siblingFriendly": false,
+    "translations": {
+      "de": {
+        "title": "Altes Gerät aufschrauben",
+        "summary": "Was steckt in einer alten Fernbedienung oder einem kaputten Spielzeug? Mit Schraubenzieher und Lupe schaut ihr hinein.",
+        "steps": [
+          "Sucht ein kleines, kaputtes Gerät, das mit Batterien lief, zum Beispiel eine alte Fernbedienung, einen Taschenrechner oder ein elektrisches Spielzeug.",
+          "Nehmt zuerst die Batterien heraus und legt sie weg. Erst dann wird geschraubt.",
+          "Sucht alle Schrauben, auch unter Aufklebern und Gummifüßen, und legt sie auf ein Tablett, damit nichts verloren geht.",
+          "Öffnet das Gehäuse vorsichtig und schaut euch die Platine mit der Lupe an: Wo sind Knöpfe, Drähte und winzige Lämpchen?",
+          "Überlegt gemeinsam: Was passiert, wenn man eine Taste drückt? Wo fließt der Strom entlang?",
+          "Sammelt am Ende alle Teile ein. Elektroschrott und Batterien gehören zur Sammelstelle, nicht in den Hausmüll."
+        ],
+        "safetyNote": "Nur mit Erwachsenen. Nur kleine Geräte mit herausnehmbaren Batterien, und die Batterien kommen vorher heraus. Niemals Geräte mit Netzstecker, Fernseher, Mikrowellen, Monitore oder Netzteile öffnen: Darin kann auch ausgesteckt gefährliche Spannung gespeichert sein. Auch keine Handys oder Geräte mit eingebautem Akku. Kanten und Drähte können scharf sein."
+      },
+      "en": {
+        "title": "Take Apart an Old Device",
+        "summary": "What’s inside an old remote control or a broken toy? Take a look with a screwdriver and a magnifying glass.",
+        "steps": [
+          "Find a small broken device that ran on batteries, for example an old remote control, a calculator or an electric toy.",
+          "Take the batteries out first and put them aside. Only then do you start unscrewing.",
+          "Find all the screws, including under stickers and rubber feet, and put them on a tray so nothing gets lost.",
+          "Open the case carefully and look at the circuit board with the magnifying glass: where are the buttons, wires and tiny lights?",
+          "Think it through together: what happens when you press a button? Which way does the electricity flow?",
+          "Gather up all the parts at the end. Electronic waste and batteries go to a collection point, not in the household trash."
+        ],
+        "safetyNote": "Only together with adults. Only small devices with removable batteries, and the batteries come out first. Never open devices with a plug, TVs, microwaves, monitors or power adapters: they can store dangerous voltage even when unplugged. No phones or devices with a built-in rechargeable battery either. Edges and wires can be sharp."
+      }
+    }
+  },
+  {
+    "id": "kids-cook-pasta",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking"],
+    "ageMin": 10,
+    "ageMax": 16,
+    "durationMin": 45,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "dayParts": ["afternoon", "evening"],
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["pasta", "tomatoSauce", "vegetables", "oil", "salt", "knife", "pot", "stove"],
+    "siblingFriendly": false,
+    "translations": {
+      "de": {
+        "title": "Heute kochen die Kinder: Nudeln mit Gemüsesauce",
+        "summary": "Die Großen kochen ein ganzes Essen für die Familie, und die Erwachsenen helfen nur, wenn sie gefragt werden.",
+        "steps": [
+          "Lest das Rezept einmal ganz durch und legt alles bereit: Nudeln, Tomatensauce, Gemüse wie Zwiebel, Paprika oder Zucchini, Öl und Salz.",
+          "Setzt einen großen Topf mit Wasser und einem Teelöffel Salz auf den Herd.",
+          "Schneidet das Gemüse in kleine Würfel. Tipp: Legt die flache Seite nach unten, dann rutscht nichts weg, und formt die Finger der anderen Hand zu einer Kralle.",
+          "Bratet das Gemüse in einem zweiten Topf mit etwas Öl etwa fünf Minuten an, gießt die Tomatensauce dazu und lasst alles leise köcheln.",
+          "Sobald das Nudelwasser sprudelt, kocht ihr die Nudeln so lange, wie es auf der Packung steht. Beim Abgießen hilft ein Erwachsener.",
+          "Mischt Nudeln und Sauce, schmeckt mit Salz ab und deckt den Tisch. Guten Appetit!"
+        ],
+        "safetyNote": "Erwachsene sind in der Nähe und helfen beim Abgießen: Kochendes Wasser und Dampf verbrühen schnell. Dreht die Topfgriffe zur Seite. Enthält Gluten, manche Nudeln auch Ei."
+      },
+      "en": {
+        "title": "Kids Cook Dinner: Pasta with Veggie Sauce",
+        "summary": "The older kids cook a whole meal for the family, and the adults only help when asked.",
+        "steps": [
+          "Read the recipe all the way through once and set everything out: pasta, tomato sauce, vegetables like onion, bell pepper or zucchini, oil and salt.",
+          "Put a large pot of water with a teaspoon of salt on the stove.",
+          "Cut the vegetables into small cubes. Tip: put the flat side down so nothing slips, and curl the fingers of your other hand like a claw.",
+          "In a second pot, fry the vegetables in a little oil for about five minutes, pour in the tomato sauce and let it all simmer gently.",
+          "Once the pasta water is bubbling, cook the pasta as long as it says on the package. An adult helps drain it.",
+          "Mix pasta and sauce, season with salt and set the table. Enjoy your meal!"
+        ],
+        "safetyNote": "Adults stay nearby and help drain the pasta: boiling water and steam scald quickly. Turn pot handles to the side. Contains gluten, and some pasta also contains egg."
+      }
+    }
+  },
+  {
+    "id": "neighborhood-photo-safari",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "outing",
+    "topics": ["technology", "outings", "craft"],
+    "ageMin": 8,
+    "ageMax": 16,
+    "durationMin": 45,
+    "durationMax": 90,
+    "setting": "outdoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["phone"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Foto-Safari in der Nachbarschaft",
+        "summary": "Mit einer Liste von Foto-Aufgaben zieht ihr durch die Nachbarschaft und seht Bekanntes plötzlich ganz neu.",
+        "steps": [
+          "Schreibt gemeinsam zehn Foto-Aufgaben auf, zum Beispiel: etwas Rundes, ein Gesicht, das keins ist, die Farbe Gelb, etwas Winziges ganz groß, ein Spiegelbild.",
+          "Teilt euch in Teams auf, jedes mit einem Handy oder einer Kamera.",
+          "Zieht los und löst die Aufgaben. Ihr habt eine Stunde Zeit, dann trefft ihr euch wieder.",
+          "Fotografiert keine fremden Menschen, ohne sie vorher zu fragen.",
+          "Zu Hause zeigt jedes Team seine Bilder. Wer hat das überraschendste Foto?",
+          "Wählt gemeinsam das schönste Bild des Tages."
+        ],
+        "safetyNote": "Teams mit jüngeren Kindern gehen nur mit Erwachsenen los. Achtet beim Fotografieren auf den Verkehr."
+      },
+      "en": {
+        "title": "Neighborhood Photo Safari",
+        "summary": "With a list of photo challenges, roam the neighborhood and suddenly see familiar things in a whole new way.",
+        "steps": [
+          "Write down ten photo challenges together, for example: something round, a face that isn’t a face, the color yellow, something tiny up close, a reflection.",
+          "Split into teams, each with a phone or a camera.",
+          "Head out and complete the challenges. You have one hour, then you meet up again.",
+          "Don’t photograph strangers without asking them first.",
+          "Back home, each team shows its pictures. Who has the most surprising photo?",
+          "Together, pick the best picture of the day."
+        ],
+        "safetyNote": "Teams with younger children only head out with an adult. Watch out for traffic while taking photos."
+      }
+    }
+  }
+]
