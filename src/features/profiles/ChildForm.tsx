@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
+import { Section } from '@/components/Section';
 import { colors, fontSize, lineHeight, radius, spacing } from '@/lib/theme';
 
 import { dislikeKeys, interestKeys } from './preferences';
@@ -174,47 +175,11 @@ export function ChildForm({ initial, header, onSubmit, onDelete }: ChildFormProp
   );
 }
 
-type SectionProps = {
-  title: string;
-  tag: string; // „(Pflicht)“ oder „(freiwillig)“
-  hint?: string;
-  children: ReactNode;
-};
-
-function Section({ title, tag, hint, children }: SectionProps) {
-  return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle} accessibilityRole="header">
-        {title}
-        {' '}
-        <Text style={styles.tag}>{tag}</Text>
-      </Text>
-      {hint ? <Text style={styles.hint}>{hint}</Text> : null}
-      {children}
-    </View>
-  );
-}
-
 // Abstände nur mit Horizontal/Vertical oder Start/End, nie Left/Right (wegen rechts-nach-links).
 const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     gap: spacing.lg,
-  },
-  section: {
-    gap: spacing.sm,
-  },
-  sectionTitle: {
-    fontSize: fontSize.lg,
-    lineHeight: lineHeight.lg,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  tag: {
-    fontSize: fontSize.sm,
-    lineHeight: lineHeight.sm,
-    fontWeight: '400',
-    color: colors.textMuted,
   },
   subTitle: {
     fontSize: fontSize.md,

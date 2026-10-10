@@ -14,6 +14,8 @@ export const colors = {
   onPrimary: '#FFFFFF', // Text auf `primary`
   border: '#D9D9D9', // Linien, Rahmen
   danger: '#B3261E', // Löschen, Fehlermeldungen
+  warning: '#8A5300', // Hinweise zum Aufpassen, Markierung der Test-Auswahl
+  icon: '#333333', // Symbole (z. B. Kategorie einer Aktivität)
 } as const;
 
 export const fontSize = {
@@ -45,6 +47,12 @@ export const spacing = {
 // Durchsichtigkeit (0 = unsichtbar, 1 = voll sichtbar).
 export const opacity = {
   disabled: 0.4, // nicht auswählbare Knöpfe und Chips
+} as const;
+
+// Größe von Symbolen (Icons), z. B. <CategoryIcon size="lg" />.
+export const iconSize = {
+  md: 24,
+  lg: 32,
 } as const;
 
 // Für borderRadius (auch borderTopStartRadius usw.).

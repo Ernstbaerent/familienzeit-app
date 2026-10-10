@@ -119,7 +119,7 @@ function readBoolean(raw: Record<string, unknown>, key: string, problems: string
   return null;
 }
 
-function isDayPart(value: unknown): value is DayPart {
+export function isDayPart(value: unknown): value is DayPart {
   return (dayPartKeys as readonly unknown[]).includes(value);
 }
 
