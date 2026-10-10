@@ -1,6 +1,6 @@
 // Alles, was die Vorschlagslogik über die heutige Situation wissen muss.
 
-import type { DayPart } from '../activities/activities';
+import type { DayPart, MonthNumber } from '../activities/activities';
 import { getAgeInMonths, type ChildProfile } from '../profiles/profiles';
 import type { ParentEnergy, Weather } from './conditions';
 
@@ -16,11 +16,16 @@ export type SuggestionRequest = {
   parentEnergy?: ParentEnergy; // freiwillig, fehlt = neutral
   weather: Weather; // M5: Test-Auswahl, ab M6 echtes Wetter
   dayPart: DayPart; // M5: Test-Auswahl, ab M6 aus der Uhrzeit
-  now: Date; // für das Alter der Kinder
+  now: Date; // für das Alter der Kinder und den Monat (`months` einer Aktivität)
 };
 
 // Alter in vollen Jahren, so wie `ageMin` und `ageMax` einer Aktivität gemeint sind:
 // Ein Kind mit 2 Jahren und 11 Monaten zählt als 2.
 export function getAgeInYears(child: SuggestionChild, now: Date): number {
   return Math.floor(getAgeInMonths(child, now) / 12);
+}
+
+// Monat als Zahl wie bei `months` einer Aktivität: 1 = Januar … 12 = Dezember.
+export function getMonthNumber(date: Date): MonthNumber {
+  return (date.getMonth() + 1) as MonthNumber;
 }

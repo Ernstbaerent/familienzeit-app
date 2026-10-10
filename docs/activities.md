@@ -1,7 +1,7 @@
-# Aktivitäten (M4)
+# Aktivitäten (M4, M5b)
 
-Aktivitäten sind die Ideen, aus denen die App 3 Vorschläge auswählt (ab M5). Dieser Schritt legt das
-Datenmodell an und liefert 20 Beispiele zum Testen. Wie die App daraus auswählt, steht in `docs/suggestions.md`.
+Aktivitäten sind die Ideen, aus denen die App 3 Vorschläge auswählt (ab M5). M4 hat das Datenmodell angelegt,
+M5b den Startbestand geschrieben. Wie die App daraus auswählt, steht in `docs/suggestions.md`.
 
 ## Wo was liegt
 
@@ -11,7 +11,7 @@ Datenmodell an und liefert 20 Beispiele zum Testen. Wie die App daraus auswählt
 | Material, Gefahren, Allergene        | `src/features/activities/materials.ts`         |
 | Sicherheits-Checkliste (Code)        | `src/features/activities/safetyCheck.ts`       |
 | Laden (lokal)                        | `src/features/activities/loadActivities.ts`    |
-| 20 Beispiel-Aktivitäten              | `data/sample-activities.json`                  |
+| Aktivitäten (Bestand)                | `data/activities-*.json`                       |
 | Prüfskript                           | `scripts/check-activities.ts`                  |
 | Checkliste (Regeln)                  | `docs/sicherheits-checkliste.md`               |
 
@@ -31,6 +31,7 @@ In der App: `loadActivities()` gibt alle Aktivitäten mit Status `approved` zur�
 | `setting`         | `indoor`, `outdoor` oder `both`. |
 | `weather`         | `needsDry` (nur bei Trockenheit), `betterInSun` (bei Sonne schöner). Beides `false` = wetterunabhängig. |
 | `dayParts`        | **Freiwillig.** Nur zu diesen Tageszeiten: `morning`, `afternoon`, `evening`. **Fehlt das Feld, passt die Aktivität zu jeder Tageszeit.** Beispiel: „Sterne beobachten“ hat `["evening"]`. Uhrzeit-Grenzen und Regeln: `docs/suggestions.md`. |
+| `months`          | **Freiwillig.** Nur in diesen Monaten, als Zahlen: 1 = Januar … 12 = Dezember. **Fehlt das Feld, passt die Aktivität das ganze Jahr.** Beispiel: Plätzchen backen hat `[11, 12]`, Ostereier färben `[3, 4]`. Nicht leer, keine doppelten, nicht alle 12 (dann weglassen). Gedacht für die Nordhalbkugel. |
 | `energy`          | Energie, die Eltern brauchen: `low`, `medium`, `high`. |
 | `cost`            | 0 = kostenlos, 1 = wenig, 2 = mehr. |
 | `materials`       | Schlüssel aus `materials.ts`. Die Texte stehen unter `materials` in `de.json` und `en.json`. |
@@ -39,7 +40,6 @@ In der App: `loadActivities()` gibt alle Aktivitäten mit Status `approved` zur�
 | `source`          | `ai` oder `manual`. |
 | `createdAt`       | ISO-Zeitpunkt. |
 | `image`           | **Freiwillig.** Web-Adresse (`https://…`) eines Bildes. Fehlt es, zeigt die App später ein Symbol der Kategorie. In M4 und M5b gibt es keine Bilder. |
-| `isSample`        | Nur bei Beispieldaten: `true`. |
 
 ### Verknüpfung mit den Interessen der Kinder
 
@@ -55,30 +55,47 @@ und `longTrips` vor.
 
 ## Material und Sicherheit
 
-Material ist eine feste Liste (`materials.ts`) mit Merkmalen wie „Kleinteile“, „scharf“, „heiß“, „Wasser“
-und mit Allergenen. Daraus leitet die Sicherheits-Checkliste ab, welche Hinweise eine Aktivität braucht
-(siehe `docs/sicherheits-checkliste.md`).
+Material ist eine feste Liste (`materials.ts`) mit Merkmalen wie „Kleinteile“, „scharf“, „heiß“, „Feuer“,
+„Wasser“, „Elektrogerät“, „brennbar“ und mit Allergenen. Daraus leitet die Sicherheits-Checkliste ab,
+welche Hinweise eine Aktivität braucht (siehe `docs/sicherheits-checkliste.md`). Wichtig beim Schreiben:
+`water` ist Wasser zum Spielen (Schüssel, Eimer, Wanne), `tapWater` nur eine kleine Menge zum Anrühren oder Trinken.
+Seit M5b umfasst die Liste 122 Materialien, fast alle aus dem Haushalt.
 
 **Neues Material ergänzen:** Schlüssel in `materials.ts` eintragen und den Text unter `materials` in
 `de.json` **und** `en.json` ergänzen. `npm run activities:check` meldet einen fehlenden Text.
 Schlüssel nie umbenennen, nur dazunehmen.
 
-## Beispieldaten
+## Bestand
 
-Die 20 Beispiele sind bewusst gemischt, damit M5 alle typischen Fälle testen kann: alle Kategorien außer
-`outing` (Ausflüge kommen später aus Orten und Veranstaltungen), Alter von 0–2 bis 13–16, Dauer von 15 bis
-240 Minuten, drinnen, draußen und wetterunabhängig, mit wenig und viel Elternenergie, mit und ohne
-Tageszeit und mit großen Altersunterschieden bei Geschwistern. Alle sind `approved`, weil es Testdaten sind.
+| Datei                         | Inhalt |
+| ----------------------------- | ------ |
+| `data/activities-m4.json`     | Die 20 Aktivitäten aus M4. Sie waren zuerst Beispieldaten, bestehen die Checkliste und gehören seit M5b zum echten Bestand (ohne `isSample`, IDs ohne `sample-`). |
+| `data/activities-m5b-1.json`  | Paket 1: Regentag, drinnen, kurz, wenig Energie (21) |
+| `data/activities-m5b-2.json`  | Paket 2: Kleinkinder 0–2 und Jugendliche 13–16 (21) |
+| `data/activities-m5b-3.json`  | Paket 3: Draußen, allgemeine Ausflüge, Experimente, Rollenspiel (21) |
+| `data/activities-m5b-4.json`  | Paket 4: Jahreszeiten und Feste (mit `months`), Geschwister, Küche (21) |
 
-Sie sind dreifach als Beispieldaten markiert: Datei `data/sample-activities.json`, Feld `isSample: true`
-und IDs mit Präfix `sample-`.
+Zusammen **104 Aktivitäten**, alle `approved`. Die Zählung zeigt `npm run activities:check`. Stand nach M5b:
 
-**Beispiele später ersetzen** (spätestens mit M8, Supabase):
+| Was | Anzahl |
+| --- | ------ |
+| Kategorien | Spiele 22, Basteln 18, Experimente 15, Bewegung 14, Natur 14, Kochen 14, Ausflüge 7 |
+| Drinnen oder beides / bei Regen machbar (`needsDry` false) | 81 / 89 |
+| Wenig Elternenergie | 67 |
+| Passt in 30 Minuten / ganz fertig in 30 Minuten | 81 / 45 |
+| Für Babys unter 1 / für 1-Jährige / für 2-Jährige | 6 / 15 / 22 |
+| Für 14-Jährige / für 16-Jährige | 38 / 24 |
+| Geschwistertauglich / davon mit 10+ Jahren Altersspanne | 94 / 24 |
+| Saisonal (`months`) / mit Tageszeit (`dayParts`) | 17 / 10 |
 
-1. Die Datei `data/sample-activities.json` löschen und in `loadActivities.ts` den Eintrag entfernen.
-2. Verweist der lokale Verlauf (ab M7) noch auf `sample-…`-IDs, beim Ersetzen aufräumen.
+Alle 13 Interessen kommen vor, ebenso die Abneigungen `gettingDirty`, `crowds`, `loudPlaces` und `longTrips`.
+Ausflüge sind bewusst allgemein (Bücherei, Spielplatz-Tour, Bahnhof), konkrete Orte kommen mit M10.
+**Bewusst noch nicht dabei:** Ideen, die Schnee brauchen. Sie kommen, sobald das Wetter in M6 Schnee kennt,
+sonst würden sie im Januar auch ohne Schnee vorgeschlagen.
 
-## Neue Datei mit Aktivitäten ergänzen (z. B. ein M5b-Paket)
+Mit M8 kommen die Aktivitäten aus Supabase. Die Dateien in `data/` sind dann der Startbestand für die Datenbank.
+
+## Neue Datei mit Aktivitäten ergänzen
 
 1. Datei in `data/` anlegen (Liste von Aktivitäten, gleiches Format).
 2. In `src/features/activities/loadActivities.ts` bei `rawActivities` eintragen.

@@ -1,0 +1,1051 @@
+[
+  {
+    "id": "chestnut-animals",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft", "natureAnimals"],
+    "ageMin": 4,
+    "ageMax": 10,
+    "durationMin": 30,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "months": [9, 10, 11],
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["chestnuts", "skewer", "toothpicks", "markers"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Kastanientiere basteln",
+        "summary": "Aus Kastanien und Zahnstochern entstehen Igel, Pferde, Spinnen und ganze Familien.",
+        "steps": [
+          "Sammelt auf einem Herbstspaziergang Kastanien, am besten frisch heruntergefallene. Die sind noch weich genug.",
+          "Ein Erwachsener sticht mit einem Holzspieß kleine Löcher in die Kastanien, dort wo Beine, Hals und Kopf hinkommen.",
+          "Steckt Zahnstocher in die Löcher und verbindet so mehrere Kastanien miteinander.",
+          "Probiert verschiedene Tiere: Eine Kastanie mit vier Zahnstocher-Beinen wird ein Pferd, eine mit vielen Zahnstochern ein Igel.",
+          "Malt mit Filzstiften Augen und Muster auf.",
+          "Baut eine ganze Kastanienfamilie und gebt allen Namen."
+        ],
+        "safetyNote": "Löcher stechen nur Erwachsene. Zahnstocher sind spitz. Kastanien sind nicht essbar, und kleine Kinder können sich daran verschlucken: Nichts in den Mund nehmen und kleine Geschwister fernhalten."
+      },
+      "en": {
+        "title": "Chestnut Animals",
+        "summary": "Chestnuts and toothpicks turn into hedgehogs, horses, spiders and whole families.",
+        "steps": [
+          "Collect chestnuts on an autumn walk, ideally freshly fallen ones. They’re still soft enough.",
+          "An adult pokes small holes into the chestnuts with a wooden skewer where the legs, neck and head should go.",
+          "Push toothpicks into the holes to connect several chestnuts.",
+          "Try different animals: a chestnut with four toothpick legs becomes a horse, one with lots of toothpicks a hedgehog.",
+          "Draw eyes and patterns on them with markers.",
+          "Build a whole chestnut family and give everyone a name."
+        ],
+        "safetyNote": "Only adults poke the holes. Toothpicks are pointy. Horse chestnuts are not edible, and small children can choke on them: don’t put anything in your mouth, and keep little siblings away."
+      }
+    }
+  },
+  {
+    "id": "paper-bag-lantern",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft"],
+    "ageMin": 4,
+    "ageMax": 10,
+    "durationMin": 45,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "months": [10, 11],
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["paperBag", "markers", "scissors", "paper", "glue", "ledLight"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Laterne aus einer Papiertüte",
+        "summary": "Aus einer Papiertüte wird in einer Stunde eine leuchtende Laterne für den Laternenumzug oder einen Abendspaziergang.",
+        "steps": [
+          "Faltet den oberen Rand einer Papiertüte zweimal nach außen um, damit er stabil wird.",
+          "Malt Bilder auf die Tüte: Mond, Sterne, einen Igel, Laub.",
+          "Ein Erwachsener schneidet einige der Bilder als Fenster aus. Klebt von innen dünnes Papier hinter die Fenster, damit das Licht bunt durchscheint.",
+          "Stellt ein LED-Licht in die Tüte oder hängt sie an einen LED-Laternenstab.",
+          "Macht zum Test das Licht im Zimmer aus: Wie leuchtet eure Laterne?",
+          "Geht abends eine kleine Runde um den Block und singt ein Laternenlied."
+        ],
+        "safetyNote": "Nur mit LED-Licht, nie mit einer Kerze: Papier fängt sofort Feuer. Mit der Schere schneidet ihr nur zusammen mit Erwachsenen."
+      },
+      "en": {
+        "title": "Paper Bag Lantern",
+        "summary": "In an hour, a paper bag becomes a glowing lantern for a lantern parade or an evening stroll.",
+        "steps": [
+          "Fold the top edge of a paper bag outward twice so it’s sturdy.",
+          "Draw pictures on the bag: a moon, stars, a hedgehog, leaves.",
+          "An adult cuts out some of the pictures as windows. Glue thin paper behind the windows from the inside so the light shines through in color.",
+          "Put an LED light inside the bag or hang it on an LED lantern stick.",
+          "Switch off the light in the room to test it: how does your lantern glow?",
+          "In the evening, take a little walk around the block and sing a lantern song."
+        ],
+        "safetyNote": "Only use an LED light, never a candle: paper catches fire instantly. Only cut with scissors together with an adult."
+      }
+    }
+  },
+  {
+    "id": "paper-snowflakes",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft"],
+    "ageMin": 5,
+    "ageMax": 14,
+    "durationMin": 20,
+    "durationMax": 30,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "months": [11, 12, 1],
+    "energy": "low",
+    "cost": 0,
+    "materials": ["paper", "scissors", "tape"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Schneeflocken aus Papier schneiden",
+        "summary": "Falten, schneiden, auffalten: Jede Papier-Schneeflocke ist einzigartig, genau wie eine echte.",
+        "steps": [
+          "Schneidet aus einem Blatt Papier ein Quadrat. Mit dünnem Papier geht das Schneiden leichter.",
+          "Faltet das Quadrat zu einem Dreieck und dann noch einmal zu einem kleineren Dreieck.",
+          "Faltet das Dreieck ein drittes Mal.",
+          "Schneidet an den Kanten kleine Dreiecke, Bögen und Zacken heraus. Lasst aber an jeder Kante ein Stück stehen, sonst zerfällt alles.",
+          "Faltet vorsichtig auf und staunt über das Muster.",
+          "Klebt die Flocken mit Klebeband ans Fenster. Jüngere Kinder falten nur zweimal, dann ist das Papier dünner."
+        ],
+        "safetyNote": "Jüngere Kinder schneiden mit einer Kinderschere und mit Erwachsenen in der Nähe."
+      },
+      "en": {
+        "title": "Cut Paper Snowflakes",
+        "summary": "Fold, cut, unfold: every paper snowflake is one of a kind, just like a real one.",
+        "steps": [
+          "Cut a square out of a sheet of paper. Thin paper makes cutting easier.",
+          "Fold the square into a triangle, then fold it again into a smaller triangle.",
+          "Fold the triangle a third time.",
+          "Cut small triangles, curves and notches out of the edges. Leave part of every edge uncut, or it will fall apart.",
+          "Unfold it carefully and marvel at the pattern.",
+          "Tape the snowflakes to the window. Younger children only fold twice, so the paper is thinner."
+        ],
+        "safetyNote": "Younger children use children’s scissors with an adult nearby."
+      }
+    }
+  },
+  {
+    "id": "paper-easter-egg-hunt",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["games", "craft"],
+    "ageMin": 3,
+    "ageMax": 12,
+    "durationMin": 30,
+    "durationMax": 45,
+    "setting": "both",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "months": [3, 4],
+    "energy": "low",
+    "cost": 0,
+    "materials": ["paper", "scissors", "markers", "basket"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Ostereier-Suche mit Papiereiern",
+        "summary": "Ihr malt bunte Eier aus Papier und versteckt sie für die anderen. Große verstecken für Kleine und umgekehrt.",
+        "steps": [
+          "Malt Eierformen auf Papier und schneidet sie aus, etwa zehn Eier pro Kind.",
+          "Bemalt die Eier mit Mustern: Punkte, Streifen, Zickzack. Gebt jedem Kind eine Farbe, die es später suchen darf. So finden auch die Kleinen genug.",
+          "Eine Gruppe versteckt, die andere wartet außer Sicht. Für Kleine kommen die Eier gut sichtbar auf Augenhöhe, für Große in kniffligere Verstecke.",
+          "Los geht die Suche mit einem Korb. Wer „warm“ oder „kalt“ ruft, hilft beim Finden.",
+          "Zählt am Ende: Sind alle Eier gefunden? Dann wird getauscht.",
+          "Draußen geht es im Garten oder Hof, drinnen in der Wohnung."
+        ],
+        "safetyNote": "Ausschneiden mit der Schere nur mit Erwachsenen oder großen Geschwistern in der Nähe."
+      },
+      "en": {
+        "title": "Paper Easter Egg Hunt",
+        "summary": "Paint colorful paper eggs and hide them for the others. Big kids hide for little ones, and the other way round.",
+        "steps": [
+          "Draw egg shapes on paper and cut them out, about ten eggs per child.",
+          "Decorate the eggs with patterns: dots, stripes, zigzags. Give each child a color to look for later, so the little ones find enough too.",
+          "One group hides, the other waits out of sight. For little ones, the eggs go in easy spots at eye level, for big kids in trickier hiding places.",
+          "Start the hunt with a basket. Calling “warmer” or “colder” helps with finding.",
+          "Count at the end: have all the eggs been found? Then switch roles.",
+          "Play outside in the garden or yard, or inside around the home."
+        ],
+        "safetyNote": "Cutting with scissors only with an adult or an older sibling close by."
+      }
+    }
+  },
+  {
+    "id": "sponge-water-fight",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "movement",
+    "topics": ["water", "movement"],
+    "ageMin": 3,
+    "ageMax": 12,
+    "durationMin": 20,
+    "durationMax": 40,
+    "setting": "outdoor",
+    "weather": { "needsDry": true, "betterInSun": true },
+    "months": [6, 7, 8],
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["sponge", "bucket", "water", "towel"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Schwamm-Wasserschlacht",
+        "summary": "An heißen Tagen die beste Abkühlung: nasse Schwämme werfen, ausweichen und lachen.",
+        "steps": [
+          "Zieht Badesachen oder alte Kleidung an und geht in den Garten, in den Hof oder auf eine Wiese.",
+          "Füllt zwei Eimer mit Wasser und legt in jeden ein paar Schwämme.",
+          "Teilt euch in zwei Teams. Jedes Team hat seinen eigenen Eimer.",
+          "Taucht die Schwämme ein und werft sie auf das andere Team, nur auf den Körper, nie auf den Kopf.",
+          "Abwandlung, Schwamm-Staffel: Wer trägt mit dem Schwamm am meisten Wasser von einem Eimer in den anderen?",
+          "Danach abtrocknen und trockene Sachen anziehen."
+        ],
+        "safetyNote": "Erwachsene bleiben die ganze Zeit dabei, und am Ende werden die Eimer ausgekippt. Nicht auf Köpfe zielen und nur auf Rasen spielen, nicht auf rutschigen Fliesen."
+      },
+      "en": {
+        "title": "Sponge Water Fight",
+        "summary": "The best way to cool off on hot days: throw wet sponges, dodge and laugh.",
+        "steps": [
+          "Put on swimwear or old clothes and head into the garden, the yard or a meadow.",
+          "Fill two buckets with water and put a few sponges in each.",
+          "Split into two teams. Each team gets its own bucket.",
+          "Dunk the sponges and throw them at the other team, only at bodies, never at heads.",
+          "Variation, sponge relay: who can carry the most water from one bucket to the other with a sponge?",
+          "Afterwards, dry off and change into dry clothes."
+        ],
+        "safetyNote": "An adult stays the whole time, and the buckets get tipped out at the end. Don’t aim at heads, and only play on grass, not on slippery tiles."
+      }
+    }
+  },
+  {
+    "id": "autumn-bingo",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "nature",
+    "topics": ["natureAnimals", "games", "outings"],
+    "ageMin": 3,
+    "ageMax": 10,
+    "durationMin": 30,
+    "durationMax": 60,
+    "setting": "outdoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "months": [9, 10, 11],
+    "energy": "low",
+    "cost": 0,
+    "materials": ["paper", "pencils", "paperBag", "book"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Herbst-Bingo im Park",
+        "summary": "Mit einer Bingo-Karte geht ihr auf Herbstspaziergang und sucht bunte Blätter, Kastanien, Pilze und mehr.",
+        "steps": [
+          "Malt vor dem Losgehen eine Bingo-Karte mit neun Feldern, drei mal drei. In jedes Feld kommt ein Herbstding.",
+          "Ideen: rotes Blatt, gelbes Blatt, Kastanie, Eichel, Pilz (nur anschauen), Spinnennetz, Feder, Zapfen, Eichhörnchen.",
+          "Geht in den Park oder Wald und hakt ab, was ihr findet. Schöne Blätter dürfen mit in die Papiertüte.",
+          "Drei in einer Reihe? Dann ruft „Bingo!“. Weiter geht es, bis die ganze Karte voll ist.",
+          "Kleinere Kinder bekommen eine Karte mit Bildern statt Wörtern.",
+          "Zu Hause legt ihr die gesammelten Blätter zum Trocknen in ein dickes Buch."
+        ],
+        "safetyNote": "Pilze nur anschauen und nicht anfassen. Kastanien und Eicheln sind nicht zum Essen, Kleine nehmen sie nicht in den Mund. Danach Hände waschen."
+      },
+      "en": {
+        "title": "Autumn Bingo in the Park",
+        "summary": "With a bingo card in hand, go on an autumn walk and look for colorful leaves, chestnuts, mushrooms and more.",
+        "steps": [
+          "Before you set off, draw a bingo card with nine squares, three by three. Each square gets an autumn thing.",
+          "Ideas: red leaf, yellow leaf, chestnut, acorn, mushroom (look only), spider web, feather, pine cone, squirrel.",
+          "Go to the park or the woods and tick off what you find. Pretty leaves can go into the paper bag.",
+          "Three in a row? Shout “Bingo!” Keep going until the whole card is full.",
+          "Younger children get a card with pictures instead of words.",
+          "At home, press the leaves you collected inside a thick book to dry."
+        ],
+        "safetyNote": "Only look at mushrooms, don’t touch them. Chestnuts and acorns are not food, and little ones don’t put them in their mouths. Wash your hands afterwards."
+      }
+    }
+  },
+  {
+    "id": "bird-feeder-cakes",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "nature",
+    "topics": ["natureAnimals", "craft"],
+    "ageMin": 5,
+    "ageMax": 12,
+    "durationMin": 30,
+    "durationMax": 45,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "months": [11, 12, 1, 2],
+    "energy": "medium",
+    "cost": 1,
+    "materials": [
+      "coconutFat",
+      "birdSeed",
+      "pot",
+      "stove",
+      "woodenSpoon",
+      "plasticCup",
+      "wool",
+      "stick"
+    ],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Futterglocken für Vögel",
+        "summary": "Aus Kokosfett und Körnern gießt ihr Vogelfutter in alte Becher und hängt es in einen Baum.",
+        "steps": [
+          "Knotet einen langen Wollfaden an ein Stöckchen und stellt das Stöckchen in einen leeren Becher, zum Beispiel einen Joghurtbecher.",
+          "Ein Erwachsener schmilzt 200 Gramm Kokosfett in einem Topf bei kleiner Hitze.",
+          "Nehmt den Topf vom Herd und rührt etwa genauso viel Vogelfutter hinein.",
+          "Lasst die Masse etwas abkühlen und füllt sie dann rund um das Stöckchen in den Becher.",
+          "Stellt alles für ein bis zwei Stunden an einen kühlen Ort, zum Beispiel auf den Balkon, bis es fest ist.",
+          "Löst den Becher ab und hängt die Futterglocke am Faden an einen Ast, den Katzen nicht erreichen. Beobachtet, wer zu Besuch kommt."
+        ],
+        "safetyNote": "Heißes Fett verbrennt die Haut: Schmelzen und Umfüllen machen Erwachsene. Vogelfutter enthält oft Erdnüsse und Nüsse. Es ist nicht zum Essen, und bei einer Allergie tragt ihr Handschuhe oder kauft eine Mischung ohne Nüsse."
+      },
+      "en": {
+        "title": "Bird Feeder Cakes",
+        "summary": "Pour coconut oil and seeds into old cups and hang the bird food in a tree.",
+        "steps": [
+          "Tie a long piece of yarn to a small stick and stand the stick in an empty cup, a yogurt cup for example.",
+          "An adult melts 200 grams of solid coconut oil in a pot over low heat.",
+          "Take the pot off the stove and stir in about the same amount of birdseed.",
+          "Let the mixture cool a little, then fill it into the cup around the stick.",
+          "Put everything somewhere cool for one to two hours, on the balcony for example, until it’s firm.",
+          "Peel off the cup and hang the feeder by its yarn from a branch that cats can’t reach. Watch who comes to visit."
+        ],
+        "safetyNote": "Hot fat burns skin: adults do the melting and pouring. Birdseed often contains peanuts and nuts. It’s not food, and if anyone has an allergy, wear gloves or buy a mix without nuts."
+      }
+    }
+  },
+  {
+    "id": "morning-bird-concert",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "nature",
+    "topics": ["natureAnimals", "music"],
+    "ageMin": 4,
+    "ageMax": 14,
+    "durationMin": 20,
+    "durationMax": 40,
+    "setting": "outdoor",
+    "weather": { "needsDry": true, "betterInSun": false },
+    "dayParts": ["morning"],
+    "months": [3, 4, 5, 6],
+    "energy": "low",
+    "cost": 0,
+    "materials": ["warmClothes"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Vogelkonzert am Morgen",
+        "summary": "Im Frühling singen die Vögel morgens am lautesten. Ihr setzt euch still nach draußen und hört dem Konzert zu.",
+        "steps": [
+          "Geht morgens, am besten früh, auf den Balkon, in den Garten oder in einen Park in der Nähe. Zieht euch warm an.",
+          "Setzt oder stellt euch hin und seid zwei Minuten lang ganz still. Schließt dabei die Augen.",
+          "Wie viele verschiedene Vogelstimmen hört ihr? Zählt sie an den Fingern ab.",
+          "Beschreibt die Stimmen: Pfeift einer, trillert einer, ruft einer immer dasselbe?",
+          "Versucht, einen Sänger zu entdecken. Amseln singen oft von Dachfirsten und Antennen.",
+          "Ahmt zum Schluss eure Lieblingsstimme nach und hört, ob jemand antwortet."
+        ]
+      },
+      "en": {
+        "title": "Morning Bird Concert",
+        "summary": "In spring, birds sing loudest in the morning. Sit quietly outside and listen to the concert.",
+        "steps": [
+          "Go out in the morning, early if you can, onto the balcony, into the garden or a park nearby. Dress warmly.",
+          "Sit or stand and be completely quiet for two minutes. Close your eyes.",
+          "How many different bird voices can you hear? Count them on your fingers.",
+          "Describe the voices: does one whistle, one trill, one call the same thing over and over?",
+          "Try to spot a singer. Blackbirds often sing from rooftops and antennas.",
+          "Finally, imitate your favorite voice and listen for an answer."
+        ]
+      }
+    }
+  },
+  {
+    "id": "bug-safari",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "nature",
+    "topics": ["natureAnimals"],
+    "ageMin": 2,
+    "ageMax": 10,
+    "durationMin": 20,
+    "durationMax": 45,
+    "setting": "outdoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "months": [4, 5, 6, 7, 8, 9],
+    "energy": "low",
+    "cost": 0,
+    "materials": ["magnifier", "plasticCup"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Krabbeltier-Safari",
+        "summary": "Mit Lupe und Becher sucht ihr Käfer, Asseln und Ameisen unter Steinen und Blättern und lasst sie danach wieder frei.",
+        "steps": [
+          "Geht in den Garten, auf eine Wiese oder an einen Waldrand.",
+          "Hebt vorsichtig einen Stein oder ein Stück Holz an und schaut darunter: Wer wohnt hier?",
+          "Setzt ein Tier mit einem Blatt in den Becher und betrachtet es mit der Lupe. Wie viele Beine hat es?",
+          "Sucht auch auf Blüten, auf Blättern und an Baumrinde nach Krabbeltieren.",
+          "Lasst jedes Tier nach ein paar Minuten genau dort frei, wo ihr es gefunden habt, und legt den Stein vorsichtig zurück.",
+          "Erzählt euch zu Hause, welches Tier euch am besten gefallen hat."
+        ],
+        "safetyNote": "Bienen und Wespen nur anschauen. Raupen mit Haaren nicht anfassen, die Haare können die Haut reizen. Danach Hände waschen."
+      },
+      "en": {
+        "title": "Bug Safari",
+        "summary": "With a magnifying glass and a cup, look for beetles, woodlice and ants under stones and leaves, then set them free again.",
+        "steps": [
+          "Go into the garden, a meadow or the edge of a forest.",
+          "Carefully lift a stone or a piece of wood and look underneath: who lives here?",
+          "Put an animal into the cup with a leaf and look at it with the magnifying glass. How many legs does it have?",
+          "Also look for crawling creatures on flowers, leaves and tree bark.",
+          "After a few minutes, set each animal free exactly where you found it, and gently put the stone back.",
+          "At home, tell each other which creature you liked best."
+        ],
+        "safetyNote": "Only look at bees and wasps. Don’t touch hairy caterpillars, the hairs can irritate skin. Wash your hands afterwards."
+      }
+    }
+  },
+  {
+    "id": "barefoot-trail",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "nature",
+    "topics": ["natureAnimals", "movement", "gettingDirty"],
+    "ageMin": 2,
+    "ageMax": 10,
+    "durationMin": 20,
+    "durationMax": 40,
+    "setting": "outdoor",
+    "weather": { "needsDry": false, "betterInSun": true },
+    "months": [5, 6, 7, 8, 9],
+    "energy": "low",
+    "cost": 0,
+    "materials": ["towel"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Barfußpfad im Garten oder Park",
+        "summary": "Schuhe aus! Ihr spürt mit den Füßen, wie sich Gras, Moos, Sand, Erde und Steine anfühlen.",
+        "steps": [
+          "Sucht eine Wiese, einen Garten oder einen Spielplatz mit Sand.",
+          "Zieht Schuhe und Socken aus und lauft los: erst langsam, dann an der Hand mit geschlossenen Augen.",
+          "Sammelt Untergründe: weiches Gras, kühles Moos, warmer Sand, krümelige Erde, glatte Steine, piksige Zapfen.",
+          "Legt aus euren Fundstücken einen kleinen Pfad: ein Stück mit Zapfen, ein Stück mit Laub, ein Stück mit Sand.",
+          "Ratespiel: Ein Kind wird mit geschlossenen Augen geführt und rät, worauf es gerade steht.",
+          "Zum Schluss trocknet ihr die Füße ab, schaut nach, ob alles in Ordnung ist, und zieht die Schuhe wieder an."
+        ],
+        "safetyNote": "Sucht den Boden vorher nach Scherben, Hundekot und Bienen auf Klee ab. Lauft nur dort barfuß, wo ihr den Boden gut seht."
+      },
+      "en": {
+        "title": "Barefoot Trail",
+        "summary": "Shoes off! Feel grass, moss, sand, soil and stones with your feet.",
+        "steps": [
+          "Find a meadow, a garden or a playground with sand.",
+          "Take off shoes and socks and set off: slowly at first, then with eyes closed, holding hands.",
+          "Collect surfaces: soft grass, cool moss, warm sand, crumbly soil, smooth stones, prickly pine cones.",
+          "Lay a little trail from what you find: a stretch of pine cones, a stretch of leaves, a stretch of sand.",
+          "Guessing game: one child is led with eyes closed and guesses what they’re standing on.",
+          "Finally, dry your feet, check they’re fine and put your shoes back on."
+        ],
+        "safetyNote": "Check the ground first for broken glass, dog poop and bees on clover. Only go barefoot where you can see the ground well."
+      }
+    }
+  },
+  {
+    "id": "flashlight-night-walk",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "nature",
+    "topics": ["natureAnimals", "outings"],
+    "ageMin": 4,
+    "ageMax": 14,
+    "durationMin": 30,
+    "durationMax": 60,
+    "setting": "outdoor",
+    "weather": { "needsDry": true, "betterInSun": false },
+    "dayParts": ["evening"],
+    "months": [10, 11, 12, 1, 2, 3],
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["flashlight", "warmClothes"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Nachtspaziergang mit Taschenlampe",
+        "summary": "Wenn es früh dunkel wird, wird der bekannte Weg zum Abenteuer: Geräusche, Lichter und vielleicht ein Igel.",
+        "steps": [
+          "Zieht euch warm an, nehmt für jedes Kind eine Taschenlampe mit und geht einen Weg, den ihr bei Tag gut kennt.",
+          "Bleibt zwischendurch stehen, macht die Lampen aus und lauscht: Was hört ihr im Dunkeln?",
+          "Leuchtet in Hecken und unter Büsche: Glänzen irgendwo Augen? Vielleicht seht ihr einen Igel, eine Katze oder einen Fuchs.",
+          "Schaut nach oben: Seht ihr den Mond, Sterne oder ein Flugzeug?",
+          "Spielt Lichtsignale: Einmal blinken heißt „Alles gut“, zweimal heißt „Komm her“.",
+          "Zu Hause wärmt ihr euch mit etwas Warmem zu trinken auf."
+        ],
+        "safetyNote": "Bleibt auf bekannten Wegen und abseits von Straßen. Kinder bleiben in Sichtweite der Erwachsenen. Helle Kleidung oder Reflektoren helfen, gesehen zu werden."
+      },
+      "en": {
+        "title": "Flashlight Night Walk",
+        "summary": "When it gets dark early, a familiar path turns into an adventure: sounds, lights and maybe a hedgehog.",
+        "steps": [
+          "Dress warmly, bring a flashlight for each child and walk a route you know well by day.",
+          "Stop now and then, switch off the flashlights and listen: what can you hear in the dark?",
+          "Shine into hedges and under bushes: are any eyes glinting? Maybe you’ll see a hedgehog, a cat or a fox.",
+          "Look up: can you see the moon, stars or a plane?",
+          "Play light signals: one blink means “all good”, two blinks mean “come here”.",
+          "Back home, warm up with a hot drink."
+        ],
+        "safetyNote": "Stay on familiar paths and away from roads. Children stay within sight of the adults. Light-colored clothing or reflectors help others see you."
+      }
+    }
+  },
+  {
+    "id": "christmas-cookies",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking"],
+    "ageMin": 3,
+    "ageMax": 14,
+    "durationMin": 90,
+    "durationMax": 150,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "months": [11, 12],
+    "energy": "high",
+    "cost": 0,
+    "materials": [
+      "flour",
+      "butter",
+      "sugar",
+      "egg",
+      "bowl",
+      "rollingPin",
+      "cookieCutters",
+      "tray",
+      "oven"
+    ],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Plätzchen ausstechen",
+        "summary": "Der Klassiker in der Adventszeit: Teig kneten, ausrollen, Sterne und Herzen ausstechen und backen.",
+        "steps": [
+          "Knetet 250 Gramm Mehl, 125 Gramm weiche Butter, 80 Gramm Zucker und 1 Ei in einer Schüssel zu einem glatten Teig.",
+          "Stellt den Teig zugedeckt eine halbe Stunde in den Kühlschrank. In der Zeit heizt ein Erwachsener den Ofen auf 180 Grad vor.",
+          "Rollt den Teig auf etwas Mehl etwa einen halben Zentimeter dick aus.",
+          "Stecht Sterne, Herzen, Monde und Tannenbäume aus und legt sie auf ein mit Butter eingefettetes Backblech.",
+          "Backt die Plätzchen etwa 10 Minuten, bis die Ränder hellbraun sind. Das Blech holt ein Erwachsener heraus.",
+          "Lasst sie abkühlen. Die Kleinen stechen aus, die Großen rollen den Teig und kümmern sich um die Bleche."
+        ],
+        "safetyNote": "Den Backofen bedienen nur Erwachsene, das Blech wird sehr heiß. Enthält Gluten, Milch und Ei. Rohen Teig nicht naschen (rohes Ei)."
+      },
+      "en": {
+        "title": "Christmas Cut-Out Cookies",
+        "summary": "The Advent classic: knead dough, roll it out, cut out stars and hearts and bake them.",
+        "steps": [
+          "In a bowl, knead 250 grams of flour, 125 grams of soft butter, 80 grams of sugar and 1 egg into a smooth dough.",
+          "Cover the dough and put it in the fridge for half an hour. Meanwhile, an adult preheats the oven to 180 degrees Celsius.",
+          "Roll out the dough on a little flour until it’s about half a centimeter thick.",
+          "Cut out stars, hearts, moons and trees and put them on a baking sheet greased with butter.",
+          "Bake the cookies for about 10 minutes until the edges are light brown. An adult takes the sheet out.",
+          "Let them cool. The little ones cut out shapes, the big ones roll the dough and look after the baking sheets."
+        ],
+        "safetyNote": "Only adults handle the oven, the baking sheet gets very hot. Contains gluten, milk and egg. Don’t snack on the raw dough (raw egg)."
+      }
+    }
+  },
+  {
+    "id": "onion-skin-easter-eggs",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking", "craft"],
+    "ageMin": 4,
+    "ageMax": 12,
+    "durationMin": 45,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "months": [3, 4],
+    "energy": "medium",
+    "cost": 0,
+    "materials": [
+      "egg",
+      "onionSkins",
+      "tapWater",
+      "vinegar",
+      "pot",
+      "stove",
+      "spoon",
+      "paperTowels",
+      "oil"
+    ],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Ostereier mit Zwiebelschalen färben",
+        "summary": "Mit Zwiebelschalen werden Eier ganz ohne gekaufte Farbe goldbraun bis rotbraun.",
+        "steps": [
+          "Sammelt die trockenen Schalen von etwa zehn Zwiebeln, braune oder rote.",
+          "Gebt die Schalen mit einem Liter Wasser und einem Schuss Essig in einen Topf. Ein Erwachsener kocht alles 15 Minuten.",
+          "Legt die Eier mit einem Löffel vorsichtig in den Sud und lasst sie etwa 10 Minuten kochen.",
+          "Lasst die Eier im Sud abkühlen: Je länger sie darin liegen, desto dunkler werden sie.",
+          "Holt die Eier mit dem Löffel heraus und lasst sie auf Küchenpapier trocknen.",
+          "Reibt die trockenen Eier mit ein paar Tropfen Öl ein, dann glänzen sie."
+        ],
+        "safetyNote": "Kochen und heißes Wasser übernehmen Erwachsene. Enthält Ei. Bewahrt die gefärbten Eier im Kühlschrank auf und esst sie innerhalb von ein paar Tagen."
+      },
+      "en": {
+        "title": "Onion Skin Easter Eggs",
+        "summary": "Onion skins dye eggs golden to reddish brown, no store-bought dye needed.",
+        "steps": [
+          "Collect the dry skins of about ten onions, brown or red.",
+          "Put the skins in a pot with one liter of water and a splash of vinegar. An adult boils it all for 15 minutes.",
+          "Carefully lower the eggs into the dye with a spoon and let them boil for about 10 minutes.",
+          "Let the eggs cool in the dye: the longer they stay in, the darker they get.",
+          "Lift the eggs out with the spoon and let them dry on paper towels.",
+          "Rub the dry eggs with a few drops of oil to make them shine."
+        ],
+        "safetyNote": "Adults handle the cooking and the hot water. Contains egg. Keep the dyed eggs in the fridge and eat them within a few days."
+      }
+    }
+  },
+  {
+    "id": "frozen-yogurt-pops",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking"],
+    "ageMin": 3,
+    "ageMax": 10,
+    "durationMin": 15,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "months": [5, 6, 7, 8, 9],
+    "energy": "low",
+    "cost": 0,
+    "materials": ["yogurt", "fruit", "bowl", "fork", "plasticCup", "spoon"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Joghurt-Eis am Stiel",
+        "summary": "Joghurt und Obst in Becher füllen, einen Löffel hinein, und am Abend oder morgen gibt es selbst gemachtes Eis.",
+        "steps": [
+          "Zerdrückt weiches Obst wie Beeren oder Banane mit der Gabel in einer Schüssel.",
+          "Rührt etwa 300 Gramm Joghurt darunter. Wer mag, schichtet Obst und Joghurt abwechselnd.",
+          "Füllt die Masse in kleine Becher, etwa drei Viertel voll.",
+          "Steckt in jeden Becher einen Teelöffel als Stiel.",
+          "Stellt die Becher für mindestens vier Stunden ins Gefrierfach.",
+          "Zum Herauslösen haltet ihr den Becher kurz in der warmen Hand, dann lässt sich das Eis am Löffel herausziehen."
+        ],
+        "safetyNote": "Enthält Milch (Joghurt). Kleine Kinder essen Eis im Sitzen, und Erwachsene sind dabei."
+      },
+      "en": {
+        "title": "Frozen Yogurt Pops",
+        "summary": "Fill cups with yogurt and fruit, stick a spoon in, and tonight or tomorrow you’ll have homemade ice pops.",
+        "steps": [
+          "Mash soft fruit like berries or banana with a fork in a bowl.",
+          "Stir in about 300 grams of yogurt. If you like, layer fruit and yogurt instead.",
+          "Fill the mixture into small cups, about three quarters full.",
+          "Stick a teaspoon into each cup as a handle.",
+          "Put the cups in the freezer for at least four hours.",
+          "To get them out, hold the cup in your warm hand for a moment, then pull the pop out by the spoon."
+        ],
+        "safetyNote": "Contains milk (yogurt). Little children eat ice pops sitting down, with an adult close by."
+      }
+    }
+  },
+  {
+    "id": "baked-apples",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking"],
+    "ageMin": 4,
+    "ageMax": 12,
+    "durationMin": 45,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "months": [10, 11, 12, 1, 2],
+    "energy": "low",
+    "cost": 0,
+    "materials": ["apple", "knife", "raisins", "sugar", "cinnamon", "bowl", "tray", "oven"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Bratäpfel aus dem Ofen",
+        "summary": "Ausgehöhlte Äpfel mit Rosinen und Zimt füllen, backen und warm genießen: Die ganze Wohnung duftet.",
+        "steps": [
+          "Ein Erwachsener heizt den Ofen auf 180 Grad vor und schneidet bei jedem Apfel das Kerngehäuse heraus, sodass ein Loch entsteht.",
+          "Mischt Rosinen, einen Teelöffel Zucker und eine Prise Zimt in einer kleinen Schüssel.",
+          "Die Kinder stopfen die Mischung mit den Fingern in die Äpfel und drücken sie fest.",
+          "Stellt die Äpfel auf ein Backblech oder in eine ofenfeste Form.",
+          "Backt die Äpfel etwa 25 bis 30 Minuten, bis die Schale schrumpelig wird.",
+          "Lasst sie etwas abkühlen, bevor ihr sie esst. Innen bleiben sie lange heiß."
+        ],
+        "safetyNote": "Messer und Backofen nur mit Erwachsenen. Die Füllung wird sehr heiß, lasst sie vor dem Essen gut abkühlen. Rosinen sind für Kinder unter 4 Jahren eine Verschluckgefahr."
+      },
+      "en": {
+        "title": "Oven-Baked Apples",
+        "summary": "Fill hollowed-out apples with raisins and cinnamon, bake them and enjoy them warm: the whole home smells wonderful.",
+        "steps": [
+          "An adult preheats the oven to 180 degrees Celsius and cuts the core out of each apple to make a hole.",
+          "Mix raisins, a teaspoon of sugar and a pinch of cinnamon in a small bowl.",
+          "The children stuff the mixture into the apples with their fingers and press it down.",
+          "Put the apples on a baking sheet or in an ovenproof dish.",
+          "Bake the apples for about 25 to 30 minutes, until the skin gets wrinkly.",
+          "Let them cool a little before eating. They stay hot inside for a long time."
+        ],
+        "safetyNote": "Knife and oven only with adults. The filling gets very hot, so let it cool well before eating. Raisins are a choking hazard for children under 4."
+      }
+    }
+  },
+  {
+    "id": "salt-dough-figures",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft"],
+    "ageMin": 3,
+    "ageMax": 10,
+    "durationMin": 30,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": [
+      "flour",
+      "salt",
+      "oil",
+      "tapWater",
+      "bowl",
+      "fork",
+      "pencils",
+      "tray",
+      "watercolors",
+      "brush"
+    ],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Figuren aus Salzteig",
+        "summary": "Aus Mehl, Salz und Wasser knetet ihr einen Teig, aus dem Tiere, Schalen und Anhänger entstehen.",
+        "steps": [
+          "Mischt in einer Schüssel 2 Tassen Mehl, 1 Tasse Salz, 1 Esslöffel Öl und knapp 1 Tasse Wasser.",
+          "Knetet alles zu einem glatten Teig. Klebt er, kommt etwas Mehl dazu. Bröselt er, etwas Wasser.",
+          "Formt Tiere, Schnecken, kleine Schalen, Buchstaben oder Anhänger. Mit einer Gabel macht ihr Muster und Fell.",
+          "Für Anhänger stecht ihr mit einem Stift ein Loch hinein.",
+          "Legt die Figuren auf ein Blech oder Tablett und lasst sie zwei bis drei Tage an der Luft trocknen.",
+          "Wenn sie hart sind, malt ihr sie mit Wasserfarben an."
+        ],
+        "safetyNote": "Enthält Gluten. Salzteig nicht essen: Die große Menge Salz ist für Kinder und Haustiere gefährlich. Bleibt bei den Kleinen dabei."
+      },
+      "en": {
+        "title": "Salt Dough Figures",
+        "summary": "Knead a dough from flour, salt and water and turn it into animals, bowls and ornaments.",
+        "steps": [
+          "In a bowl, mix 2 cups of flour, 1 cup of salt, 1 tablespoon of oil and just under 1 cup of water.",
+          "Knead it all into a smooth dough. If it’s sticky, add a little flour. If it crumbles, a little water.",
+          "Shape animals, snails, little bowls, letters or ornaments. Use a fork to make patterns and fur.",
+          "For ornaments, poke a hole with a pencil.",
+          "Put the figures on a baking sheet or tray and let them air-dry for two to three days.",
+          "Once they’re hard, paint them with watercolors."
+        ],
+        "safetyNote": "Contains gluten. Don’t eat salt dough: the large amount of salt is dangerous for children and pets. Stay close to the little ones."
+      }
+    }
+  },
+  {
+    "id": "potato-stamps",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft"],
+    "ageMin": 3,
+    "ageMax": 10,
+    "durationMin": 30,
+    "durationMax": 45,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": [
+      "potato",
+      "knife",
+      "pencils",
+      "paperTowels",
+      "watercolors",
+      "brush",
+      "paper",
+      "oldShirt"
+    ],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Kartoffeldruck",
+        "summary": "Ein Erwachsener schnitzt einfache Stempel aus Kartoffeln, und die Kinder drucken damit Muster, Karten und Geschenkpapier.",
+        "steps": [
+          "Ein Erwachsener schneidet große Kartoffeln in der Mitte durch.",
+          "Malt mit einem Stift eine einfache Form auf die Schnittfläche: Herz, Stern, Dreieck, Fisch.",
+          "Der Erwachsene schneidet rund um die Form etwa einen halben Zentimeter tief weg, sodass sie hervorsteht.",
+          "Tupft die Stempel mit Küchenpapier trocken und streicht mit dem Pinsel Wasserfarbe darauf, nicht zu nass.",
+          "Drückt den Stempel fest aufs Papier und hebt ihn gerade wieder ab.",
+          "Druckt Muster, Grußkarten oder großes Geschenkpapier. Wischt den Stempel zwischen den Farben kurz ab."
+        ],
+        "safetyNote": "Die Kartoffeln schnitzen nur Erwachsene mit dem Messer. Zieht alte T-Shirts an, Farbe geht schlecht aus der Kleidung."
+      },
+      "en": {
+        "title": "Potato Stamps",
+        "summary": "An adult carves simple stamps from potatoes, and the children print patterns, cards and wrapping paper.",
+        "steps": [
+          "An adult cuts large potatoes in half.",
+          "Draw a simple shape on the cut surface with a pencil: a heart, a star, a triangle, a fish.",
+          "The adult cuts away about half a centimeter all around the shape so it stands out.",
+          "Dab the stamps dry with a paper towel and brush watercolor paint onto them, not too wet.",
+          "Press the stamp firmly onto the paper and lift it straight up again.",
+          "Print patterns, greeting cards or big sheets of wrapping paper. Wipe the stamp briefly between colors."
+        ],
+        "safetyNote": "Only adults carve the potatoes with the knife. Wear old T-shirts, paint is hard to wash out of clothes."
+      }
+    }
+  },
+  {
+    "id": "story-stones",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft", "stories"],
+    "ageMin": 3,
+    "ageMax": 14,
+    "durationMin": 30,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["flatStones", "watercolors", "brush", "tapWater", "markers", "basket"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Geschichtensteine bemalen",
+        "summary": "Ihr bemalt flache Steine mit Figuren und Dingen und erzählt damit immer neue Geschichten.",
+        "steps": [
+          "Sammelt draußen flache, glatte Steine, etwa so groß wie eine Kinderhand, und wascht sie ab.",
+          "Lasst die Steine trocknen. Dann malt ihr auf jeden ein Bild: eine Sonne, ein Haus, einen Drachen, ein Boot, einen Schlüssel, eine Prinzessin.",
+          "Kleine Kinder malen mit Wasserfarben ganze Steine bunt, Größere zeichnen mit Filzstiften Einzelheiten.",
+          "Legt alle trockenen Steine in einen Korb.",
+          "Zieht reihum einen Stein und erzählt die Geschichte damit weiter: „Es war einmal ein Drache, der fand einen Schlüssel …“",
+          "Hebt die Steine auf. Beim nächsten Mal erzählen sie eine ganz andere Geschichte."
+        ],
+        "safetyNote": "Nehmt nur Steine, die größer sind als eine Kinderfaust, damit sie nicht in den Mund passen."
+      },
+      "en": {
+        "title": "Story Stones",
+        "summary": "Paint figures and objects on flat stones and use them to tell new stories again and again.",
+        "steps": [
+          "Collect flat, smooth stones outside, about the size of a child’s hand, and wash them.",
+          "Let the stones dry. Then paint a picture on each one: a sun, a house, a dragon, a boat, a key, a princess.",
+          "Little ones paint whole stones with watercolors, older kids draw details with markers.",
+          "Put all the dry stones into a basket.",
+          "Take turns drawing a stone and continuing the story with it: “Once upon a time there was a dragon who found a key …”",
+          "Keep the stones. Next time, they’ll tell a completely different story."
+        ],
+        "safetyNote": "Only use stones bigger than a child’s fist so they don’t fit in a mouth."
+      }
+    }
+  },
+  {
+    "id": "shadow-theater",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["stories", "roleplay", "craft"],
+    "ageMin": 4,
+    "ageMax": 12,
+    "durationMin": 30,
+    "durationMax": 60,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": [
+      "cardboardBox",
+      "pencils",
+      "scissors",
+      "tape",
+      "straws",
+      "bedsheet",
+      "chairs",
+      "flashlight"
+    ],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Schattentheater",
+        "summary": "Aus Pappe schneidet ihr Figuren, und mit einer Taschenlampe werden sie auf einem Bettlaken lebendig.",
+        "steps": [
+          "Zeichnet Figuren auf Pappe, zum Beispiel aus einem alten Karton: einen Drachen, eine Katze, ein Haus, einen Baum.",
+          "Schneidet die Figuren aus. Bei dicker Pappe hilft ein Erwachsener.",
+          "Klebt jede Figur mit Klebeband an einen Strohhalm als Griff.",
+          "Hängt ein helles Bettlaken über zwei Stühle oder nehmt eine helle Wand. Dunkelt das Zimmer ab.",
+          "Legt die Taschenlampe hinter die Spieler, sodass sie durch das Laken scheint. Das Publikum sitzt auf der anderen Seite.",
+          "Spielt eine Geschichte vor. Auch Hände werfen tolle Schatten: Hund, Vogel, Hase."
+        ],
+        "safetyNote": "Mit der Schere schneidet ihr nur zusammen mit Erwachsenen. Nehmt nur Taschenlampen, keine Kerzen, und leuchtet niemandem in die Augen."
+      },
+      "en": {
+        "title": "Shadow Theater",
+        "summary": "Cut figures out of cardboard, and a flashlight brings them to life on a bedsheet.",
+        "steps": [
+          "Draw figures on cardboard, from an old box for example: a dragon, a cat, a house, a tree.",
+          "Cut the figures out. With thick cardboard, an adult helps.",
+          "Tape each figure to a straw as a handle.",
+          "Hang a light-colored bedsheet over two chairs or use a pale wall. Darken the room.",
+          "Put the flashlight behind the players so it shines through the sheet. The audience sits on the other side.",
+          "Act out a story. Hands make great shadows too: a dog, a bird, a rabbit."
+        ],
+        "safetyNote": "Only cut with scissors together with an adult. Use flashlights only, no candles, and don’t shine the light into anyone’s eyes."
+      }
+    }
+  },
+  {
+    "id": "roll-your-own-wraps",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking"],
+    "ageMin": 3,
+    "ageMax": 14,
+    "durationMin": 30,
+    "durationMax": 45,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "medium",
+    "cost": 0,
+    "materials": ["tortillas", "cheese", "vegetables", "knife", "bowl", "plate"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Wraps zum Selberrollen",
+        "summary": "Alle Zutaten stehen auf dem Tisch, und jeder rollt sich seinen eigenen Wrap, die Kleinen genauso wie die Großen.",
+        "steps": [
+          "Wascht das Gemüse. Ein Erwachsener schneidet Gurke, Paprika und Möhren in Streifen, größere Kinder helfen mit.",
+          "Schneidet den Käse in dünne Scheiben und stellt alles in Schüsseln auf den Tisch.",
+          "Jeder bekommt einen Teller und einen Wrap und belegt ihn, wie er mag.",
+          "Klappt den unteren Rand ein Stück nach oben und rollt den Wrap von der Seite her fest auf.",
+          "Kleine Kinder belegen nur eine Hälfte und klappen zu, Größere probieren eigene Kombinationen.",
+          "Was übrig bleibt, kommt morgen in die Brotdose."
+        ],
+        "safetyNote": "Gemüse schneiden nur Erwachsene oder Größere mit Erwachsenen daneben. Schneidet Gemüse für kleine Kinder in Streifen, nicht in runde Stücke. Enthält Gluten (Wraps) und Milch (Käse)."
+      },
+      "en": {
+        "title": "Roll Your Own Wraps",
+        "summary": "All the fillings go on the table, and everyone rolls their own wrap, little ones and big ones alike.",
+        "steps": [
+          "Wash the vegetables. An adult cuts cucumber, bell pepper and carrots into strips, older kids help.",
+          "Slice the cheese thinly and put everything in bowls on the table.",
+          "Everyone gets a plate and a wrap and fills it however they like.",
+          "Fold the bottom edge up a little and roll the wrap up tightly from the side.",
+          "Little ones only fill one half and fold it over, older kids try out their own combinations.",
+          "Leftovers go into tomorrow’s lunch box."
+        ],
+        "safetyNote": "Only adults cut the vegetables, or older kids with an adult right beside them. Cut vegetables for small children into strips, not round pieces. Contains gluten (wraps) and milk (cheese)."
+      }
+    }
+  },
+  {
+    "id": "herb-dip-with-veggie-sticks",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking"],
+    "ageMin": 3,
+    "ageMax": 10,
+    "durationMin": 15,
+    "durationMax": 25,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": [
+      "herbs",
+      "scissors",
+      "quark",
+      "salt",
+      "tapWater",
+      "bowl",
+      "spoon",
+      "vegetables",
+      "knife"
+    ],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Kräuterquark mit Gemüsesticks",
+        "summary": "Kräuter schnippeln, in Quark rühren und Gemüse eintunken: ein schneller Snack, bei dem schon Kleine mithelfen.",
+        "steps": [
+          "Wascht die Kräuter, zum Beispiel Schnittlauch oder Petersilie, und schüttelt sie trocken.",
+          "Die Kinder schneiden die Kräuter mit einer Schere in kleine Stückchen direkt in eine Schüssel.",
+          "Gebt 250 Gramm Quark und eine Prise Salz dazu und rührt alles glatt. Ist er zu fest, hilft ein Löffel Wasser.",
+          "Ein Erwachsener schneidet Möhren, Gurke und Paprika in Sticks.",
+          "Probiert: Fehlt noch Salz, oder dürfen es mehr Kräuter sein?",
+          "Tunkt die Gemüsesticks in den Quark und lasst es euch schmecken."
+        ],
+        "safetyNote": "Das Messer benutzen nur Erwachsene, die Schere nur mit Erwachsenen daneben. Enthält Milch (Quark)."
+      },
+      "en": {
+        "title": "Herb Dip with Veggie Sticks",
+        "summary": "Snip herbs, stir them into quark and dip vegetables: a quick snack even little ones can help with.",
+        "steps": [
+          "Wash the herbs, chives or parsley for example, and shake them dry.",
+          "The children snip the herbs into small pieces with scissors, straight into a bowl.",
+          "Add 250 grams of quark and a pinch of salt and stir until smooth. If it’s too thick, add a spoonful of water.",
+          "An adult cuts carrots, cucumber and bell pepper into sticks.",
+          "Taste: does it need more salt, or a few more herbs?",
+          "Dip the veggie sticks and enjoy."
+        ],
+        "safetyNote": "Only adults use the knife, and the scissors only with an adult close by. Contains milk (quark)."
+      }
+    }
+  }
+]

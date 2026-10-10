@@ -25,7 +25,7 @@ import {
   getAllergens,
   type AllergenNames,
 } from '../src/features/activities/safetyCheck.ts';
-import { interestKeys } from '../src/features/profiles/preferences.ts';
+import { dislikeKeys, interestKeys } from '../src/features/profiles/preferences.ts';
 
 const root = new URL('../', import.meta.url);
 const errors: string[] = [];
@@ -97,6 +97,18 @@ for (const file of files) {
   }
 }
 
+// Keine doppelten Ideen: Gleicher Titel in derselben Sprache ist ein Fehler.
+for (const language of ['de', 'en']) {
+  const seenTitles = new Map<string, string>(); // Titel (klein geschrieben) -> id
+  for (const activity of all) {
+    const key = activity.translations[language]?.title.trim().toLowerCase();
+    if (!key) continue;
+    const other = seenTitles.get(key);
+    if (other) errors.push(`${activity.id}: Titel (${language}) gibt es schon bei ${other}`);
+    else seenTitles.set(key, activity.id);
+  }
+}
+
 // --- Ausgabe -----------------------------------------------------------------------------------
 function title(activity: Activity): string {
   return activity.translations.de?.title ?? activity.id;
@@ -114,6 +126,7 @@ const columns = [
   { head: 'Ort', width: 8 },
   { head: 'Energie', width: 7 },
   { head: 'Tageszeit', width: 20 },
+  { head: 'Monate', width: 14 },
   { head: 'Status', width: 8 },
 ];
 
@@ -133,6 +146,7 @@ for (const activity of all) {
     activity.setting,
     activity.energy,
     activity.dayParts?.join(', ') ?? 'jederzeit',
+    activity.months?.join(', ') ?? 'ganzjährig',
     activity.status,
   ]);
 }
@@ -147,13 +161,31 @@ count('  Energie   ', energyKeys, (a) => a.energy);
 count('  Ort       ', settingKeys, (a) => a.setting);
 console.log(`  Wetterunabhängig (needsDry false): ${all.filter((a) => !a.weather.needsDry).length}`);
 console.log(`  Mit Tageszeit: ${all.filter((a) => a.dayParts).length}`);
+console.log(`  Mit Monaten (saisonal): ${all.filter((a) => a.months).length}`);
 console.log(`  Für Geschwister (siblingFriendly): ${all.filter((a) => a.siblingFriendly).length}`);
+// Geschwister mit großem Altersabstand: geschwistertauglich und mindestens 10 Jahre Spanne (z. B. 3–14).
+const wideSiblings = all.filter((a) => a.siblingFriendly && a.ageMax - a.ageMin >= 10);
+console.log(`    davon mit 10+ Jahren Altersspanne: ${wideSiblings.length}`);
+const howMany = (test: (a: Activity) => boolean) => all.filter(test).length;
+console.log(`  Drinnen oder beides: ${howMany((a) => a.setting !== 'outdoor')}`);
+console.log(`  Wenig Elternenergie: ${howMany((a) => a.energy === 'low')}`);
+console.log(
+  `  Kurz: passt in 30 Min. ${howMany((a) => a.durationMin <= 30)}, ganz fertig in 30 Min. ${howMany((a) => a.durationMax <= 30)}`,
+);
+console.log(
+  `  Kleinkinder: ab 0 Jahren ${howMany((a) => a.ageMin === 0)}, für 1-Jährige ${howMany((a) => a.ageMin <= 1)}, für 2-Jährige ${howMany((a) => a.ageMin <= 2)}`,
+);
+console.log(
+  `  Jugendliche: für 14-Jährige ${howMany((a) => a.ageMax >= 14)}, für 16-Jährige ${howMany((a) => a.ageMax >= 16)}`,
+);
 if (all.length > 0) {
   const durations = all.flatMap((a) => [a.durationMin, a.durationMax]);
   console.log(`  Alter: ${Math.min(...all.map((a) => a.ageMin))}–${Math.max(...all.map((a) => a.ageMax))} Jahre`);
   console.log(`  Dauer: ${Math.min(...durations)}–${Math.max(...durations)} Minuten`);
 }
-const unusedInterests = interestKeys.filter((key) => !all.some((a) => a.topics.includes(key)));
+const topicCount = (key: string) => all.filter((a) => (a.topics as string[]).includes(key)).length;
+console.log(`  Themen: ${dislikeKeys.map((key) => `${key} ${topicCount(key)}`).join(', ')}`);
+const unusedInterests = interestKeys.filter((key) => topicCount(key) === 0);
 console.log(`  Interessen ohne Aktivität: ${unusedInterests.length > 0 ? unusedInterests.join(', ') : 'keine'}`);
 
 const withAllergens = all.filter((a) => getAllergens(a).length > 0);

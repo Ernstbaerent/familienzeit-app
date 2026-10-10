@@ -39,6 +39,7 @@ Nur Sicherheit und Machbarkeit. Diese Regeln werden **nie** aufgeweicht.
 | `age`       | Die Aktivität muss für **jedes** ausgewählte Kind passen: `ageMin` ≤ Alter ≤ `ageMax`, Alter in vollen Jahren. |
 | `time`      | `durationMin` ist länger als die verfügbare Zeit. Passt die kürzeste Variante, ist die Aktivität machbar. Anfahrt gibt es erst mit Orten (M10). |
 | `dayPart`   | Die Aktivität hat `dayParts` und die Tageszeit ist nicht dabei. Ohne `dayParts` passt sie immer. |
+| `month`     | Die Aktivität hat `months` und der heutige Monat ist nicht dabei. Ohne `months` passt sie das ganze Jahr. Der Monat kommt aus dem Datum (`request.now`), es gibt keine Auswahl dafür. |
 | `danger`    | Gewitter und `setting: 'outdoor'`. `both` bleibt, weil man es drinnen machen kann. |
 | `notDry`    | `weather.needsDry` und es regnet oder gewittert. |
 | `notApproved` | Sicherheitsnetz: nur `status: 'approved'` (filtert `loadActivities()` schon). |
@@ -112,11 +113,15 @@ npx expo lint
 `suggest.test.ts` prüft die Regeln einzeln, typische Fälle mit einem festen Mini-Katalog
 (Regen + Kleinkind, Gewitter, 30 Min. + müde, Baby + Teenager, Abend, Interessen und Abneigungen)
 und alle harten Ausschlüsse mit den echten Aktivitäten aus `data/` für über tausend Kombinationen.
+Ein weiterer Test spielt mit den echten Aktivitäten alle 12 Monate durch: kein Vorschlag außerhalb seiner Monate,
+und für ein Kind mit 5 Jahren und 1 Stunde gibt es in jedem Monat, bei jedem Wetter und zu jeder Tageszeit mindestens 3 Ideen.
 Diese letzten Tests prüfen nur Regeln, keine einzelnen IDs. Sie laufen also auch, wenn sich die Aktivitäten ändern.
 
 Von Hand: `npx expo start`, mit Expo Go öffnen, „Was machen wir?“ antippen und z. B. ausprobieren:
 
 - Gewitter: keine Ideen für draußen (Pfützen-Forscher, Waldtag mit Picknick, Draußen-Olympiade, Schnitzeljagd fehlen)
-- Abend + Kind ab 6: „Sterne beobachten“ taucht auf, morgens nie
+- Abend + Kind ab 6: „Sterne beobachten“ taucht auf (nur September bis März), morgens nie
+- Monate: Im Oktober können „Kastanientiere“, „Laterne aus einer Papiertüte“ und „Bratäpfel“ kommen,
+  „Plätzchen ausstechen“ und „Ostereier färben“ nie (Monat kommt aus dem Datum des Handys)
 - Baby und Teenager zusammen: Hinweis statt Vorschläge
 - „Andere Vorschläge“ mehrmals: nach der letzten Gruppe kommt der Hinweis „von vorn“

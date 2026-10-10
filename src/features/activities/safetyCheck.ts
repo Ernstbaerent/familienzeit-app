@@ -6,10 +6,10 @@
 // Im Zweifel fällt eine Aktivität durch und bleibt `draft`, nie umgekehrt.
 
 import type { Activity } from './activities.ts';
-import { getMaterialInfo, type AllergenKey, type HazardKey } from './materials.ts';
+import { getMaterialInfo, type AllergenKey, type HazardKey, type MaterialKey } from './materials.ts';
 
 // Gefahren, bei denen der Hinweis „mit Erwachsenen“ Pflicht ist.
-const adultHazards: readonly HazardKey[] = ['sharp', 'heat', 'fire', 'water'];
+const adultHazards: readonly HazardKey[] = ['sharp', 'heat', 'fire', 'water', 'electric'];
 // Gefahren, die unter 3 Jahren nie vorkommen dürfen.
 const notUnderThree: readonly HazardKey[] = ['sharp', 'heat', 'fire'];
 
@@ -20,6 +20,14 @@ const maxAgeSpan = 12; // z. B. 4–16; „für alle von 0 bis 16“ ist selten 
 // Formulierungen, nach denen die Prüfung in den Hinweisen sucht.
 const adultPhrase: Record<string, RegExp> = { de: /Erwachsene/i, en: /adult/i };
 const wholeTimePhrase: Record<string, RegExp> = { de: /die ganze Zeit/i, en: /the whole time/i };
+// Punkt 6: nur batteriebetriebene Geräte ohne Batterien, nie mit Netzstecker.
+const batteryPhrase: Record<string, RegExp> = { de: /Batterie/i, en: /batter/i };
+const mainsPlugPhrase: Record<string, RegExp> = { de: /Netzstecker/i, en: /plug/i };
+// Punkt 7: Licht in Papier nur mit LED, keine Kerze.
+const ledPhrase: Record<string, RegExp> = { de: /LED/, en: /LED/ };
+const candlePhrase: Record<string, RegExp> = { de: /Kerze/i, en: /candle/i };
+// Material, das Licht in Laternen und Papier bringt (Punkt 7).
+const paperLight: MaterialKey = 'ledLight';
 
 const checkedLanguages = ['de', 'en'] as const;
 
@@ -103,6 +111,34 @@ export function checkSafety(activity: Activity, allergenNames: AllergenNames = {
   }
   if (activity.ageMax - activity.ageMin > maxAgeSpan) {
     problems.push(`Punkt 5: Altersspanne über ${maxAgeSpan} Jahre ist nicht realistisch`);
+  }
+
+  // 6. Elektrogeräte aufschrauben: nur kleine batteriebetriebene Geräte, Batterien vorher heraus,
+  //    nie Geräte mit Netzstecker (auch ausgesteckt kann darin gefährliche Spannung gespeichert sein).
+  if (hazards.includes('electric')) {
+    for (const language of checkedLanguages) {
+      const text = note(language) ?? '';
+      if (!batteryPhrase[language].test(text) || !mainsPlugPhrase[language].test(text)) {
+        problems.push(
+          `Punkt 6: Hinweis (${language}) muss sagen: nur batteriebetriebene Geräte, Batterien vorher heraus, nie mit Netzstecker`,
+        );
+      }
+    }
+  }
+
+  // 7. Licht in Papier nur mit LED: Feuer und leicht brennbares Material nie zusammen,
+  //    und wer ein LED-Licht nutzt, sagt ausdrücklich „keine Kerze“.
+  const flammable = activity.materials.filter((key) => getMaterialInfo(key).flammable);
+  if (hazards.includes('fire') && flammable.length > 0) {
+    problems.push(`Punkt 7: Feuer zusammen mit brennbarem Material (${flammable.join(', ')}), nur LED erlaubt`);
+  }
+  if (activity.materials.includes(paperLight)) {
+    for (const language of checkedLanguages) {
+      const text = note(language) ?? '';
+      if (!ledPhrase[language].test(text) || !candlePhrase[language].test(text)) {
+        problems.push(`Punkt 7: Hinweis (${language}) muss sagen: nur LED, keine Kerze`);
+      }
+    }
   }
 
   return problems;

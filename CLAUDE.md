@@ -99,6 +99,7 @@ Umgesetzt in `src/features/suggestions/`, Gewichte und Details in `docs/suggesti
 - nicht altersgerecht für mindestens ein ausgewähltes Kind
 - dauert länger als die verfügbare Zeit (inkl. Anfahrt)
 - passt nicht zur Tageszeit (`dayParts` der Aktivität)
+- passt nicht zum Monat (`months` der Aktivität, z. B. Plätzchen nur im November und Dezember)
 - draußen bei Gefahr (Gewitter, Sturm, Unwetterwarnung)
 - braucht Trockenheit (`needsDry`), es regnet oder gewittert
 - Kurse oder Voranmeldung über heute hinaus
@@ -129,6 +130,7 @@ type Activity = {
   setting: 'indoor' | 'outdoor' | 'both';
   weather: { needsDry: boolean; betterInSun: boolean };
   dayParts?: ('morning' | 'afternoon' | 'evening')[];   // freiwillig: nur zu diesen Tageszeiten; fehlt = jederzeit
+  months?: number[];         // freiwillig: nur in diesen Monaten (1 = Januar … 12 = Dezember); fehlt = ganzes Jahr
   energy: 'low' | 'medium' | 'high';   // Energie, die Eltern brauchen
   cost: 0 | 1 | 2;           // 0 = kostenlos, 1 = wenig, 2 = mehr
   materials: MaterialKey[];  // Schlüssel aus materials.ts (mit Gefahren und Allergenen), übersetzt über locales
@@ -137,7 +139,6 @@ type Activity = {
   source: 'ai' | 'manual';
   createdAt: string;
   image?: string;            // freiwillig: Web-Adresse; ohne Bild zeigt die App das Symbol der Kategorie
-  isSample?: true;           // Beispieldaten (`data/sample-activities.json`), später durch die echte Datenbank ersetzen
 };
 ```
 
@@ -162,8 +163,8 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
 - [x] **M3 Kinderprofile:** Einstieg ohne Konto, mehrere Kinder anlegen/bearbeiten, lokal speichern
 - [x] **M4 Aktivitäten:** Datenmodell, 20 Beispiel-Aktivitäten in `data/`, lokal laden
 - [x] **M5 Vorschläge:** Zeit + Energie wählen, Vorschlagslogik mit Tests, 3 Vorschläge anzeigen
-- [ ] **M5b Startbestand Aktivitäten:** Claude Code schreibt weitere Aktivitäten vollständig in eigenen Worten (Titel, Kurzbeschreibung, Schritte, Material, Altersangaben, Sicherheitshinweise, Deutsch und Englisch), in Paketen zu je 20–25, bis mindestens 100 erreicht sind. Ideen dürfen bekannte Klassiker sein, Texte werden nie von Websites übernommen. Jede Aktivität durchläuft nach dem Schreiben die Sicherheits-Checkliste (`docs/sicherheits-checkliste.md`); nur wer besteht, wird `approved`. Bilder sind nicht Teil von M5b
-- [ ] **M6 Wetter und Standort:** Bright Sky und Standortabfrage in die Vorschlagslogik einbinden
+- [x] **M5b Startbestand Aktivitäten:** Claude Code schreibt weitere Aktivitäten vollständig in eigenen Worten (Titel, Kurzbeschreibung, Schritte, Material, Altersangaben, Sicherheitshinweise, Deutsch und Englisch), in Paketen zu je 20–25, bis mindestens 100 erreicht sind. Ideen dürfen bekannte Klassiker sein, Texte werden nie von Websites übernommen. Jede Aktivität durchläuft nach dem Schreiben die Sicherheits-Checkliste (`docs/sicherheits-checkliste.md`); nur wer besteht, wird `approved`. Bilder sind nicht Teil von M5b
+- [ ] **M6 Wetter und Standort:** Bright Sky und Standortabfrage in die Vorschlagslogik einbinden. Danach Aktivitäten für Schnee ergänzen (in M5b bewusst weggelassen, weil das Wetter noch keinen Schnee kennt)
 - [ ] **M7 Details und Feedback:** Detailansicht, Daumen hoch/runter, Verlauf lokal
 - [ ] **M8 Supabase:** Aktivitäten aus der Datenbank laden (nur `approved`), Offline-Cache
 - [ ] **M9 KI-Wochenlauf:** Generator-Skript, GitHub Action, `activity_ideas`. Der Wochenlauf ergänzt laufend neue Aktivitäten zum Bestand aus M5b
@@ -198,3 +199,4 @@ Vorschläge für einen anderen Ort (z. B. Urlaubsort).
 - 2026-10-10 – M4 abgeschlossen: Datenmodell in `src/features/activities/`, 20 Beispiele in `data/sample-activities.json` (alle `approved`, aber als Beispieldaten markiert: `isSample`, IDs `sample-…`), Details in `docs/activities.md`. Neue Felder gegenüber dem Entwurf: `topics` (gleiche Schlüssel wie Interessen/Abneigungen, damit M5 zuordnen kann), `dayParts` (freiwillig, Tageszeit; fehlt = jederzeit), `image` (freiwillig; ohne Bild später Kategorie-Symbol), `isSample`. Material ist eine feste Liste mit Gefahren und Allergenen (`materials.ts`); daraus prüft `npm run activities:check` die Sicherheits-Checkliste. Dafür ist `allowImportingTsExtensions` in `tsconfig.json` gesetzt, damit das Skript Code aus `src/` nutzen kann. Jest kommt weiter mit M5
 - 2026-10-10 – Entscheidung zu Aktivitäten: Keine Freigabe durch Ani. Es gilt die Sicherheits-Checkliste (`docs/sicherheits-checkliste.md`) für M5b und den KI-Wochenlauf; bestanden = `approved`, sonst bleibt es `draft`. Vor der Beta (M12) liest ein Mensch alle Aktivitäten einmal durch. Team-Zeile: Ani macht Design und Ideen
 - 2026-10-10 – M5 abgeschlossen: „Was machen wir?“ (`app/suggestions/`) mit Kindern (alle vorausgewählt), Zeit (30 Min./1 Std./2 Std./halber Tag = 240 Min.), Energie (freiwillig) und 3 Karten mit „Andere Vorschläge“. Details in `docs/suggestions.md`. Entscheidungen: Tageszeit (`dayParts`) und `needsDry` bei Regen/Gewitter sind harte Ausschlüsse (Machbarkeit; „Sortieren statt aussortieren“ zielt auf zu wenige Orte auf dem Land, bei Regen gibt es genug für drinnen). Zeit schließt nur aus, wenn schon `durationMin` nicht passt. Bei Gewitter bleibt `both` (drinnen machbar). Tageszeit-Grenzen: Morgen ab 5, Nachmittag ab 12, Abend ab 17 Uhr. Abwechslung über Abzug je gleicher Kategorie in der Dreiergruppe. Weniger als 3 Treffer: vorhandene zeigen plus Hinweis, Tipps nur, wenn sie wirklich helfen. Wetter und Tageszeit sind bis M6 eine Test-Auswahl, alle Stellen mit `TEST (M6)` markiert. Neue Pakete: `@expo/vector-icons` (Ionicons, Linien-Stil), `jest`, `jest-expo`, `@types/jest`. In `tsconfig.json` steht `"types": ["jest"]`, weil TypeScript 6 Typ-Pakete nicht mehr automatisch einbindet. Gemeinsamer Baustein `Section` in `src/components/`
+- 2026-10-10 – M5b abgeschlossen: 104 Aktivitäten (20 aus M4 + 4 Pakete à 21 in `data/activities-m5b-*.json`), alle `approved`, Verteilung in `docs/activities.md`. Die 20 aus M4 sind jetzt echter Bestand (Datei `data/activities-m4.json`, ohne `isSample`, IDs ohne `sample-`; das Feld `isSample` ist aus dem Datenmodell entfernt). Neues freiwilliges Feld `months` (1–12, fehlt = ganzes Jahr) als harter Ausschluss `month`, Monat aus dem Datum. Monate statt Jahreszeiten, weil Ostern, Advent und Laternenzeit nicht in eine Jahreszeit passen. Waldtag mit Picknick April–Oktober, Sterne beobachten September–März. Sicherheits-Checkliste um Punkt 6 (Elektrogeräte: nur klein und batteriebetrieben, Batterien vorher heraus, nie mit Netzstecker, Fernseher, Mikrowellen, Monitore, Netzteile) und Punkt 7 (Licht in Papier nur mit LED, nie Kerze; Feuer und brennbares Material nie zusammen) erweitert, mit Tests. Neue Materialien: `tapWater` (Leitungswasser in kleinen Mengen, Wasser zum Spielen bleibt `water`), Vogelfutter mit Allergenen Erdnüsse und Nüsse, insgesamt 53 neue (jetzt 122). Prüfskript zählt die Verteilung und meldet doppelte Titel. Schnee-Ideen erst nach M6

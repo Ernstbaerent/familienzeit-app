@@ -3,13 +3,14 @@
 // Diese Regeln werden NIE aufgeweicht, auch wenn dadurch weniger als 3 Vorschläge übrig bleiben.
 
 import type { Activity } from '../activities/activities';
-import { getAgeInYears, type SuggestionRequest } from './request';
+import { getAgeInYears, getMonthNumber, type SuggestionRequest } from './request';
 
 export type ExclusionReason =
   | 'notApproved' // Sicherheitsnetz: nur freigegebene Aktivitäten (loadActivities filtert schon)
   | 'age' // nicht altersgerecht für mindestens ein ausgewähltes Kind
   | 'time' // dauert länger als die verfügbare Zeit
   | 'dayPart' // passt nicht zur Tageszeit
+  | 'month' // passt nicht zum Monat (z. B. Plätzchen nur im November und Dezember)
   | 'danger' // draußen bei Gewitter
   | 'notDry'; // braucht trockenes Wetter, es regnet oder gewittert
 
@@ -34,6 +35,9 @@ export function getExclusionReason(
 
   // Ohne `dayParts` passt eine Aktivität zu jeder Tageszeit.
   if (activity.dayParts && !activity.dayParts.includes(request.dayPart)) return 'dayPart';
+
+  // Ohne `months` passt eine Aktivität das ganze Jahr. Der Monat kommt aus dem heutigen Datum.
+  if (activity.months && !activity.months.includes(getMonthNumber(request.now))) return 'month';
 
   // Bei Gewitter nichts draußen. `both` bleibt, weil man es drinnen machen kann.
   if (request.weather === 'thunderstorm' && activity.setting === 'outdoor') return 'danger';

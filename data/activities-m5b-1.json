@@ -1,0 +1,930 @@
+[
+  {
+    "id": "i-spy",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["games"],
+    "ageMin": 3,
+    "ageMax": 14,
+    "durationMin": 10,
+    "durationMax": 20,
+    "setting": "both",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": [],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Ich sehe was, was du nicht siehst",
+        "summary": "Das Ratespiel, das überall geht: im Wohnzimmer, im Wartezimmer oder unterwegs.",
+        "steps": [
+          "Eine Person sucht sich still etwas aus, das alle sehen können.",
+          "Sie sagt: „Ich sehe was, was du nicht siehst, und das ist … rot.“",
+          "Die anderen raten reihum. Wer es errät, sucht sich als Nächstes etwas aus.",
+          "Für die Kleinen bleibt es bei Farben. Größere Kinder nennen den Anfangsbuchstaben oder die Form („… und das ist rund“).",
+          "Schwerer wird es mit zwei Hinweisen: „… und das ist weich und kleiner als ein Buch.“"
+        ]
+      },
+      "en": {
+        "title": "I Spy",
+        "summary": "The guessing game that works anywhere: in the living room, in a waiting room or on the go.",
+        "steps": [
+          "One person secretly picks something everyone can see.",
+          "They say: “I spy with my little eye something that is … red.”",
+          "The others take turns guessing. Whoever gets it right picks the next thing.",
+          "For little ones, stick to colors. Older kids use the first letter or the shape (“… something round”).",
+          "Make it harder with two clues: “… something soft and smaller than a book.”"
+        ]
+      }
+    }
+  },
+  {
+    "id": "packing-suitcase",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["games"],
+    "ageMin": 5,
+    "ageMax": 14,
+    "durationMin": 10,
+    "durationMax": 20,
+    "setting": "both",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": [],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Ich packe meinen Koffer",
+        "summary": "Ein Merkspiel ohne Material: Der Koffer wird mit jeder Runde voller und lustiger.",
+        "steps": [
+          "Die erste Person beginnt: „Ich packe meinen Koffer und nehme mit: eine Zahnbürste.“",
+          "Die nächste wiederholt alles und legt etwas dazu: „… eine Zahnbürste und einen Elefanten.“",
+          "So geht es reihum. Wer etwas vergisst oder verdreht, packt einfach einen neuen Koffer. Niemand scheidet aus.",
+          "Für Kleine: Zu jedem Ding gibt es eine Bewegung, zum Beispiel Zähneputzen oder Rüssel schwingen. Das hilft beim Merken.",
+          "Für Größere: Die Dinge kommen nach dem Alphabet, A wie Apfel, B wie Badehose …"
+        ]
+      },
+      "en": {
+        "title": "I’m Packing My Suitcase",
+        "summary": "A memory game with no materials: the suitcase gets fuller and sillier every round.",
+        "steps": [
+          "The first person starts: “I’m packing my suitcase and I’m taking a toothbrush.”",
+          "The next person repeats everything and adds something: “… a toothbrush and an elephant.”",
+          "Keep going in turns. If someone forgets or mixes things up, they simply pack a new suitcase. Nobody is out.",
+          "For little ones: give every item a gesture, like brushing teeth or swinging a trunk. It helps them remember.",
+          "For older kids: the items follow the alphabet, A for apple, B for blanket …"
+        ]
+      }
+    }
+  },
+  {
+    "id": "charades",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["games", "roleplay"],
+    "ageMin": 5,
+    "ageMax": 16,
+    "durationMin": 15,
+    "durationMax": 30,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["paper", "pencils", "bowl"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Pantomime raten",
+        "summary": "Ohne ein Wort zu sagen, spielt ihr Tiere, Berufe und Alltagsszenen vor, und die anderen raten.",
+        "steps": [
+          "Schreibt oder malt Begriffe auf kleine Zettel: Tiere, Berufe, Sportarten oder Dinge wie Zähneputzen und Staubsaugen.",
+          "Faltet die Zettel und legt sie in eine Schüssel.",
+          "Wer dran ist, zieht einen Zettel und spielt den Begriff vor, ganz ohne Worte und Geräusche.",
+          "Die anderen raten. Wer richtig rät, spielt als Nächstes.",
+          "Kinder, die noch nicht lesen, bekommen den Begriff ins Ohr geflüstert oder ziehen ein gemaltes Bild.",
+          "Für Größere: Filmtitel, Bücher oder Sprichwörter, mit einer Minute Zeit pro Begriff."
+        ]
+      },
+      "en": {
+        "title": "Charades",
+        "summary": "Act out animals, jobs and everyday scenes without saying a word while the others guess.",
+        "steps": [
+          "Write or draw ideas on small slips of paper: animals, jobs, sports, or things like brushing teeth and vacuuming.",
+          "Fold the slips and put them in a bowl.",
+          "Whoever’s turn it is draws a slip and acts it out, with no words and no sounds.",
+          "The others guess. Whoever guesses right acts next.",
+          "Children who can’t read yet get the word whispered in their ear or draw a picture slip.",
+          "For older kids: film titles, books or sayings, with one minute per word."
+        ]
+      }
+    }
+  },
+  {
+    "id": "story-chain",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["stories", "games"],
+    "ageMin": 4,
+    "ageMax": 16,
+    "durationMin": 10,
+    "durationMax": 20,
+    "setting": "both",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": [],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Fortsetzungsgeschichte",
+        "summary": "Jeder sagt einen Satz, und gemeinsam entsteht eine Geschichte, die vorher niemand kannte.",
+        "steps": [
+          "Setzt euch zusammen hin, auf dem Sofa, im Auto oder beim Warten.",
+          "Eine Person beginnt mit einem Satz, zum Beispiel: „Es war einmal ein Hund, der Angst vor Pfützen hatte.“",
+          "Reihum sagt jede Person den nächsten Satz. Alles ist erlaubt, nur nicht zurückspulen.",
+          "Kleine Kinder dürfen auch nur ein Wort beisteuern, die anderen bauen es ein.",
+          "Würzt die Geschichte: Jeder dritte Satz beginnt mit „Plötzlich …“.",
+          "Nach ein paar Runden entscheidet die jüngste Person, wie die Geschichte endet."
+        ]
+      },
+      "en": {
+        "title": "Story Chain",
+        "summary": "Everyone adds one sentence, and together you make up a story nobody knew before.",
+        "steps": [
+          "Sit together, on the sofa, in the car or while you wait.",
+          "One person starts with a sentence, for example: “Once upon a time there was a dog who was afraid of puddles.”",
+          "Take turns adding the next sentence. Anything goes, just no rewinding.",
+          "Little children can add a single word, and the others build it in.",
+          "Spice it up: every third sentence starts with “Suddenly …”.",
+          "After a few rounds, the youngest person decides how the story ends."
+        ]
+      }
+    }
+  },
+  {
+    "id": "fold-over-monsters",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["craft", "games"],
+    "ageMin": 4,
+    "ageMax": 16,
+    "durationMin": 10,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["paper", "pencils"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Faltmonster zeichnen",
+        "summary": "Jeder zeichnet einen Teil eines Fantasiewesens, ohne den Rest zu sehen. Beim Aufklappen gibt es viel zu lachen.",
+        "steps": [
+          "Faltet ein Blatt Papier quer in drei gleich breite Streifen und klappt es wieder auf.",
+          "Die erste Person zeichnet oben einen Kopf, ob Tier, Mensch oder Monster. Der Hals ragt ein kleines Stück in den mittleren Streifen.",
+          "Knickt den oberen Streifen nach hinten, sodass nur noch die Halsenden zu sehen sind, und gebt das Blatt weiter.",
+          "Die nächste Person zeichnet den Bauch mit Armen, knickt um und gibt weiter. Die dritte zeichnet Beine und Füße.",
+          "Klappt das Blatt auf und gebt eurem Monster einen Namen.",
+          "Mit mehr Leuten nehmt ihr mehrere Blätter gleichzeitig, sodass alle immer etwas zu zeichnen haben."
+        ]
+      },
+      "en": {
+        "title": "Fold-Over Monsters",
+        "summary": "Everyone draws one part of a creature without seeing the rest. Unfolding it gets plenty of laughs.",
+        "steps": [
+          "Fold a sheet of paper crosswise into three equal strips and open it again.",
+          "The first person draws a head at the top, animal, human or monster. Let the neck stick out a little into the middle strip.",
+          "Fold the top strip back so only the ends of the neck show, and pass the sheet on.",
+          "The next person draws a body with arms, folds it and passes it on. The third draws legs and feet.",
+          "Unfold the sheet and give your monster a name.",
+          "With more people, use several sheets at once so everyone always has something to draw."
+        ]
+      }
+    }
+  },
+  {
+    "id": "what-is-missing",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["games"],
+    "ageMin": 4,
+    "ageMax": 12,
+    "durationMin": 10,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["tray", "towel", "socks", "pencils", "apple", "woodenSpoon"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Was fehlt? (Kim-Spiel)",
+        "summary": "Ein Blick aufs Tablett, Tuch drüber, und dann die Frage: Was ist verschwunden?",
+        "steps": [
+          "Legt 6 bis 10 Dinge aus dem Haushalt auf ein Tablett, zum Beispiel eine Socke, einen Stift, einen Apfel und einen Kochlöffel.",
+          "Alle schauen sich die Sachen eine Minute lang genau an.",
+          "Deckt das Tablett mit einem Handtuch zu. Eine Person nimmt heimlich ein Ding weg.",
+          "Tuch ab: Was fehlt? Wer es weiß, darf als Nächstes etwas verschwinden lassen.",
+          "Leichter wird es mit weniger Dingen. Schwerer mit mehr Dingen, oder ihr vertauscht nur zwei Sachen."
+        ]
+      },
+      "en": {
+        "title": "What’s Missing? (Kim’s Game)",
+        "summary": "One look at the tray, cover it up, and then the question: what has disappeared?",
+        "steps": [
+          "Put 6 to 10 household things on a tray, for example a sock, a pencil, an apple and a wooden spoon.",
+          "Everyone takes a good look at them for one minute.",
+          "Cover the tray with a towel. One person secretly takes one thing away.",
+          "Towel off: what’s missing? Whoever knows gets to make something disappear next.",
+          "Fewer things make it easier. More things make it harder, or just swap two of them around."
+        ]
+      }
+    }
+  },
+  {
+    "id": "house-of-cards",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "game",
+    "topics": ["building", "games"],
+    "ageMin": 7,
+    "ageMax": 16,
+    "durationMin": 15,
+    "durationMax": 30,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["playingCards"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Kartenhaus bauen",
+        "summary": "Mit ruhiger Hand und viel Geduld baut ihr aus Spielkarten Türme, die beim kleinsten Hauch einstürzen.",
+        "steps": [
+          "Sucht euch einen Platz ohne Luftzug, am besten auf einem Teppich, damit die Karten nicht rutschen.",
+          "Lehnt zwei Karten oben gegeneinander, sodass ein Dach wie ein umgedrehtes V entsteht.",
+          "Baut zwei oder drei solcher Dächer nebeneinander und legt flache Karten als Decke darüber.",
+          "Darauf kommt das nächste Stockwerk, mit einem Dach weniger.",
+          "Wer schafft die meisten Stockwerke? Jüngere Kinder bauen flache Mauern und dürfen am Ende alles umpusten."
+        ]
+      },
+      "en": {
+        "title": "Build a House of Cards",
+        "summary": "With steady hands and lots of patience, build towers of playing cards that tumble at the slightest breath.",
+        "steps": [
+          "Find a spot without drafts, ideally on a rug so the cards don’t slide.",
+          "Lean two cards against each other at the top to make a roof like an upside-down V.",
+          "Build two or three of these roofs side by side and lay flat cards across them as a ceiling.",
+          "The next floor goes on top, with one roof fewer.",
+          "Who can build the most floors? Younger children build flat walls and get to blow everything down at the end."
+        ]
+      }
+    }
+  },
+  {
+    "id": "balloon-volleyball",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "movement",
+    "topics": ["movement", "games"],
+    "ageMin": 3,
+    "ageMax": 12,
+    "durationMin": 10,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["balloon", "wool", "chairs"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Luftballon-Volleyball",
+        "summary": "Ein Luftballon, ein Wollfaden als Netz, und schon wird das Wohnzimmer zum Spielfeld. Geht auch im Sitzen.",
+        "steps": [
+          "Ein Erwachsener bläst einen Luftballon auf und verknotet ihn.",
+          "Spannt einen Wollfaden zwischen zwei Stühlen als Netz, etwa auf Hüfthöhe der Kinder.",
+          "Spielt euch den Ballon über das Netz zu. Ihr dürft ihn so oft berühren, wie ihr wollt, nur der Boden ist tabu.",
+          "Zählt mit, wie viele Schläge ihr gemeinsam schafft, und versucht, euren Rekord zu brechen.",
+          "Wer müde ist, spielt im Sitzen oder kniend. Für Größere gilt: nur mit Kopf, Ellbogen oder Füßen."
+        ],
+        "safetyNote": "Kinder unter 8 Jahren blasen Luftballons nicht selbst auf und spielen nur, wenn Erwachsene dabei sind. Platzt ein Ballon, sammelt die Reste sofort ein: Sie sind gefährlich, wenn sie in den Mund kommen."
+      },
+      "en": {
+        "title": "Balloon Volleyball",
+        "summary": "A balloon, a piece of yarn as a net, and the living room turns into a court. Works sitting down, too.",
+        "steps": [
+          "An adult blows up a balloon and ties it.",
+          "Stretch a piece of yarn between two chairs as a net, at about the children’s hip height.",
+          "Hit the balloon back and forth over the net. You can touch it as often as you like, it just mustn’t touch the floor.",
+          "Count how many hits you manage together and try to beat your record.",
+          "Tired players can sit or kneel. For older kids: heads, elbows or feet only."
+        ],
+        "safetyNote": "Children under 8 don’t blow up balloons themselves and only play when adults are around. If a balloon pops, pick up the pieces right away: they are dangerous if they end up in a mouth."
+      }
+    }
+  },
+  {
+    "id": "animal-yoga",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "movement",
+    "topics": ["movement", "natureAnimals"],
+    "ageMin": 3,
+    "ageMax": 12,
+    "durationMin": 15,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["blanket"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Tier-Yoga",
+        "summary": "Strecken wie eine Katze, stehen wie ein Flamingo: ruhige Bewegung, die Kinder und müde Eltern entspannt.",
+        "steps": [
+          "Legt eine Decke auf den Boden und zieht die Socken aus.",
+          "Katze: Auf allen vieren den Rücken rund machen, dann langsam durchhängen lassen. Miauen ist erlaubt.",
+          "Hund: Hände und Füße auf den Boden, Po hoch, sodass ihr ein Dreieck bildet.",
+          "Flamingo: Auf einem Bein stehen und die Arme wie Flügel ausbreiten. Wer schafft es bis zehn?",
+          "Schlange: Auf dem Bauch liegen, den Oberkörper langsam heben und leise zischen.",
+          "Zum Schluss die Schildkröte: Auf die Knie setzen, nach vorn beugen und eine Minute lang ganz ruhig atmen."
+        ],
+        "safetyNote": "Jede Übung nur so weit, wie es sich gut anfühlt. Nichts erzwingen."
+      },
+      "en": {
+        "title": "Animal Yoga",
+        "summary": "Stretch like a cat, stand like a flamingo: calm movement that relaxes children and tired parents.",
+        "steps": [
+          "Lay a blanket on the floor and take your socks off.",
+          "Cat: on all fours, round your back, then slowly let it sag. Meowing is allowed.",
+          "Dog: hands and feet on the floor, bottom up high, so you make a triangle.",
+          "Flamingo: stand on one leg and spread your arms like wings. Who can make it to ten?",
+          "Snake: lie on your tummy, slowly lift your upper body and hiss quietly.",
+          "Finish with the turtle: sit on your knees, bend forward and breathe calmly for one minute."
+        ],
+        "safetyNote": "Only go as far as feels good in each pose. Never force anything."
+      }
+    }
+  },
+  {
+    "id": "paint-the-music",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft", "music"],
+    "ageMin": 3,
+    "ageMax": 12,
+    "durationMin": 15,
+    "durationMax": 30,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["musicPlayer", "paper", "pencils"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Musik malen",
+        "summary": "Ihr hört Musik und malt dazu, was ihr hört: schnelle Zickzacks, ruhige Wellen, laute Kleckse.",
+        "steps": [
+          "Legt für alle Papier und Stifte bereit, am besten Wachsmalstifte oder dicke Buntstifte.",
+          "Spielt ein Musikstück an. Alle malen dazu, ohne lange nachzudenken: Linien, Punkte, Farben.",
+          "Wechselt nach zwei, drei Minuten zu ganz anderer Musik: erst schnell und laut, dann langsam und leise.",
+          "Wenn die Musik stoppt, stoppen auch die Stifte.",
+          "Legt die Bilder nebeneinander. Erkennt ihr, welches Bild zu welcher Musik gehört?"
+        ]
+      },
+      "en": {
+        "title": "Paint the Music",
+        "summary": "Listen to music and draw what you hear: fast zigzags, calm waves, loud splotches.",
+        "steps": [
+          "Put out paper and pencils for everyone, crayons or thick colored pencils work best.",
+          "Start a piece of music. Everyone draws along without thinking too much: lines, dots, colors.",
+          "After two or three minutes, switch to very different music: first fast and loud, then slow and quiet.",
+          "When the music stops, the pencils stop too.",
+          "Lay the pictures side by side. Can you tell which picture belongs to which music?"
+        ]
+      }
+    }
+  },
+  {
+    "id": "fingerprint-animals",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft", "natureAnimals"],
+    "ageMin": 3,
+    "ageMax": 8,
+    "durationMin": 15,
+    "durationMax": 25,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["watercolors", "tapWater", "paper", "markers", "towel"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Fingerabdruck-Tiere",
+        "summary": "Aus bunten Fingerabdrücken werden mit ein paar Strichen Marienkäfer, Mäuse und Raupen.",
+        "steps": [
+          "Macht die Wasserfarben mit ein paar Tropfen Wasser feucht, aber nicht zu nass.",
+          "Reibt eine Fingerkuppe über die Farbe und drückt sie fest aufs Papier.",
+          "Setzt mehrere Abdrücke: einzeln, nebeneinander als Raupe oder übereinander als Turm.",
+          "Wischt die Finger am Handtuch ab, bevor ihr die Farbe wechselt.",
+          "Lasst alles kurz trocknen. Dann malt ihr mit Filzstiften Beine, Augen, Fühler und Schwänze dazu.",
+          "Gebt jedem Tier einen Namen oder erfindet eine kleine Geschichte dazu."
+        ],
+        "safetyNote": "Wasserfarben sind nicht zum Essen: Bleibt bei den Kleinen in der Nähe und wascht danach die Hände."
+      },
+      "en": {
+        "title": "Fingerprint Animals",
+        "summary": "With a few lines, colorful fingerprints turn into ladybugs, mice and caterpillars.",
+        "steps": [
+          "Wet the watercolors with a few drops of water, but not too much.",
+          "Rub a fingertip over the paint and press it firmly onto the paper.",
+          "Make several prints: on their own, in a row as a caterpillar, or stacked as a tower.",
+          "Wipe your fingers on the towel before you switch colors.",
+          "Let everything dry for a moment. Then draw legs, eyes, feelers and tails with markers.",
+          "Give each animal a name or make up a little story about it."
+        ],
+        "safetyNote": "Watercolors are not for eating: stay close to the little ones and wash hands afterwards."
+      }
+    }
+  },
+  {
+    "id": "paper-plane-contest",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "craft",
+    "topics": ["craft", "technology", "games"],
+    "ageMin": 5,
+    "ageMax": 14,
+    "durationMin": 15,
+    "durationMax": 30,
+    "setting": "both",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["paper", "tape", "basket"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Papierflieger-Wettbewerb",
+        "summary": "Faltet Papierflieger und lasst sie um die Wette fliegen: am weitesten, am längsten, mitten ins Ziel.",
+        "steps": [
+          "Faltet ein Blatt der Länge nach in der Mitte und klappt es wieder auf.",
+          "Faltet die beiden oberen Ecken zur Mittellinie, sodass eine Spitze entsteht. Wiederholt das mit den neuen Kanten.",
+          "Klappt den Flieger an der Mittellinie zusammen und faltet beide Seiten als Flügel nach unten.",
+          "Markiert mit Klebeband eine Startlinie und stellt einen Korb als Ziel auf.",
+          "Fliegt drei Runden: Wer fliegt am weitesten, wer bleibt am längsten in der Luft, wer trifft den Korb?",
+          "Größere probieren eigene Formen aus, Kleinere bemalen ihre Flieger und werfen mit."
+        ],
+        "safetyNote": "Werft nie in Richtung von Gesichtern: Die Spitze kann ins Auge gehen."
+      },
+      "en": {
+        "title": "Paper Plane Contest",
+        "summary": "Fold paper planes and race them: farthest, longest in the air, right into the target.",
+        "steps": [
+          "Fold a sheet in half lengthwise and open it again.",
+          "Fold the two top corners to the center line to make a point. Repeat with the new edges.",
+          "Fold the plane in half along the center line and fold both sides down as wings.",
+          "Mark a starting line with tape and set up a basket as the target.",
+          "Fly three rounds: whose plane goes farthest, whose stays up longest, who hits the basket?",
+          "Older kids try their own designs, younger ones decorate their planes and throw too."
+        ],
+        "safetyNote": "Never throw toward anyone’s face: the tip can hurt an eye."
+      }
+    }
+  },
+  {
+    "id": "walking-water",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "experiment",
+    "topics": ["experiments"],
+    "ageMin": 4,
+    "ageMax": 10,
+    "durationMin": 15,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["plasticCup", "tapWater", "watercolors", "paperTowels"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Wandernde Farben",
+        "summary": "Farbiges Wasser klettert an Küchenpapier hoch und mischt sich in den leeren Bechern zu neuen Farben.",
+        "steps": [
+          "Stellt sechs Becher im Kreis auf. Füllt jeden zweiten Becher fast voll mit Wasser.",
+          "Färbt die vollen Becher mit Wasserfarbe: einen rot, einen gelb, einen blau. Rührt kräftig, die Farbe soll leuchten.",
+          "Faltet sechs Streifen Küchenpapier der Länge nach. Hängt jeden mit einem Ende in einen vollen und mit dem anderen in einen leeren Becher.",
+          "Jetzt heißt es warten: Schaut alle zehn Minuten nach, wie weit das Wasser schon gewandert ist.",
+          "Nach etwa einer Stunde haben sich die leeren Becher gefüllt. Welche neuen Farben sind entstanden?",
+          "Warum klappt das? Das Wasser zieht sich durch winzige Lücken im Papier nach oben, so wie Pflanzen Wasser trinken."
+        ]
+      },
+      "en": {
+        "title": "Walking Water",
+        "summary": "Colored water climbs up paper towels and mixes into new colors in the empty cups.",
+        "steps": [
+          "Set up six cups in a circle. Fill every other cup almost to the top with water.",
+          "Color the full cups with watercolor paint: one red, one yellow, one blue. Stir well, the color should be bright.",
+          "Fold six strips of paper towel lengthwise. Hang each one with one end in a full cup and the other end in an empty cup.",
+          "Now it’s time to wait: check every ten minutes how far the water has walked.",
+          "After about an hour, the empty cups have filled up. Which new colors have appeared?",
+          "Why does it work? Water pulls itself up through tiny gaps in the paper, just like plants drink water."
+        ]
+      }
+    }
+  },
+  {
+    "id": "ice-cube-fishing",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "experiment",
+    "topics": ["experiments"],
+    "ageMin": 5,
+    "ageMax": 12,
+    "durationMin": 10,
+    "durationMax": 15,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["ice", "salt", "wool", "plasticCup", "tapWater"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Eiswürfel angeln",
+        "summary": "Mit einem Wollfaden und einer Prise Salz fischt ihr Eiswürfel aus dem Wasser, ganz ohne Haken.",
+        "steps": [
+          "Füllt einen Becher mit kaltem Wasser und legt einen Eiswürfel hinein.",
+          "Versucht zuerst, den Eiswürfel mit einem Wollfaden herauszuholen. Klappt nicht, oder?",
+          "Legt den Faden quer über den Eiswürfel und streut eine Prise Salz darauf.",
+          "Zählt langsam bis 60 und hebt den Faden dann vorsichtig an: Der Eiswürfel hängt dran.",
+          "Das Salz lässt das Eis kurz antauen, danach friert es um den Faden herum wieder fest.",
+          "Wettangeln: Wer holt die meisten Eiswürfel auf einmal heraus?"
+        ]
+      },
+      "en": {
+        "title": "Ice Cube Fishing",
+        "summary": "Fish ice cubes out of the water with a piece of yarn and a pinch of salt, no hook needed.",
+        "steps": [
+          "Fill a cup with cold water and drop in an ice cube.",
+          "First try to lift the ice cube out with a piece of yarn. Doesn’t work, does it?",
+          "Lay the yarn across the ice cube and sprinkle a pinch of salt on top.",
+          "Count slowly to 60, then carefully lift the yarn: the ice cube is hanging on it.",
+          "The salt melts the ice a little, then it freezes again around the yarn.",
+          "Fishing contest: who can lift the most ice cubes at once?"
+        ]
+      }
+    }
+  },
+  {
+    "id": "dancing-raisins",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "experiment",
+    "topics": ["experiments"],
+    "ageMin": 4,
+    "ageMax": 10,
+    "durationMin": 10,
+    "durationMax": 15,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["raisins", "sparklingWater", "tapWater", "jar", "plasticCup"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Tanzende Rosinen",
+        "summary": "In Sprudelwasser fahren Rosinen wie in einem Aufzug auf und ab.",
+        "steps": [
+          "Füllt ein Schraubglas mit Sprudelwasser und einen Becher mit Leitungswasser.",
+          "Werft in beide je fünf Rosinen.",
+          "Beobachtet: Im Leitungswasser bleiben die Rosinen unten liegen. Im Sprudel setzen sich Bläschen an sie, und sie steigen nach oben.",
+          "Oben platzen die Bläschen, und die Rosinen sinken wieder. Das geht immer wieder von vorn los.",
+          "Zählt, wie oft eine Rosine in einer Minute nach oben fährt.",
+          "Probiert aus, ob es mit frisch geöffnetem Sprudel schneller geht als mit älterem."
+        ],
+        "safetyNote": "Rosinen sind für Kinder unter 4 Jahren eine Verschluckgefahr. Wer sie danach essen möchte, sitzt dabei ruhig am Tisch."
+      },
+      "en": {
+        "title": "Dancing Raisins",
+        "summary": "In sparkling water, raisins ride up and down like in an elevator.",
+        "steps": [
+          "Fill a screw-top jar with sparkling water and a cup with tap water.",
+          "Drop five raisins into each.",
+          "Watch: in the tap water, the raisins stay at the bottom. In the sparkling water, bubbles stick to them and they rise.",
+          "At the top, the bubbles pop and the raisins sink again. It starts over and over.",
+          "Count how often one raisin rides up in a minute.",
+          "Test whether freshly opened sparkling water works faster than older water."
+        ],
+        "safetyNote": "Raisins are a choking hazard for children under 4. If you want to eat them afterwards, sit calmly at the table."
+      }
+    }
+  },
+  {
+    "id": "pepper-on-the-run",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "experiment",
+    "topics": ["experiments", "water"],
+    "ageMin": 3,
+    "ageMax": 10,
+    "durationMin": 5,
+    "durationMax": 10,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["plate", "tapWater", "pepper", "dishSoap"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Pfeffer auf der Flucht",
+        "summary": "Ein Tupfer Spülmittel, und der Pfeffer auf dem Wasser flitzt blitzschnell zum Rand.",
+        "steps": [
+          "Gießt Wasser auf einen Teller, bis der Boden bedeckt ist.",
+          "Streut gemahlenen Pfeffer darüber, sodass die Oberfläche gesprenkelt ist.",
+          "Tippt mit einem trockenen Finger in die Mitte. Was passiert? Fast nichts.",
+          "Tupft jetzt einen Finger in Spülmittel und tippt wieder in die Mitte: Der Pfeffer flieht zum Rand.",
+          "Das Spülmittel zerreißt die dünne Haut auf dem Wasser, und die zieht den Pfeffer mit nach außen.",
+          "Wascht die Hände und probiert es mit frischem Wasser noch einmal."
+        ],
+        "safetyNote": "Pfeffer und Spülmittel nicht in die Augen reiben: Wascht nach dem Versuch die Hände."
+      },
+      "en": {
+        "title": "Pepper on the Run",
+        "summary": "One dab of dish soap, and the pepper on the water races to the edge in a flash.",
+        "steps": [
+          "Pour water onto a plate until the bottom is covered.",
+          "Sprinkle ground pepper over it so the surface is speckled.",
+          "Touch the middle with a dry finger. What happens? Almost nothing.",
+          "Now dip a finger in dish soap and touch the middle again: the pepper flees to the edge.",
+          "The soap breaks the thin skin on top of the water, and the skin pulls the pepper outward.",
+          "Wash your hands and try again with fresh water."
+        ],
+        "safetyNote": "Don’t rub pepper or dish soap into your eyes: wash your hands after the experiment."
+      }
+    }
+  },
+  {
+    "id": "window-bird-count",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "nature",
+    "topics": ["natureAnimals"],
+    "ageMin": 4,
+    "ageMax": 12,
+    "durationMin": 15,
+    "durationMax": 30,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["paper", "pencils"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Vögel am Fenster zählen",
+        "summary": "Vom gemütlichen Fensterplatz aus zählt ihr, welche Vögel vorbeikommen, und führt eine kleine Strichliste.",
+        "steps": [
+          "Sucht euch ein Fenster mit Blick auf Bäume, Büsche oder ein Dach und setzt euch bequem hin.",
+          "Malt auf ein Blatt eine Tabelle: Amsel, Meise, Spatz, Taube, Krähe und eine Zeile für „Wer ist das?“.",
+          "Beobachtet 15 Minuten lang und macht für jeden Vogel einen Strich. Seid leise und bewegt euch langsam.",
+          "Achtet auf Farben, Größe und darauf, ob der Vogel hüpft oder läuft. Malt Vögel ab, die ihr nicht kennt.",
+          "Zählt am Ende zusammen: Welcher Vogel war am häufigsten da?",
+          "Hebt die Liste auf und zählt an einem anderen Tag noch einmal. Hat sich etwas verändert?"
+        ]
+      },
+      "en": {
+        "title": "Count Birds at the Window",
+        "summary": "From a cozy spot by the window, count which birds come by and keep a little tally.",
+        "steps": [
+          "Find a window that looks out on trees, bushes or a roof, and sit comfortably.",
+          "Draw a table on a sheet of paper: blackbird, tit, sparrow, pigeon, crow and one row for “Who’s that?”.",
+          "Watch for 15 minutes and make a mark for every bird. Stay quiet and move slowly.",
+          "Look at colors, size and whether the bird hops or walks. Draw the ones you don’t know.",
+          "Add it up at the end: which bird came most often?",
+          "Keep the list and count again another day. Has anything changed?"
+        ]
+      }
+    }
+  },
+  {
+    "id": "grow-cress",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "nature",
+    "topics": ["natureAnimals", "experiments", "cooking"],
+    "ageMin": 3,
+    "ageMax": 10,
+    "durationMin": 15,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 1,
+    "materials": ["cressSeeds", "paperTowels", "plate", "tapWater"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Kresse säen",
+        "summary": "Auf einem Teller wächst in wenigen Tagen ein kleiner Garten, den ihr am Ende essen könnt.",
+        "steps": [
+          "Legt mehrere Lagen Küchenpapier auf einen Teller und macht sie mit Wasser gut feucht, aber nicht tropfnass.",
+          "Streut die Kressesamen gleichmäßig darauf. Sie dürfen dicht liegen, aber nicht übereinander.",
+          "Stellt den Teller an einen hellen Platz, zum Beispiel aufs Fensterbrett.",
+          "Schaut jeden Tag nach und gebt ein paar Tropfen Wasser dazu, damit das Papier nie austrocknet.",
+          "Schon nach einem Tag platzen die Samen auf. Nach etwa einer Woche ist die Kresse fingerhoch.",
+          "Zupft die Kresse ab und probiert sie. Sie schmeckt würzig und ein bisschen scharf."
+        ]
+      },
+      "en": {
+        "title": "Grow Cress",
+        "summary": "In just a few days, a little garden grows on a plate, and you can eat it at the end.",
+        "steps": [
+          "Put several layers of paper towel on a plate and wet them well with water, damp but not dripping.",
+          "Sprinkle the cress seeds evenly on top. They can be close together, but not on top of each other.",
+          "Put the plate in a bright spot, like a windowsill.",
+          "Check every day and add a few drops of water so the paper never dries out.",
+          "After just one day the seeds split open. After about a week the cress is as tall as a finger.",
+          "Pinch off the cress and taste it. It’s tangy and a little spicy."
+        ]
+      }
+    }
+  },
+  {
+    "id": "banana-oat-balls",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking"],
+    "ageMin": 3,
+    "ageMax": 10,
+    "durationMin": 15,
+    "durationMax": 25,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["banana", "oats", "cocoa", "bowl", "fork"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Bananen-Haferkugeln",
+        "summary": "Aus Banane, Haferflocken und Kakao rollt ihr kleine Kugeln, ganz ohne Backofen.",
+        "steps": [
+          "Zerdrückt eine reife Banane mit der Gabel in einer Schüssel zu Brei.",
+          "Gebt nach und nach etwa 6 Esslöffel Haferflocken und einen Teelöffel Kakao dazu und rührt alles gut um.",
+          "Ist die Masse zu weich, kommen noch ein paar Haferflocken dazu, bis sie sich formen lässt.",
+          "Rollt mit sauberen Händen kleine Kugeln, etwa so groß wie ein Tischtennisball.",
+          "Wälzt die Kugeln zum Schluss in etwas Kakao oder Haferflocken.",
+          "Esst sie gleich oder stellt sie eine Viertelstunde in den Kühlschrank, dann werden sie fester."
+        ],
+        "safetyNote": "Enthält Gluten (Haferflocken). Wascht vorher die Hände."
+      },
+      "en": {
+        "title": "Banana Oat Balls",
+        "summary": "Roll little balls from banana, oats and cocoa, no oven needed.",
+        "steps": [
+          "Mash a ripe banana with a fork in a bowl.",
+          "Little by little, add about 6 tablespoons of oats and a teaspoon of cocoa and stir everything well.",
+          "If the mixture is too soft, add a few more oats until you can shape it.",
+          "With clean hands, roll small balls about the size of a ping-pong ball.",
+          "Finally, roll the balls in a little cocoa or oats.",
+          "Eat them right away, or put them in the fridge for a quarter of an hour so they firm up."
+        ],
+        "safetyNote": "Contains gluten (oats). Wash your hands first."
+      }
+    }
+  },
+  {
+    "id": "banana-smoothie",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking"],
+    "ageMin": 4,
+    "ageMax": 12,
+    "durationMin": 10,
+    "durationMax": 15,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["banana", "milk", "cocoa", "blender", "plasticCup"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Bananen-Smoothie mixen",
+        "summary": "Banane, Milch und eine Prise Kakao: In zehn Minuten steht ein cremiger Drink auf dem Tisch.",
+        "steps": [
+          "Schält zwei Bananen und brecht sie mit den Händen in Stücke.",
+          "Gebt die Stücke in einen hohen Becher oder den Mixer und gießt etwa 300 Milliliter Milch dazu.",
+          "Wer mag, gibt eine Prise Kakao dazu.",
+          "Ein Erwachsener mixt alles, bis keine Stückchen mehr zu sehen sind. Die Kinder zählen dabei laut mit.",
+          "Gießt den Smoothie in Becher und probiert. Zu dick? Dann kommt noch ein Schluck Milch dazu."
+        ],
+        "safetyNote": "Den Mixer bedienen nur Erwachsene, und erst, wenn alle Hände weg sind. Enthält Milch."
+      },
+      "en": {
+        "title": "Banana Smoothie",
+        "summary": "Banana, milk and a pinch of cocoa: a creamy drink is ready in ten minutes.",
+        "steps": [
+          "Peel two bananas and break them into pieces with your hands.",
+          "Put the pieces into a tall cup or the blender and pour in about 300 milliliters of milk.",
+          "Add a pinch of cocoa if you like.",
+          "An adult blends everything until there are no lumps left. The children count out loud.",
+          "Pour the smoothie into cups and taste. Too thick? Add another splash of milk."
+        ],
+        "safetyNote": "Only adults use the blender, and only once all hands are out of the way. Contains milk."
+      }
+    }
+  },
+  {
+    "id": "homemade-lemonade",
+    "status": "approved",
+    "source": "ai",
+    "createdAt": "2026-10-10T12:00:00.000Z",
+    "category": "cooking",
+    "topics": ["cooking"],
+    "ageMin": 4,
+    "ageMax": 12,
+    "durationMin": 15,
+    "durationMax": 20,
+    "setting": "indoor",
+    "weather": { "needsDry": false, "betterInSun": false },
+    "energy": "low",
+    "cost": 0,
+    "materials": ["lemon", "knife", "fork", "sugar", "tapWater", "jar", "plasticCup"],
+    "siblingFriendly": true,
+    "translations": {
+      "de": {
+        "title": "Zitronenlimonade selbst machen",
+        "summary": "Zitronen auspressen, Zucker einrühren, schütteln: Eure eigene Limonade schmeckt am besten.",
+        "steps": [
+          "Ein Erwachsener schneidet zwei Zitronen in Hälften.",
+          "Die Kinder drehen eine Gabel in die Zitronenhälften und pressen so den Saft in ein großes Schraubglas.",
+          "Gebt zwei bis drei Esslöffel Zucker und einen Schluck warmes Leitungswasser dazu und rührt, bis sich der Zucker aufgelöst hat.",
+          "Füllt das Glas mit kaltem Leitungswasser auf, schraubt es fest zu und schüttelt kräftig.",
+          "Probiert aus kleinen Bechern: zu sauer, zu süß? Gebt Zucker oder Wasser dazu, bis es allen schmeckt.",
+          "Kerne, die im Glas schwimmen, fischt ihr mit der Gabel heraus."
+        ],
+        "safetyNote": "Die Zitronen schneiden Erwachsene. Zitronensaft brennt in kleinen Wunden und in den Augen."
+      },
+      "en": {
+        "title": "Homemade Lemonade",
+        "summary": "Squeeze lemons, stir in sugar, shake: your own lemonade tastes best.",
+        "steps": [
+          "An adult cuts two lemons in half.",
+          "The children twist a fork into the lemon halves to squeeze the juice into a large screw-top jar.",
+          "Add two to three tablespoons of sugar and a splash of warm tap water, and stir until the sugar has dissolved.",
+          "Fill the jar with cold tap water, screw the lid on tightly and shake hard.",
+          "Taste from small cups: too sour, too sweet? Add sugar or water until everyone likes it.",
+          "Fish out any seeds with the fork."
+        ],
+        "safetyNote": "Adults cut the lemons. Lemon juice stings in small cuts and in the eyes."
+      }
+    }
+  }
+]

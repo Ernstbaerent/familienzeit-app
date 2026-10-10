@@ -19,6 +19,8 @@ export const categoryKeys = [
 export const settingKeys = ['indoor', 'outdoor', 'both'] as const;
 export const energyKeys = ['low', 'medium', 'high'] as const; // Energie, die Eltern brauchen
 export const dayPartKeys = ['morning', 'afternoon', 'evening'] as const;
+// Monate als Zahlen: 1 = Januar … 12 = Dezember (Nordhalbkugel, die App startet in Deutschland).
+export const monthNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 export const costValues = [0, 1, 2] as const; // 0 = kostenlos, 1 = wenig, 2 = mehr
 export const statusKeys = ['draft', 'approved', 'rejected'] as const;
 export const sourceKeys = ['ai', 'manual'] as const;
@@ -35,6 +37,7 @@ export type ActivityCategory = (typeof categoryKeys)[number];
 export type ActivitySetting = (typeof settingKeys)[number];
 export type ActivityEnergy = (typeof energyKeys)[number];
 export type DayPart = (typeof dayPartKeys)[number];
+export type MonthNumber = (typeof monthNumbers)[number];
 export type ActivityCost = (typeof costValues)[number];
 export type ActivityStatus = (typeof statusKeys)[number];
 export type ActivitySource = (typeof sourceKeys)[number];
@@ -62,6 +65,7 @@ export type Activity = {
   setting: ActivitySetting;
   weather: { needsDry: boolean; betterInSun: boolean };
   dayParts?: DayPart[]; // freiwillig: nur zu diesen Tageszeiten. Fehlt es, passt die Aktivität immer.
+  months?: MonthNumber[]; // freiwillig: nur in diesen Monaten (z. B. Plätzchen [11, 12]). Fehlt es, passt sie das ganze Jahr.
   energy: ActivityEnergy;
   cost: ActivityCost;
   materials: MaterialKey[]; // Schlüssel, Texte unter "materials" in den Übersetzungen
@@ -70,7 +74,6 @@ export type Activity = {
   source: ActivitySource;
   createdAt: string; // ISO-Zeitpunkt
   image?: string; // freiwillig: Web-Adresse. Ohne Bild zeigt die App das Symbol der Kategorie.
-  isSample?: true; // Beispieldaten, werden später durch die echte Datenbank ersetzt
 };
 
 export type ParseResult =
@@ -123,8 +126,12 @@ export function isDayPart(value: unknown): value is DayPart {
   return (dayPartKeys as readonly unknown[]).includes(value);
 }
 
+export function isMonthNumber(value: unknown): value is MonthNumber {
+  return (monthNumbers as readonly unknown[]).includes(value);
+}
+
 // Liste von bekannten Schlüsseln ohne Doppelte.
-function readKeyList<T extends string>(
+function readKeyList<T extends string | number>(
   value: unknown,
   key: string,
   isKey: (item: unknown) => item is T,
@@ -238,6 +245,14 @@ export function parseActivity(raw: unknown): ParseResult {
   if (raw.dayParts !== undefined) {
     readKeyList(raw.dayParts, 'dayParts', isDayPart, problems, { requireNonEmpty: true });
   }
+  if (raw.months !== undefined) {
+    const months = readKeyList(raw.months, 'months', isMonthNumber, problems, {
+      requireNonEmpty: true,
+    });
+    if (months && months.length === monthNumbers.length) {
+      problems.push('months: alle 12 Monate, dann besser weglassen');
+    }
+  }
   readTranslations(raw.translations, problems);
 
   if (!isNonEmptyString(raw.createdAt) || Number.isNaN(Date.parse(raw.createdAt))) {
@@ -245,9 +260,6 @@ export function parseActivity(raw: unknown): ParseResult {
   }
   if (raw.image !== undefined && !(isNonEmptyString(raw.image) && raw.image.startsWith('https://'))) {
     problems.push('image: Web-Adresse mit https:// erwartet (oder weglassen)');
-  }
-  if (raw.isSample !== undefined && raw.isSample !== true) {
-    problems.push('isSample: nur true oder weglassen');
   }
 
   if (problems.length > 0) return { ok: false, id, problems };

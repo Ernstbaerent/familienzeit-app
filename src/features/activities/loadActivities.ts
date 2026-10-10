@@ -1,12 +1,22 @@
 // Lädt die Aktivitäten lokal aus den Dateien in data/ (kein Netz, kein Konto).
 // Später (M8) kommen sie aus Supabase mit Offline-Cache; die App ruft dann weiter loadActivities() auf.
 
-import sampleActivities from '../../../data/sample-activities.json';
+import activitiesM4 from '../../../data/activities-m4.json';
+import activitiesM5b1 from '../../../data/activities-m5b-1.json';
+import activitiesM5b2 from '../../../data/activities-m5b-2.json';
+import activitiesM5b3 from '../../../data/activities-m5b-3.json';
+import activitiesM5b4 from '../../../data/activities-m5b-4.json';
 import { parseActivities, type Activity } from './activities.ts';
 
-// Alle Datenquellen. Neue Datei in data/ (z. B. ein M5b-Paket): hier eintragen.
+// Alle Datenquellen. Neue Datei in data/: hier eintragen.
 // `npm run activities:check` prüft alle Dateien in data/ und erinnert daran, falls eine fehlt.
-const rawActivities: unknown[] = [...sampleActivities];
+const rawActivities: unknown[] = [
+  ...activitiesM4,
+  ...activitiesM5b1,
+  ...activitiesM5b2,
+  ...activitiesM5b3,
+  ...activitiesM5b4,
+];
 
 let cache: Activity[] | null = null;
 
