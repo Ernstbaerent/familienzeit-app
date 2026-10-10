@@ -383,6 +383,8 @@ async function waitForFreeSlot(): Promise<void> {
 async function postQuery(query: string): Promise<OverpassResponse> {
   for (let attempt = 1; attempt <= 2; attempt++) {
     let problem: string;
+    const startedAt = Date.now();
+    const after = () => `nach ${((Date.now() - startedAt) / 1000).toFixed(0)} s`;
     try {
       const res = await fetch(OVERPASS_URL, {
         method: 'POST',
@@ -400,11 +402,12 @@ async function postQuery(query: string): Promise<OverpassResponse> {
       const body = (await res.text()).slice(0, 300);
       // Überlastung (429/502/503/504) darf einmal wiederholt werden, alles andere nicht
       if (![429, 502, 503, 504].includes(res.status)) throw new Error(`Overpass-Fehler ${res.status}: ${body}`);
-      problem = `HTTP ${res.status} (${body.slice(0, 80)})`;
+      problem = `HTTP ${res.status} ${after()} (${body.replace(/\s+/g, ' ').slice(0, 80)})`;
     } catch (error) {
       if (error instanceof Error && /^Overpass/.test(error.message)) throw error;
       // Netzwerkfehler (Verbindung abgebrochen, Zeitüberschreitung) zählen wie Überlastung
-      problem = error instanceof Error ? `${error.message} ${error.cause instanceof Error ? error.cause.message : ''}` : String(error);
+      const text = error instanceof Error ? `${error.message} ${error.cause instanceof Error ? error.cause.message : ''}` : String(error);
+      problem = `${text.trim()} ${after()}`;
     }
     if (attempt === 2) throw new Error(`Overpass nicht erreichbar: ${problem}`);
     console.log(`  Problem: ${problem}. Ein weiterer Versuch in ${RETRY_WAIT_MS / 1000} s ...`);
@@ -665,9 +668,10 @@ async function main(): Promise<void> {
   for (const place of PLACES) {
     const { lat, lon } = centers.get(place.id)!;
     console.log(`2) ${place.label} (${lat.toFixed(2)} / ${lon.toFixed(2)})`);
-    const full = await runQuery(buildAreaQuery(lat, lon, 30, 'tags'), `${place.label}: 30 km mit allen Angaben`);
-    const ids15 = await runQuery(buildAreaQuery(lat, lon, 15, 'ids'), `${place.label}: 15 km (nur IDs)`);
+    // Kleine Abfragen zuerst: Sie zeigen früh, ob es klappt, und jede Antwort wird sofort zwischengespeichert.
     const ids5 = await runQuery(buildAreaQuery(lat, lon, 5, 'ids'), `${place.label}: 5 km (nur IDs)`);
+    const ids15 = await runQuery(buildAreaQuery(lat, lon, 15, 'ids'), `${place.label}: 15 km (nur IDs)`);
+    const full = await runQuery(buildAreaQuery(lat, lon, 30, 'tags'), `${place.label}: 30 km mit allen Angaben`);
     const toSet = (res: OverpassResponse) => new Set(res.elements.map((e) => `${e.type}/${e.id}`));
     const inRadius: Record<Radius, Set<string>> = { 5: toSet(ids5), 15: toSet(ids15), 30: toSet(full) };
     results.push(analyze(place, lat, lon, full.elements, inRadius));
