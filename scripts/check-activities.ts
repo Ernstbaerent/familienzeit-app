@@ -114,6 +114,7 @@ const columns = [
   { head: 'Ort', width: 8 },
   { head: 'Energie', width: 7 },
   { head: 'Tageszeit', width: 20 },
+  { head: 'Monate', width: 14 },
   { head: 'Status', width: 8 },
 ];
 
@@ -133,6 +134,7 @@ for (const activity of all) {
     activity.setting,
     activity.energy,
     activity.dayParts?.join(', ') ?? 'jederzeit',
+    activity.months?.join(', ') ?? 'ganzjährig',
     activity.status,
   ]);
 }
@@ -147,6 +149,7 @@ count('  Energie   ', energyKeys, (a) => a.energy);
 count('  Ort       ', settingKeys, (a) => a.setting);
 console.log(`  Wetterunabhängig (needsDry false): ${all.filter((a) => !a.weather.needsDry).length}`);
 console.log(`  Mit Tageszeit: ${all.filter((a) => a.dayParts).length}`);
+console.log(`  Mit Monaten (saisonal): ${all.filter((a) => a.months).length}`);
 console.log(`  Für Geschwister (siblingFriendly): ${all.filter((a) => a.siblingFriendly).length}`);
 if (all.length > 0) {
   const durations = all.flatMap((a) => [a.durationMin, a.durationMax]);

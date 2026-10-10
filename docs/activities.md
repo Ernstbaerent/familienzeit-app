@@ -31,6 +31,7 @@ In der App: `loadActivities()` gibt alle Aktivitäten mit Status `approved` zur�
 | `setting`         | `indoor`, `outdoor` oder `both`. |
 | `weather`         | `needsDry` (nur bei Trockenheit), `betterInSun` (bei Sonne schöner). Beides `false` = wetterunabhängig. |
 | `dayParts`        | **Freiwillig.** Nur zu diesen Tageszeiten: `morning`, `afternoon`, `evening`. **Fehlt das Feld, passt die Aktivität zu jeder Tageszeit.** Beispiel: „Sterne beobachten“ hat `["evening"]`. Uhrzeit-Grenzen und Regeln: `docs/suggestions.md`. |
+| `months`          | **Freiwillig.** Nur in diesen Monaten, als Zahlen: 1 = Januar … 12 = Dezember. **Fehlt das Feld, passt die Aktivität das ganze Jahr.** Beispiel: Plätzchen backen hat `[11, 12]`, Ostereier färben `[3, 4]`. Nicht leer, keine doppelten, nicht alle 12 (dann weglassen). Gedacht für die Nordhalbkugel. |
 | `energy`          | Energie, die Eltern brauchen: `low`, `medium`, `high`. |
 | `cost`            | 0 = kostenlos, 1 = wenig, 2 = mehr. |
 | `materials`       | Schlüssel aus `materials.ts`. Die Texte stehen unter `materials` in `de.json` und `en.json`. |

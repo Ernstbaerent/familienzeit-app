@@ -99,6 +99,7 @@ Umgesetzt in `src/features/suggestions/`, Gewichte und Details in `docs/suggesti
 - nicht altersgerecht für mindestens ein ausgewähltes Kind
 - dauert länger als die verfügbare Zeit (inkl. Anfahrt)
 - passt nicht zur Tageszeit (`dayParts` der Aktivität)
+- passt nicht zum Monat (`months` der Aktivität, z. B. Plätzchen nur im November und Dezember)
 - draußen bei Gefahr (Gewitter, Sturm, Unwetterwarnung)
 - braucht Trockenheit (`needsDry`), es regnet oder gewittert
 - Kurse oder Voranmeldung über heute hinaus
@@ -129,6 +130,7 @@ type Activity = {
   setting: 'indoor' | 'outdoor' | 'both';
   weather: { needsDry: boolean; betterInSun: boolean };
   dayParts?: ('morning' | 'afternoon' | 'evening')[];   // freiwillig: nur zu diesen Tageszeiten; fehlt = jederzeit
+  months?: number[];         // freiwillig: nur in diesen Monaten (1 = Januar … 12 = Dezember); fehlt = ganzes Jahr
   energy: 'low' | 'medium' | 'high';   // Energie, die Eltern brauchen
   cost: 0 | 1 | 2;           // 0 = kostenlos, 1 = wenig, 2 = mehr
   materials: MaterialKey[];  // Schlüssel aus materials.ts (mit Gefahren und Allergenen), übersetzt über locales

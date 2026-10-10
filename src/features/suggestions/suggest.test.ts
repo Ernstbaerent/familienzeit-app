@@ -9,7 +9,7 @@ import {
   type ParentEnergy,
 } from './conditions';
 import { getExclusionReason } from './exclusions';
-import { getAgeInYears, type SuggestionChild } from './request';
+import { getAgeInYears, getMonthNumber, type SuggestionChild } from './request';
 import { scoreActivity } from './scoring';
 import { getPage, getTips, isStartingOver, suggest, type Suggestions } from './suggest';
 import { ids, makeActivity, makeChild, makeRequest } from './testHelpers';
@@ -46,6 +46,28 @@ describe('harte Ausschlüsse', () => {
     for (const dayPart of dayPartKeys) {
       expect(getExclusionReason(anyTime, makeRequest({ dayPart }))).toBeNull();
     }
+  });
+
+  it('Monat: nur in den angegebenen Monaten, ohne Angabe das ganze Jahr', () => {
+    const advent = makeActivity({ id: 'a', months: [11, 12] });
+    const allYear = makeActivity({ id: 'b' });
+    const inMonth = (month: number) => makeRequest({ now: new Date(2026, month - 1, 15, 15, 0) });
+    expect(getExclusionReason(advent, inMonth(11))).toBeNull();
+    expect(getExclusionReason(advent, inMonth(12))).toBeNull();
+    expect(getExclusionReason(advent, inMonth(10))).toBe('month');
+    expect(getExclusionReason(advent, inMonth(1))).toBe('month');
+    for (let month = 1; month <= 12; month++) {
+      expect(getExclusionReason(allYear, inMonth(month))).toBeNull();
+    }
+  });
+
+  it('Monat: Grenzen am ersten und letzten Tag eines Monats', () => {
+    const october = makeActivity({ id: 'a', months: [10] });
+    const at = (date: Date) => getExclusionReason(october, makeRequest({ now: date }));
+    expect(at(new Date(2026, 9, 1, 0, 0))).toBeNull(); // 1. Oktober, Mitternacht
+    expect(at(new Date(2026, 9, 31, 23, 59))).toBeNull(); // 31. Oktober, kurz vor Mitternacht
+    expect(at(new Date(2026, 8, 30, 23, 59))).toBe('month'); // 30. September
+    expect(at(new Date(2026, 10, 1, 0, 0))).toBe('month'); // 1. November
   });
 
   it('Gewitter: nichts draußen, aber „drinnen oder draußen“ bleibt', () => {
@@ -503,6 +525,7 @@ describe('Regeln mit den echten Aktivitäten aus data/', () => {
                 }
                 expect(activity.durationMin).toBeLessThanOrEqual(minutes);
                 if (activity.dayParts) expect(activity.dayParts).toContain(dayPart);
+                if (activity.months) expect(activity.months).toContain(getMonthNumber(request.now));
                 if (weather === 'thunderstorm') expect(activity.setting).not.toBe('outdoor');
                 if (weather === 'rain' || weather === 'thunderstorm') {
                   expect(activity.weather.needsDry).toBe(false);
@@ -514,6 +537,23 @@ describe('Regeln mit den echten Aktivitäten aus data/', () => {
               for (const page of result.pages) expect(page).toHaveLength(expectedSize);
             }
           }
+        }
+      }
+    }
+  });
+
+  it('jeder Monat: kein Vorschlag außerhalb seiner Monate, und es gibt immer Vorschläge', () => {
+    for (let month = 1; month <= 12; month++) {
+      const now = new Date(2026, month - 1, 15, 15, 0);
+      for (const weather of weatherKeys) {
+        for (const dayPart of dayPartKeys) {
+          // Ein Kind mit 5 Jahren und eine Stunde Zeit: Dafür muss es immer genug Ideen geben.
+          const request = makeRequest({ now, weather, dayPart, availableMinutes: 60 });
+          const result = suggest(activities, request);
+          for (const activity of allSuggested(result)) {
+            if (activity.months) expect(activity.months).toContain(month);
+          }
+          expect(result.matchCount).toBeGreaterThanOrEqual(3);
         }
       }
     }
