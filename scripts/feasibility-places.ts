@@ -352,6 +352,8 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 let lastRequestAt = 0;
 
 function parseStatus(text: string): { slots: number; waitSeconds: number } {
+  // "Rate limit: 0" heißt: keine Begrenzung (z. B. bei overpass.kumi.systems), es ist also immer Platz
+  if (/Rate limit: 0\b/.test(text)) return { slots: Infinity, waitSeconds: 0 };
   const slots = Number(/(\d+) slots? available now/.exec(text)?.[1] ?? '0');
   const waitSeconds = Number(/in (\d+) seconds?/.exec(text)?.[1] ?? '0');
   return { slots, waitSeconds };
@@ -729,6 +731,7 @@ function selftest(): void {
 
   // Status-Text von Overpass
   assert.deepEqual(parseStatus('Rate limit: 4\n4 slots available now.\n'), { slots: 4, waitSeconds: 0 });
+  assert.equal(parseStatus('Rate limit: 0\nCurrently running queries (pid, space limit, time limit, start time):\n').slots, Infinity);
   assert.deepEqual(parseStatus('0 slots available now.\nSlot available after: 2026-10-10T12:00:00Z, in 12 seconds.'), {
     slots: 0,
     waitSeconds: 12,
