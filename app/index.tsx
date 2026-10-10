@@ -26,6 +26,11 @@ export default function HomeScreen() {
           {t('home.greeting')}
         </Text>
         <Text style={styles.intro}>{t('home.intro')}</Text>
+        <Button
+          label={t('home.start')}
+          size="large"
+          onPress={() => router.push('/suggestions')}
+        />
 
         <View style={styles.children}>
           <Text style={styles.childrenTitle} accessibilityRole="header">

@@ -1,8 +1,73 @@
 {
   "home": {
     "greeting": "Hello!",
-    "intro": "What will you do together today? Soon you'll get 3 matching ideas here in 30 seconds.",
+    "intro": "What will you do together today? Get 3 matching ideas in 30 seconds.",
+    "start": "What shall we do?",
     "childrenTitle": "Your children"
+  },
+  "suggest": {
+    "title": "What shall we do?",
+    "childrenTitle": "Who's joining?",
+    "childLabel": "{{name}} ({{age}})",
+    "childrenMissing": "Please choose at least one child.",
+    "timeTitle": "How much time do you have?",
+    "timeMissing": "Please choose how much time you have.",
+    "energyTitle": "How much energy do you have today?",
+    "energyHint": "Tap again to clear your choice.",
+    "show": "Show ideas",
+    "resultsTitle": "Your ideas",
+    "more": "Other ideas",
+    "changeSelection": "Change selection",
+    "startingOver": "Those were all the ideas that fit right now. Here they are again from the start.",
+    "fewMatches_zero": "No idea fits your selection right now.",
+    "fewMatches_one": "Only one idea fits your selection right now.",
+    "fewMatches_other": "Only {{count}} ideas fit your selection right now.",
+    "tipFewerChildren": "Tip: With fewer children, more ideas fit.",
+    "tipMoreTime": "Tip: With more time, there are more ideas.",
+    "tipComingSoon": "We keep adding new ideas. Check back soon."
+  },
+  "time": {
+    "minutes30": "30 min",
+    "hour1": "1 hour",
+    "hours2": "2 hours",
+    "halfDay": "Half a day"
+  },
+  "parentEnergy": {
+    "tired": "Tired",
+    "normal": "Okay",
+    "fit": "Energetic"
+  },
+  "testConditions": {
+    "badge": "For testing only",
+    "hint": "Later, weather and time of day will be set automatically.",
+    "weatherTitle": "Weather",
+    "dayPartTitle": "Time of day",
+    "weather": {
+      "sunny": "Sunny",
+      "cloudy": "Cloudy",
+      "rain": "Rain",
+      "thunderstorm": "Thunderstorm"
+    },
+    "dayPart": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    }
+  },
+  "categories": {
+    "craft": "Crafts",
+    "game": "Game",
+    "movement": "Movement",
+    "experiment": "Experiment",
+    "nature": "Nature",
+    "cooking": "Cooking and baking",
+    "outing": "Outing"
+  },
+  "duration": {
+    "minutes": "{{min}}–{{max}} min",
+    "minutesSingle": "{{value}} min",
+    "hours": "{{min, number}}–{{max, number}} h",
+    "hoursSingle": "{{value, number}} h"
   },
   "children": {
     "defaultName": "Child {{number}}",
