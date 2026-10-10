@@ -6,7 +6,7 @@
  * es pro Kategorie gibt und wie viele davon Öffnungszeiten oder eine Website haben.
  *
  * Start (im Projektordner):
- *   npm run places:test                 # Abfragen + Auswertung (Node 22.18 oder neuer)
+ *   npm run places:test                 # Abfragen + Auswertung (Node 22 oder neuer)
  *   npm run places:test -- --offline    # nur aus dem Zwischenspeicher auswerten, kein Netz
  *   npm run places:test -- --refresh    # Zwischenspeicher ignorieren und neu abfragen
  *   npm run places:test -- --selftest   # Rechenfunktionen prüfen, kein Netz

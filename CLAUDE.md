@@ -48,7 +48,7 @@ npx expo start         # App starten, mit Expo Go auf dem Handy testen
 npx tsc --noEmit       # TypeScript prüfen
 npm test               # Tests ausführen
 npx expo lint          # Code-Stil prüfen
-npm run places:test    # M2a: Machbarkeitstest Orte (Overpass API, braucht Node 22.18+, Zwischenspeicher in scripts/.cache/)
+npm run places:test    # M2a: Machbarkeitstest Orte (Overpass API, braucht Node 22+, Zwischenspeicher in scripts/.cache/)
 ```
 
 ## Ordnerstruktur (Ziel)
@@ -132,7 +132,7 @@ Bearbeite immer den **ersten offenen Punkt**, außer Clemens sagt etwas anderes.
 Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfüllt ist.
 
 - [x] **M1 Grundgerüst:** Expo-Projekt mit TypeScript, Expo Router, Ordnerstruktur, i18next mit de/en, RTL-Vorbereitung, Startbildschirm
-- [ ] **M2a Machbarkeitstest Orte (OpenStreetMap):** Skript `scripts/feasibility-places.ts` fragt über die Overpass API familientaugliche Orte für zwei Testorte (Greiz, Reudnitz) in 5/15/30 km ab; Ergebnis in `docs/machbarkeit-orte.md` (nur Test, keine App-Funktion)
+- [x] **M2a Machbarkeitstest Orte (OpenStreetMap):** Skript `scripts/feasibility-places.ts` fragt über die Overpass API familientaugliche Orte für zwei Testorte (Greiz, Reudnitz) in 5/15/30 km ab; Ergebnis in `docs/machbarkeit-orte.md` (nur Test, keine App-Funktion)
 - [ ] **M2b Machbarkeitstest Veranstaltungen (Knowledge Graph):** Skript, das den Knowledge Graph für eine Region abfragt und das Ergebnis zusammenfasst (nur Test, keine App-Funktion). ⏸ wartet auf den API-Schlüssel
 - [ ] **M3 Kinderprofile:** Einstieg ohne Konto, mehrere Kinder anlegen/bearbeiten, lokal speichern
 - [ ] **M4 Aktivitäten:** Datenmodell, 20 Beispiel-Aktivitäten in `data/`, lokal laden
@@ -141,7 +141,12 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
 - [ ] **M7 Details und Feedback:** Detailansicht, Daumen hoch/runter, Verlauf lokal
 - [ ] **M8 Supabase:** Aktivitäten aus der Datenbank laden (nur `approved`), Offline-Cache
 - [ ] **M9 KI-Wochenlauf:** Generator-Skript, GitHub Action, `activity_ideas`, 150–200 Start-Aktivitäten
-- [ ] **M10 Orte:** OpenStreetMap-Abfrage für Spielplätze, Museen, Bäder usw.
+- [ ] **M10 Orte:** OpenStreetMap-Abfrage für Spielplätze, Museen, Bäder usw. Erkenntnisse aus M2a (Zahlen und Begründung: `docs/machbarkeit-orte.md`):
+  1. Orte ohne Öffnungszeiten nicht ausschließen, sondern mit dem Hinweis „Öffnungszeiten vorher prüfen" anzeigen.
+  2. Bäder mit drinnen/draußen kennzeichnen und eine Saison berücksichtigen (keine Freibäder außerhalb der Saison).
+  3. Namenlose Orte (z. B. Spielplätze) über Straße oder Ortsteil beschreiben.
+  4. Kategorien nach Kindertauglichkeit gewichten (z. B. Rastplätze und kleine Sehenswürdigkeiten niedrig).
+  5. Bei Regen sind Indoor-Orte vor Ort selten: Die Aktivitäten für zu Hause sind dann besonders wichtig.
 - [ ] **M11 Veranstaltungen:** Knowledge Graph in die Vorschläge einbinden
 - [ ] **M12 Beta:** Datenschutzerklärung, Impressum, Testversionen für Freunde und Familie
 
@@ -158,3 +163,4 @@ Konto und Familie teilen, Premium/Abo, Radiosender-Kooperationen, Nachbarländer
 - 2026-10-10 – Zentrales Theme in `src/lib/theme.ts` (Farben, Schriftgrößen, Abstände, Eckenradien) mit neutralen Platzhalterwerten, bis Ani das Design festlegt. Breiten und Höhen bewusst nicht im Theme
 - 2026-10-10 – RTL nur, wenn die angezeigte Sprache RTL ist. Bis eine RTL-Übersetzung kommt, ist Spiegeln in `app.json` ausgeschaltet
 - 2026-10-10 – Roadmap: M2 aufgeteilt in M2a (Orte, OpenStreetMap, jetzt) und M2b (Veranstaltungen, wartet auf API-Schlüssel). M10 „Orte" bleibt die spätere App-Funktion
+- 2026-10-10 – M2a abgeschlossen: Rund um Greiz und Reudnitz gibt es in OSM genug Orte für 3 Vorschläge, aber dünn im Dorf (5 km), bei Regen (keine Kinder-Indoor-Ziele im 15-km-Umkreis) und bei Öffnungszeiten (nur ca. ein Drittel der Bäder, Museen, Zoos, Indoor-Angebote). Die öffentlichen Overpass-Server sind langsam und schwankend: Orte live aus der App abzufragen ist riskant, vor M10 klären, ob sie vorab geladen werden. Die 5 Erkenntnisse stehen bei M10
