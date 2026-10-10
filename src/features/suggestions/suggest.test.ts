@@ -501,6 +501,9 @@ describe('Regeln mit den echten Aktivitäten aus data/', () => {
   });
 
   it('kein Vorschlag verletzt einen harten Ausschluss, und es sind immer genau 3 (wenn möglich)', () => {
+    // Verstöße werden gesammelt und am Ende einmal geprüft. Das ist bei über tausend Kombinationen
+    // viel schneller als einzelne expect-Aufrufe und zeigt im Fehlerfall gleich Aktivität und Situation.
+    const violations: string[] = [];
     for (const children of childGroups) {
       for (const { minutes } of timeOptions) {
         for (const weather of weatherKeys) {
@@ -515,31 +518,40 @@ describe('Regeln mit den echten Aktivitäten aus data/', () => {
               });
               const result = suggest(activities, request);
               const suggested = allSuggested(result);
+              const where = `${minutes} Min., ${weather}, ${dayPart}`;
+              const fail = (activity: Activity, rule: string) =>
+                violations.push(`${activity.id}: ${rule} (${where})`);
 
               for (const activity of suggested) {
-                expect(activity.status).toBe('approved');
+                if (activity.status !== 'approved') fail(activity, 'nicht approved');
                 for (const child of children) {
                   const age = getAgeInYears(child, request.now);
-                  expect(age).toBeGreaterThanOrEqual(activity.ageMin);
-                  expect(age).toBeLessThanOrEqual(activity.ageMax);
+                  if (age < activity.ageMin || age > activity.ageMax) fail(activity, `Alter ${age}`);
                 }
-                expect(activity.durationMin).toBeLessThanOrEqual(minutes);
-                if (activity.dayParts) expect(activity.dayParts).toContain(dayPart);
-                if (activity.months) expect(activity.months).toContain(getMonthNumber(request.now));
-                if (weather === 'thunderstorm') expect(activity.setting).not.toBe('outdoor');
-                if (weather === 'rain' || weather === 'thunderstorm') {
-                  expect(activity.weather.needsDry).toBe(false);
+                if (activity.durationMin > minutes) fail(activity, 'zu lang');
+                if (activity.dayParts && !activity.dayParts.includes(dayPart)) fail(activity, 'Tageszeit');
+                if (activity.months && !activity.months.includes(getMonthNumber(request.now))) {
+                  fail(activity, 'Monat');
+                }
+                if (weather === 'thunderstorm' && activity.setting === 'outdoor') fail(activity, 'Gewitter');
+                if ((weather === 'rain' || weather === 'thunderstorm') && activity.weather.needsDry) {
+                  fail(activity, 'braucht Trockenheit');
                 }
               }
 
-              expect(suggested).toHaveLength(result.matchCount);
+              if (suggested.length !== result.matchCount) {
+                violations.push(`nicht alle passenden Ideen in den Gruppen (${where})`);
+              }
               const expectedSize = Math.min(result.matchCount, 3);
-              for (const page of result.pages) expect(page).toHaveLength(expectedSize);
+              if (result.pages.some((page) => page.length !== expectedSize)) {
+                violations.push(`Gruppe nicht genau ${expectedSize} groß (${where})`);
+              }
             }
           }
         }
       }
     }
+    expect(violations).toEqual([]);
   });
 
   it('jeder Monat: kein Vorschlag außerhalb seiner Monate, und es gibt immer Vorschläge', () => {
