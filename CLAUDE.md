@@ -46,7 +46,7 @@ Team: Clemens (Technik, programmiert mit dir), Ani (Design, Ideen).
 - **Wetter:** Bright Sky API (DWD-Daten, ohne Schlüssel), Details in `docs/weather.md`
 - **Standort:** expo-location, nur im Vordergrund und auf 2 Nachkommastellen gerundet
 - **Orte:** OpenStreetMap Overpass API (Ergebnisse cachen, sparsam abfragen)
-- **Veranstaltungen:** German Tourism Knowledge Graph
+- **Veranstaltungen:** German Tourism Knowledge Graph, ThüCAT, open.destination.one (siehe M11)
 - **Symbole:** @expo/vector-icons (Ionicons, nur Linien-Varianten `…-outline`), Zuordnung Kategorie → Symbol nur in `src/features/activities/CategoryIcon.tsx`
 - **Tests:** Jest (über `jest-expo`) für Logik (vor allem die Vorschlagslogik)
 
@@ -90,6 +90,8 @@ docs/                 # Konzept und Anleitungen
 - **Datenschutz:** Kinderprofile, Feedback und Verlauf nur lokal speichern. Kein echter Name nötig,
   nur Geburtsjahr und -monat. Standort nur bei Nutzung, auf 2 Nachkommastellen (~1 km) runden,
   bevor er an externe Dienste geht.
+- **Veranstaltungsdaten nur aus lizenzierten Quellen oder von Veranstaltern selbst eingereicht.** Niemals fremde
+  Websites oder Kalender automatisch auslesen (Datenbankherstellerrecht, siehe `docs/veranstaltungsquellen.md`).
 - Vorschlagslogik als **reine Funktionen** in `src/features/suggestions/` – ohne UI, mit Tests.
 
 ## Vorschlagslogik
@@ -160,7 +162,7 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
 
 - [x] **M1 Grundgerüst:** Expo-Projekt mit TypeScript, Expo Router, Ordnerstruktur, i18next mit de/en, RTL-Vorbereitung, Startbildschirm
 - [x] **M2a Machbarkeitstest Orte (OpenStreetMap):** Skript `scripts/feasibility-places.ts` fragt über die Overpass API familientaugliche Orte für zwei Testorte (Greiz, Reudnitz) in 5/15/30 km ab; Ergebnis in `docs/machbarkeit-orte.md` (nur Test, keine App-Funktion)
-- [ ] **M2b Machbarkeitstest Veranstaltungen (Knowledge Graph):** Skript, das den Knowledge Graph für eine Region abfragt und das Ergebnis zusammenfasst (nur Test, keine App-Funktion). ⏸ wartet auf den API-Schlüssel
+- [ ] **M2b Machbarkeitstest Veranstaltungen:** Skript, das den DZT Knowledge Graph, ThüCAT und open.destination.one (Sachsen/Vogtland) für Greiz und Reudnitz abfragt und das Ergebnis zusammenfasst (nur Test, keine App-Funktion). Zugang und Quellen: `docs/veranstaltungsquellen.md`. ⏸ wartet auf die API-Schlüssel
 - [x] **M3 Kinderprofile:** Einstieg ohne Konto, mehrere Kinder anlegen/bearbeiten, lokal speichern
 - [x] **M4 Aktivitäten:** Datenmodell, 20 Beispiel-Aktivitäten in `data/`, lokal laden
 - [x] **M5 Vorschläge:** Zeit + Energie wählen, Vorschlagslogik mit Tests, 3 Vorschläge anzeigen
@@ -176,7 +178,11 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
   3. Namenlose Orte (z. B. Spielplätze) über Straße oder Ortsteil beschreiben.
   4. Kategorien nach Kindertauglichkeit gewichten (z. B. Rastplätze und kleine Sehenswürdigkeiten niedrig).
   5. Bei Regen sind Indoor-Orte vor Ort selten: Die Aktivitäten für zu Hause sind dann besonders wichtig.
-- [ ] **M11 Veranstaltungen:** Knowledge Graph in die Vorschläge einbinden
+- [ ] **M11 Veranstaltungen:** Die ersten Quellen (Knowledge Graph, ThüCAT, open.destination.one) in die Vorschläge einbinden (Recherche: `docs/veranstaltungsquellen.md`). Pflicht von Anfang an:
+  1. Lizenz und Quellenangabe pro Veranstaltung speichern.
+  2. Datensätze mit NC- oder ND-Lizenz herausfiltern.
+  3. Quellenhinweis in der Detailansicht anzeigen.
+  4. Dubletten über Ort, Startzeit und Titel erkennen.
 - [ ] **M12 Beta:** Datenschutzerklärung, Impressum, Testversionen für Freunde und Familie. Vorher liest ein Mensch alle Aktivitäten einmal durch
 
 ## Später (nicht jetzt bauen)
@@ -186,6 +192,9 @@ Konto und Familie teilen, Premium/Abo, Radiosender-Kooperationen, Nachbarländer
 Anbieter-Portal (lokale Anbieter tragen Angebote und Termine selbst ein), Widget „Idee für heute“,
 Bildschirm anlassen während der Anleitung (braucht ein neues Paket, `expo-keep-awake`, vorher Rückfrage),
 Vorschläge für einen anderen Ort (z. B. Urlaubsort), Wetter im Ausland (Urlaub), z. B. über eine zweite Wetterquelle (Bright Sky deckt nur Deutschland ab).
+Veranstaltungen (Details: `docs/veranstaltungsquellen.md`): Einreichungsformular für Veranstalter (Vereine, Kitas, Kirchgemeinden) mit Lizenz-Einwilligung,
+Ticket-Partnerprogramme (Eventim über AWIN, Reservix/ADticket), Kooperationen (Freizeitkalender Vogtland, Flohmarkt- und Mittelalter-Portale),
+weitere Landesschnittstellen.
 
 ## Notizen und Entscheidungen
 
