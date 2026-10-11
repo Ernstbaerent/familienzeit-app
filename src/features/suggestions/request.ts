@@ -14,10 +14,17 @@ export type SuggestionRequest = {
   children: SuggestionChild[]; // die Kinder, die heute dabei sind
   availableMinutes: number;
   parentEnergy?: ParentEnergy; // freiwillig, fehlt = neutral
-  weather: Weather; // M5: Test-Auswahl, ab M6 echtes Wetter
-  dayPart: DayPart; // M5: Test-Auswahl, ab M6 aus der Uhrzeit
+  weather: Weather; // Wetterlage in der gewählten Zeitspanne (schlimmster Wert)
+  // Temperatur in °C in der Zeitspanne. Fehlt sie (z. B. Wetter von Hand gewählt), wird sie nicht gewichtet.
+  temperature?: { min: number; max: number };
+  // Amtliche Warnung vor Gewitter, Sturm oder Unwetter gilt in der Zeitspanne: draußen ist dann ausgeschlossen.
+  severeWarning?: boolean;
+  dayPart: DayPart; // kommt aus der Uhrzeit (`getDayPart`)
   now: Date; // für das Alter der Kinder und den Monat (`months` einer Aktivität)
 };
+
+// Der Teil der Anfrage, den die Wetter-Funktionen (src/features/weather) liefern.
+export type WeatherConditions = Pick<SuggestionRequest, 'weather' | 'temperature' | 'severeWarning'>;
 
 // Alter in vollen Jahren, so wie `ageMin` und `ageMax` einer Aktivität gemeint sind:
 // Ein Kind mit 2 Jahren und 11 Monaten zählt als 2.

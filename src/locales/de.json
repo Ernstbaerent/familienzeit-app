@@ -37,21 +37,61 @@
     "normal": "Normal",
     "fit": "Fit"
   },
-  "testConditions": {
-    "badge": "Nur zum Testen",
-    "hint": "Später kommen Wetter und Tageszeit automatisch.",
-    "weatherTitle": "Wetter",
-    "dayPartTitle": "Tageszeit",
-    "weather": {
+  "weather": {
+    "explain": {
+      "title": "Wetter bei euch",
+      "text": "Damit wir passende Ideen für heute finden, schauen wir kurz, wie das Wetter bei euch ist. Später zeigen wir auch, was in der Nähe los ist.",
+      "pointWhen": "Wir fragen deinen Standort nur, solange die App offen ist.",
+      "pointRounded": "Er wird auf etwa 1 km gerundet. Nur dieser grobe Ort geht an den Wetterdienst.",
+      "pointPrivacy": "Ein Konto brauchst du nicht, alles andere bleibt auf deinem Handy.",
+      "allow": "Standort erlauben",
+      "decline": "Wetter selbst wählen"
+    },
+    "manual": {
+      "title": "Wie ist das Wetter?",
+      "hint": "Ohne Standort fragen wir kurz nach.",
+      "hintUnavailable": "Das Wetter ließ sich gerade nicht abrufen. Wie ist es bei euch?"
+    },
+    "allowLocation": "Standort erlauben",
+    "openSettings": "Standort in den Einstellungen erlauben",
+    "change": "Wetter ändern",
+    "automatic": "Automatisch",
+    "loading": "Wetter wird geprüft …",
+    "options": {
       "sunny": "Sonne",
       "cloudy": "Bewölkt",
       "rain": "Regen",
-      "thunderstorm": "Gewitter"
+      "thunderstorm": "Gewitter",
+      "snow": "Schnee"
     },
-    "dayPart": {
-      "morning": "Morgen",
-      "afternoon": "Nachmittag",
-      "evening": "Abend"
+    "names": {
+      "sunny": "Sonnig",
+      "cloudy": "Bewölkt",
+      "rain": "Regen",
+      "thunderstorm": "Gewitter",
+      "snow": "Schnee"
+    },
+    "line": {
+      "withChange": "{{now}}, {{change}} ab {{time}}",
+      "manual": "Eure Auswahl: {{weather}}",
+      "assumed": "Wetter nicht abrufbar. Wir gehen von „{{weather}}“ aus.",
+      "withTemperature": "{{text}} · {{temperature}}"
+    },
+    "temperature": "{{value}} °C",
+    "source": "Quelle: Deutscher Wetterdienst",
+    "stale": "Stand {{time}}, gerade nicht aktualisierbar.",
+    "warning": {
+      "thunderstorm": "Amtliche Gewitterwarnung",
+      "storm": "Amtliche Sturmwarnung",
+      "severe": "Amtliche Unwetterwarnung",
+      "from": "ab {{time}}",
+      "until": "bis {{time}}",
+      "fromUntil": "von {{from}} bis {{until}}",
+      "effect": "Deshalb schlagen wir nichts draußen vor."
+    },
+    "clock": {
+      "fullHour": "{{hour}} Uhr",
+      "withMinutes": "{{hour}}:{{minute}} Uhr"
     }
   },
   "categories": {

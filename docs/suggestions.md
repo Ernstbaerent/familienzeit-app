@@ -1,4 +1,4 @@
-# Vorschläge (M5)
+# Vorschläge (M5, Wetter ab M6)
 
 Eltern wählen, wer dabei ist und wie viel Zeit sie haben. Die App zeigt genau 3 passende Ideen.
 
@@ -7,23 +7,24 @@ Eltern wählen, wer dabei ist und wie viel Zeit sie haben. Die App zeigt genau 3
 | Bildschirm        | Datei                          | Zweck |
 | ----------------- | ------------------------------ | ----- |
 | Start             | `app/index.tsx`                | Großer Knopf „Was machen wir?“ |
-| Was machen wir?   | `app/suggestions/index.tsx`    | Kinder (alle vorausgewählt), Zeit (Pflicht), Energie (freiwillig), Test-Auswahl Wetter und Tageszeit |
-| Eure Ideen        | `app/suggestions/results.tsx`  | 3 Karten, „Andere Vorschläge“, „Auswahl ändern“ |
+| Was machen wir?   | `app/suggestions/index.tsx`    | Kinder (alle vorausgewählt), Zeit (Pflicht), Energie (freiwillig), Wetter-Teil (Erklär-Karte für den Standort oder „Wie ist das Wetter?“) |
+| Eure Ideen        | `app/suggestions/results.tsx`  | Wetterzeile, 3 Karten, „Andere Vorschläge“, „Auswahl ändern“ |
 
 Die Auswahl reist als Parameter in der Bildschirm-Adresse zum Ergebnis (`selection.ts`). Das bleibt auf dem Gerät.
+Das Wetter reist nicht mit, nur eine **Handwahl** („Wie ist das Wetter?“) als freiwilliger Parameter `weather`. Sonst holt sich der Ergebnis-Bildschirm das Wetter selbst (`docs/weather.md`).
 Eine Karte zeigt Kategorie-Symbol, Titel, Dauer und Kurzbeschreibung. Antippen öffnet noch nichts (Detailansicht: M7).
 
 ## Wo was liegt
 
 | Was                                        | Datei (in `src/features/`)            |
 | ------------------------------------------ | ------------------------------------- |
-| Zeit-Auswahl, Energie, Wetter, Tageszeit   | `suggestions/conditions.ts`           |
+| Zeit-Auswahl, Energie, Wetterlagen, Tageszeit | `suggestions/conditions.ts`        |
 | Harte Ausschlüsse                          | `suggestions/exclusions.ts`           |
 | Gewichtung (alle Gewichte in einer Tabelle)| `suggestions/scoring.ts`              |
 | Dreiergruppen, Blättern, Tipps             | `suggestions/suggest.ts`              |
 | Auswahl ↔ Bildschirm-Parameter             | `suggestions/selection.ts`            |
 | Karte                                      | `suggestions/SuggestionCard.tsx`      |
-| Test-Auswahl Wetter und Tageszeit          | `suggestions/TestConditions.tsx`      |
+| Wetter und Standort (Abruf, Zwischenspeicher, Anzeige) | `weather/`, siehe `docs/weather.md` |
 | Kategorie → Symbol                         | `activities/CategoryIcon.tsx`         |
 | Dauer als Text, Text in der App-Sprache    | `activities/activityDisplay.ts`, `activities/formatDuration.ts` |
 
@@ -40,11 +41,12 @@ Nur Sicherheit und Machbarkeit. Diese Regeln werden **nie** aufgeweicht.
 | `time`      | `durationMin` ist länger als die verfügbare Zeit. Passt die kürzeste Variante, ist die Aktivität machbar. Anfahrt gibt es erst mit Orten (M10). |
 | `dayPart`   | Die Aktivität hat `dayParts` und die Tageszeit ist nicht dabei. Ohne `dayParts` passt sie immer. |
 | `month`     | Die Aktivität hat `months` und der heutige Monat ist nicht dabei. Ohne `months` passt sie das ganze Jahr. Der Monat kommt aus dem Datum (`request.now`), es gibt keine Auswahl dafür. |
-| `danger`    | Gewitter und `setting: 'outdoor'`. `both` bleibt, weil man es drinnen machen kann. |
-| `notDry`    | `weather.needsDry` und es regnet oder gewittert. |
+| `danger`    | Gewitter **oder amtliche Warnung** (Gewitter, Sturm, Orkan, andere Unwetterwarnung ab Stufe 3) und `setting: 'outdoor'`. `both` bleibt, weil man es drinnen machen kann. |
+| `notDry`    | `weather.needsDry` und es regnet, gewittert oder schneit. |
 | `notApproved` | Sicherheitsnetz: nur `status: 'approved'` (filtert `loadActivities()` schon). |
 
 **Uhrzeit-Grenzen der Tageszeiten** (`getDayPart`): Morgen 5:00–11:59, Nachmittag 12:00–16:59, Abend 17:00–4:59.
+Die Tageszeit kommt automatisch aus der Uhrzeit beim Öffnen von „Eure Ideen“ (`toSuggestionRequest`), es gibt keine Auswahl dafür.
 
 **Zeit-Auswahl:** 30 Min., 1 Std., 2 Std., halber Tag (= 4 Std.).
 
@@ -57,6 +59,7 @@ Nur Sicherheit und Machbarkeit. Diese Regeln werden **nie** aufgeweicht.
 | Thema, das mindestens ein ausgewähltes Kind mag | +3 je Thema |
 | Thema, das mindestens ein ausgewähltes Kind nicht mag | −4 je Thema |
 | Sonne und `betterInSun` | +2 |
+| Hitze (ab 30 °C) oder Frost (0 °C und kälter) im Zeitfenster | `outdoor` −4, `both` −1, drinnen 0 |
 | Mehrere Kinder dabei und `siblingFriendly` | +2 |
 | Kosten | −1 je Stufe |
 | Eltern müde | `low` +2, `high` −4 |
@@ -79,20 +82,15 @@ Noch nicht dabei: Entfernung (kommt mit M10) und „kürzlich gemacht“ (brauch
   („weniger Kinder“, „mehr Zeit“) erscheint nur, wenn er wirklich zu mehr Ideen führt (`getTips`).
   Sonst steht dort, dass laufend neue Ideen dazukommen.
 
-## Test-Auswahl Wetter und Tageszeit (bis M6)
+## Wetter und Tageszeit (ab M6)
 
-Bis M6 wählt man Wetter und Tageszeit von Hand. Der Kasten ist gestrichelt und mit „Nur zum Testen“ beschriftet.
-Die Tageszeit ist nach der Uhrzeit vorausgewählt, das Wetter auf „Bewölkt“.
+Die Vorschlagslogik bekommt über `SuggestionRequest` die Wetterlage (`weather`, jetzt auch `snow`), die Temperatur im Zeitfenster
+(`temperature`, freiwillig) und ob eine amtliche Warnung gilt (`severeWarning`, freiwillig). Woher das kommt, steht in `docs/weather.md`.
+Die Logik selbst bleibt reine Funktionen ohne Internet und Standort.
 
-**In M6 entfernen:**
-
-1. `src/features/suggestions/TestConditions.tsx` löschen.
-2. In `src/locales/de.json` und `en.json` den Bereich `testConditions` löschen.
-3. Im Projekt nach `TEST (M6)` suchen und jede Stelle anpassen:
-   `app/suggestions/index.tsx` (Zustand und Kasten) und `src/features/suggestions/selection.ts`
-   (Wetter und Tageszeit nicht mehr als Parameter, sondern auf dem Ergebnis-Bildschirm aus Bright Sky und `getDayPart(new Date())`).
-
-Die Vorschlagslogik selbst ändert sich dabei nicht: Sie bekommt Wetter und Tageszeit weiter über `SuggestionRequest`.
+- **Wetterlage:** `sunny`, `cloudy`, `rain`, `thunderstorm`, `snow`. Schnee ist nicht trocken (`needsDry` fällt weg), Aktivitäten, die Schnee brauchen, folgen mit M6b.
+- **Temperatur:** nur Gewichtung (siehe oben), nie ein Ausschluss.
+- **Warnung:** schließt draußen aus (`danger`), auch wenn das Wetter gerade ruhig ist.
 
 ## Kategorie-Symbole
 
@@ -114,14 +112,16 @@ npx expo lint
 (Regen + Kleinkind, Gewitter, 30 Min. + müde, Baby + Teenager, Abend, Interessen und Abneigungen)
 und alle harten Ausschlüsse mit den echten Aktivitäten aus `data/` für über tausend Kombinationen.
 Ein weiterer Test spielt mit den echten Aktivitäten alle 12 Monate durch: kein Vorschlag außerhalb seiner Monate,
-und für ein Kind mit 5 Jahren und 1 Stunde gibt es in jedem Monat, bei jedem Wetter und zu jeder Tageszeit mindestens 3 Ideen.
+und für ein Kind mit 5 Jahren und 1 Stunde gibt es in jedem Monat, bei jedem Wetter (auch Schnee), mit und ohne Warnung und zu jeder Tageszeit mindestens 3 Ideen.
 Diese letzten Tests prüfen nur Regeln, keine einzelnen IDs. Sie laufen also auch, wenn sich die Aktivitäten ändern.
 
-Von Hand: `npx expo start`, mit Expo Go öffnen, „Was machen wir?“ antippen und z. B. ausprobieren:
+Von Hand: `npx expo start`, mit Expo Go öffnen, „Was machen wir?“ antippen. Das Wetter lässt sich mit „Wetter ändern“ auf „Eure Ideen“
+(oder ohne Standort mit „Wie ist das Wetter?“) selbst wählen, z. B. ausprobieren (Wetter und Standort: `docs/weather.md`):
 
 - Gewitter: keine Ideen für draußen (Pfützen-Forscher, Waldtag mit Picknick, Draußen-Olympiade, Schnitzeljagd fehlen)
 - Abend + Kind ab 6: „Sterne beobachten“ taucht auf (nur September bis März), morgens nie
 - Monate: Im Oktober können „Kastanientiere“, „Laterne aus einer Papiertüte“ und „Bratäpfel“ kommen,
   „Plätzchen ausstechen“ und „Ostereier färben“ nie (Monat kommt aus dem Datum des Handys)
+- Schnee: nichts, was trocken sein muss (z. B. Picknick); sonst bleibt alles möglich
 - Baby und Teenager zusammen: Hinweis statt Vorschläge
 - „Andere Vorschläge“ mehrmals: nach der letzten Gruppe kommt der Hinweis „von vorn“

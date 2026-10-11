@@ -1,14 +1,14 @@
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import { loadActivities } from '@/features/activities/loadActivities';
 import type { ChildProfile } from '@/features/profiles/profiles';
 import { useProfiles } from '@/features/profiles/ProfilesContext';
-import { longestMinutes } from '@/features/suggestions/conditions';
+import { getMinutes, longestMinutes, type Weather } from '@/features/suggestions/conditions';
 import {
   parseSelectionParams,
   toSuggestionRequest,
@@ -23,6 +23,14 @@ import {
   type Tip,
 } from '@/features/suggestions/suggest';
 import { SuggestionCard } from '@/features/suggestions/SuggestionCard';
+import {
+  assumedSituation,
+  buildSituation,
+  manualSituation,
+  toConditions,
+} from '@/features/weather/situation';
+import { useWeather, useWeatherRefresh } from '@/features/weather/WeatherProvider';
+import { WeatherSummary } from '@/features/weather/WeatherSummary';
 import { colors, fontSize, lineHeight, radius, spacing } from '@/lib/theme';
 
 // Die Vorschläge: genau 3 Karten, „Andere Vorschläge“ zeigt die nächsten 3.
@@ -43,16 +51,32 @@ function Results({ selection, profiles }: { selection: Selection; profiles: Chil
   const { t } = useTranslation();
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
-  // „Jetzt“ einmal festhalten (für das Alter der Kinder).
+  // „Jetzt“ einmal festhalten (für das Alter der Kinder, die Tageszeit und das Wetter-Fenster).
   const [now] = useState(() => new Date());
   // Wie oft „Andere Vorschläge“ gedrückt wurde.
   const [pageIndex, setPageIndex] = useState(0);
+  // Wetter von Hand: aus der Auswahl („Wie ist das Wetter?“) oder hier mit „Wetter ändern“.
+  // `null` heißt: Das Wetter kommt automatisch vom Deutschen Wetterdienst.
+  const [manualWeather, setManualWeather] = useState<Weather | null>(selection.weather ?? null);
+  const { status, data, stale } = useWeather();
+  useWeatherRefresh();
+
+  // Das Wetter für die gewählte Zeit. Eine Handwahl ersetzt nur die Wetterlage: Amtliche Warnungen bleiben.
+  const automatic = data ? buildSituation(data, getMinutes(selection.time), now, { stale }) : null;
+  const situation = manualWeather
+    ? manualSituation(manualWeather, automatic)
+    : (automatic ?? assumedSituation());
 
   const activities = loadActivities();
-  const request = toSuggestionRequest(selection, profiles, now);
+  const request = toSuggestionRequest(selection, profiles, now, toConditions(situation));
   const suggestions = suggest(activities, request);
   const page = getPage(suggestions, pageIndex);
   const tooFew = suggestions.matchCount < suggestionsPerPage;
+
+  function changeWeather(weather: Weather | null) {
+    setManualWeather(weather);
+    setPageIndex(0); // andere Wetterlage, andere Reihenfolge: wieder bei den ersten 3
+  }
 
   function showOthers() {
     setPageIndex((current) => current + 1);
@@ -67,10 +91,31 @@ function Results({ selection, profiles }: { selection: Selection; profiles: Chil
     }
   }
 
+  // Die Vorschläge hängen vom Wetter ab: Kurz warten, bis es da ist (der Abruf hat ein Zeitlimit).
+  if (status === 'loading' && data === null && manualWeather === null) {
+    return (
+      <SafeAreaView style={[styles.screen, styles.loading]} edges={['bottom']}>
+        <Stack.Screen options={{ title: t('suggest.resultsTitle') }} />
+        <ActivityIndicator color={colors.primary} />
+        <Text style={styles.hint} accessibilityLiveRegion="polite">
+          {t('weather.loading')}
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
       <Stack.Screen options={{ title: t('suggest.resultsTitle') }} />
       <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
+        <WeatherSummary
+          situation={situation}
+          now={now}
+          manualWeather={manualWeather}
+          hasAutomatic={automatic !== null}
+          onManualWeatherChange={changeWeather}
+        />
+
         {isStartingOver(suggestions, pageIndex) && (
           <Text style={styles.hint} accessibilityLiveRegion="polite">
             {t('suggest.startingOver')}
@@ -135,6 +180,11 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.lg,
+    gap: spacing.md,
+  },
+  loading: {
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: spacing.md,
   },
   hint: {
