@@ -7,12 +7,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { Section } from '@/components/Section';
-import type { DayPart } from '@/features/activities/activities';
 import { formatAge } from '@/features/profiles/formatAge';
 import type { ChildProfile } from '@/features/profiles/profiles';
 import { useProfiles } from '@/features/profiles/ProfilesContext';
 import {
-  getDayPart,
   parentEnergyKeys,
   timeKeys,
   type ParentEnergy,
@@ -20,7 +18,9 @@ import {
   type Weather,
 } from '@/features/suggestions/conditions';
 import { toSelectionParams } from '@/features/suggestions/selection';
-import { TestConditions } from '@/features/suggestions/TestConditions';
+import { needsManualWeather } from '@/features/weather/manualWeather';
+import { useWeather, useWeatherRefresh } from '@/features/weather/WeatherProvider';
+import { WeatherSection } from '@/features/weather/WeatherSection';
 import { colors, fontSize, lineHeight, spacing } from '@/lib/theme';
 
 // „Was machen wir?“: Kinder, Zeit und (freiwillig) Energie wählen, dann zu den Vorschlägen.
@@ -40,9 +40,12 @@ function SelectionForm({ profiles }: { profiles: ChildProfile[] }) {
   const [childIds, setChildIds] = useState(() => profiles.map((child) => child.id));
   const [time, setTime] = useState<TimeKey | null>(null);
   const [parentEnergy, setParentEnergy] = useState<ParentEnergy | null>(null);
-  // TEST (M6): Wetter und Tageszeit kommen dann automatisch. Die Tageszeit startet schon jetzt mit der Uhrzeit.
-  const [weather, setWeather] = useState<Weather>('cloudy');
-  const [dayPart, setDayPart] = useState<DayPart>(() => getDayPart(new Date()));
+  // Wetter von Hand („Wie ist das Wetter?“). Gilt nur, wenn die App das Wetter nicht selbst holen kann
+  // (Standort verweigert oder Wetter nicht abrufbar). „Bewölkt“ ist die neutrale Vorauswahl.
+  const [manualWeather, setManualWeather] = useState<Weather>('cloudy');
+  const { access, status } = useWeather();
+  // Holt das Wetter schon jetzt, damit es bei den Vorschlägen bereitliegt (dank Zwischenspeicher meist ohne Abruf).
+  useWeatherRefresh();
 
   // Nur Kinder, die es noch gibt (falls zwischendurch eins gelöscht wurde).
   const selectedIds = childIds.filter((id) => profiles.some((child) => child.id === id));
@@ -63,8 +66,7 @@ function SelectionForm({ profiles }: { profiles: ChildProfile[] }) {
         childIds: selectedIds,
         time,
         parentEnergy: parentEnergy ?? undefined,
-        weather,
-        dayPart,
+        weather: needsManualWeather(access, status) ? manualWeather : undefined,
       }),
     });
   }
@@ -122,13 +124,7 @@ function SelectionForm({ profiles }: { profiles: ChildProfile[] }) {
           </View>
         </Section>
 
-        {/* TEST (M6): Test-Auswahl entfernen, sobald Wetter und Tageszeit echt sind. */}
-        <TestConditions
-          weather={weather}
-          dayPart={dayPart}
-          onWeatherChange={setWeather}
-          onDayPartChange={setDayPart}
-        />
+        <WeatherSection manualWeather={manualWeather} onManualWeatherChange={setManualWeather} />
 
         <View style={styles.actions}>
           {childrenMissing && <Text style={styles.hint}>{t('suggest.childrenMissing')}</Text>}

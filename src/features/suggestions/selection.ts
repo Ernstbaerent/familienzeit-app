@@ -1,8 +1,8 @@
 // Die Auswahl auf „Was machen wir?“ und ihre Übergabe an den Ergebnis-Bildschirm.
 // Die Auswahl reist als Parameter in der Bildschirm-Adresse mit. Das bleibt alles auf dem Gerät.
 
-import { isDayPart, type DayPart } from '../activities/activities';
 import {
+  getDayPart,
   getMinutes,
   isParentEnergy,
   isTimeKey,
@@ -11,22 +11,21 @@ import {
   type TimeKey,
   type Weather,
 } from './conditions';
-import type { SuggestionChild, SuggestionRequest } from './request';
+import type { SuggestionChild, SuggestionRequest, WeatherConditions } from './request';
 
 export type Selection = {
   childIds: string[]; // mindestens ein Kind
   time: TimeKey;
   parentEnergy?: ParentEnergy;
-  weather: Weather; // TEST (M6): kommt dann vom echten Wetter
-  dayPart: DayPart; // TEST (M6): kommt dann aus der Uhrzeit
+  // Wetter von Hand gewählt („Wie ist das Wetter?“). Fehlt es, gilt das Wetter vom Deutschen Wetterdienst.
+  weather?: Weather;
 };
 
 export type SelectionParams = {
   children: string; // IDs mit Komma getrennt
   time: string;
   energy?: string;
-  weather: string; // TEST (M6)
-  dayPart: string; // TEST (M6)
+  weather?: string;
 };
 
 export function toSelectionParams(selection: Selection): SelectionParams {
@@ -34,8 +33,7 @@ export function toSelectionParams(selection: Selection): SelectionParams {
     children: selection.childIds.join(','),
     time: selection.time,
     ...(selection.parentEnergy ? { energy: selection.parentEnergy } : {}),
-    weather: selection.weather,
-    dayPart: selection.dayPart,
+    ...(selection.weather ? { weather: selection.weather } : {}),
   };
 }
 
@@ -51,28 +49,30 @@ export function parseSelectionParams(raw: RawParams): Selection | null {
   const time = single(raw.time);
   const energy = single(raw.energy);
   const weather = single(raw.weather);
-  const dayPart = single(raw.dayPart);
 
-  if (childIds.length === 0 || !isTimeKey(time) || !isWeather(weather) || !isDayPart(dayPart)) {
-    return null;
-  }
+  if (childIds.length === 0 || !isTimeKey(time)) return null;
   if (energy !== undefined && !isParentEnergy(energy)) return null;
+  if (weather !== undefined && !isWeather(weather)) return null;
 
-  return { childIds, time, parentEnergy: energy, weather, dayPart };
+  return { childIds, time, parentEnergy: energy, weather };
 }
 
 // Baut aus der Auswahl die Anfrage für suggest(). Kinder, die es nicht mehr gibt, fallen weg.
+// Das Wetter kommt getrennt herein (siehe src/features/weather), die Tageszeit aus der Uhrzeit.
 export function toSuggestionRequest(
   selection: Selection,
   profiles: readonly (SuggestionChild & { id: string })[],
   now: Date,
+  conditions: WeatherConditions,
 ): SuggestionRequest {
   return {
     children: profiles.filter((child) => selection.childIds.includes(child.id)),
     availableMinutes: getMinutes(selection.time),
     parentEnergy: selection.parentEnergy,
-    weather: selection.weather,
-    dayPart: selection.dayPart,
+    weather: conditions.weather,
+    temperature: conditions.temperature,
+    severeWarning: conditions.severeWarning,
+    dayPart: getDayPart(now),
     now,
   };
 }

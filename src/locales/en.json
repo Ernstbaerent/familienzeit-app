@@ -37,21 +37,61 @@
     "normal": "Okay",
     "fit": "Energetic"
   },
-  "testConditions": {
-    "badge": "For testing only",
-    "hint": "Later, weather and time of day will be set automatically.",
-    "weatherTitle": "Weather",
-    "dayPartTitle": "Time of day",
-    "weather": {
+  "weather": {
+    "explain": {
+      "title": "Weather where you are",
+      "text": "To find ideas that fit today, we take a quick look at the weather where you are. Later we will also show what is going on nearby.",
+      "pointWhen": "We ask for your location only while the app is open.",
+      "pointRounded": "It is rounded to about 1 km. Only this rough place goes to the weather service.",
+      "pointPrivacy": "You do not need an account, everything else stays on your phone.",
+      "allow": "Allow location",
+      "decline": "Choose the weather myself"
+    },
+    "manual": {
+      "title": "What is the weather like?",
+      "hint": "Without your location we simply ask.",
+      "hintUnavailable": "We could not get the weather just now. What is it like where you are?"
+    },
+    "allowLocation": "Allow location",
+    "openSettings": "Allow location in settings",
+    "change": "Change weather",
+    "automatic": "Automatic",
+    "loading": "Checking the weather …",
+    "options": {
       "sunny": "Sunny",
       "cloudy": "Cloudy",
       "rain": "Rain",
-      "thunderstorm": "Thunderstorm"
+      "thunderstorm": "Thunderstorm",
+      "snow": "Snow"
     },
-    "dayPart": {
-      "morning": "Morning",
-      "afternoon": "Afternoon",
-      "evening": "Evening"
+    "names": {
+      "sunny": "Sunny",
+      "cloudy": "Cloudy",
+      "rain": "Rain",
+      "thunderstorm": "Thunderstorm",
+      "snow": "Snow"
+    },
+    "line": {
+      "withChange": "{{now}}, {{change}} from {{time}}",
+      "manual": "Your choice: {{weather}}",
+      "assumed": "Weather unavailable. We assume “{{weather}}”.",
+      "withTemperature": "{{text}} · {{temperature}}"
+    },
+    "temperature": "{{value}} °C",
+    "source": "Source: Deutscher Wetterdienst (German Weather Service)",
+    "stale": "As of {{time}}, cannot be updated right now.",
+    "warning": {
+      "thunderstorm": "Official thunderstorm warning",
+      "storm": "Official storm warning",
+      "severe": "Official severe weather warning",
+      "from": "from {{time}}",
+      "until": "until {{time}}",
+      "fromUntil": "from {{from}} until {{until}}",
+      "effect": "That is why we suggest nothing outdoors."
+    },
+    "clock": {
+      "fullHour": "{{hour}}:00",
+      "withMinutes": "{{hour}}:{{minute}}"
     }
   },
   "categories": {

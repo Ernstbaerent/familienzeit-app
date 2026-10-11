@@ -11,8 +11,8 @@ export type ExclusionReason =
   | 'time' // dauert länger als die verfügbare Zeit
   | 'dayPart' // passt nicht zur Tageszeit
   | 'month' // passt nicht zum Monat (z. B. Plätzchen nur im November und Dezember)
-  | 'danger' // draußen bei Gewitter
-  | 'notDry'; // braucht trockenes Wetter, es regnet oder gewittert
+  | 'danger' // draußen bei Gewitter oder amtlicher Gewitter-, Sturm- oder Unwetterwarnung
+  | 'notDry'; // braucht trockenes Wetter, es regnet, gewittert oder schneit
 
 // Gibt den ersten Grund zurück, aus dem die Aktivität heute nicht in Frage kommt.
 // `null` heißt: Sie kommt in Frage.
@@ -39,11 +39,14 @@ export function getExclusionReason(
   // Ohne `months` passt eine Aktivität das ganze Jahr. Der Monat kommt aus dem heutigen Datum.
   if (activity.months && !activity.months.includes(getMonthNumber(request.now))) return 'month';
 
-  // Bei Gewitter nichts draußen. `both` bleibt, weil man es drinnen machen kann.
-  if (request.weather === 'thunderstorm' && activity.setting === 'outdoor') return 'danger';
+  // Bei Gewitter oder einer amtlichen Warnung (Gewitter, Sturm, Unwetter) nichts draußen.
+  // `both` bleibt, weil man es drinnen machen kann.
+  const isDangerous = request.weather === 'thunderstorm' || request.severeWarning === true;
+  if (isDangerous && activity.setting === 'outdoor') return 'danger';
 
-  // `needsDry` heißt „nur bei Trockenheit“: bei Regen und Gewitter nicht machbar.
-  const isWet = request.weather === 'rain' || request.weather === 'thunderstorm';
+  // `needsDry` heißt „nur bei Trockenheit“: bei Regen, Gewitter und Schnee nicht machbar.
+  const isWet =
+    request.weather === 'rain' || request.weather === 'thunderstorm' || request.weather === 'snow';
   if (isWet && activity.weather.needsDry) return 'notDry';
 
   return null;

@@ -77,7 +77,20 @@ describe('harte Ausschlüsse', () => {
     expect(getExclusionReason(makeActivity({ id: 'c', setting: 'indoor' }), request)).toBeNull();
   });
 
-  it('needsDry: bei Regen und Gewitter ausgeschlossen, bei Sonne und Wolken nicht', () => {
+  it('Amtliche Warnung (Gewitter, Sturm, Unwetter): nichts draußen, auch wenn es gerade ruhig ist', () => {
+    const outdoor = makeActivity({ id: 'a', setting: 'outdoor' });
+    const both = makeActivity({ id: 'b', setting: 'both' });
+    const indoor = makeActivity({ id: 'c', setting: 'indoor' });
+    const warned = makeRequest({ weather: 'cloudy', severeWarning: true });
+    expect(getExclusionReason(outdoor, warned)).toBe('danger');
+    expect(getExclusionReason(both, warned)).toBeNull();
+    expect(getExclusionReason(indoor, warned)).toBeNull();
+    // Ohne Warnung bleibt draußen möglich.
+    expect(getExclusionReason(outdoor, makeRequest({ weather: 'cloudy' }))).toBeNull();
+    expect(getExclusionReason(outdoor, makeRequest({ weather: 'cloudy', severeWarning: false }))).toBeNull();
+  });
+
+  it('needsDry: bei Regen, Gewitter und Schnee ausgeschlossen, bei Sonne und Wolken nicht', () => {
     const activity = makeActivity({
       id: 'a',
       setting: 'both',
@@ -87,6 +100,7 @@ describe('harte Ausschlüsse', () => {
       getExclusionReason(activity, makeRequest({ weather }));
     expect(at('rain')).toBe('notDry');
     expect(at('thunderstorm')).toBe('notDry');
+    expect(at('snow')).toBe('notDry');
     expect(at('sunny')).toBeNull();
     expect(at('cloudy')).toBeNull();
   });
@@ -154,6 +168,49 @@ describe('Gewichtung (nur Reihenfolge)', () => {
     const free = makeActivity({ id: 'a', cost: 0 });
     const paid = makeActivity({ id: 'b', cost: 2 });
     expect(scoreActivity(free, makeRequest())).toBeGreaterThan(scoreActivity(paid, makeRequest()));
+  });
+});
+
+describe('Gewichtung bei Hitze und Frost', () => {
+  const outdoor = makeActivity({ id: 'outdoor', setting: 'outdoor' });
+  const both = makeActivity({ id: 'both', setting: 'both' });
+  const indoor = makeActivity({ id: 'indoor', setting: 'indoor' });
+  const score = (activity: Activity, temperature?: { min: number; max: number }) =>
+    scoreActivity(activity, makeRequest({ temperature }));
+
+  it('ab 30 °C rutscht draußen nach hinten, „beides“ ein wenig, drinnen bleibt', () => {
+    const hot = { min: 24, max: 30 };
+    expect(score(outdoor, hot)).toBe(score(outdoor) - 4);
+    expect(score(both, hot)).toBe(score(both) - 1);
+    expect(score(indoor, hot)).toBe(score(indoor));
+  });
+
+  it('bei 0 °C und darunter ebenso', () => {
+    const frost = { min: 0, max: 5 };
+    expect(score(outdoor, frost)).toBe(score(outdoor) - 4);
+    expect(score(both, frost)).toBe(score(both) - 1);
+    expect(score(indoor, frost)).toBe(score(indoor));
+  });
+
+  it('Grenzen: 29,9 °C und 0,1 °C zählen noch nicht', () => {
+    expect(score(outdoor, { min: 20, max: 29.9 })).toBe(score(outdoor));
+    expect(score(outdoor, { min: 0.1, max: 8 })).toBe(score(outdoor));
+  });
+
+  it('ohne Temperatur (Wetter von Hand gewählt) wird nichts abgezogen', () => {
+    expect(score(outdoor, undefined)).toBe(score(outdoor));
+  });
+
+  it('schließt nie aus, ändert nur die Reihenfolge', () => {
+    const activities = [
+      makeActivity({ id: 'outdoor', setting: 'outdoor', category: 'nature' }),
+      makeActivity({ id: 'indoor', setting: 'indoor', category: 'craft' }),
+    ];
+    const hot = suggest(activities, makeRequest({ temperature: { min: 25, max: 35 } }));
+    expect(hot.matchCount).toBe(2);
+    expect(ids(getPage(hot, 0))).toEqual(['indoor', 'outdoor']);
+    const mild = suggest(activities, makeRequest({ temperature: { min: 10, max: 18 } }));
+    expect(ids(getPage(mild, 0))).toEqual(['outdoor', 'indoor']);
   });
 });
 
@@ -495,6 +552,10 @@ describe('Regeln mit den echten Aktivitäten aus data/', () => {
     [makeChild({ years: 4 }), makeChild({ years: 7 }), makeChild({ years: 12 })],
   ];
   const energies: (ParentEnergy | undefined)[] = [undefined, ...parentEnergyKeys];
+  // Jede Energie mit und ohne amtliche Warnung.
+  const energiesAndWarnings = energies.flatMap((energy) =>
+    [false, true].map((warning) => [energy, warning] as const),
+  );
 
   it('hat Aktivitäten zum Prüfen', () => {
     expect(activities.length).toBeGreaterThan(0);
@@ -508,17 +569,20 @@ describe('Regeln mit den echten Aktivitäten aus data/', () => {
       for (const { minutes } of timeOptions) {
         for (const weather of weatherKeys) {
           for (const dayPart of dayPartKeys) {
-            for (const parentEnergy of energies) {
+            for (const [parentEnergy, severeWarning] of energiesAndWarnings) {
+              // Die Temperatur ändert nur die Reihenfolge, nie die Auswahl (Hitze mit, Frost ohne Warnung).
               const request = makeRequest({
                 children,
                 availableMinutes: minutes,
                 weather,
                 dayPart,
                 parentEnergy,
+                severeWarning,
+                temperature: severeWarning ? { min: 31, max: 35 } : { min: -3, max: 2 },
               });
               const result = suggest(activities, request);
               const suggested = allSuggested(result);
-              const where = `${minutes} Min., ${weather}, ${dayPart}`;
+              const where = `${minutes} Min., ${weather}, ${dayPart}, Warnung ${severeWarning}`;
               const fail = (activity: Activity, rule: string) =>
                 violations.push(`${activity.id}: ${rule} (${where})`);
 
@@ -534,9 +598,9 @@ describe('Regeln mit den echten Aktivitäten aus data/', () => {
                   fail(activity, 'Monat');
                 }
                 if (weather === 'thunderstorm' && activity.setting === 'outdoor') fail(activity, 'Gewitter');
-                if ((weather === 'rain' || weather === 'thunderstorm') && activity.weather.needsDry) {
-                  fail(activity, 'braucht Trockenheit');
-                }
+                if (severeWarning && activity.setting === 'outdoor') fail(activity, 'Warnung');
+                const isWet = weather === 'rain' || weather === 'thunderstorm' || weather === 'snow';
+                if (isWet && activity.weather.needsDry) fail(activity, 'braucht Trockenheit');
               }
 
               if (suggested.length !== result.matchCount) {
@@ -559,13 +623,22 @@ describe('Regeln mit den echten Aktivitäten aus data/', () => {
       const now = new Date(2026, month - 1, 15, 15, 0);
       for (const weather of weatherKeys) {
         for (const dayPart of dayPartKeys) {
-          // Ein Kind mit 5 Jahren und eine Stunde Zeit: Dafür muss es immer genug Ideen geben.
-          const request = makeRequest({ now, weather, dayPart, availableMinutes: 60 });
-          const result = suggest(activities, request);
-          for (const activity of allSuggested(result)) {
-            if (activity.months) expect(activity.months).toContain(month);
+          for (const severeWarning of [false, true]) {
+            // Ein Kind mit 5 Jahren und eine Stunde Zeit: Dafür muss es immer genug Ideen geben,
+            // auch bei Schnee und bei amtlicher Warnung (dann nur drinnen oder „beides“).
+            const request = makeRequest({
+              now,
+              weather,
+              dayPart,
+              severeWarning,
+              availableMinutes: 60,
+            });
+            const result = suggest(activities, request);
+            for (const activity of allSuggested(result)) {
+              if (activity.months) expect(activity.months).toContain(month);
+            }
+            expect(result.matchCount).toBeGreaterThanOrEqual(3);
           }
-          expect(result.matchCount).toBeGreaterThanOrEqual(3);
         }
       }
     }

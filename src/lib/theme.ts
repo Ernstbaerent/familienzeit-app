@@ -14,7 +14,7 @@ export const colors = {
   onPrimary: '#FFFFFF', // Text auf `primary`
   border: '#D9D9D9', // Linien, Rahmen
   danger: '#B3261E', // Löschen, Fehlermeldungen
-  warning: '#8A5300', // Hinweise zum Aufpassen, Markierung der Test-Auswahl
+  warning: '#8A5300', // Hinweise zum Aufpassen, z. B. amtliche Wetterwarnung
   icon: '#333333', // Symbole (z. B. Kategorie einer Aktivität)
 } as const;
 

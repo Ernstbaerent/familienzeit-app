@@ -27,8 +27,9 @@ export function getMinutes(time: TimeKey): number {
 export const parentEnergyKeys = ['tired', 'normal', 'fit'] as const;
 export type ParentEnergy = (typeof parentEnergyKeys)[number];
 
-// Wetter. In M5 aus der Test-Auswahl, ab M6 aus Bright Sky.
-export const weatherKeys = ['sunny', 'cloudy', 'rain', 'thunderstorm'] as const;
+// Wetterlage. Kommt aus Bright Sky (src/features/weather) oder von Hand, wenn es keinen Standort gibt.
+// Die Reihenfolge ist die der Auswahl „Wie ist das Wetter?“.
+export const weatherKeys = ['sunny', 'cloudy', 'rain', 'thunderstorm', 'snow'] as const;
 export type Weather = (typeof weatherKeys)[number];
 
 // Uhrzeit-Grenzen der Tageszeiten (`dayParts` einer Aktivität):

@@ -22,7 +22,20 @@ export const weights = {
   // Abwechslung in einer Dreiergruppe: Abzug je Aktivität derselben Kategorie, die schon in der Gruppe ist.
   // So hoch, dass Abwechslung meist gewinnt, aber eine Abneigung nicht überspielt (siehe suggest.ts).
   sameCategory: -5,
+  // Große Hitze oder Frost in der Zeitspanne: Aktivitäten draußen rutschen nach hinten (kein Ausschluss).
+  // `both` kann man drinnen machen, deshalb nur ein kleiner Abzug. Drinnen bleibt unverändert.
+  extremeTemperature: { outdoor: -4, both: -1, indoor: 0 },
 } as const;
+
+// Grenzen für „große Hitze“ und „Frost“ in °C. Ab 30 °C heißt beim Deutschen Wetterdienst „Hitzetag“.
+export const heatFromCelsius = 30;
+export const frostUpToCelsius = 0;
+
+// true, wenn es in der Zeitspanne mindestens 30 °C heiß wird oder friert.
+export function hasExtremeTemperature(temperature: SuggestionRequest['temperature']): boolean {
+  if (!temperature) return false;
+  return temperature.max >= heatFromCelsius || temperature.min <= frostUpToCelsius;
+}
 
 export function scoreActivity(activity: Activity, request: SuggestionRequest): number {
   let score = 0;
@@ -41,6 +54,10 @@ export function scoreActivity(activity: Activity, request: SuggestionRequest): n
   // Wetter-Eignung. Regen und Gewitter schließen schon in exclusions.ts aus, was trocken sein muss.
   if (request.weather === 'sunny' && activity.weather.betterInSun) {
     score += weights.betterInSun;
+  }
+
+  if (hasExtremeTemperature(request.temperature)) {
+    score += weights.extremeTemperature[activity.setting];
   }
 
   if (request.parentEnergy) {

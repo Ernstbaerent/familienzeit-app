@@ -1,0 +1,149 @@
+# Wetter und Standort (M6)
+
+Die App holt das Wetter beim Deutschen Wetterdienst (über die freie Schnittstelle **Bright Sky**, ohne Schlüssel)
+und nutzt es für die Vorschläge. Ohne Standort fragt sie stattdessen „Wie ist das Wetter?“. Die Tageszeit kommt
+automatisch aus der Uhrzeit.
+
+## Ablauf in der App
+
+| Wann | Was passiert |
+| ---- | ------------ |
+| App-Start | Nichts. Es wird weder der Standort gelesen noch das Wetter geholt. |
+| „Was machen wir?“ öffnen | Das Wetter wird besorgt (`useWeatherRefresh`). Standort noch nie gefragt: Erklär-Karte mit **„Standort erlauben“** und **„Wetter selbst wählen“**. |
+| „Standort erlauben“ | Erst jetzt zeigt das Handy seinen Dialog (nur „während der Nutzung“). |
+| Standort erlaubt | Nichts zu tun. Das Wetter kommt automatisch. |
+| Standort verweigert, „selbst wählen“ oder Wetter nicht abrufbar | Auswahl **„Wie ist das Wetter?“** (Sonne, Bewölkt, Regen, Gewitter, Schnee) und ein kleiner Link „Standort erlauben“. |
+| Ergebnis „Eure Ideen“ | Oben eine Zeile mit dem angenommenen Wetter, z. B. „Bewölkt, Regen ab 15 Uhr · 11 °C“, darunter „Quelle: Deutscher Wetterdienst“. |
+| Dort: „Wetter ändern“ | Wetter von Hand überschreiben, **auch wenn der Standort klappt**. „Automatisch“ hebt die Handwahl wieder auf. |
+| Dort: „Standort erlauben“ | Kleiner Link, solange der Standort nicht erlaubt ist. Hat das Handy ihn dauerhaft abgelehnt, führt er in die Einstellungen. |
+
+Die Handwahl ersetzt nur die **Wetterlage**. Eine amtliche Warnung und die Temperatur bleiben, wenn es sie gibt:
+Sicherheit wird nie aufgeweicht.
+
+## Welche Regeln gelten
+
+Alle Zahlen stehen als Konstanten oben in `src/features/weather/situation.ts` (Wetter) und
+`src/features/suggestions/scoring.ts` (Gewichtung).
+
+### Zeitfenster
+Es zählt das Wetter **von jetzt bis jetzt + gewählte Zeit, mindestens 2 Stunden** (`minLookaheadMinutes = 120`).
+Wer „30 Min.“ wählt, sieht also auch Regen, der in 90 Minuten kommt. „Halber Tag“ ist 4 Stunden.
+Betrachtet werden das aktuelle Wetter und die Stundenwerte nach jetzt bis zum Ende des Fensters.
+
+### Wetterlage
+Pro Messwert oder Stunde wird eine Lage bestimmt, dann gewinnt im Fenster der **schlimmste** Wert:
+**Gewitter > Regen > Schnee > bewölkt/Sonne**. Gibt es nichts davon, entscheidet die Mehrheit der Stunden zwischen Sonne und bewölkt.
+
+| Bright Sky meldet | Lage |
+| ----------------- | ---- |
+| `thunderstorm`, `hail` (Hagel ist gefährlich draußen) | Gewitter |
+| `rain`, `sleet` (Schneeregen) | Regen, **aber nur ab der Mindestmenge** (siehe unten) |
+| `snow` | Schnee, immer |
+| `dry`, `fog`, keine Angabe | Sonne oder bewölkt |
+
+**Sonne** heißt: am Tag, höchstens 50 % Bewölkung (`sunnyMaxCloudCover`). Nachts und bei Nebel ist es „bewölkt“.
+Fehlt die Bewölkung, entscheidet das Symbol von Bright Sky.
+
+### Regen erst ab einer Mindestmenge
+Kurzer Nieselregen soll nicht alles blockieren, was trocken sein muss. Regen und Schneeregen zählen deshalb erst ab
+**0,3 mm pro Stunde** (`rainMinMmPerHour`). Beispiel: Am 11. Oktober meldete Bright Sky stundenlang „rain“ mit je 0,1 mm
+(Nieselregen). Das zählt als bewölkt. Der Messwert „rain“ mit 0,84 mm in der letzten Stunde zählt als Regen.
+
+- Beim aktuellen Wetter ist die Menge der Niederschlag der letzten Stunde, sonst hochgerechnet aus den letzten 30 oder 10 Minuten.
+- Ist die Menge unbekannt, glauben wir dem Wetterzustand (Regen).
+- **Gewitter, Hagel und Schnee zählen immer**, auch bei kleinster Menge (Sicherheit, und Schnee ist selten und beliebt).
+- Getestet in `situation.test.ts` (Grenzen 0,29 / 0,3 mm) und mit der echten Antwort in `brightSky.test.ts`.
+- Anpassen: nur die Konstante ändern.
+
+### Amtliche Warnungen (DWD)
+Eine Warnung **schließt Aktivitäten nur für draußen aus** (`setting: 'outdoor'`; „drinnen oder draußen“ bleibt), wenn sie sich mit dem Zeitfenster überschneidet und
+
+- im Namen **Gewitter, Sturm oder Orkan** trägt (jede Stufe, z. B. „STURMBÖEN“), **oder**
+- jede andere Warnung ist, ab **Stufe 3** („severe“ = Unwetterwarnung, „extreme“), z. B. Starkregen oder Glatteis.
+
+Das schließt **nicht** aus: „Windböen“ (Stufe 1), Warnungen unterhalb von Stufe 3 für andere Ereignisse, Gesundheitswarnungen
+(z. B. Hitze, dort wirkt nur die Temperatur auf die Reihenfolge), Entwarnungen und Testmeldungen.
+Klappt nur der Abruf der Warnungen nicht, geht die App ohne Warnungen weiter; Gewitter selbst schließt weiter draußen aus.
+
+### Temperatur (nur Reihenfolge)
+Wird es im Fenster mindestens **30 °C** oder höchstens **0 °C**, rutschen Aktivitäten draußen nach hinten:
+**−4** für `outdoor`, **−1** für `both`, drinnen bleibt. Kein Ausschluss. Ohne Temperatur (Wetter von Hand gewählt, ohne Daten) wird nichts abgezogen.
+
+### Schnee
+Schnee ist eine Wetterlage. `needsDry`-Aktivitäten fallen bei Schnee weg (Schnee ist nicht trocken). Aktivitäten, die Schnee brauchen,
+gibt es noch nicht: Sie kommen als **M6b** (eigener Schritt, mit einem Feld im Datenmodell).
+
+## Zwischenspeicher und Offline
+
+- Gespeichert wird in AsyncStorage (`weather.v1`) **nur auf dem Gerät**, mit dem auf ~1 km **gerundeten** Ort.
+- **30 Minuten** gelten die Daten ohne neuen Abruf (für denselben gerundeten Ort). Dazu wird die Vorhersage für 8 Stunden gespeichert,
+  damit jede Zeitspanne daraus berechnet werden kann.
+- Klappt ein Abruf nicht (kein Internet, Server down, Ort außerhalb von Deutschland), gelten gespeicherte Daten **bis 3 Stunden** alt.
+  Die Zeile zeigt dann „Stand 14:20 Uhr, gerade nicht aktualisierbar“.
+- Älter als 3 Stunden oder nichts gespeichert: „Wie ist das Wetter?“ von Hand. Kommt auch der Bildschirm „Eure Ideen“ ohne Auswahl,
+  nimmt die App neutral „bewölkt“ an und sagt das offen („Wetter nicht abrufbar. Wir gehen von „Bewölkt“ aus.“).
+- Wird die Standort-Erlaubnis zurückgenommen, löscht die App die gespeicherten Wetterdaten.
+- Das Zeitlimit für einen Abruf ist 8 Sekunden (`requestTimeoutMs`).
+
+## Datenschutz
+
+- Standort **nur im Vordergrund** und nur nach der Erklär-Karte. Es gibt weder im Code noch in `app.json` Hintergrund-Standort
+  (Plugin `expo-location` mit allen Hintergrund-Optionen aus; iOS fragt nur „während der Nutzung“).
+- Die App fragt „ungefähr“ ab (`Accuracy.Low`, letzter bekannter Standort höchstens 30 Min. alt) und rundet **sofort** auf 2 Nachkommastellen
+  (`getRoundedPlace` in `getLocation.ts`). Genauere Werte gibt es sonst nirgends. Die Internet-Adressen runden zusätzlich selbst
+  (`buildUrls`), damit nie ein genauerer Wert nach außen gehen kann. Beides ist getestet.
+- Bright Sky sieht pro Abruf: den gerundeten Ort, die Zeit und die IP-Adresse (wie bei jedem Internet-Abruf). Kein Konto, keine Kennung.
+  **Für die Datenschutzerklärung (M12) merken:** Bright Sky ist ein freier Dienst eines Dritten (`api.brightsky.dev`), die Daten stammen vom
+  Deutschen Wetterdienst. Quellenangabe „Deutscher Wetterdienst“ steht in der App.
+- Android: Das Handy bietet bei Android 12+ „ungefähr“ oder „genau“ an. Wir blockieren „genau“ nicht (so läuft `expo-location` sicher),
+  fragen aber nur ungefähr ab und runden.
+- Der iOS-Text im Dialog steht in `app.json` (Englisch) und `src/locales/native/de.json` (Deutsch). Eine neue Sprache braucht auch dort eine Datei.
+
+## Wo was liegt (`src/features/weather/`)
+
+| Was | Datei |
+| --- | ----- |
+| Ort runden, vergleichen | `location.ts` |
+| Standort und Erlaubnis lesen (einzige Stelle mit `expo-location`) | `getLocation.ts` |
+| Internet-Adressen, Antworten prüfen (Wetter, Vorhersage, Warnungen) | `brightSky.ts` |
+| Der Abruf (`fetch`, Zeitlimit) | `fetchWeather.ts` |
+| Regeln des Zwischenspeichers | `weatherCache.ts` |
+| Speichern auf dem Gerät | `weatherStorage.ts` |
+| Ablauf „Wetter besorgen“ | `weatherService.ts` |
+| Wetterlage für die Vorschläge (Fenster, Regel-Mindestmenge, Warnungen, Temperatur) | `situation.ts` |
+| Texte zusammensetzen (Zeile, Warnung, Uhrzeit) | `weatherText.ts`, `formatClock.ts` |
+| Zustand für die Bildschirme | `WeatherProvider.tsx` |
+| Oberfläche | `LocationExplainer.tsx`, `WeatherSection.tsx`, `WeatherChips.tsx`, `WeatherSummary.tsx`, `AllowLocationLink.tsx`, `WeatherIcon.tsx` |
+| Wann die Handwahl erscheint | `manualWeather.ts` |
+
+`location.ts`, `brightSky.ts`, `situation.ts`, `weatherCache.ts`, `weatherText.ts` und `manualWeather.ts` sind reine Funktionen mit Tests.
+Die Vorschlagslogik (`src/features/suggestions/`) kennt weder Standort noch Internet: Sie bekommt Wetterlage, Temperatur und
+Warnung über `SuggestionRequest` (`toConditions(situation)`).
+
+## Testen
+
+```bash
+npm test               # Jest: alle Regeln oben, der Ablauf mit falschem Standort/Internet
+npx tsc --noEmit
+npx expo lint
+```
+
+Von Hand mit Expo Go (`npx expo start`, QR-Code scannen). Der Standort lässt sich nur auf einem echten Handy prüfen:
+
+1. **Erstes Mal:** „Was machen wir?“ antippen. Es erscheint die Erklär-Karte, noch **kein** Dialog des Handys.
+2. **„Standort erlauben“ → „Beim Verwenden der App“.** Zeit wählen, „Vorschläge zeigen“: oben steht das Wetter mit „Quelle: Deutscher Wetterdienst“.
+3. **Zweites Mal (innerhalb von 30 Min.):** geht schnell, es wird nicht neu abgerufen.
+4. **„Wetter ändern“ → Regen:** Die Zeile zeigt „Eure Auswahl: Regen“, die Vorschläge ändern sich (nichts, was trocken sein muss). „Automatisch“ stellt zurück.
+5. **Flugmodus an:** Innerhalb von 30 Minuten nach Schritt 2 geht alles wie gewohnt (Daten noch frisch). Danach, mit Daten unter 3 Std.,
+   steht „Stand …, gerade nicht aktualisierbar“. Gibt es keine Daten (z. B. frisch installiert), erscheint „Wie ist das Wetter?“.
+6. **Standort verweigern** (Einstellungen → Familienzeit → Standort aus, oder „Wetter selbst wählen“): „Wie ist das Wetter?“ mit Sonne, Bewölkt, Regen, Gewitter, Schnee und dem Link „Standort erlauben“.
+7. **Außerhalb von Deutschland** liefert Bright Sky keine Daten: auch dann die Auswahl von Hand.
+
+Die Wetter-Abfragen lassen sich mit Beispielen ausprobieren:
+`https://api.brightsky.dev/current_weather?lat=50.66&lon=12.19` (Greiz).
+
+## Grenzen
+
+- Bright Sky ist ein freier Dienst ohne Zusage. Fällt er aus, fragt die App von Hand. Eine zweite Wetterquelle steht unter „Später“.
+- Wetter im Ausland (Urlaub) gibt es noch nicht; Bright Sky deckt nur Deutschland ab.
+- Das Wetter wird beim Öffnen von „Was machen wir?“ und beim Zurückkommen in die App besorgt, nicht ständig und nie im Hintergrund.

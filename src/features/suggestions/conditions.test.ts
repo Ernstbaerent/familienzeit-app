@@ -1,4 +1,4 @@
-import { getDayPart, getMinutes, timeOptions } from './conditions';
+import { getDayPart, getMinutes, isWeather, timeOptions, weatherKeys } from './conditions';
 
 describe('getDayPart (Uhrzeit-Grenzen der Tageszeiten)', () => {
   const at = (hour: number, minute = 0) => getDayPart(new Date(2026, 9, 10, hour, minute));
@@ -28,5 +28,13 @@ describe('Zeit-Auswahl', () => {
   it('die Auswahl ist von kurz nach lang sortiert', () => {
     const minutes = timeOptions.map((option) => option.minutes);
     expect(minutes).toEqual([...minutes].sort((a, b) => a - b));
+  });
+});
+
+describe('Wetterlagen', () => {
+  it('Schnee ist eine Wetterlage, in der Reihenfolge der Auswahl „Wie ist das Wetter?“', () => {
+    expect(weatherKeys).toEqual(['sunny', 'cloudy', 'rain', 'thunderstorm', 'snow']);
+    expect(isWeather('snow')).toBe(true);
+    expect(isWeather('hail')).toBe(false);
   });
 });
