@@ -1,6 +1,6 @@
 import { makeActivity } from '../suggestions/testHelpers';
 import type { Activity, ActivityText } from './activities';
-import { checkSafety, type AllergenNames } from './safetyCheck';
+import { checkSafety, getAllergens, needsAdults, type AllergenNames } from './safetyCheck';
 
 const allergenNames: AllergenNames = { de: { milk: 'Milch' }, en: { milk: 'milk' } };
 
@@ -90,5 +90,29 @@ describe('Sicherheits-Checkliste', () => {
       const withHint = withNote({ id: 'b', materials: ['paperBag', 'ledLight', 'scissors'] }, ledNote);
       expect(checkSafety(withHint, allergenNames)).toEqual([]);
     });
+  });
+});
+
+describe('Anzeige in der Detailansicht', () => {
+  it('„Mit Erwachsenen“ genau bei Schere, Messer, Hitze, Feuer, Wasser und Elektrogeräten', () => {
+    for (const material of ['scissors', 'knife', 'oven', 'candle', 'water', 'oldDevice'] as const) {
+      expect(needsAdults({ materials: [material] })).toBe(true);
+    }
+  });
+
+  it('nicht bei harmlosem Material, Kleinteilen oder Zutaten', () => {
+    expect(needsAdults({ materials: [] })).toBe(false);
+    expect(needsAdults({ materials: ['paper', 'pencils', 'glue'] })).toBe(false);
+    expect(needsAdults({ materials: ['buttons'] })).toBe(false); // Kleinteile: Altersgrenze statt Erwachsene
+    expect(needsAdults({ materials: ['cream', 'tapWater'] })).toBe(false);
+  });
+
+  it('ein einziges Material mit Gefahr genügt', () => {
+    expect(needsAdults({ materials: ['paper', 'pencils', 'scissors'] })).toBe(true);
+  });
+
+  it('Allergene kommen aus dem Material, ohne Doppelte', () => {
+    expect(getAllergens({ materials: ['cream', 'butter', 'paper'] })).toEqual(['milk']);
+    expect(getAllergens({ materials: ['paper'] })).toEqual([]);
   });
 });

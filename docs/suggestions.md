@@ -12,7 +12,7 @@ Eltern wählen, wer dabei ist und wie viel Zeit sie haben. Die App zeigt genau 3
 
 Die Auswahl reist als Parameter in der Bildschirm-Adresse zum Ergebnis (`selection.ts`). Das bleibt auf dem Gerät.
 Das Wetter reist nicht mit, nur eine **Handwahl** („Wie ist das Wetter?“) als freiwilliger Parameter `weather`. Sonst holt sich der Ergebnis-Bildschirm das Wetter selbst (`docs/weather.md`).
-Eine Karte zeigt Kategorie-Symbol, Titel, Dauer und Kurzbeschreibung. Antippen öffnet noch nichts (Detailansicht: M7).
+Eine Karte zeigt Kategorie-Symbol, Titel, Dauer und Kurzbeschreibung. Antippen öffnet die Detailansicht (M7, siehe `docs/history.md`).
 
 ## Wo was liegt
 
@@ -23,6 +23,7 @@ Eine Karte zeigt Kategorie-Symbol, Titel, Dauer und Kurzbeschreibung. Antippen �
 | Gewichtung (alle Gewichte in einer Tabelle)| `suggestions/scoring.ts`              |
 | Dreiergruppen, Blättern, Tipps             | `suggestions/suggest.ts`              |
 | Auswahl ↔ Bildschirm-Parameter             | `suggestions/selection.ts`            |
+| Verlauf auswerten (kürzlich gemacht, Bewertung) | `suggestions/historyIndex.ts`, Punkte in `scoring.ts` |
 | Karte                                      | `suggestions/SuggestionCard.tsx`      |
 | Wetter und Standort (Abruf, Zwischenspeicher, Anzeige) | `weather/`, siehe `docs/weather.md` |
 | Kategorie → Symbol                         | `activities/CategoryIcon.tsx`         |
@@ -66,9 +67,15 @@ Die Tageszeit kommt automatisch aus der Uhrzeit beim Öffnen von „Eure Ideen�
 | Eltern normal | `high` −1 |
 | Eltern fit | `high` +1 |
 | Energie nicht angegeben | 0 |
+| Kürzlich gemacht (Verlauf, ab M7) | Tag 0–3 −10, danach linear abklingend bis Tag 28 |
+| Daumen runter für diese Aktivität (Verlauf) | −20, 90 Tage lang |
+| Daumen hoch für diese Aktivität (Verlauf) | +3 ab Tag 14, bis Tag 179 |
+| Daumen hoch für die Kategorie (Verlauf) | +1, bis Tag 179 |
 
 Bei Gleichstand bleibt die Reihenfolge aus den Daten.
-Noch nicht dabei: Entfernung (kommt mit M10) und „kürzlich gemacht“ (braucht den Verlauf aus M7).
+Der Verlauf (`request.history`, freiwillig) ändert wie alles hier **nur die Reihenfolge** und schließt nie etwas aus.
+Tage zählen als Kalendertage nach Ortszeit. Alle Regeln und Zahlen: `docs/history.md`.
+Noch nicht dabei: Entfernung (kommt mit M10).
 
 ## Abwechslung und „Andere Vorschläge“ (`suggest.ts`)
 
@@ -114,6 +121,7 @@ und alle harten Ausschlüsse mit den echten Aktivitäten aus `data/` für über 
 Ein weiterer Test spielt mit den echten Aktivitäten alle 12 Monate durch: kein Vorschlag außerhalb seiner Monate,
 und für ein Kind mit 5 Jahren und 1 Stunde gibt es in jedem Monat, bei jedem Wetter (auch Schnee), mit und ohne Warnung und zu jeder Tageszeit mindestens 3 Ideen.
 Diese letzten Tests prüfen nur Regeln, keine einzelnen IDs. Sie laufen also auch, wenn sich die Aktivitäten ändern.
+Der Verlauf hat eigene Tests in `history.test.ts` (Zahlen, Grenzen, Kalendertage mit Zeitumstellung, Garantie „genau 3“ bei vollem Verlauf).
 
 Von Hand: `npx expo start`, mit Expo Go öffnen, „Was machen wir?“ antippen. Das Wetter lässt sich mit „Wetter ändern“ auf „Eure Ideen“
 (oder ohne Standort mit „Wie ist das Wetter?“) selbst wählen, z. B. ausprobieren (Wetter und Standort: `docs/weather.md`):

@@ -59,11 +59,13 @@ export function parseSelectionParams(raw: RawParams): Selection | null {
 
 // Baut aus der Auswahl die Anfrage für suggest(). Kinder, die es nicht mehr gibt, fallen weg.
 // Das Wetter kommt getrennt herein (siehe src/features/weather), die Tageszeit aus der Uhrzeit.
+// Der Verlauf (freiwillig) ändert nur die Reihenfolge (siehe docs/history.md).
 export function toSuggestionRequest(
   selection: Selection,
   profiles: readonly (SuggestionChild & { id: string })[],
   now: Date,
   conditions: WeatherConditions,
+  history?: SuggestionRequest['history'],
 ): SuggestionRequest {
   return {
     children: profiles.filter((child) => selection.childIds.includes(child.id)),
@@ -74,5 +76,6 @@ export function toSuggestionRequest(
     severeWarning: conditions.severeWarning,
     dayPart: getDayPart(now),
     now,
+    history,
   };
 }

@@ -2,6 +2,8 @@
 // Profile liegen nur auf dem Gerät (siehe profileStorage.ts). Es gibt keinen echten Namen,
 // nur einen freiwilligen Spitzname sowie Geburtsjahr und -monat.
 
+import { createId } from '@/lib/id';
+
 import {
   isDislikeKey,
   isInterestKey,
@@ -50,11 +52,6 @@ const minStoredBirthYear = 1900;
 
 export function createChild(draft: ChildDraft, now: Date = new Date()): ChildProfile {
   return { ...draft, id: createId(), createdAt: now.toISOString() };
-}
-
-// Reicht für lokale Profile: Zeit plus Zufall, keine Bibliothek nötig.
-function createId(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 // Leerer Spitzname wird zu `undefined`, zu langer wird gekürzt.

@@ -1,6 +1,7 @@
 // Alles, was die Vorschlagslogik über die heutige Situation wissen muss.
 
 import type { DayPart, MonthNumber } from '../activities/activities';
+import type { HistoryEntry } from '../history/history';
 import { getAgeInMonths, type ChildProfile } from '../profiles/profiles';
 import type { ParentEnergy, Weather } from './conditions';
 
@@ -20,7 +21,10 @@ export type SuggestionRequest = {
   // Amtliche Warnung vor Gewitter, Sturm oder Unwetter gilt in der Zeitspanne: draußen ist dann ausgeschlossen.
   severeWarning?: boolean;
   dayPart: DayPart; // kommt aus der Uhrzeit (`getDayPart`)
-  now: Date; // für das Alter der Kinder und den Monat (`months` einer Aktivität)
+  now: Date; // für das Alter der Kinder, den Monat (`months` einer Aktivität) und die Tage im Verlauf
+  // Was die Familie schon gemacht hat (freiwillig, fehlt = nichts bekannt). Ändert nur die Reihenfolge:
+  // Der Verlauf schließt nie eine Aktivität aus (siehe scoring.ts, `weights.history`).
+  history?: readonly HistoryEntry[];
 };
 
 // Der Teil der Anfrage, den die Wetter-Funktionen (src/features/weather) liefern.

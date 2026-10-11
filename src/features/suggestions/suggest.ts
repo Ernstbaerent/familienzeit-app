@@ -3,6 +3,7 @@
 
 import type { Activity } from '../activities/activities';
 import { isExcluded } from './exclusions';
+import { buildHistoryIndex } from './historyIndex';
 import type { SuggestionRequest } from './request';
 import { scoreActivity, weights } from './scoring';
 
@@ -21,9 +22,16 @@ export type Suggestions = {
 type ScoredActivity = { activity: Activity; score: number };
 
 export function suggest(activities: readonly Activity[], request: SuggestionRequest): Suggestions {
+  // Der Verlauf kommt erst nach den harten Ausschlüssen ins Spiel und ändert nur die Punkte.
+  // Deshalb bleibt die Menge der passenden Ideen (und die Garantie „3, wenn so viele passen“) gleich.
+  const history =
+    request.history && request.history.length > 0
+      ? buildHistoryIndex(request.history, activities, request.now)
+      : undefined;
+
   const sorted: ScoredActivity[] = activities
     .filter((activity) => !isExcluded(activity, request))
-    .map((activity) => ({ activity, score: scoreActivity(activity, request) }))
+    .map((activity) => ({ activity, score: scoreActivity(activity, request, history) }))
     // Bei gleicher Punktzahl bleibt die Reihenfolge aus den Daten (sort ist stabil).
     .sort((a, b) => b.score - a.score);
 

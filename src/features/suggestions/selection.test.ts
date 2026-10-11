@@ -66,6 +66,16 @@ describe('Auswahl an den Ergebnis-Bildschirm übergeben', () => {
     expect(request.severeWarning).toBe(true);
   });
 
+  it('reicht den Verlauf an die Anfrage weiter (freiwillig)', () => {
+    const profiles = [{ ...makeChild({ years: 4 }), id: 'kid-1' }];
+    const history = [
+      { id: 'h1', activityId: 'a', doneAt: testNow.toISOString(), childIds: ['kid-1'] },
+    ];
+    const conditions = { weather: 'cloudy' } as const;
+    expect(toSuggestionRequest(selection, profiles, testNow, conditions, history).history).toBe(history);
+    expect(toSuggestionRequest(selection, profiles, testNow, conditions).history).toBeUndefined();
+  });
+
   it('die Tageszeit kommt aus der Uhrzeit', () => {
     const profiles = [{ ...makeChild({ years: 4 }), id: 'kid-1' }];
     const at = (hour: number) =>

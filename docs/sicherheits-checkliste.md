@@ -68,7 +68,7 @@ zum Beispiel `cream` → Milch, `flour` → Gluten, `egg` → Ei.
 **Wichtig beim Schreiben:** Jede Zutat und jedes Gerät, das vorkommt, muss als Material eingetragen sein,
 sonst fehlen die abgeleiteten Hinweise. Braucht eine Aktivität ein Material, das es noch nicht gibt,
 wird es mit seinen Merkmalen ergänzt (Anleitung oben in `materials.ts`).
-Die Detailansicht (M7) soll die Allergene später zusätzlich automatisch aus dem Material anzeigen.
+Die Detailansicht (M7) zeigt die Allergene zusätzlich automatisch aus dem Material an (`getAllergens`) und das Schild „Mit Erwachsenen“ genau bei den Gefahren aus Punkt 2 (`needsAdults`).
 
 ## Ablauf pro Paket (M5b) oder Wochenlauf (M9)
 

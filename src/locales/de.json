@@ -3,7 +3,8 @@
     "greeting": "Hallo!",
     "intro": "Was macht ihr heute zusammen? In 30 Sekunden bekommst du 3 passende Ideen.",
     "start": "Was machen wir?",
-    "childrenTitle": "Eure Kinder"
+    "childrenTitle": "Eure Kinder",
+    "history": "Was wir zusammen gemacht haben"
   },
   "suggest": {
     "title": "Was machen wir?",
@@ -24,7 +25,8 @@
     "fewMatches_other": "Zu eurer Auswahl passen gerade nur {{count}} Ideen.",
     "tipFewerChildren": "Tipp: Mit weniger Kindern passen mehr Ideen.",
     "tipMoreTime": "Tipp: Mit mehr Zeit gibt es mehr Ideen.",
-    "tipComingSoon": "Wir sammeln laufend neue Ideen. Schau gern bald wieder vorbei."
+    "tipComingSoon": "Wir sammeln laufend neue Ideen. Schau gern bald wieder vorbei.",
+    "openDetails": "Öffnet die Details"
   },
   "time": {
     "minutes30": "30 Min.",
@@ -93,6 +95,63 @@
       "fullHour": "{{hour}} Uhr",
       "withMinutes": "{{hour}}:{{minute}} Uhr"
     }
+  },
+  "detail": {
+    "screenTitle": "Details",
+    "duration": "Dauer: {{value}}",
+    "age": "Alter: {{min}}–{{max}} Jahre",
+    "ageSingle_one": "Alter: {{count}} Jahr",
+    "ageSingle_other": "Alter: {{count}} Jahre",
+    "energy": {
+      "low": "Energie von dir: wenig",
+      "medium": "Energie von dir: mittel",
+      "high": "Energie von dir: viel"
+    },
+    "cost": {
+      "free": "Kostenlos",
+      "low": "Kostet wenig",
+      "high": "Kostet etwas mehr"
+    },
+    "allergensTitle": "Achtung, Allergene",
+    "allergensText": "Enthält möglicherweise: {{list}}.",
+    "safetyTitle": "Sicherheit",
+    "withAdults": "Mit Erwachsenen",
+    "materialsTitle": "Das braucht ihr",
+    "noMaterials": "Ihr braucht kein besonderes Material.",
+    "stepsTitle": "So geht’s",
+    "stepNumber": "Schritt {{number}}",
+    "start": "Das machen wir",
+    "started": "Viel Spaß! Tippe auf „Fertig“, wenn ihr durch seid.",
+    "done": "Fertig",
+    "saveError": "Das Speichern hat nicht geklappt. Bitte versuche es noch einmal."
+  },
+  "feedback": {
+    "title": "Wie war’s?",
+    "up": "Hat gefallen",
+    "down": "Hat nicht gefallen",
+    "skip": "Überspringen",
+    "saveError": "Die Bewertung ließ sich nicht speichern. Bitte versuche es noch einmal oder tippe auf „Überspringen“."
+  },
+  "history": {
+    "title": "Verlauf",
+    "heading": "Was wir zusammen gemacht haben",
+    "explain": "Was ihr gerade erst gemacht habt, schlagen wir nicht gleich wieder vor. Ein Daumen runter merken wir uns länger. Ausgeschlossen wird dadurch nie etwas.",
+    "privacy": "Der Verlauf bleibt auf deinem Handy. Nichts davon wird hochgeladen.",
+    "empty": "Noch nichts eingetragen. Wenn ihr eine Idee mit „Fertig“ abschließt, steht sie hier.",
+    "unknownActivity": "Nicht mehr verfügbare Idee",
+    "ratingHint": "Die Bewertung lässt sich hier ändern. Nochmal auf den Daumen tippen entfernt sie.",
+    "rateUp": "Daumen hoch",
+    "rateDown": "Daumen runter",
+    "delete": "Löschen",
+    "deleteTitle": "Eintrag löschen?",
+    "deleteMessage": "Der Eintrag wird von deinem Handy gelöscht. Das lässt sich nicht rückgängig machen.",
+    "clearAll": "Ganzen Verlauf löschen",
+    "clearTitle": "Ganzen Verlauf löschen?",
+    "clearMessage": "Alle Einträge werden von deinem Handy gelöscht. Das lässt sich nicht rückgängig machen.",
+    "clearConfirm": "Alles löschen",
+    "cancel": "Abbrechen",
+    "deleteError": "Das Löschen hat nicht geklappt. Bitte versuche es noch einmal.",
+    "ratingError": "Die Bewertung ließ sich nicht speichern. Bitte versuche es noch einmal."
   },
   "categories": {
     "craft": "Basteln",

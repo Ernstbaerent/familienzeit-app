@@ -1,20 +1,27 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Activity } from '@/features/activities/activities';
 import { getActivityText } from '@/features/activities/activityDisplay';
 import { CategoryIcon } from '@/features/activities/CategoryIcon';
 import { formatDuration } from '@/features/activities/formatDuration';
-import { colors, fontSize, lineHeight, radius, spacing } from '@/lib/theme';
+import { mirrorInRTL } from '@/lib/rtl';
+import { colors, fontSize, iconSize, lineHeight, opacity, radius, spacing } from '@/lib/theme';
 
 // Ein Vorschlag als Karte: Kategorie-Symbol, Titel, Dauer, Kurzbeschreibung.
-// Antippen öffnet noch nichts, die Detailansicht kommt mit M7.
-export function SuggestionCard({ activity }: { activity: Activity }) {
+// Antippen öffnet die Details (app/activity/[id].tsx).
+export function SuggestionCard({ activity, onPress }: { activity: Activity; onPress: () => void }) {
   const { t, i18n } = useTranslation();
   const text = getActivityText(activity, i18n.resolvedLanguage ?? i18n.language);
 
   return (
-    <View style={styles.card}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityHint={t('suggest.openDetails')}
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+    >
       <View style={styles.iconCircle}>
         <CategoryIcon category={activity.category} size="lg" />
       </View>
@@ -25,7 +32,15 @@ export function SuggestionCard({ activity }: { activity: Activity }) {
         <Text style={styles.duration}>{formatDuration(t, activity)}</Text>
         <Text style={styles.summary}>{text.summary}</Text>
       </View>
-    </View>
+      <Ionicons
+        name="chevron-forward-outline"
+        size={iconSize.md}
+        color={colors.textMuted}
+        style={mirrorInRTL}
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+      />
+    </Pressable>
   );
 }
 
@@ -38,6 +53,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
+  },
+  cardPressed: {
+    opacity: opacity.pressed,
   },
   iconCircle: {
     padding: spacing.sm,
