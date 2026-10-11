@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
+import { useHistory } from '@/features/history/HistoryContext';
 import { formatAge } from '@/features/profiles/formatAge';
 import { useProfiles } from '@/features/profiles/ProfilesContext';
 import { colors, fontSize, lineHeight, radius, spacing } from '@/lib/theme';
@@ -12,6 +13,7 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { status, profiles } = useProfiles();
+  const { entries: historyEntries } = useHistory();
 
   // Solange die Profile vom Gerät gelesen werden, bleibt der Bildschirm leer (dauert Millisekunden).
   if (status === 'loading') return <SafeAreaView style={styles.screen} />;
@@ -68,6 +70,15 @@ export default function HomeScreen() {
             onPress={() => router.push('/children/new')}
           />
         </View>
+
+        {/* Erst da, wenn es etwas zu sehen gibt. Dort lässt sich der Verlauf auch löschen. */}
+        {historyEntries.length > 0 && (
+          <Button
+            label={t('home.history')}
+            variant="secondary"
+            onPress={() => router.push('/history')}
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );

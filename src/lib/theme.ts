@@ -15,6 +15,7 @@ export const colors = {
   border: '#D9D9D9', // Linien, Rahmen
   danger: '#B3261E', // Löschen, Fehlermeldungen
   warning: '#8A5300', // Hinweise zum Aufpassen, z. B. amtliche Wetterwarnung
+  warningSurface: '#FFF4E0', // Hintergrund für Hinweisboxen, z. B. Allergene und Sicherheit (Text darauf: `warning`)
   icon: '#333333', // Symbole (z. B. Kategorie einer Aktivität)
 } as const;
 
@@ -22,6 +23,7 @@ export const fontSize = {
   sm: 14,
   md: 16,
   lg: 18,
+  reading: 20, // Text, den man beim Machen mit etwas Abstand zum Handy liest, z. B. die Schritte einer Anleitung
   xl: 24,
   xxl: 32,
 } as const;
@@ -31,6 +33,7 @@ export const lineHeight = {
   sm: 20,
   md: 24,
   lg: 26,
+  reading: 32,
   xl: 32,
   xxl: 40,
 } as const;
@@ -47,6 +50,7 @@ export const spacing = {
 // Durchsichtigkeit (0 = unsichtbar, 1 = voll sichtbar).
 export const opacity = {
   disabled: 0.4, // nicht auswählbare Knöpfe und Chips
+  pressed: 0.7, // antippbare Karten, solange der Finger darauf liegt
 } as const;
 
 // Größe von Symbolen (Icons), z. B. <CategoryIcon size="lg" />.

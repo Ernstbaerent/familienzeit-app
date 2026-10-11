@@ -39,6 +39,12 @@ export function getHazards(activity: Pick<Activity, 'materials'>): HazardKey[] {
   return [...hazards];
 }
 
+// true, wenn die Aktivität nur mit Erwachsenen gemacht werden soll (Schere, Messer, Hitze, Feuer, Wasser,
+// Elektrogerät). Dieselbe Regel wie Punkt 2 der Checkliste, damit die Detailansicht „Mit Erwachsenen“ genau dann zeigt.
+export function needsAdults(activity: Pick<Activity, 'materials'>): boolean {
+  return getHazards(activity).some((hazard) => adultHazards.includes(hazard));
+}
+
 export function getAllergens(activity: Pick<Activity, 'materials'>): AllergenKey[] {
   const allergens = new Set<AllergenKey>();
   for (const key of activity.materials) {

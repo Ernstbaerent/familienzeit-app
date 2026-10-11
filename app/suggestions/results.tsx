@@ -5,7 +5,10 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
+import type { Activity } from '@/features/activities/activities';
 import { loadActivities } from '@/features/activities/loadActivities';
+import type { HistoryEntry } from '@/features/history/history';
+import { useHistory } from '@/features/history/HistoryContext';
 import type { ChildProfile } from '@/features/profiles/profiles';
 import { useProfiles } from '@/features/profiles/ProfilesContext';
 import { getMinutes, longestMinutes, type Weather } from '@/features/suggestions/conditions';
@@ -37,22 +40,32 @@ import { colors, fontSize, lineHeight, radius, spacing } from '@/lib/theme';
 export default function ResultsScreen() {
   const params = useLocalSearchParams();
   const { status, profiles } = useProfiles();
-  if (status === 'loading') return null;
+  const { status: historyStatus, entries } = useHistory();
+  if (status === 'loading' || historyStatus === 'loading') return null;
 
   // Unvollständige Auswahl oder kein ausgewähltes Kind mehr da: zurück zur Auswahl.
   const selection = parseSelectionParams(params);
   const hasChild = profiles.some((child) => selection?.childIds.includes(child.id));
   if (!selection || !hasChild) return <Redirect href="/suggestions" />;
 
-  return <Results selection={selection} profiles={profiles} />;
+  return <Results selection={selection} profiles={profiles} historyEntries={entries} />;
 }
 
-function Results({ selection, profiles }: { selection: Selection; profiles: ChildProfile[] }) {
+type ResultsProps = {
+  selection: Selection;
+  profiles: ChildProfile[];
+  historyEntries: HistoryEntry[];
+};
+
+function Results({ selection, profiles, historyEntries }: ResultsProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
   // „Jetzt“ einmal festhalten (für das Alter der Kinder, die Tageszeit und das Wetter-Fenster).
   const [now] = useState(() => new Date());
+  // Der Verlauf beim Öffnen dieses Bildschirms. Er bleibt eingefroren, damit sich die Karten nicht umsortieren,
+  // während man zwischen Details und Vorschlägen hin- und herwechselt. Beim nächsten Öffnen gilt der neue Stand.
+  const [history] = useState(historyEntries);
   // Wie oft „Andere Vorschläge“ gedrückt wurde.
   const [pageIndex, setPageIndex] = useState(0);
   // Wetter von Hand: aus der Auswahl („Wie ist das Wetter?“) oder hier mit „Wetter ändern“.
@@ -68,7 +81,7 @@ function Results({ selection, profiles }: { selection: Selection; profiles: Chil
     : (automatic ?? assumedSituation());
 
   const activities = loadActivities();
-  const request = toSuggestionRequest(selection, profiles, now, toConditions(situation));
+  const request = toSuggestionRequest(selection, profiles, now, toConditions(situation), history);
   const suggestions = suggest(activities, request);
   const page = getPage(suggestions, pageIndex);
   const tooFew = suggestions.matchCount < suggestionsPerPage;
@@ -81,6 +94,13 @@ function Results({ selection, profiles }: { selection: Selection; profiles: Chil
   function showOthers() {
     setPageIndex((current) => current + 1);
     scrollRef.current?.scrollTo({ y: 0, animated: true });
+  }
+
+  function openDetails(activity: Activity) {
+    router.push({
+      pathname: '/activity/[id]',
+      params: { id: activity.id, children: selection.childIds.join(',') },
+    });
   }
 
   function changeSelection() {
@@ -123,7 +143,11 @@ function Results({ selection, profiles }: { selection: Selection; profiles: Chil
         )}
 
         {page.map((activity) => (
-          <SuggestionCard key={activity.id} activity={activity} />
+          <SuggestionCard
+            key={activity.id}
+            activity={activity}
+            onPress={() => openDetails(activity)}
+          />
         ))}
 
         {tooFew && (

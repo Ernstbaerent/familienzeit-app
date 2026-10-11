@@ -22,7 +22,7 @@ In der App: `loadActivities()` gibt alle Aktivit채ten mit Status `approved` zur�
 
 | Feld              | Bedeutung |
 | ----------------- | --------- |
-| `id`              | Eindeutig, nie 채ndern (der Verlauf in M7 verweist darauf). |
+| `id`              | Eindeutig, nie 채ndern (der Verlauf verweist darauf, `HistoryEntry.activityId`, siehe `docs/history.md`). |
 | `category`        | `craft`, `game`, `movement`, `experiment`, `nature`, `cooking`, `outing`. Bestimmt das Symbol auf den Karten (`CategoryIcon.tsx`). |
 | `topics`          | Themen der Aktivit채t. **Dieselben Schl체ssel wie Interessen und Abneigungen** in den Kinderprofilen (`preferences.ts`). Siehe unten. |
 | `translations`    | Pro Sprache `title`, `summary`, `steps`, optional `safetyNote`. **`de` und `en` sind Pflicht.** |
