@@ -21,7 +21,7 @@ Anleitungstext 20 px.
 Textkontraste nach WCAG AA (die Werte stehen an den Farben).
 Alle Schriften sind Google Fonts (OFL) mit „Latein erweitert" (Türkisch, Rumänisch) und Kyrillisch (Ukrainisch). Arabisch läuft über eine passende Partnerschrift.
 Layouts mit logischen Abständen (Anfang/Ende statt links/rechts), damit Rechts-nach-links (Arabisch) funktioniert.
-Symbole: gleicher Linienstil, 1,75 px Linie auf 24er-Raster, runde Enden. Kategorien: Basteln, Spiele, Bewegung, Experimente, Natur, Kochen, Ausflüge, Spielplatz, Bad, Termine.
+Symbole: gleicher Linienstil, 1,75 px Linie auf 24er-Raster, runde Enden (umgesetzt mit Ionicons, nur Outline, kein eigener Symbolsatz, siehe Entscheidung 20). Kategorien: Basteln, Spiele, Bewegung, Experimente, Natur, Kochen, Ausflüge, Spielplatz, Bad, Termine.
 Hell als Standard, Dunkelmodus als Variante (folgt der Handy-Einstellung).
 Beispielsituation im PDF: Samstag 13:10, zwei Kinder (4 und 13 Jahre), 1 Std, Energie „normal", Regen ab 15 Uhr. Orte und Veranstaltungen im PDF sind erfunden.
 Farben (hell)
@@ -32,8 +32,10 @@ Text	Tinte
 #2A211C	15,4:1
 Hauptfarbe (Knöpfe)	Terrakotta	
 #B4532F	mit weißem Text 5,0:1
+Karten	Weiß	
+#FFFFFF	Karten, Kacheln, nicht gewählte Chips (Text darauf Tinte)
 Flächen	Sand	
-#F0E6D8	Karten, Flächen
+#F0E6D8	Flächen, Streifen, Platzhalter, Nebenknöpfe (keine Karten)
 Zweitfarbe	Salbei	
 #5F7A5A	mit weißem Text 4,8:1
 Akzent	Honig	
@@ -58,7 +60,7 @@ Bildsprache
 
 Mit Foto: Natürliches Tageslicht, echte Wohnungen, Hände bei der Arbeit. Kinder schauen nicht in die Kamera, nichts ist aufgeräumt-perfekt.
 
-Ohne Foto (Normalfall, solange es für eine Aktivität kein geprüftes Bild gibt): ruhige Farbfläche mit großem, dünnem Kategorie-Symbol, angeschnitten. Gleiche Kartenform, gleiche Höhe wie die Karte mit Foto. Diese Karte muss genauso hochwertig aussehen wie die mit Foto.
+Ohne Foto (Rückfall, solange es weder ein Bild der Aktivität noch ein Kategorie-Foto gibt, heute der Normalfall): ruhige Farbfläche mit großem, dünnem Kategorie-Symbol, angeschnitten. Gleiche Kartenform, gleiche Höhe wie die Karte mit Foto. Diese Karte muss genauso hochwertig aussehen wie die mit Foto.
 
 Regeln für Fotos
 
@@ -68,11 +70,11 @@ Keine erkennbaren Gesichter, besonders keine von Kindern. Gut sind Hände bei de
 Keine erkennbaren Marken, Logos oder Produktverpackungen. Kein Text im Bild.
 Nur Bilder, deren Lizenz kommerzielle Nutzung erlaubt (z. B. Unsplash, Pexels). Die Plattformen prüfen nicht, ob Einwilligungen für abgebildete Personen vorliegen, deshalb Regel 1.
 Quellenliste: Zu jedem Foto werden gespeichert: Link, Fotograf, Plattform, Lizenz, Datum des Abrufs. Die Liste liegt in docs/bildquellen.md.
-Format: Querformat, etwa 1200 px breit, deutlich unter 300 KB. Ablage unter assets/images/.
+Format: Querformat, etwa 1200 px breit, deutlich unter 300 KB. Ablage unter assets/images/ (Kategorie-Fotos unter assets/images/categories/).
 Das Foto passt zur Aktivität und widerspricht nicht der Altersgruppe (kein Babyspielzeug bei einer Aktivität für Teenager).
 Vor der Beta schaut ein Mensch einmal alle Fotos durch (wie bei den Aktivitäten).
 
-Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image). Ohne Bild zeigt die App die Karte ohne Foto.
+Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse. Auf der Karte gilt dieser Vorrang: 1. image der Aktivität, 2. gebündeltes Kategorie-Foto aus assets/images/categories/, 3. Farbfläche mit Symbol (Entscheidung 21).
 
 Logo A1 „Zwei Bögen"
 
@@ -82,23 +84,66 @@ Varianten: Farbe, einfarbig, dunkel. Kleinste Größen im PDF: 29 px und 20 px, 
 Dateien werden gebraucht: Das Logo ist im PDF nur ein Bild. Für die App braucht es das Logo als SVG oder PNG, das App-Icon als quadratisches PNG (mindestens 1024 × 1024) und eine einfarbige Variante. Ablage unter assets/.
 Das App-Icon und das Startbild sind in Expo Go nicht zu sehen, erst in einer echten App-Version (Build).
 Bildschirme
-Start mit Auswahl: Die Auswahl (Kinder, Zeit, Energie) sitzt direkt auf dem Start, ein Tipp bis zu den Vorschlägen. Die letzte Wahl bleibt vorbelegt.
+Start mit Auswahl: Die Auswahl (Kinder, Zeit, Energie) sitzt direkt auf dem Start, ein Tipp bis zu den Vorschlägen. Vorbelegt sind nur die zuletzt gewählten Kinder, Zeit und Energie nicht (Entscheidung 4).
 Ergebnis (volle Scrollhöhe): Das Wetter steht als feste Zeile unter der Navigation. Die dritte Karte hat im PDF kein Foto: gleiche Form, Farbfläche plus großes Liniensymbol.
-Detail (volle Scrollhöhe): Schritte in 20 px mit 28 px Abstand, Abhak-Felder 56 px hoch. Der Hauptknopf bleibt beim Scrollen fest am unteren Rand.
+Detail (volle Scrollhöhe): Schritte in 20 px mit 28 px Abstand, Abhak-Felder 56 px hoch (beim Material „Das braucht ihr“, Entscheidung 13). Der Hauptknopf bleibt beim Scrollen fest am unteren Rand.
 In der Nähe: Warmer, gedämpfter Kartenstil. Pins rund, mit Kategorie-Farbe. Der gewählte Ort hat eine Beschriftung, die Liste liegt als Blatt darunter. Gehört zu M10 und wird dort gebaut.
 Abweichungen vom heutigen Stand der App
 
-Heutiger Ablauf: Start mit Hauptknopf „Was machen wir?" → Auswahl (Kinder, Zeit, Energie) → Ergebnis mit drei Karten → Detail → „Das machen wir" → „Fertig" → „Wie war's?" → Verlauf. Folgendes im PDF weicht ab oder ist neu. Jeweils im Plan der Stufe ansprechen und bestätigen lassen:
+Heutiger Ablauf: Start mit Hauptknopf „Was machen wir?" → Auswahl (Kinder, Zeit, Energie) → Ergebnis mit drei Karten → Detail → „Das machen wir" → „Fertig" → „Wie war's?" → Verlauf. Folgendes im PDF weicht ab oder ist neu. Alle Punkte sind inzwischen entschieden (Abschnitt „Entscheidungen“ unten). Die Tabelle zeigt den Stand:
 
 Punkt	Vorschlag
-Auswahl direkt auf dem Start statt eigener Bildschirm	Übernehmen. Ein Tipp bis zu den Vorschlägen unterstützt das 30-Sekunden-Prinzip. Kinderliste und Verlauf-Link bleiben auf dem Start erreichbar. Stufe D2.
-Abhak-Felder bei den Schritten der Anleitung	Übernehmen, aber nur auf dem Bildschirm, nicht speichern.
-Knopf „Anleitung starten" im PDF	Der Name aus der App bleibt: „Das machen wir".
-„Keine passt? Drei neue Ideen"	Entspricht „Andere Vorschläge". Text darf angepasst werden.
-Text „Ohne Konto. Ohne Tracking." auf dem Start	Übernehmen, in de und en.
-Stimmungsbild auf dem Start	Platzhalter, bis ein geprüftes Foto da ist (siehe Regeln für Fotos).
+Auswahl direkt auf dem Start statt eigener Bildschirm	Übernommen (Nr. 1). Ein Tipp bis zu den Vorschlägen unterstützt das 30-Sekunden-Prinzip. Kinderliste und Verlauf-Link bleiben auf dem Start erreichbar. Stufe D2.
+Abhak-Felder bei den Schritten der Anleitung	Übernommen, aber beim Material („Das braucht ihr“), nicht bei den Schritten (Nr. 13). Nur auf dem Bildschirm, nicht gespeichert.
+Knopf „Anleitung starten" im PDF	Der Name aus der App bleibt: „Das machen wir“ (Nr. 14).
+„Keine passt? Drei neue Ideen"	Ersetzt „Andere Vorschläge“, der Durchlauf mit Hinweis bleibt (Nr. 8).
+Text „Ohne Konto. Ohne Tracking." auf dem Start	Ersetzt durch: de „Kein Konto nötig. Deine Daten bleiben auf deinem Handy.“, en „No account needed. Your data stays on your phone.“ Nicht „Ohne Tracking“ (Nr. 5).
+Stimmungsbild auf dem Start	Platzhalter: Sandfläche mit großem, dünnem Sonnen-Symbol (Nr. 6), bis ein geprüftes Foto da ist (siehe Regeln für Fotos).
 Kartenansicht „In der Nähe"	Erst mit M10. Jetzt nicht bauen.
-Aktivitäten haben bisher kein Foto	Die Karte ohne Foto ist der Normalfall. Fotos kommen schrittweise dazu.
+Aktivitäten haben bisher kein Foto	Vorrang auf der Karte: image der Aktivität, dann Kategorie-Foto, dann Farbfläche mit Symbol (Nr. 21). Fotos kommen schrittweise dazu.
+Entscheidungen
+Stand: 12. Oktober 2026. Clemens (Technik) hat die Fragenliste von Claude Code beantwortet. Die Entscheidungen gelten ab sofort und gehen widersprechenden Stellen in dieser Datei und im PDF vor. Die Nummern werden in CLAUDE.md, docs/theme.md und im Code als Verweis benutzt.
+
+Stufe D2 (Start und Auswahl)
+1. Die Auswahl (Kinder, Zeit, Energie) sitzt direkt auf dem Start. Der alte Auswahl-Bildschirm entfällt.
+2. Ein Kind bearbeitet man über ein Stift-Symbol an der Kachel (mindestens 44 pt, mit Beschriftung für die Sprachausgabe). Ein Tipp auf die Kachel wählt das Kind aus oder ab. Dazu gibt es eine Kachel „Kind hinzufügen“.
+3. Energie ist freiwillig und ohne Vorbelegung.
+4. Gemerkt werden nur die gewählten Kinder, lokal auf dem Gerät und versioniert. Gelöschte Kinder fliegen aus der Auswahl. Zeit und Energie werden nicht gemerkt.
+5. Text auf dem Start: de „Kein Konto nötig. Deine Daten bleiben auf deinem Handy.“, en „No account needed. Your data stays on your phone.“ Nicht „Ohne Tracking“.
+6. Stimmungsbild-Platzhalter: sandfarbene Fläche mit großem, dünnem, angeschnittenem Sonnen-Symbol. Für die Sprachausgabe als Dekoration markiert.
+7. Das Wetter kommt erst nach dem Tipp auf den Hauptknopf. Ist die Standort-Erlaubnis schon da, darf das Wetter beim Öffnen vorgeladen werden. Die Erlaubnis wird beim Öffnen nie neu erfragt.
+
+Stufe D3 (Ergebnis mit Karten)
+8. „Keine passt? Drei neue Ideen“ / „None of these? Three new ideas“ ersetzt „Andere Vorschläge“. Der Durchlauf mit Hinweis bleibt.
+9. Der Kopf hat einen runden Zurück-Knopf, kein Mischen-Symbol.
+10. Jede Kategorie hat eine eigene Farbe, abgetönt aus der Palette, mit Kontrastprüfung im Test.
+11. Karten sind weiß (`card`), Sand ist für Flächen (Farbtabelle oben berichtigt). Gewählter Zustand von Chips: Tinte. Terrakotta nur für den Hauptknopf.
+12. Symbole für Spielplatz, Bad und Termine kommen erst mit M10 und M11.
+
+Stufe D4 (Detailansicht)
+13. Abhak-Felder gibt es beim Material („Das braucht ihr“), nicht bei den Schritten. Sie gelten nur auf dem Bildschirm und werden nicht gespeichert.
+14. Der Knopf heißt weiter „Das machen wir“ (nicht „Anleitung starten“).
+15. „davon 15 aktiv“, „ergibt 12 Stück“, Hinweise je Schritt und persönliche Untertitel werden nicht gebaut. Sie stehen unter „Später“ in der CLAUDE.md.
+16. Es gibt kein Teilen-Symbol.
+17. Der Rand der Abhak-Felder kommt aus der Palette und hat mindestens 3:1 Kontrast zum Grund. Das wird im Test geprüft (WCAG 1.4.11).
+
+Stufe D5 (Verlauf und Profile, Dunkelmodus)
+18. Entwürfe für Verlauf, „Wie war’s?“, Kinderprofile und Standort-Erklärung werden aus dem Stil abgeleitet. Ani prüft sie.
+19. Dunkelwerte: Hintergrund, Text und Hauptfarbe stehen im PDF, alles Weitere ist abgeleitet und im Kontrasttest geprüft. `expo-system-ui` ist freigegeben, wenn es zum Einschalten des Dunkelmodus nötig ist (kurz begründen, welches Problem es löst).
+
+Widersprüche zur CLAUDE.md
+20. Ionicons (nur Outline) bleiben, es gibt keinen eigenen Symbolsatz. Dass die Linienstärke nicht genau 1,75 px auf dem 24er-Raster ist, ist akzeptiert.
+21. Das Feld `image` bleibt eine Web-Adresse. Vorrang auf der Karte: 1. `image` der Aktivität, 2. gebündeltes Kategorie-Foto aus `assets/images/categories/`, 3. Farbfläche mit Symbol. Ohne Foto ist deshalb nicht dauerhaft der Normalfall, sondern der Rückfall.
+
+Zusätze beim Umsetzen von D2 (von Clemens bestätigt)
+22. Das Wetter nach dem Tipp (Auslegung von Nr. 7): Ein Schritt auf dem Ergebnis-Bildschirm kommt nur, wenn er nötig ist. Wurde der Standort noch nie gefragt, erscheint zuerst die Erklär-Karte. Fehlt danach das Wetter, genügt ein Tipp auf „Wie ist das Wetter?“, dann erscheinen die Vorschläge.
+23. Gewählte Kinder-Kacheln haben Rand und Häkchen in Tinte (nicht Terrakotta wie im PDF), nach Nr. 11.
+24. Der Kreis mit dem Anfangsbuchstaben des Kindes ist sandfarben. Die zwei Pastelltöne aus dem PDF brauchten neue, ungeprüfte Farben.
+25. Die Wortmarke „miki“ ist bis zur Logo-Datei ein Text in Tinte (im Code als Platzhalter gekennzeichnet).
+26. Die Zeile „Samstag, 13:10“ aus dem PDF wird nicht gebaut.
+27. Der Hauptknopf ist inaktiv, solange keine Zeit gewählt ist oder kein Kind gewählt ist. Der Hinweis darunter nennt den fehlenden Grund.
+28. Die Kinder-Kacheln brechen bei vielen Kindern um und werden nicht abgeschnitten. Bei großer Systemschrift gibt es weniger Spalten pro Zeile, die Texte brechen um.
+
 Offene Punkte
  Logo und App-Icon als Dateien exportieren und unter assets/ ablegen
  Name „Miki": Markenregister (DPMA) und App Store / Play Store prüfen

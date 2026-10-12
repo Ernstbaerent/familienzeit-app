@@ -30,9 +30,12 @@ Team: Clemens (Technik, programmiert mit dir), Ani (Design, Ideen).
 Gewählt ist die Richtung **„Sonntagslicht“** (warm und fotografisch), Name vorläufig **Miki** („mit Kindern“).
 Alle Werte, die Bildsprache und die Foto-Regeln stehen in `docs/design/DESIGN.md` (Quelle: das PDF im selben Ordner).
 Wie das Theme aufgebaut ist und woher die Werte kommen: `docs/theme.md`. Umgesetzt wird in Stufen (Roadmap D1 bis D5).
+Die Entscheidungen zu den Stufen stehen nummeriert im Abschnitt „Entscheidungen“ der DESIGN.md (Nr. 1 bis 28) und gehen dem PDF und älteren Notizen vor.
 
 - **Farben und Größen nur aus dem Theme** (`src/lib/theme.ts`): Farben, Schriften (`fonts`), Schriftgrößen, Abstände, Radien, Schatten.
   Neue Bildschirme holen sie mit `useTheme()` bzw. `useThemedStyles`. Fehlt ein Wert, im Theme ergänzen und in `docs/theme.md` die Herkunft vermerken.
+- **Farbrollen:** Karten und Kacheln sind weiß (`card`), Sand (`surface`) ist für Flächen und Platzhalter, gewählte Chips und Kacheln sind Tinte
+  (`selected`), Terrakotta (`primary`) nur für den Hauptknopf.
 - **Ruhig und warm** statt bunt und verspielt. Keine Punkte, Abzeichen, Level, Serien oder ungefragten Benachrichtigungen (keine Gamification).
 - Die Entscheidung steht im Mittelpunkt: ein Hauptknopf, **genau drei Karten**, kein Scrollen durch lange Listen.
 - Mindestanforderungen: Tippflächen ≥ 44 pt (`size.touch`), Anleitungstext 20 px (`fontSize.reading`), Textkontraste WCAG AA
@@ -44,7 +47,8 @@ Wie das Theme aufgebaut ist und woher die Werte kommen: `docs/theme.md`. Umgeset
   nur Bilder mit Lizenz für kommerzielle Nutzung (z. B. Unsplash, Pexels); zu jedem Foto Link, Fotograf, Plattform, Lizenz und Abrufdatum
   in `docs/bildquellen.md`; Querformat, etwa 1200 px breit, deutlich unter 300 KB, Ablage in `assets/images/`; das Foto passt zur Aktivität
   und zur Altersgruppe; vor der Beta schaut ein Mensch alle Fotos durch.
-  Ohne geprüftes Foto (der Normalfall) zeigt die Karte eine ruhige Farbfläche mit großem, dünnem Kategorie-Symbol, in gleicher Form und Höhe.
+  Auf der Karte gilt dieser Vorrang: `image` der Aktivität (Web-Adresse), dann gebündeltes Kategorie-Foto aus `assets/images/categories/`,
+  dann (Rückfall, heute der Normalfall) eine ruhige Farbfläche mit großem, dünnem Kategorie-Symbol, in gleicher Form und Höhe.
 - Widersprüche zwischen der DESIGN.md und dieser Datei (Mehrsprachigkeit, Rechts-nach-links, Datenschutz) werden gemeldet, nicht still gelöst.
 
 ## Arbeitsweise mit Clemens
@@ -193,13 +197,13 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
 - [ ] **M6b Schnee-Aktivitäten:** Aktivitäten für Schnee ergänzen (in M5b bewusst weggelassen, weil das Wetter noch keinen Schnee kannte; seit M6 gibt es die Wetterlage `snow`). Dafür braucht das Datenmodell ein Feld für „braucht Schnee“ (Vorschlag: `weather.needsSnow`), mit Regel in der Vorschlagslogik und Tests, danach durchlaufen die neuen Aktivitäten die Sicherheits-Checkliste
 - [x] **M7 Details und Feedback:** Detailansicht, Daumen hoch/runter, Verlauf lokal
 - [x] **D1 Design-Grundlagen („Sonntagslicht“):** Theme mit den Werten aus `docs/design/DESIGN.md` (Farben hell und dunkel, Radien, Schriften, Schatten, Mindestgrößen), Schriften Literata und Onest, App-Name Miki, `Button`, `Chip` und `Section` im neuen Stil. Keine Bildschirme umgebaut. Details: `docs/theme.md`
-- [ ] **D2 Start und Auswahl:** Auswahl (Kinder, Zeit, Energie) direkt auf dem Start, ein Tipp bis zu den Vorschlägen, letzte Wahl vorbelegt; Bildschirme auf `useTheme()` umstellen. Vorher die Punkte unter „Abweichungen vom heutigen Stand“ in der DESIGN.md mit Clemens bestätigen
-- [ ] **D3 Ergebnis mit Karten:** Wetter als feste Zeile unter der Navigation, genau drei Karten (mit Foto oder Farbfläche mit großem Kategorie-Symbol, gleiche Form und Höhe), „Andere Vorschläge“ im neuen Stil
-- [ ] **D4 Detailansicht:** Schritte in 20 px mit 28 px Abstand, Abhak-Felder 56 px (nur auf dem Bildschirm, nicht gespeichert), Hauptknopf fest am unteren Rand, Allergen- und Sicherheitsboxen
-- [ ] **D5 Verlauf und Profile:** übrige Bildschirme (Verlauf, Kinderprofile, Wetter-Erklärung) im neuen Stil. **Danach den Dunkelmodus einschalten** (Anleitung: `docs/theme.md`, Abschnitt „Dunkelmodus“) und alle Bildschirme in Hell und Dunkel prüfen
+- [ ] **D2 Start und Auswahl:** Auswahl (Kinder, Zeit, Energie) direkt auf dem Start, ein Tipp bis zu den Vorschlägen, nur die zuletzt gewählten Kinder vorbelegt (Zeit und Energie nicht); Start auf `useTheme()` umstellen. Entscheidungen 1 bis 7 und 22 bis 28 in der DESIGN.md sind bestätigt
+- [ ] **D3 Ergebnis mit Karten:** Wetter als feste Zeile unter der Navigation, genau drei Karten (mit Foto oder Farbfläche mit großem Kategorie-Symbol, gleiche Form und Höhe), „Keine passt? Drei neue Ideen“ statt „Andere Vorschläge“, runder Zurück-Knopf statt Mischen-Symbol, eine Farbe pro Kategorie (Entscheidungen 8 bis 12)
+- [ ] **D4 Detailansicht:** Schritte in 20 px mit 28 px Abstand, Abhak-Felder 56 px beim Material „Das braucht ihr“ (nur auf dem Bildschirm, nicht gespeichert, Rand aus der Palette mit mindestens 3:1 Kontrast, im Test geprüft), Hauptknopf „Das machen wir“ fest am unteren Rand, Allergen- und Sicherheitsboxen, kein Teilen-Symbol (Entscheidungen 13 bis 17)
+- [ ] **D5 Verlauf und Profile:** übrige Bildschirme (Verlauf, Kinderprofile, Wetter-Erklärung) im neuen Stil. Entwürfe werden aus dem Stil abgeleitet, Ani prüft sie (Entscheidung 18). **Danach den Dunkelmodus einschalten** (Anleitung: `docs/theme.md`, Abschnitt „Dunkelmodus“) und alle Bildschirme in Hell und Dunkel prüfen. `expo-system-ui` ist dafür freigegeben, wenn es zum Einschalten nötig ist (kurz begründen, Entscheidung 19)
 - [ ] **M8 Supabase:** Aktivitäten aus der Datenbank laden (nur `approved`), Offline-Cache
 - [ ] **M9 KI-Wochenlauf:** Generator-Skript, GitHub Action, `activity_ideas`. Der Wochenlauf ergänzt laufend neue Aktivitäten zum Bestand aus M5b
-- [ ] **M9b Bilder-Pipeline:** Stock-Fotos automatisch suchen und prüfen, Regeln in `docs/design/DESIGN.md` (Abschnitt „Regeln für Fotos“, Kurzfassung im Abschnitt „Design“). Vorher klären: Das Feld `image` ist heute eine Web-Adresse, die DESIGN.md legt die Fotos unter `assets/images/` ab. Bis ein geprüftes Foto da ist, zeigt die Karte die Farbfläche mit Symbol
+- [ ] **M9b Bilder-Pipeline:** Stock-Fotos automatisch suchen und prüfen, Regeln in `docs/design/DESIGN.md` (Abschnitt „Regeln für Fotos“, Kurzfassung im Abschnitt „Design“). Entschieden (DESIGN.md, Entscheidung 21): `image` bleibt eine Web-Adresse. Vorrang auf der Karte: `image` der Aktivität, dann gebündeltes Kategorie-Foto aus `assets/images/categories/`, dann Farbfläche mit Symbol
 - [ ] **M10 Orte:** OpenStreetMap-Abfrage für Spielplätze, Museen, Bäder usw. Erkenntnisse aus M2a (Zahlen und Begründung: `docs/machbarkeit-orte.md`):
   1. Orte ohne Öffnungszeiten nicht ausschließen, sondern mit dem Hinweis „Öffnungszeiten vorher prüfen" anzeigen.
   2. Bäder mit drinnen/draußen kennzeichnen und eine Saison berücksichtigen (keine Freibäder außerhalb der Saison).
@@ -225,6 +229,8 @@ Konto und Familie teilen, Premium/Abo, Radiosender-Kooperationen, Nachbarländer
 Anbieter-Portal (lokale Anbieter tragen Angebote und Termine selbst ein), Widget „Idee für heute“,
 Bildschirm anlassen während der Anleitung (braucht ein neues Paket, `expo-keep-awake`, vorher Rückfrage),
 Vorschläge für einen anderen Ort (z. B. Urlaubsort), Wetter im Ausland (Urlaub), z. B. über eine zweite Wetterquelle (Bright Sky deckt nur Deutschland ab).
+Detailansicht (im PDF zu sehen, bewusst nicht gebaut, DESIGN.md Entscheidung 15): „davon 15 aktiv“ bei der Dauer, „ergibt 12 Stück“ bei der Menge,
+Hinweise je Schritt (z. B. „Gut für kleine Hände“, „ab 12 Jahren“) und persönliche Untertitel mit den Namen der Kinder.
 Veranstaltungen (Details: `docs/veranstaltungsquellen.md`): Einreichungsformular für Veranstalter (Vereine, Kitas, Kirchgemeinden) mit Lizenz-Einwilligung,
 Ticket-Partnerprogramme (Eventim über AWIN, Reservix/ADticket), Kooperationen (Freizeitkalender Vogtland, Flohmarkt- und Mittelalter-Portale),
 weitere Landesschnittstellen.
