@@ -85,6 +85,7 @@ npm test               # Tests ausführen
 npx expo lint          # Code-Stil prüfen
 npm run places:test    # M2a: Machbarkeitstest Orte (Overpass API, braucht Node 22+, Zwischenspeicher in scripts/.cache/)
 npm run activities:check  # M4: prüft alle Aktivitäten in data/ (Form, Sicherheits-Checkliste, Texte), braucht Node 22+
+npm run photos:find    # Auswahlschritt Kategorie-Fotos über Pixabay (einmalig, von Hand; braucht PIXABAY_API_KEY, Node 22+, ImageMagick), Ergebnis: docs/bilder-pruefung.md
 ```
 
 ## Ordnerstruktur (Ziel)
@@ -203,7 +204,7 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
 - [ ] **D5 Verlauf und Profile:** übrige Bildschirme (Verlauf, Kinderprofile, Wetter-Erklärung) im neuen Stil. Entwürfe werden aus dem Stil abgeleitet, Ani prüft sie (Entscheidung 18). **Danach den Dunkelmodus einschalten** (Anleitung: `docs/theme.md`, Abschnitt „Dunkelmodus“) und alle Bildschirme in Hell und Dunkel prüfen. `expo-system-ui` ist dafür freigegeben, wenn es zum Einschalten nötig ist (kurz begründen, Entscheidung 19)
 - [ ] **M8 Supabase:** Aktivitäten aus der Datenbank laden (nur `approved`), Offline-Cache
 - [ ] **M9 KI-Wochenlauf:** Generator-Skript, GitHub Action, `activity_ideas`. Der Wochenlauf ergänzt laufend neue Aktivitäten zum Bestand aus M5b
-- [ ] **M9b Bilder-Pipeline:** Stock-Fotos automatisch suchen und prüfen, Regeln in `docs/design/DESIGN.md` (Abschnitt „Regeln für Fotos“, Kurzfassung im Abschnitt „Design“). Entschieden (DESIGN.md, Entscheidung 21): `image` bleibt eine Web-Adresse. Vorrang auf der Karte: `image` der Aktivität, dann gebündeltes Kategorie-Foto aus `assets/images/categories/`, dann Farbfläche mit Symbol
+- [ ] **M9b Bilder-Pipeline:** Stock-Fotos automatisch suchen und prüfen, Regeln in `docs/design/DESIGN.md` (Abschnitt „Regeln für Fotos“, Kurzfassung im Abschnitt „Design“). Entschieden (DESIGN.md, Entscheidung 21): `image` bleibt eine Web-Adresse. Vorrang auf der Karte: `image` der Aktivität, dann gebündeltes Kategorie-Foto aus `assets/images/categories/`, dann Farbfläche mit Symbol. Vor dem Einsatz einer automatischen Pipeline mit Pixabay beim Anbieter anfragen (Regel: keine automatisierten Massenabfragen) oder eine andere Quelle wählen.
 - [ ] **M10 Orte:** OpenStreetMap-Abfrage für Spielplätze, Museen, Bäder usw. Erkenntnisse aus M2a (Zahlen und Begründung: `docs/machbarkeit-orte.md`):
   1. Orte ohne Öffnungszeiten nicht ausschließen, sondern mit dem Hinweis „Öffnungszeiten vorher prüfen" anzeigen.
   2. Bäder mit drinnen/draußen kennzeichnen und eine Saison berücksichtigen (keine Freibäder außerhalb der Saison).
@@ -220,6 +221,7 @@ Punkte mit „⏸ wartet" überspringst du, bis die genannte Voraussetzung erfü
   2. Markenprüfung: Markenregister (DPMA), App Store und Play Store.
   3. Bundle-ID (iOS) und Paketname (Android). Nach der Store-Veröffentlichung nicht mehr änderbar, bis dahin in `app.json` nicht setzen.
   4. Logo und App-Icon liegen noch nicht unter `assets/`. Benötigt: Logo als SVG oder PNG (dazu einfarbig), App-Icon als quadratisches PNG (mindestens 1024 × 1024), Vordergrund für das adaptive Android-Icon. Dann in `app.json` einbinden (Icon, adaptives Icon, Startbild); sichtbar erst im Build, nicht in Expo Go (Details: `docs/theme.md`)
+  5. Bildquellen-Hinweis „Bilder: Pixabay“ in einem Info-Bildschirm (Pixabay bittet um einen Hinweis zur Herkunft, Pflicht ist er laut Lizenz nicht). Auswahl der Kategorie-Fotos: `docs/bilder-pruefung.md`
 - [ ] **M12 Beta:** Datenschutzerklärung, Impressum, Testversionen für Freunde und Familie. Vorher liest ein Mensch alle Aktivitäten einmal durch
 
 ## Später (nicht jetzt bauen)
