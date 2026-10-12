@@ -13,8 +13,11 @@ Namensnennung. Pixabay garantiert keine Einwilligungen abgebildeter Personen, de
 **Prüfung:** Die Befunde stammen aus einer Sichtprüfung durch Claude Code am 12.10.2026 (Gesichter auch im Hintergrund, Marken, Logos,
 Verpackungen, Text). **Vor der Beta schaut ein Mensch alle Fotos noch einmal durch.**
 
-**Stand:** 11 Fotos. Für **Bewegung** und **Experiment** gibt es noch kein Foto, dort zeigt die Karte die Farbfläche mit Symbol
-(Rückfall laut DESIGN.md, Entscheidung 21).
+**Stand:** 9 Fotos (Natur 4, Kochen 3, Basteln 1, Spiel 1). Für **Bewegung**, **Experiment** und **Ausflug** gibt es noch kein Foto, dort zeigt die Karte
+die Farbfläche mit Symbol (Rückfall laut DESIGN.md, Entscheidung 21). Die Nummern dürfen Lücken haben (`kochen-3` fehlt).
+
+**Neues Foto aufnehmen:** Datei als `kategorie-nummer.jpg` nach `assets/images/categories/` legen, hier eintragen und `npm run photos:index` laufen
+lassen (erzeugt die Liste, die die App nutzt). Der Test `categoryPhotos.test.ts` meldet, wenn Datei, Liste und diese Tabelle nicht zusammenpassen.
 
 | Datei | Plattform | Foto-Seite | Fotograf | Lizenz | Abrufdatum | Prüfbefund |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -26,6 +29,4 @@ Verpackungen, Text). **Vor der Beta schaut ein Mensch alle Fotos noch einmal dur
 | `natur-4.jpg` | Pixabay | [Pixabay 4591121](https://pixabay.com/photos/path-trees-autumn-fog-avenue-fall-4591121/) | [Peggychoucair](https://pixabay.com/users/1130890/) | Pixabay Content License | 2026-10-12 | Gesichter: nein · Marken: nein · Text: nein |
 | `kochen-1.jpg` | Pixabay | [Pixabay 943245](https://pixabay.com/photos/new-year-background-dough-cook-943245/) | [ClickerHappy](https://pixabay.com/users/324082/) | Pixabay Content License | 2026-10-12 | Gesichter: nein · Marken: nein · Text: nein |
 | `kochen-2.jpg` | Pixabay | [Pixabay 1181189](https://pixabay.com/photos/pasta-fettuccine-fresh-pasta-1181189/) | [Oldmermaid](https://pixabay.com/users/1999835/) | Pixabay Content License | 2026-10-12 | Gesichter: nein · Marken: nein · Text: nein |
-| `kochen-3.jpg` | Pixabay | [Pixabay 1868396](https://pixabay.com/photos/bakery-bread-baker-apron-baking-1868396/) | [Pexels](https://pixabay.com/users/2286921/) | Pixabay Content License | 2026-10-12 | Gesichter: nein · Marken: nein · Text: nein. Nur Oberkörper und Schürze, Kopf nicht im Bild. Licht eher kühl. Das Pixabay-Konto heißt „Pexels“: Vor der Beta auf der Foto-Seite prüfen, ob ein anderer Urheber genannt ist. |
 | `kochen-4.jpg` | Pixabay | [Pixabay 2132874](https://pixabay.com/photos/cooking-pies-vareniki-pelmeni-cook-2132874/) | [Daria-Yakovleva](https://pixabay.com/users/3938704/) | Pixabay Content License | 2026-10-12 | Gesichter: nein · Marken: nein · Text: nein |
-| `ausflug-1.jpg` | Pixabay | [Pixabay 2178847](https://pixabay.com/photos/bench-lake-park-recreational-area-2178847/) | [Pexels](https://pixabay.com/users/2286921/) | Pixabay Content License | 2026-10-12 | Gesichter: nein · Marken: nein · Text: nein. Das Pixabay-Konto heißt „Pexels“: Vor der Beta auf der Foto-Seite prüfen, ob ein anderer Urheber genannt ist. |
