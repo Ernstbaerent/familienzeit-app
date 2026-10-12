@@ -20,9 +20,10 @@ steht im Abschnitt „Vorladen beim Öffnen des Starts“.
 | „Standort erlauben“ | Erst jetzt zeigt das Handy seinen Dialog (nur „während der Nutzung“). Erlaubt: Das Wetter kommt automatisch, die Vorschläge erscheinen. |
 | Standort erlaubt | Kein Schritt. Das Wetter kommt automatisch (war oft schon vorgeladen). |
 | Standort verweigert, „selbst wählen“ oder Wetter nicht abrufbar | Wetter-Schritt 2: **„Wie ist das Wetter?“** (Sonne, Bewölkt, Regen, Gewitter, Schnee). **Ein Tipp** wählt das Wetter und zeigt gleich die Vorschläge. Dazu ein kleiner Link „Standort erlauben“. |
-| Ergebnis „Eure Ideen“ | Oben eine Zeile mit dem angenommenen Wetter, z. B. „Bewölkt, Regen ab 15 Uhr · 11 °C“, darunter „Quelle: Deutscher Wetterdienst“. |
-| Dort: „Wetter ändern“ | Wetter von Hand überschreiben, **auch wenn der Standort klappt**. „Automatisch“ hebt die Handwahl wieder auf. |
-| Dort: „Standort erlauben“ | Kleiner Link, solange der Standort nicht erlaubt ist. Hat das Handy ihn dauerhaft abgelehnt, führt er in die Einstellungen. |
+| Ergebnis „Eure Ideen“ | Unter dem Kopf steht die **feste Wetterzeile** (`WeatherBar`, bleibt beim Scrollen stehen) mit dem angenommenen Wetter, z. B. „Bewölkt, Regen ab 15 Uhr · 11 °C“, darunter „Quelle: Deutscher Wetterdienst“. Solange das Wetter lädt, zeigt sie „Wetter wird geprüft …“. |
+| Dort: „Ändern“ | Öffnet „Wetter ändern“: Wetter von Hand überschreiben, **auch wenn der Standort klappt**. „Automatisch“ hebt die Handwahl wieder auf. Sichtbar steht „Ändern“, die Sprachausgabe liest „Wetter ändern“. Der aufgeklappte Teil (`WeatherPanel`) scrollt mit den Karten, damit die feste Zeile auch bei großer Schrift klein bleibt. |
+| Dort: amtliche Warnung | Kasten über den Karten (`WeatherPanel`) mit dem Hinweis „Deshalb schlagen wir nichts draußen vor.“ |
+| Dort: „Standort erlauben“ | Link über den Karten, solange der Standort nicht erlaubt ist (erst die Erklär-Karte, dann der Dialog des Handys). Hat das Handy ihn dauerhaft abgelehnt, führt er in die Einstellungen. |
 
 Die Handwahl ersetzt nur die **Wetterlage**. Eine amtliche Warnung und die Temperatur bleiben, wenn es sie gibt:
 Sicherheit wird nie aufgeweicht.
@@ -124,7 +125,7 @@ gibt es noch nicht: Sie kommen als **M6b** (eigener Schritt, mit einem Feld im D
 | Wetterlage für die Vorschläge (Fenster, Regel-Mindestmenge, Warnungen, Temperatur) | `situation.ts` |
 | Texte zusammensetzen (Zeile, Warnung, Uhrzeit) | `weatherText.ts`, `formatClock.ts` |
 | Zustand für die Bildschirme | `WeatherProvider.tsx` |
-| Oberfläche | `LocationExplainer.tsx`, `WeatherStep.tsx` (Schritt vor den Vorschlägen), `WeatherChips.tsx`, `WeatherSummary.tsx`, `AllowLocationLink.tsx`, `WeatherIcon.tsx` |
+| Oberfläche | `WeatherBar.tsx` (feste Zeile mit Ladezustand), `WeatherPanel.tsx` (Warnung, „Wetter ändern“, Erklärung, scrollt mit), `WeatherCard.tsx` (weißer Kartenkasten), `LocationExplainer.tsx`, `WeatherStep.tsx` (Schritt vor den Vorschlägen), `WeatherChips.tsx`, `AllowLocationLink.tsx`, `WeatherIcon.tsx` |
 | Wann die Handwahl und der Wetter-Schritt erscheinen | `manualWeather.ts` (`needsManualWeather`, `getWeatherStep`) |
 
 `location.ts`, `brightSky.ts`, `situation.ts`, `weatherCache.ts`, `weatherText.ts` und `manualWeather.ts` sind reine Funktionen mit Tests.
@@ -146,7 +147,7 @@ Von Hand mit Expo Go (`npx expo start`, QR-Code scannen). Der Standort lässt si
 2. **„Standort erlauben“ → „Beim Verwenden der App“.** Die Vorschläge erscheinen, oben steht das Wetter mit „Quelle: Deutscher Wetterdienst“.
    Danach die App schließen und wieder öffnen: Der Start lädt das Wetter jetzt vor (siehe unten), gefragt wird nichts.
 3. **Zweites Mal (innerhalb von 30 Min.):** geht schnell, es wird nicht neu abgerufen (der Zwischenspeicher gilt).
-4. **„Wetter ändern“ → Regen:** Die Zeile zeigt „Eure Auswahl: Regen“, die Vorschläge ändern sich (nichts, was trocken sein muss). „Automatisch“ stellt zurück.
+4. **„Ändern“ → Regen:** Die Zeile zeigt „Eure Auswahl: Regen“, die Vorschläge ändern sich (nichts, was trocken sein muss). „Automatisch“ stellt zurück.
 5. **Flugmodus an:** Innerhalb von 30 Minuten nach Schritt 2 geht alles wie gewohnt (Daten noch frisch). Danach, mit Daten unter 3 Std.,
    steht „Stand …, gerade nicht aktualisierbar“. Gibt es keine Daten (z. B. frisch installiert), erscheint „Wie ist das Wetter?“.
 6. **Standort verweigern** (Einstellungen → Miki → Standort aus, oder „Wetter selbst wählen“): Nach dem Tipp auf „Was machen wir?“ erscheint „Wie ist das Wetter?“ mit Sonne, Bewölkt, Regen, Gewitter, Schnee und dem Link „Standort erlauben“.

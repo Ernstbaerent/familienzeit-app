@@ -18,8 +18,8 @@
   },
   "suggest": {
     "resultsTitle": "Eure Ideen",
-    "more": "Andere Vorschläge",
-    "changeSelection": "Auswahl ändern",
+    "back": "Zurück zur Auswahl",
+    "more": "Keine passt? Drei neue Ideen",
     "startingOver": "Das waren alle Ideen, die gerade passen. Hier sind sie noch einmal von vorn.",
     "fewMatches_zero": "Zu eurer Auswahl passt gerade keine Idee.",
     "fewMatches_one": "Zu eurer Auswahl passt gerade nur eine Idee.",
@@ -27,7 +27,12 @@
     "tipFewerChildren": "Tipp: Mit weniger Kindern passen mehr Ideen.",
     "tipMoreTime": "Tipp: Mit mehr Zeit gibt es mehr Ideen.",
     "tipComingSoon": "Wir sammeln laufend neue Ideen. Schau gern bald wieder vorbei.",
-    "openDetails": "Öffnet die Details"
+    "openDetails": "Öffnet die Details",
+    "card": {
+      "ageRange": "{{min}}–{{max}} Jahre",
+      "ageAll": "Alle Alter",
+      "label": "{{title}}. {{category}}, {{duration}}, {{age}}. {{summary}}"
+    }
   },
   "time": {
     "minutes30": "30 Min.",
@@ -58,6 +63,7 @@
     "allowLocation": "Standort erlauben",
     "openSettings": "Standort in den Einstellungen erlauben",
     "change": "Wetter ändern",
+    "changeShort": "Ändern",
     "automatic": "Automatisch",
     "loading": "Wetter wird geprüft …",
     "options": {

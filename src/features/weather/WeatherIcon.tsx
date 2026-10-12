@@ -4,7 +4,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
 
-import { colors, iconSize } from '@/lib/theme';
+import { iconSize, useTheme } from '@/lib/theme';
 
 import type { Weather } from '../suggestions/conditions';
 
@@ -25,6 +25,7 @@ type WeatherIconProps = {
 
 // Das Symbol ist Schmuck: Der Wettertext steht daneben, deshalb wird es für Bildschirmleser versteckt.
 export function WeatherIcon({ weather, size = 'md' }: WeatherIconProps) {
+  const { colors } = useTheme();
   return (
     <Ionicons
       name={weatherIcons[weather]}

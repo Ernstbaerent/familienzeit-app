@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
-import { colors, fontSize, iconSize, lineHeight, radius, spacing } from '@/lib/theme';
+import { fonts, fontSize, iconSize, lineHeight, spacing, type Theme } from '@/lib/theme';
+import { useThemedStyles } from '@/lib/useThemedStyles';
+
+import { WeatherCard } from './WeatherCard';
 
 type LocationExplainerProps = {
   onAllow: () => void; // zeigt danach den Dialog des Handys
@@ -13,10 +16,12 @@ type LocationExplainerProps = {
 const points = ['pointWhen', 'pointRounded', 'pointPrivacy'] as const;
 
 // Erklärt kurz, wofür die App den Standort braucht, BEVOR das Handy danach fragt.
+// „Standort erlauben“ ist hier der Hauptknopf (Terrakotta), „Wetter selbst wählen“ ein Nebenknopf.
 export function LocationExplainer({ onAllow, onDecline }: LocationExplainerProps) {
   const { t } = useTranslation();
+  const { styles, colors } = useThemedStyles(createStyles);
   return (
-    <View style={styles.card}>
+    <WeatherCard>
       <Text style={styles.title} accessibilityRole="header">
         {t('weather.explain.title')}
       </Text>
@@ -35,46 +40,47 @@ export function LocationExplainer({ onAllow, onDecline }: LocationExplainerProps
           </View>
         ))}
       </View>
-      <Button label={t('weather.explain.allow')} onPress={onAllow} />
-      <Button label={t('weather.explain.decline')} variant="secondary" onPress={onDecline} />
-    </View>
+      <View style={styles.actions}>
+        <Button label={t('weather.explain.allow')} size="large" onPress={onAllow} />
+        <Button label={t('weather.explain.decline')} variant="secondary" onPress={onDecline} />
+      </View>
+    </WeatherCard>
   );
 }
 
 // Abstände nur mit Horizontal/Vertical oder Start/End, nie Left/Right (wegen rechts-nach-links).
-const styles = StyleSheet.create({
-  card: {
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  title: {
-    fontSize: fontSize.lg,
-    lineHeight: lineHeight.lg,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  text: {
-    fontSize: fontSize.md,
-    lineHeight: lineHeight.md,
-    color: colors.text,
-  },
-  points: {
-    gap: spacing.xs,
-    marginVertical: spacing.xs,
-  },
-  point: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-  },
-  pointText: {
-    flex: 1,
-    fontSize: fontSize.sm,
-    lineHeight: lineHeight.sm,
-    color: colors.textMuted,
-  },
+const createStyles = ({ colors }: Theme) => ({
+  colors,
+  styles: StyleSheet.create({
+    title: {
+      fontFamily: fonts.title,
+      fontSize: fontSize.xl,
+      lineHeight: lineHeight.xl,
+      color: colors.text,
+    },
+    text: {
+      fontFamily: fonts.body,
+      fontSize: fontSize.md,
+      lineHeight: lineHeight.md,
+      color: colors.text,
+    },
+    points: {
+      gap: spacing.sm,
+    },
+    point: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing.sm,
+    },
+    pointText: {
+      flex: 1,
+      fontFamily: fonts.body,
+      fontSize: fontSize.sm,
+      lineHeight: lineHeight.sm,
+      color: colors.textMuted,
+    },
+    actions: {
+      gap: spacing.sm,
+    },
+  }),
 });

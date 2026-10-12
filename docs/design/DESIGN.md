@@ -144,6 +144,13 @@ Zusätze beim Umsetzen von D2 (von Clemens bestätigt)
 27. Der Hauptknopf ist inaktiv, solange keine Zeit gewählt ist oder kein Kind gewählt ist. Der Hinweis darunter nennt den fehlenden Grund.
 28. Die Kinder-Kacheln brechen bei vielen Kindern um und werden nicht abgeschnitten. Bei großer Systemschrift gibt es weniger Spalten pro Zeile, die Texte brechen um.
 
+Zusätze beim Umsetzen von D3 (von Clemens noch zu bestätigen)
+29. Unten gibt es kein „Auswahl ändern“ mehr: Der runde Zurück-Knopf im Kopf führt zur Auswahl. Das PDF zeigt unten nur „Keine passt? Drei neue Ideen“.
+30. Die Wetterzeile ist fest (scrollt nicht mit) und hat den Knopf „Ändern“ (sichtbar „Ändern“, für die Sprachausgabe „Wetter ändern“). Warnung, „Standort erlauben“ und die Wetterwahl stehen im Scrollbereich über den Karten, damit die feste Zeile bei großer Schrift klein bleibt.
+31. „Keine passt? Drei neue Ideen“ ist ein Nebenknopf (Sand, Tinte), nicht Terrakotta und kein Textlink wie im PDF (Entscheidung 11). Links im Wetter-Schritt sind Tinte mit Unterstreichung.
+32. Nicht gebaut aus dem PDF: die Überschrift „Drei Ideen für eure Stunde“ mit Untertitel („Mila & Jonas · 1 Std · Energie normal · Ändern“) und die Angabe „Drinnen“ auf der Karte. Der Kopf trägt den Titel „Eure Ideen“.
+33. Die Karte zeigt die Altersspanne („3–8 Jahre“, 0 bis 16 „Alle Alter“) statt „ab 3 J.“. Die sieben Kategorie-Farben (Entscheidung 10) stehen mit allen Werten und Kontrasten in docs/theme.md.
+
 Offene Punkte
  Logo und App-Icon als Dateien exportieren und unter assets/ ablegen
  Name „Miki": Markenregister (DPMA) und App Store / Play Store prüfen
