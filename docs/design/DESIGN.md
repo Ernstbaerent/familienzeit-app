@@ -1,32 +1,29 @@
-Miki – Design (Runde 1)
+Miki – Design
 
-Stand: Oktober 2026. Quelle: PDF „Runde 1 · Drei Richtungen und Logo für Miki" aus Claude Design. Die Werte sind aus dem PDF übernommen, nichts ist dazuerfunden.
+Stand: Oktober 2026. Quelle: PDF „Runde 1 · Drei Richtungen und Logo für Miki" aus Claude Design (liegt im selben Ordner). Die Werte sind aus dem PDF übernommen, nichts ist dazuerfunden.
 
-Gewählte Richtung: noch offen (A „Sonntagslicht" oder B „Stille Wiese"). Hier eintragen, sobald entschieden ist.
+Gewählte Richtung: A „Sonntagslicht" (warm und fotografisch) Gewähltes Logo: A1 „Zwei Bögen" Name: Miki steht für „Mit Kindern". Wortmarke kleingeschrieben: miki, darunter optional die Zeile „mit Kindern".
 
-Stand des PDFs: Im PDF-Text stehen nur Richtung A und B. Richtung C „Wegweiser" und die Empfehlung fehlen. Falls sie in Claude Design existieren, bitte nachliefern.
-
-Name: Miki steht für „Mit Kindern". Wortmarke kleingeschrieben: miki.
+Richtung B „Stille Wiese" und Richtung C wurden nicht gewählt. Ihre Werte stehen nur noch im PDF.
 
 So nutzt Claude Code diese Datei
-Es wird nur die gewählte Richtung umgesetzt. Die andere Richtung dient nur als Referenz.
+Es wird nur Richtung A umgesetzt.
 Werte kommen in src/lib/theme.ts. Die Lint-Regel gegen feste Farben, Größen und Abstände bleibt bestehen. Die Namen der Theme-Werte legt Claude Code fest, die Rollen stehen in den Tabellen unten.
 Funktionen, die es in der App noch nicht gibt, werden nicht still mitgebaut. Sie stehen im Abschnitt „Abweichungen vom heutigen Stand". Vorher nachfragen.
 Widersprüche zu den Regeln in der CLAUDE.md (Mehrsprachigkeit, Rechts-nach-links, Datenschutz) melden, nicht eigenmächtig lösen.
-Gemeinsame Vorgaben (gelten für beide Richtungen)
+Gefühl
+
+Wie ein heller Samstagmorgen am Küchentisch: warmes Licht, echte Momente, nichts Inszeniertes. Große Fotos tragen die Stimmung, die Oberfläche tritt bescheiden zurück. Ruhig und warm, keine Punkte, Abzeichen oder Serien, genau drei Karten, ein Hauptknopf.
+
+Vorgaben für alle Bildschirme
 Tippflächen mindestens 44 pt.
 Anleitungstext 20 px.
-Textkontraste nach WCAG AA (die Kontrastwerte stehen an den Farben).
+Textkontraste nach WCAG AA (die Werte stehen an den Farben).
 Alle Schriften sind Google Fonts (OFL) mit „Latein erweitert" (Türkisch, Rumänisch) und Kyrillisch (Ukrainisch). Arabisch läuft über eine passende Partnerschrift.
 Layouts mit logischen Abständen (Anfang/Ende statt links/rechts), damit Rechts-nach-links (Arabisch) funktioniert.
 Symbole: gleicher Linienstil, 1,75 px Linie auf 24er-Raster, runde Enden. Kategorien: Basteln, Spiele, Bewegung, Experimente, Natur, Kochen, Ausflüge, Spielplatz, Bad, Termine.
-Hell als Standard, Dunkelmodus als Variante.
-Fotos im PDF sind Platzhalter. Orte und Veranstaltungen im PDF sind erfunden.
-Beispielsituation im PDF (in beiden Richtungen gleich): Samstag 13:10, zwei Kinder (4 und 13 Jahre), 1 Std, Energie „normal", Regen ab 15 Uhr.
-Richtung A – „Sonntagslicht" (warm und fotografisch)
-
-Gefühl: wie ein heller Samstagmorgen am Küchentisch. Warmes Licht, echte Momente, nichts Inszeniertes. Große Fotos tragen die Stimmung, die Oberfläche tritt bescheiden zurück.
-
+Hell als Standard, Dunkelmodus als Variante (folgt der Handy-Einstellung).
+Beispielsituation im PDF: Samstag 13:10, zwei Kinder (4 und 13 Jahre), 1 Std, Energie „normal", Regen ab 15 Uhr. Orte und Veranstaltungen im PDF sind erfunden.
 Farben (hell)
 Rolle	Name	Wert	Hinweis
 Hintergrund	Papier	
@@ -51,97 +48,59 @@ Hauptfarbe (Knöpfe)
 #E3825C	mit dunkler Schrift 6,4:1
 Schrift
 Literata für Titel und Zahlen, Onest für Text und Bedienung.
-Arabisch: Noto Naskh Arabic.
+Arabisch: Noto Naskh Arabic (kommt mit der arabischen Übersetzung).
 Beispiel Titel: „Was machen wir heute?". Beispiel Wetterzeile: „Bewölkt, Regen ab 15 Uhr · 11 °C".
 Ecken
 
 Karte 22, Knopf Pille (vollständig rund), Kachel 16.
 
-Bildsprache: Foto
-Natürliches Tageslicht, echte Wohnungen, Hände bei der Arbeit. Kinder schauen nicht in die Kamera, nichts ist aufgeräumt-perfekt.
-Ohne Foto: ruhige Farbfläche mit großem, dünnem Kategorie-Symbol, angeschnitten. Gleiche Kartenform, gleiche Höhe wie die Karte mit Foto.
-Logo-Entwürfe
-A1 „Zwei Bögen": Das „m" hat einen großen und einen kleinen Bogen, Erwachsene und Kind nebeneinander, zugleich zwei Hügel. Eigene Linien-Schrift, kleingeschrieben.
-A2 „Tagesbogen": Die Sonne auf ihrem Weg über den Horizont, für Zeit und Wetter. Wortmarke in Literata.
-A3 „Drei Karten": Drei Karten, eine liegt vorn, als Zeichen für „drei Vorschläge". Wortmarke in Onest.
-Jeder Entwurf in drei Varianten: Farbe, einfarbig, dunkel. Kleinste Größen im PDF: 29 px und 20 px.
+Bildsprache
+
+Mit Foto: Natürliches Tageslicht, echte Wohnungen, Hände bei der Arbeit. Kinder schauen nicht in die Kamera, nichts ist aufgeräumt-perfekt.
+
+Ohne Foto (Normalfall, solange es für eine Aktivität kein geprüftes Bild gibt): ruhige Farbfläche mit großem, dünnem Kategorie-Symbol, angeschnitten. Gleiche Kartenform, gleiche Höhe wie die Karte mit Foto. Diese Karte muss genauso hochwertig aussehen wie die mit Foto.
+
+Regeln für Fotos
+
+Gelten für jedes Foto in der App, egal ob von Hand oder automatisch ausgewählt:
+
+Keine erkennbaren Gesichter, besonders keine von Kindern. Gut sind Hände bei der Arbeit, Rückenansichten, Nahaufnahmen, Material, Essen, Natur.
+Keine erkennbaren Marken, Logos oder Produktverpackungen. Kein Text im Bild.
+Nur Bilder, deren Lizenz kommerzielle Nutzung erlaubt (z. B. Unsplash, Pexels). Die Plattformen prüfen nicht, ob Einwilligungen für abgebildete Personen vorliegen, deshalb Regel 1.
+Quellenliste: Zu jedem Foto werden gespeichert: Link, Fotograf, Plattform, Lizenz, Datum des Abrufs. Die Liste liegt in docs/bildquellen.md.
+Format: Querformat, etwa 1200 px breit, deutlich unter 300 KB. Ablage unter assets/images/.
+Das Foto passt zur Aktivität und widerspricht nicht der Altersgruppe (kein Babyspielzeug bei einer Aktivität für Teenager).
+Vor der Beta schaut ein Mensch einmal alle Fotos durch (wie bei den Aktivitäten).
+
+Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image). Ohne Bild zeigt die App die Karte ohne Foto.
+
+Logo A1 „Zwei Bögen"
+
+Das „m" hat einen großen und einen kleinen Bogen: Erwachsene und Kind nebeneinander, zugleich zwei Hügel. Eigene Linien-Schrift, kleingeschrieben. Darunter die Zeile „mit Kindern" (im PDF in Großbuchstaben).
+
+Varianten: Farbe, einfarbig, dunkel. Kleinste Größen im PDF: 29 px und 20 px, das Logo muss dort lesbar bleiben.
+Dateien werden gebraucht: Das Logo ist im PDF nur ein Bild. Für die App braucht es das Logo als SVG oder PNG, das App-Icon als quadratisches PNG (mindestens 1024 × 1024) und eine einfarbige Variante. Ablage unter assets/.
+Das App-Icon und das Startbild sind in Expo Go nicht zu sehen, erst in einer echten App-Version (Build).
 Bildschirme
 Start mit Auswahl: Die Auswahl (Kinder, Zeit, Energie) sitzt direkt auf dem Start, ein Tipp bis zu den Vorschlägen. Die letzte Wahl bleibt vorbelegt.
-Ergebnis (volle Scrollhöhe): Das Wetter steht als feste Zeile unter der Navigation. Die dritte Karte hat kein Foto: gleiche Form, Farbfläche plus großes Liniensymbol.
+Ergebnis (volle Scrollhöhe): Das Wetter steht als feste Zeile unter der Navigation. Die dritte Karte hat im PDF kein Foto: gleiche Form, Farbfläche plus großes Liniensymbol.
 Detail (volle Scrollhöhe): Schritte in 20 px mit 28 px Abstand, Abhak-Felder 56 px hoch. Der Hauptknopf bleibt beim Scrollen fest am unteren Rand.
-In der Nähe: Warmer, gedämpfter Kartenstil. Pins rund, mit Kategorie-Farbe. Der gewählte Ort hat eine Beschriftung, die Liste liegt als Blatt darunter.
-Richtung B – „Stille Wiese" (ruhig und illustriert)
-
-Gefühl: ein tiefer Atemzug zwischen Arbeit und Abendessen. Weiche Farbflächen, viel Luft, nichts drängt. Illustrationen erzählen leise, statt einen perfekten Familiennachmittag vorzuführen.
-
-Farben (hell)
-Rolle	Name	Wert	Hinweis
-Hintergrund	Creme	
-#F6F4EC	Grund
-Text	Tinte	
-#1F2A24	13,5:1
-Hauptfarbe (Knöpfe)	Moos	
-#3F6B4F	mit weißem Text 6,1:1
-Flächen	Salbei hell	
-#DCE6D5	Karten, Flächen
-Wetterfläche	Himmel	
-#D6E4EC	für die Wetterzeile
-Akzent	Aprikose	
-#F2B98A	nur Akzent, nie für Text
-Farben (Dunkelmodus)
-Rolle	Wert	Hinweis
-Hintergrund	
-#141A16	
-Text	
-#ECEFE6	15,1:1
-Hauptfarbe (Knöpfe)	
-#9CC5A6	mit dunkler Schrift 9,2:1
-Schrift
-Rubik für alles. Leicht gerundete Ecken, ruhige Formen, nicht verspielt.
-Arabisch: Noto Sans Arabic.
-Ecken
-
-Karte 24, Knopf 20, Chip 14.
-
-Symbole
-
-Gleiche Linien-Symbole, hier immer auf einer weichen Kategorie-Kachel. Jede Kategorie hat eine helle Fläche und eine dunkle Linie (Kontrast mindestens 4,5:1).
-
-Bildsprache: Illustration
-Flächige, ruhige Szenen ohne Gesichter: Landschaften, Tische, Hände. Fotos kommen später ergänzend dazu, immer in weichen Rahmen.
-Ohne Foto: Kachel in der Kategorie-Farbe mit weicher Form und dünnem Symbol. Wirkt wie eine kleine Illustration.
-Logo-Entwürfe
-B1 „Steinmännchen": Drei gestapelte Kiesel, unterschiedlich groß, im Gleichgewicht. Am Wanderweg zeigt so ein Stapel, wo es langgeht. Wortmarke Rubik Medium.
-B2 „Zwei Blätter": Ein großes und ein kleines Blatt an einem Stiel. Wortmarke leicht gesperrt, sehr ruhig.
-B3 „Tageskreis": Ein Kreis mit Horizont und Sonne, wie ein Blick aus dem Fenster auf den Tag. Wortmarke Rubik Semibold.
-Jeder Entwurf in drei Varianten: Farbe, einfarbig, dunkel. Kleinste Größen im PDF: 29 px und 20 px.
-Bildschirme
-Start: Sehr wenig auf dem Start: Bild, Kinder, ein Knopf. Zeit und Energie fragt der nächste Schritt (zwei Tipps).
-Ergebnis: Alle drei Ideen passen auf einen Bildschirm, kein Scrollen. Die Wetterzeile erklärt kurz, warum diese Ideen kommen („Darum heute vor allem Ideen für drinnen.").
-Detail (volle Scrollhöhe): Jeder Schritt ist eine eigene Karte, gut mit dem Daumen zu treffen („1 von 5", „2 von 5" usw.). Der Knopf bleibt unten fest.
-In der Nähe: Helle Pastellkarte, runde Pins ohne Spitze. Die Liste nutzt dieselben Kategorie-Kacheln wie die Karte.
+In der Nähe: Warmer, gedämpfter Kartenstil. Pins rund, mit Kategorie-Farbe. Der gewählte Ort hat eine Beschriftung, die Liste liegt als Blatt darunter. Gehört zu M10 und wird dort gebaut.
 Abweichungen vom heutigen Stand der App
 
-Der heutige Ablauf: Start mit Hauptknopf „Was machen wir?" → Auswahl (Kinder, Zeit, Energie) → Ergebnis mit drei Karten → Detail → „Das machen wir" → „Fertig" → „Wie war's?" → Verlauf. Folgendes im PDF gibt es noch nicht oder weicht ab. Nicht still umsetzen, sondern vorher klären:
+Heutiger Ablauf: Start mit Hauptknopf „Was machen wir?" → Auswahl (Kinder, Zeit, Energie) → Ergebnis mit drei Karten → Detail → „Das machen wir" → „Fertig" → „Wie war's?" → Verlauf. Folgendes im PDF weicht ab oder ist neu. Jeweils im Plan der Stufe ansprechen und bestätigen lassen:
 
-Punkt	Richtung	Stand
-Auswahl (Kinder, Zeit, Energie) direkt auf dem Start statt eigener Bildschirm	A	Ändert den Ablauf. B entspricht dem heutigen Ablauf.
-Abhak-Felder bei den Schritten der Anleitung	A	Neue Funktion. Offen: wird der Haken gespeichert? Vorschlag: nur auf dem Bildschirm, nicht gespeichert.
-„Schritt 1 von 5" als Schritt-Karten	B	Nur Darstellung, keine neue Logik.
-Wetterzeile mit Begründung („Darum heute vor allem Ideen für drinnen")	B	Neue Textlogik, abhängig von der Wetterlage.
-Knopf „Anleitung starten" im PDF	A, B	Heißt in der App „Das machen wir". Der Name bleibt, bis anders entschieden.
-„Keine passt? Drei neue Ideen" / „Andere Ideen"	A, B	Entspricht „Andere Vorschläge". Text darf angepasst werden.
-Text „Ohne Konto. Ohne Tracking." auf dem Start	A	Neuer Text, passt zur Datenschutz-Linie.
-Stimmungsbild oder Illustration auf dem Start	A (Foto), B (Illustration)	Das Bild muss erst erstellt oder beschafft werden. Bis dahin Platzhalter.
-Kartenansicht „In der Nähe"	A, B	Gehört zu M10 (Orte). Jetzt nicht bauen.
-Aktivitäten haben bisher kein Foto	A, B	Die Variante „ohne Foto" ist deshalb der Normalfall, nicht der Sonderfall.
-Logo und Dateien
-Im PDF sind die Logos nur als Bild enthalten. Für die App werden Dateien gebraucht: das gewählte Logo als SVG oder PNG, das App-Icon als quadratisches PNG (mindestens 1024 × 1024) und eine einfarbige Variante.
-Diese Dateien bitte aus Claude Design als PNG exportieren und unter assets/ im Repo ablegen.
-Das App-Icon und das Startbild sind in Expo Go nicht zu sehen, erst in einer echten App-Version (Build).
-Offene Entscheidungen
- Richtung wählen (A oder B), gern mit Mischwünschen
- Logo wählen (A1–A3 oder B1–B3)
+Punkt	Vorschlag
+Auswahl direkt auf dem Start statt eigener Bildschirm	Übernehmen. Ein Tipp bis zu den Vorschlägen unterstützt das 30-Sekunden-Prinzip. Kinderliste und Verlauf-Link bleiben auf dem Start erreichbar. Stufe D2.
+Abhak-Felder bei den Schritten der Anleitung	Übernehmen, aber nur auf dem Bildschirm, nicht speichern.
+Knopf „Anleitung starten" im PDF	Der Name aus der App bleibt: „Das machen wir".
+„Keine passt? Drei neue Ideen"	Entspricht „Andere Vorschläge". Text darf angepasst werden.
+Text „Ohne Konto. Ohne Tracking." auf dem Start	Übernehmen, in de und en.
+Stimmungsbild auf dem Start	Platzhalter, bis ein geprüftes Foto da ist (siehe Regeln für Fotos).
+Kartenansicht „In der Nähe"	Erst mit M10. Jetzt nicht bauen.
+Aktivitäten haben bisher kein Foto	Die Karte ohne Foto ist der Normalfall. Fotos kommen schrittweise dazu.
+Offene Punkte
+ Logo und App-Icon als Dateien exportieren und unter assets/ ablegen
  Name „Miki": Markenregister (DPMA) und App Store / Play Store prüfen
  Bundle-ID und Paketname festlegen (nach der Store-Veröffentlichung nicht mehr änderbar)
- Richtung C und Empfehlung aus Claude Design nachliefern, falls vorhanden
+ Erste Fotos für die Kategorien auswählen (siehe Regeln für Fotos)
