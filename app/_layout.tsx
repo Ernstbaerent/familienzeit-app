@@ -1,15 +1,32 @@
 // Übersetzungen einmal beim App-Start laden, bevor ein Bildschirm erscheint.
 import '@/lib/i18n';
 
-import { Stack } from 'expo-router';
+import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 
 import { HistoryProvider } from '@/features/history/HistoryContext';
 import { ProfilesProvider } from '@/features/profiles/ProfilesContext';
 import { WeatherProvider } from '@/features/weather/WeatherProvider';
-import { colors } from '@/lib/theme';
+import { useAppFonts } from '@/lib/fonts';
+import { fonts, useTheme } from '@/lib/theme';
+
+// Das Startbild bleibt stehen, bis die Schriften geladen sind (oder das Zeitlimit abläuft, siehe
+// src/lib/fonts.ts). So springt nichts um und kein Bildschirm erscheint leer oder in der falschen Schrift.
+// Ein Fehler hier darf den Start nie blockieren.
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
+  const fontsReady = useAppFonts();
+  const { colors, scheme } = useTheme();
+
+  useEffect(() => {
+    if (fontsReady) SplashScreen.hideAsync().catch(() => {});
+  }, [fontsReady]);
+
+  // Bis dahin zeigt die App nichts: darüber liegt das Startbild.
+  if (!fontsReady) return null;
+
   return (
     <ProfilesProvider>
       {/* Der Verlauf liegt wie die Profile nur auf dem Gerät (docs/history.md). */}
@@ -20,6 +37,7 @@ export default function RootLayout() {
             screenOptions={{
               headerStyle: { backgroundColor: colors.background },
               headerTintColor: colors.text,
+              headerTitleStyle: { fontFamily: fonts.title },
               headerShadowVisible: false,
               // Beim Zurück-Pfeil nur den Pfeil zeigen, nicht den Namen des vorigen Bildschirms.
               headerBackButtonDisplayMode: 'minimal',
@@ -29,7 +47,7 @@ export default function RootLayout() {
             {/* Der Start hat eine eigene Überschrift im Bildschirm, keine Kopfzeile. */}
             <Stack.Screen name="index" options={{ headerShown: false }} />
           </Stack>
-          <StatusBar style="dark" />
+          <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
         </WeatherProvider>
       </HistoryProvider>
     </ProfilesProvider>

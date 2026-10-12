@@ -1,6 +1,16 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { colors, fontSize, lineHeight, opacity, radius, spacing } from '@/lib/theme';
+import {
+  fonts,
+  fontSize,
+  lineHeight,
+  opacity,
+  radius,
+  size,
+  spacing,
+  type Theme,
+} from '@/lib/theme';
+import { useThemedStyles } from '@/lib/useThemedStyles';
 
 type ChipProps = {
   label: string;
@@ -11,8 +21,9 @@ type ChipProps = {
   disabled?: boolean;
 };
 
-// Auswählbare Kachel in Pillenform. Gewählt = Hauptfarbe, sonst Kartenfarbe mit Rahmen.
+// Auswählbare Kachel in Pillenform. Gewählt = Hauptfarbe, sonst Flächenfarbe mit Rahmen.
 export function Chip({ label, selected, onPress, role = 'checkbox', disabled = false }: ChipProps) {
+  const styles = useThemedStyles(createStyles);
   return (
     <Pressable
       onPress={onPress}
@@ -26,31 +37,32 @@ export function Chip({ label, selected, onPress, role = 'checkbox', disabled = f
   );
 }
 
-const styles = StyleSheet.create({
-  chip: {
-    minHeight: 44, // Touch-Ziel mindestens 44
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  chipSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary,
-  },
-  chipDisabled: {
-    opacity: opacity.disabled,
-  },
-  label: {
-    fontSize: fontSize.md,
-    lineHeight: lineHeight.md,
-    color: colors.text,
-  },
-  labelSelected: {
-    color: colors.onPrimary,
-    fontWeight: '600',
-  },
-});
+const createStyles = ({ colors }: Theme) =>
+  StyleSheet.create({
+    chip: {
+      minHeight: size.touch,
+      justifyContent: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: radius.full,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    chipSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primary,
+    },
+    chipDisabled: {
+      opacity: opacity.disabled,
+    },
+    label: {
+      fontFamily: fonts.bodyMedium,
+      fontSize: fontSize.md,
+      lineHeight: lineHeight.md,
+      color: colors.text,
+    },
+    labelSelected: {
+      color: colors.onPrimary,
+    },
+  });

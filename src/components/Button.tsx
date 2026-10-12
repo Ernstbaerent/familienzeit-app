@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { colors, fontSize, lineHeight, opacity, radius, spacing } from '@/lib/theme';
+import { fonts, fontSize, lineHeight, opacity, radius, spacing, type Theme } from '@/lib/theme';
+import { useThemedStyles } from '@/lib/useThemedStyles';
 
 type ButtonProps = {
   label: string;
@@ -19,6 +20,7 @@ export function Button({
   size = 'regular',
   disabled = false,
 }: ButtonProps) {
+  const { styles, buttonStyles, labelStyles } = useThemedStyles(createStyles);
   return (
     <Pressable
       onPress={onPress}
@@ -39,44 +41,43 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    minHeight: 48, // Touch-Ziel mindestens 44
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    borderWidth: 1,
-  },
-  buttonLarge: {
-    minHeight: 64,
-    paddingVertical: spacing.md,
-  },
-  buttonDisabled: {
-    opacity: opacity.disabled,
-  },
-  label: {
-    fontSize: fontSize.md,
-    lineHeight: lineHeight.md,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  labelLarge: {
-    fontSize: fontSize.lg,
-    lineHeight: lineHeight.lg,
-    fontWeight: '700',
-  },
-});
-
-const buttonStyles = StyleSheet.create({
-  primary: { backgroundColor: colors.primary, borderColor: colors.primary },
-  secondary: { backgroundColor: colors.surface, borderColor: colors.border },
-  danger: { backgroundColor: colors.background, borderColor: colors.danger },
-});
-
-const labelStyles = StyleSheet.create({
-  primary: { color: colors.onPrimary },
-  secondary: { color: colors.text },
-  danger: { color: colors.danger },
+const createStyles = ({ colors }: Theme) => ({
+  styles: StyleSheet.create({
+    button: {
+      minHeight: 48, // Touch-Ziel mindestens 44
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderRadius: radius.full, // Pille (Design Sonntagslicht)
+      borderWidth: 1,
+    },
+    buttonLarge: {
+      minHeight: 64,
+      paddingVertical: spacing.md,
+    },
+    buttonDisabled: {
+      opacity: opacity.disabled,
+    },
+    label: {
+      fontFamily: fonts.bodyStrong,
+      fontSize: fontSize.md,
+      lineHeight: lineHeight.md,
+      textAlign: 'center',
+    },
+    labelLarge: {
+      fontSize: fontSize.lg,
+      lineHeight: lineHeight.lg,
+    },
+  }),
+  buttonStyles: StyleSheet.create({
+    primary: { backgroundColor: colors.primary, borderColor: colors.primary },
+    secondary: { backgroundColor: colors.surface, borderColor: colors.border },
+    danger: { backgroundColor: colors.background, borderColor: colors.danger },
+  }),
+  labelStyles: StyleSheet.create({
+    primary: { color: colors.onPrimary },
+    secondary: { color: colors.text },
+    danger: { color: colors.danger },
+  }),
 });
