@@ -74,7 +74,7 @@ Format: Querformat, etwa 1200 px breit, deutlich unter 300 KB. Ablage unter asse
 Das Foto passt zur Aktivität und widerspricht nicht der Altersgruppe (kein Babyspielzeug bei einer Aktivität für Teenager).
 Vor der Beta schaut ein Mensch einmal alle Fotos durch (wie bei den Aktivitäten).
 
-Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse. Auf der Karte gilt dieser Vorrang: 1. image der Aktivität, 2. gebündeltes Kategorie-Foto aus assets/images/categories/, 3. Farbfläche mit Symbol (Entscheidung 21).
+Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse (nur von unserem eigenen Speicher, Zusatz 35). Auf der Karte gilt dieser Vorrang: 1. image der Aktivität, 2. gebündeltes Kategorie-Foto aus assets/images/categories/ (nur bei mindestens drei Fotos in der Kategorie, Zusatz 34), 3. Farbfläche mit Symbol (Entscheidung 21).
 
 Logo A1 „Zwei Bögen"
 
@@ -143,6 +143,15 @@ Zusätze beim Umsetzen von D2 (von Clemens bestätigt)
 26. Die Zeile „Samstag, 13:10“ aus dem PDF wird nicht gebaut.
 27. Der Hauptknopf ist inaktiv, solange keine Zeit gewählt ist oder kein Kind gewählt ist. Der Hinweis darunter nennt den fehlenden Grund.
 28. Die Kinder-Kacheln brechen bei vielen Kindern um und werden nicht abgeschnitten. Bei großer Systemschrift gibt es weniger Spalten pro Zeile, die Texte brechen um.
+
+Zusätze beim Umsetzen von D3 (von Clemens bestätigt, 34 und 35 von Clemens nach der Prüfung festgelegt)
+29. Unten gibt es kein „Auswahl ändern“ mehr: Der runde Zurück-Knopf im Kopf führt zur Auswahl. Das PDF zeigt unten nur „Keine passt? Drei neue Ideen“.
+30. Die Wetterzeile ist fest (scrollt nicht mit) und hat den Knopf „Ändern“ (sichtbar „Ändern“, für die Sprachausgabe „Wetter ändern“). Warnung, „Standort erlauben“ und die Wetterwahl stehen im Scrollbereich über den Karten, damit die feste Zeile bei großer Schrift klein bleibt.
+31. „Keine passt? Drei neue Ideen“ ist ein Nebenknopf (Sand, Tinte), nicht Terrakotta und kein Textlink wie im PDF (Entscheidung 11). Links im Wetter-Schritt sind Tinte mit Unterstreichung.
+32. Nicht gebaut aus dem PDF: die Überschrift „Drei Ideen für eure Stunde“ mit Untertitel („Mila & Jonas · 1 Std · Energie normal · Ändern“) und die Angabe „Drinnen/Draußen“ auf der Karte. Der Kopf trägt den Titel „Eure Ideen“. „Drinnen/Draußen“ steht auf der Feinschliff-Liste in der CLAUDE.md.
+33. Die Karte zeigt die Altersspanne („3–8 Jahre“, 0 bis 16 „Alle Alter“) statt „ab 3 J.“. Die sieben Kategorie-Farben (Entscheidung 10) stehen mit allen Werten und Kontrasten in docs/theme.md.
+34. Ein Kategorie-Foto erscheint nur, wenn die Kategorie mindestens drei Fotos hat (Konstante `minPhotosPerCategory` in `src/features/activities/categoryPhotoFiles.ts`, Erklärung in docs/theme.md). Mit nur einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: Schachbrett bei der Kissenburg). Das `image` einer einzelnen Aktivität hat weiterhin Vorrang. Heute zeigen nur Natur und Kochen Fotos, alle anderen die Farbfläche mit Symbol.
+35. Das Feld `image` darf nur Adressen von unserem eigenen Speicher laden (Allowlist), damit keine IP-Adressen an fremde Server gehen. Die Allowlist kommt mit M8, der Speicher-Host steht unter „Entscheidungen vor M12“ in der CLAUDE.md. Bis dahin prüft der Code nur `https://`.
 
 Offene Punkte
  Logo und App-Icon als Dateien exportieren und unter assets/ ablegen

@@ -1,10 +1,13 @@
 import { useTranslation } from 'react-i18next';
+import { StyleSheet, Text } from 'react-native';
 
-import { Section } from '@/components/Section';
+import { fonts, fontSize, lineHeight, type Theme } from '@/lib/theme';
+import { useThemedStyles } from '@/lib/useThemedStyles';
 
 import type { Weather } from '../suggestions/conditions';
 import { AllowLocationLink } from './AllowLocationLink';
 import { LocationExplainer } from './LocationExplainer';
+import { WeatherCard } from './WeatherCard';
 import { useWeather } from './WeatherProvider';
 import { WeatherChips } from './WeatherChips';
 
@@ -21,6 +24,7 @@ type WeatherStepProps = {
 //    „Wie ist das Wetter?“. Ein Tipp wählt das Wetter und zeigt gleich die Vorschläge.
 export function WeatherStep({ step, onChooseWeather }: WeatherStepProps) {
   const { t } = useTranslation();
+  const styles = useThemedStyles(createStyles);
   const { access, allowLocation, chooseManualWeather } = useWeather();
 
   if (step === 'explain') {
@@ -33,12 +37,31 @@ export function WeatherStep({ step, onChooseWeather }: WeatherStepProps) {
   }
 
   return (
-    <Section
-      title={t('weather.manual.title')}
-      hint={access === 'granted' ? t('weather.manual.hintUnavailable') : t('weather.manual.hint')}
-    >
+    <WeatherCard>
+      <Text style={styles.title} accessibilityRole="header">
+        {t('weather.manual.title')}
+      </Text>
+      <Text style={styles.hint}>
+        {access === 'granted' ? t('weather.manual.hintUnavailable') : t('weather.manual.hint')}
+      </Text>
       <WeatherChips value={null} onChange={onChooseWeather} />
       {access !== 'granted' && access !== 'checking' && <AllowLocationLink access={access} />}
-    </Section>
+    </WeatherCard>
   );
 }
+
+const createStyles = ({ colors }: Theme) =>
+  StyleSheet.create({
+    title: {
+      fontFamily: fonts.title,
+      fontSize: fontSize.xl,
+      lineHeight: lineHeight.xl,
+      color: colors.text,
+    },
+    hint: {
+      fontFamily: fonts.body,
+      fontSize: fontSize.md,
+      lineHeight: lineHeight.md,
+      color: colors.textMuted,
+    },
+  });

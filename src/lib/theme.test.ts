@@ -1,3 +1,8 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { categoryKeys } from '@/features/activities/activities';
+
 import {
   darkColors,
   darkModeEnabled,
@@ -7,6 +12,7 @@ import {
   lightColors,
   lightTheme,
   lineHeight,
+  mixColors,
   radius,
   resolveTheme,
   size,
@@ -113,6 +119,66 @@ describe('Farben: Werte aus der DESIGN.md', () => {
   });
 });
 
+// Kategorie-Farben (Entscheidung 10): sieben Töne, abgetönt aus der Palette. Symbol und Text gegen die Fläche geprüft.
+describe.each([
+  ['hell', lightTheme],
+  ['dunkel', darkTheme],
+])('Kategorie-Farben (%s)', (_name, theme) => {
+  const tones = theme.categoryTones;
+  const colors = theme.colors;
+
+  it('es gibt für jede der sieben Kategorien einen Ton', () => {
+    expect(categoryKeys).toHaveLength(7);
+    expect(Object.keys(tones).sort()).toEqual([...categoryKeys].sort());
+  });
+
+  it.each(categoryKeys)('%s: Symbol auf der Fläche mindestens 3:1', (category) => {
+    expect(contrast(tones[category].mark, tones[category].field)).toBeGreaterThanOrEqual(3);
+  });
+
+  it.each(categoryKeys)('%s: Tinte (`text`) auf der Fläche mindestens 4,5:1', (category) => {
+    expect(contrast(colors.text, tones[category].field)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('die weiße Pille mit dem Namen der Kategorie ist lesbar (Tinte auf `card`, mindestens 4,5:1)', () => {
+    expect(contrast(colors.text, colors.card)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('die sieben Flächen sind verschieden, und der Kreis hebt sich von der Fläche ab', () => {
+    const fields = categoryKeys.map((category) => tones[category].field);
+    expect(new Set(fields).size).toBe(7);
+    for (const category of categoryKeys) expect(tones[category].shape).not.toBe(tones[category].field);
+  });
+
+  it('alle Werte sind gültige Hex-Farben', () => {
+    for (const category of categoryKeys) {
+      for (const value of Object.values(tones[category])) expect(value).toMatch(/^#[0-9A-F]{6}$/);
+    }
+  });
+
+  it('alle Werte stehen in docs/theme.md (Tabelle „Kategorie-Farben“), damit die Doku nicht abweicht', () => {
+    const docs = readFileSync(join(__dirname, '../../docs/theme.md'), 'utf8').toUpperCase();
+    const missing = categoryKeys.flatMap((category) =>
+      Object.values(tones[category]).filter((value) => !docs.includes(value)),
+    );
+    expect(missing).toEqual([]);
+  });
+});
+
+describe('mixColors', () => {
+  it('0 ist die erste Farbe, 1 die zweite, dazwischen die Mischung', () => {
+    expect(mixColors('#000000', '#FFFFFF', 0)).toBe('#000000');
+    expect(mixColors('#000000', '#FFFFFF', 1)).toBe('#FFFFFF');
+    expect(mixColors('#000000', '#FFFFFF', 0.5)).toBe('#808080');
+    expect(mixColors('#FF0000', '#0000FF', 0.5)).toBe('#800080');
+  });
+
+  it('liefert immer sechs Zeichen in Großbuchstaben (auch bei kleinen Werten)', () => {
+    expect(mixColors('#000000', '#0A0A0A', 0.5)).toBe('#050505');
+    expect(mixColors('#abcdef', '#abcdef', 0.3)).toBe('#ABCDEF');
+  });
+});
+
 describe('Größen aus der DESIGN.md', () => {
   it('Anleitungstext 20 px, Schritte mit 28 px Abstand', () => {
     expect(fontSize.reading).toBe(20);
@@ -160,6 +226,12 @@ describe('resolveTheme', () => {
     expect(resolveTheme(null, true)).toBe(lightTheme);
     expect(resolveTheme(undefined, true)).toBe(lightTheme);
     expect(resolveTheme('unspecified', true)).toBe(lightTheme);
+  });
+
+  it('liefert die Kategorie-Farben zum jeweiligen Theme', () => {
+    expect(resolveTheme('light', true).categoryTones).toBe(lightTheme.categoryTones);
+    expect(resolveTheme('dark', true).categoryTones).toBe(darkTheme.categoryTones);
+    expect(lightTheme.categoryTones).not.toEqual(darkTheme.categoryTones);
   });
 
   it('der Dunkelmodus ist bis D5 ausgeschaltet', () => {

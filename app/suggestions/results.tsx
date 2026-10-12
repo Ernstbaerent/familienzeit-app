@@ -1,7 +1,7 @@
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
@@ -11,7 +11,9 @@ import type { HistoryEntry } from '@/features/history/history';
 import { useHistory } from '@/features/history/HistoryContext';
 import type { ChildProfile } from '@/features/profiles/profiles';
 import { useProfiles } from '@/features/profiles/ProfilesContext';
+import { assignCardImages } from '@/features/suggestions/cardImage';
 import { getMinutes, longestMinutes, type Weather } from '@/features/suggestions/conditions';
+import { ResultsHeader } from '@/features/suggestions/ResultsHeader';
 import {
   parseSelectionParams,
   toSuggestionRequest,
@@ -33,12 +35,14 @@ import {
   toConditions,
 } from '@/features/weather/situation';
 import { getWeatherStep } from '@/features/weather/manualWeather';
+import { WeatherBar } from '@/features/weather/WeatherBar';
+import { WeatherPanel, type WeatherPanelMode } from '@/features/weather/WeatherPanel';
 import { useWeather, useWeatherRefresh } from '@/features/weather/WeatherProvider';
 import { WeatherStep } from '@/features/weather/WeatherStep';
-import { WeatherSummary } from '@/features/weather/WeatherSummary';
-import { colors, fontSize, lineHeight, radius, spacing } from '@/lib/theme';
+import { fonts, fontSize, lineHeight, radius, spacing, type Theme } from '@/lib/theme';
+import { useThemedStyles } from '@/lib/useThemedStyles';
 
-// Die Vorschläge: genau 3 Karten, „Andere Vorschläge“ zeigt die nächsten 3.
+// Die Vorschläge (DESIGN.md, Bildschirm 02): genau 3 Karten, „Keine passt? Drei neue Ideen“ zeigt die nächsten 3.
 export default function ResultsScreen() {
   const params = useLocalSearchParams();
   const { status, profiles } = useProfiles();
@@ -62,17 +66,20 @@ type ResultsProps = {
 function Results({ selection, profiles, historyEntries }: ResultsProps) {
   const { t } = useTranslation();
   const router = useRouter();
+  const styles = useThemedStyles(createStyles);
   const scrollRef = useRef<ScrollView>(null);
   // „Jetzt“ einmal festhalten (für das Alter der Kinder, die Tageszeit und das Wetter-Fenster).
   const [now] = useState(() => new Date());
   // Der Verlauf beim Öffnen dieses Bildschirms. Er bleibt eingefroren, damit sich die Karten nicht umsortieren,
   // während man zwischen Details und Vorschlägen hin- und herwechselt. Beim nächsten Öffnen gilt der neue Stand.
   const [history] = useState(historyEntries);
-  // Wie oft „Andere Vorschläge“ gedrückt wurde.
+  // Wie oft „Keine passt? Drei neue Ideen“ gedrückt wurde.
   const [pageIndex, setPageIndex] = useState(0);
   // Wetter von Hand: aus der Auswahl („Wie ist das Wetter?“) oder hier mit „Wetter ändern“.
   // `null` heißt: Das Wetter kommt automatisch vom Deutschen Wetterdienst.
   const [manualWeather, setManualWeather] = useState<Weather | null>(selection.weather ?? null);
+  // Was unter der festen Wetterzeile aufgeklappt ist („Wetter ändern“ oder die Erklärung zum Standort).
+  const [panel, setPanel] = useState<WeatherPanelMode>('closed');
   const { access, status, data, stale } = useWeather();
   useWeatherRefresh();
   // Fehlt noch etwas zum Wetter, kommt vor den Vorschlägen ein Schritt (nur wenn nötig, siehe WeatherStep).
@@ -89,9 +96,13 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
   const suggestions = suggest(activities, request);
   const page = getPage(suggestions, pageIndex);
   const tooFew = suggestions.matchCount < suggestionsPerPage;
+  // Bild je Karte: Aktivität, Kategorie-Foto oder Farbfläche. Die Fotos werden für die ganze Gruppe zusammen verteilt,
+  // damit möglichst nicht zwei Karten dasselbe zeigen.
+  const imageChains = assignCardImages(page);
 
   function changeWeather(weather: Weather | null) {
     setManualWeather(weather);
+    setPanel('closed');
     setPageIndex(0); // andere Wetterlage, andere Reihenfolge: wieder bei den ersten 3
   }
 
@@ -107,7 +118,8 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
     });
   }
 
-  function changeSelection() {
+  // Zurück zur Auswahl auf dem Start (dort stehen Kinder, Zeit und Energie).
+  function goBack() {
     if (router.canGoBack()) {
       router.back();
     } else {
@@ -115,41 +127,50 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
     }
   }
 
+  const header = <ResultsHeader title={t('suggest.resultsTitle')} onBack={goBack} />;
+
   // Vor den Vorschlägen: erst das Wetter klären (Erklär-Karte oder „Wie ist das Wetter?“).
   if (weatherStep !== null) {
     return (
-      <SafeAreaView style={styles.screen} edges={['bottom']}>
-        <Stack.Screen options={{ title: t('suggest.resultsTitle') }} />
+      <Frame header={header}>
         <ScrollView contentContainerStyle={styles.content}>
           <WeatherStep step={weatherStep} onChooseWeather={changeWeather} />
         </ScrollView>
-      </SafeAreaView>
+      </Frame>
     );
   }
 
   // Die Vorschläge hängen vom Wetter ab: Kurz warten, bis es da ist (der Abruf hat ein Zeitlimit).
+  // Die Wetterzeile zeigt dabei den Ladezustand, der Kopf bleibt benutzbar.
   if (status === 'loading' && data === null && manualWeather === null) {
     return (
-      <SafeAreaView style={[styles.screen, styles.loading]} edges={['bottom']}>
-        <Stack.Screen options={{ title: t('suggest.resultsTitle') }} />
-        <ActivityIndicator color={colors.primary} />
-        <Text style={styles.hint} accessibilityLiveRegion="polite">
-          {t('weather.loading')}
-        </Text>
-      </SafeAreaView>
+      <Frame header={header} weather={<WeatherBar state="loading" />}>
+        <View style={styles.waiting} />
+      </Frame>
     );
   }
 
   return (
-    <SafeAreaView style={styles.screen} edges={['bottom']}>
-      <Stack.Screen options={{ title: t('suggest.resultsTitle') }} />
+    <Frame
+      header={header}
+      weather={
+        <WeatherBar
+          state="ready"
+          situation={situation}
+          changeOpen={panel === 'change'}
+          onToggleChange={() => setPanel((current) => (current === 'change' ? 'closed' : 'change'))}
+        />
+      }
+    >
       <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
-        <WeatherSummary
+        <WeatherPanel
           situation={situation}
           now={now}
+          mode={panel}
           manualWeather={manualWeather}
           hasAutomatic={automatic !== null}
-          onManualWeatherChange={changeWeather}
+          onChooseWeather={changeWeather}
+          onModeChange={setPanel}
         />
 
         {isStartingOver(suggestions, pageIndex) && (
@@ -158,10 +179,11 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
           </Text>
         )}
 
-        {page.map((activity) => (
+        {page.map((activity, index) => (
           <SuggestionCard
             key={activity.id}
             activity={activity}
+            imageChain={imageChains[index]}
             onPress={() => openDetails(activity)}
           />
         ))}
@@ -173,17 +195,37 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
           />
         )}
 
-        <View style={styles.actions}>
-          {suggestions.pages.length > 1 && (
-            <Button label={t('suggest.more')} size="large" onPress={showOthers} />
-          )}
-          <Button
-            label={t('suggest.changeSelection')}
-            variant="secondary"
-            onPress={changeSelection}
-          />
-        </View>
+        {suggestions.pages.length > 1 && (
+          <View style={styles.actions}>
+            <Button
+              label={t('suggest.more')}
+              variant="secondary"
+              icon="shuffle-outline"
+              onPress={showOthers}
+            />
+          </View>
+        )}
       </ScrollView>
+    </Frame>
+  );
+}
+
+type FrameProps = {
+  header: ReactNode;
+  weather?: ReactNode; // die feste Wetterzeile (fehlt im Wetter-Schritt, dort gibt es noch kein Wetter)
+  children: ReactNode;
+};
+
+// Der Rahmen von „Eure Ideen“: eigener Kopf statt der Navigationsleiste, darunter die feste Wetterzeile,
+// darunter der Bereich, der scrollt.
+function Frame({ header, weather, children }: FrameProps) {
+  const styles = useThemedStyles(createStyles);
+  return (
+    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
+      <Stack.Screen options={{ headerShown: false }} />
+      {header}
+      {weather}
+      {children}
     </SafeAreaView>
   );
 }
@@ -197,6 +239,7 @@ const tipTextKeys = {
 // stattdessen ein Tipp, was man an der Auswahl ändern kann (nur, wenn es wirklich hilft).
 function FewMatchesNotice({ count, tips }: { count: number; tips: Tip[] }) {
   const { t } = useTranslation();
+  const styles = useThemedStyles(createStyles);
   const texts = tips.map((tip) => t(tipTextKeys[tip]));
   if (texts.length === 0) texts.push(t('suggest.tipComingSoon'));
 
@@ -213,45 +256,46 @@ function FewMatchesNotice({ count, tips }: { count: number; tips: Tip[] }) {
 }
 
 // Abstände nur mit Horizontal/Vertical oder Start/End, nie Left/Right (wegen rechts-nach-links).
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  loading: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.md,
-  },
-  hint: {
-    fontSize: fontSize.md,
-    lineHeight: lineHeight.md,
-    color: colors.textMuted,
-  },
-  notice: {
-    gap: spacing.xs,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  noticeTitle: {
-    fontSize: fontSize.md,
-    lineHeight: lineHeight.md,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  noticeText: {
-    fontSize: fontSize.md,
-    lineHeight: lineHeight.md,
-    color: colors.textMuted,
-  },
-  actions: {
-    marginTop: spacing.sm,
-    gap: spacing.sm,
-  },
-});
+const createStyles = ({ colors }: Theme) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.xl,
+      gap: spacing.md,
+    },
+    waiting: {
+      flex: 1,
+    },
+    hint: {
+      fontFamily: fonts.body,
+      fontSize: fontSize.md,
+      lineHeight: lineHeight.md,
+      color: colors.textMuted,
+    },
+    notice: {
+      gap: spacing.xs,
+      padding: spacing.md,
+      borderRadius: radius.tile,
+      backgroundColor: colors.surface,
+    },
+    noticeTitle: {
+      fontFamily: fonts.bodyStrong,
+      fontSize: fontSize.md,
+      lineHeight: lineHeight.md,
+      color: colors.text,
+    },
+    noticeText: {
+      fontFamily: fonts.body,
+      fontSize: fontSize.md,
+      lineHeight: lineHeight.md,
+      color: colors.textMuted,
+    },
+    actions: {
+      marginTop: spacing.sm,
+    },
+  });

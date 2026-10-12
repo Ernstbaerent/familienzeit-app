@@ -11,6 +11,8 @@
 
 import { useColorScheme, type ViewStyle } from 'react-native';
 
+import type { ActivityCategory } from '@/features/activities/activities';
+
 // ---------------------------------------------------------------------------
 // Farben
 // ---------------------------------------------------------------------------
@@ -64,6 +66,90 @@ export const darkColors: Colors = {
 };
 
 // ---------------------------------------------------------------------------
+// Kategorie-Farben (Karte ohne Foto, DESIGN.md Entscheidung 10)
+// ---------------------------------------------------------------------------
+
+// Jede Kategorie hat eine eigene Farbe für die Fläche, auf der die Karte ohne Foto ihr großes Symbol zeigt.
+// Es gibt keine neuen Farbtöne: Jeder Ton wird aus den Farben der Palette gemischt (Papier, Sand, Terrakotta, Salbei, Honig, Tinte),
+// im Dunkeln aus den Dunkelwerten. Vier Farbtöne für sieben Kategorien: Terrakotta, Salbei und Honig je zweimal
+// (hell und kräftiger getönt), Sand einmal. Die berechneten Werte stehen in docs/theme.md, die Kontraste prüft src/lib/theme.test.ts.
+//
+// Auf der Fläche liegt nur das Symbol (mindestens 3:1) und, falls je Text darauf stehen soll, `text` (mindestens 4,5:1).
+// Der Name der Kategorie steht in einer weißen Pille (`card`), nicht auf der Fläche.
+export type CategoryTone = {
+  field: string; // Fläche der Karte (Rückfall ohne Foto)
+  mark: string; // das große, dünne Symbol auf der Fläche: Palettenfarbe, zur Tinte hin abgedunkelt
+  shape: string; // der weiche große Kreis auf der Fläche, nur Dekoration
+};
+
+// Mischt zwei Farben: `share` ist der Anteil von `other` (0 = nur `base`, 1 = nur `other`).
+export function mixColors(base: string, other: string, share: number): string {
+  const channel = (hex: string, start: number) => parseInt(hex.slice(start, start + 2), 16);
+  const mixed = [1, 3, 5].map((start) =>
+    Math.round(channel(base, start) + (channel(other, start) - channel(base, start)) * share),
+  );
+  return `#${mixed.map((value) => value.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+}
+
+type ColorKey = keyof Colors;
+
+// Rezept für einen Ton: Die Fläche ist `paper` mit dem Anteil `tint` der Farbe `hue`.
+// Das Symbol ist `markFrom` mit dem Anteil `ink` Tinte (`text`) darin. 0 heißt: die reine Palettenfarbe.
+type ToneRecipe = {
+  field: [paper: ColorKey, hue: ColorKey, tint: number];
+  mark: [markFrom: ColorKey, ink: number];
+};
+
+type ToneRecipes = {
+  recipes: Record<ActivityCategory, ToneRecipe>;
+  shape: [lighten: ColorKey, share: number]; // der Kreis: Fläche, mit `lighten` aufgehellt
+};
+
+function buildCategoryTones(
+  colors: Colors,
+  { recipes, shape }: ToneRecipes,
+): Record<ActivityCategory, CategoryTone> {
+  const tone = ({ field: [paper, hue, tint], mark: [markFrom, ink] }: ToneRecipe): CategoryTone => {
+    const field = mixColors(colors[paper], colors[hue], tint);
+    return {
+      field,
+      mark: mixColors(colors[markFrom], colors.text, ink),
+      shape: mixColors(field, colors[shape[0]], shape[1]),
+    };
+  };
+  return Object.fromEntries(
+    Object.entries(recipes).map(([category, recipe]) => [category, tone(recipe)]),
+  ) as Record<ActivityCategory, CategoryTone>;
+}
+
+const lightCategoryTones = buildCategoryTones(lightColors, {
+  recipes: {
+    craft: { field: ['background', 'primary', 0.17], mark: ['primary', 0] }, // Terrakotta, hell
+    movement: { field: ['background', 'primary', 0.36], mark: ['primary', 0.3] }, // Terrakotta, kräftiger
+    game: { field: ['background', 'secondary', 0.17], mark: ['secondary', 0] }, // Salbei, hell (wie im PDF)
+    nature: { field: ['background', 'secondary', 0.36], mark: ['secondary', 0.2] }, // Salbei, kräftiger
+    outing: { field: ['background', 'accent', 0.28], mark: ['accent', 0.45] }, // Honig, hell
+    experiment: { field: ['background', 'accent', 0.55], mark: ['accent', 0.55] }, // Honig, kräftiger
+    cooking: { field: ['surface', 'text', 0.07], mark: ['surface', 0.62] }, // Sand, abgedunkelt (wie im PDF)
+  },
+  shape: ['card', 0.45],
+});
+
+// Dunkelmodus (D5): derselbe Aufbau aus den Dunkelwerten. Die Tinte (`text`) ist hier hell, das Symbol wird also heller.
+const darkCategoryTones = buildCategoryTones(darkColors, {
+  recipes: {
+    craft: { field: ['background', 'primary', 0.24], mark: ['primary', 0] },
+    movement: { field: ['background', 'primary', 0.42], mark: ['primary', 0.25] },
+    game: { field: ['background', 'secondary', 0.22], mark: ['secondary', 0] },
+    nature: { field: ['background', 'secondary', 0.4], mark: ['secondary', 0.25] },
+    outing: { field: ['background', 'accent', 0.24], mark: ['accent', 0] },
+    experiment: { field: ['background', 'accent', 0.42], mark: ['accent', 0.25] },
+    cooking: { field: ['surface', 'text', 0.12], mark: ['surface', 0.62] },
+  },
+  shape: ['text', 0.08],
+});
+
+// ---------------------------------------------------------------------------
 // Schatten (boxShadow gilt auf iOS und Android gleich)
 // ---------------------------------------------------------------------------
 
@@ -99,10 +185,21 @@ export type Theme = {
   scheme: 'light' | 'dark';
   colors: Colors;
   shadow: Shadows;
+  categoryTones: Record<ActivityCategory, CategoryTone>;
 };
 
-export const lightTheme: Theme = { scheme: 'light', colors: lightColors, shadow: lightShadow };
-export const darkTheme: Theme = { scheme: 'dark', colors: darkColors, shadow: darkShadow };
+export const lightTheme: Theme = {
+  scheme: 'light',
+  colors: lightColors,
+  shadow: lightShadow,
+  categoryTones: lightCategoryTones,
+};
+export const darkTheme: Theme = {
+  scheme: 'dark',
+  colors: darkColors,
+  shadow: darkShadow,
+  categoryTones: darkCategoryTones,
+};
 
 // Schalter für den Dunkelmodus. Bis D5 AUS: Die Bildschirme nutzen noch feste helle Farben,
 // und `userInterfaceStyle: "light"` in app.json hält Android nicht zuverlässig hell (dafür bräuchte es
@@ -207,7 +304,7 @@ export const opacity = {
 
 // Größe von Symbolen (Icons), z. B. <CategoryIcon size="lg" />.
 export const iconSize = {
-  sm: 14, // Häkchen im kleinen Kreis (Kinder-Kachel auf dem Start)
+  sm: 14, // kleine Symbole: Häkchen im Kreis (Kinder-Kachel), Kategorie-Pille und Eckdaten auf der Karte
   md: 24,
   lg: 32,
   hero: 160, // großes, angeschnittenes Symbol auf Platzhalter-Flächen (DESIGN.md: „großes dünnes Kategorie-Symbol“)

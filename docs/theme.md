@@ -29,8 +29,8 @@ function Card() {
 ```
 
 - `createStyles` steht **außerhalb** der Komponente. `Theme`, `fonts`, `fontSize` usw. kommen aus `@/lib/theme`.
-- Der feste Export `colors` (immer hell) gibt es nur, bis jeder Bildschirm umgestellt ist. Umgestellt ist bisher der Start (D2);
-  Ergebnis (D3), Detail (D4) sowie Verlauf, Kinderprofile und Wetter-Erklärung (D5) folgen. Neue Bildschirme nehmen `useTheme()` oder `useThemedStyles`.
+- Der feste Export `colors` (immer hell) gibt es nur, bis jeder Bildschirm umgestellt ist. Umgestellt sind bisher der Start (D2) und das Ergebnis mit dem Wetter-Schritt (D3);
+  Detail (D4) sowie Verlauf und Kinderprofile (D5) folgen. Neue Bildschirme nehmen `useTheme()` oder `useThemedStyles`.
 - Die Lint-Regel gegen feste Farben, Größen, Abstände und Radien bleibt (`npx expo lint`).
 - Breiten und Höhen stehen nicht im Theme, **außer** den Mindestgrößen `size.touch` (44 pt Tippfläche)
   und `size.checkbox` (56 px Abhak-Feld). Beides schreibt die DESIGN.md vor.
@@ -96,7 +96,48 @@ Regeln, die aus den Kontrasten folgen:
 - **Gewählter Zustand von Chips und Kacheln ist Tinte** (`selected` mit `onSelected`), wie im PDF bei den Chips. Das PDF zeigt gewählte
   Kinder-Kacheln mit Terrakotta-Rand: Das ist durch „Terrakotta nur für den Hauptknopf“ ersetzt (DESIGN.md, Entscheidung 11 und 23).
 - `shadow.card` und `shadow.primaryButton` gibt es. `shadow.primaryButton` trägt seit D2 der große Hauptknopf auf dem Start.
-  `shadow.card` setzt D3 für die Ergebniskarten ein; die Kinder-Kacheln auf dem Start haben nur einen feinen Rand.
+  `shadow.card` tragen seit D3 die Ergebniskarten (`SuggestionCard`) und die Kartenkästen des Wetter-Schritts (`WeatherCard`); die Kinder-Kacheln auf dem Start haben nur einen feinen Rand.
+
+### Kategorie-Farben (seit D3, Entscheidung 10)
+
+Die Karte ohne Foto zeigt eine **Farbfläche mit einem großen, dünnen, angeschnittenen Kategorie-Symbol** (und einem weichen großen Kreis).
+Jede Kategorie hat ihren eigenen Ton. **Es gibt keine neuen Farbtöne:** Alle Werte werden in `src/lib/theme.ts` aus den Farben der Palette
+**gemischt** (`categoryTones`, Funktion `mixColors`), nicht von Hand eingetragen. Vier Palettenfarben für sieben Kategorien: Terrakotta, Salbei
+und Honig je zweimal (hell und kräftiger getönt), Sand einmal.
+
+Rezept: **Fläche** = Papier mit einem Anteil der Palettenfarbe (Sand: Sand mit einem Anteil Tinte). **Symbol** = die Palettenfarbe, zur Tinte
+hin abgedunkelt, damit es mindestens 3:1 zur Fläche hat. **Kreis** = die Fläche, mit Weiß aufgehellt (im Dunkeln mit hellem Text).
+
+| Kategorie (Schlüssel)    | Palettenfarbe   | Fläche (hell) | Symbol (hell) | Kreis (hell) | Fläche (dunkel) | Symbol (dunkel) | Kreis (dunkel) |
+| ------------------------ | --------------- | ------------- | ------------- | ------------ | --------------- | --------------- | -------------- |
+| Basteln (`craft`)        | Terrakotta, hell     | `#EEDACF` | `#B4532F` | `#F6EBE5` | `#4C3125` | `#E3825C` | `#594034` |
+| Bewegung (`movement`)    | Terrakotta, kräftiger | `#E1BBAB` | `#8B4429` | `#EFDAD1` | `#704432` | `#E79C7E` | `#7A5140` |
+| Spiel (`game`)           | Salbei, hell         | `#E0E1D7` | `#5F7A5A` | `#EEEFE9` | `#35372D` | `#8FA887` | `#44453B` |
+| Natur (`nature`)         | Salbei, kräftiger    | `#C2C9BA` | `#54684E` | `#DDE1D9` | `#4A5142` | `#A8B99E` | `#585D4F` |
+| Ausflug (`outing`)       | Honig, hell          | `#F5E0C3` | `#936C38` | `#FAEEDE` | `#4D3A22` | `#E8A94F` | `#5A4831` |
+| Experiment (`experiment`) | Honig, kräftiger    | `#F0CC97` | `#7F5E33` | `#F7E3C6` | `#72542D` | `#EBBA74` | `#7C603B` |
+| Kochen (`cooking`)       | Sand, abgedunkelt    | `#E2D8CB` | `#756C63` | `#EFEAE2` | `#423A35` | `#A79F97` | `#504843` |
+
+Kontraste (geprüft in `src/lib/theme.test.ts`, für alle sieben Kategorien, hell und dunkel):
+
+- **Symbol auf der Fläche mindestens 3:1** (hell zwischen 3,6:1 und 4,0:1, dunkel zwischen 3,7:1 und 5,3:1). Das Symbol ist Dekoration, die Prüfung hält es trotzdem gut sichtbar.
+- **Tinte (`text`) auf der Fläche mindestens 4,5:1** (hell 8,9:1 bis 12,3:1). Auf der Fläche steht kein Text: Der Name der Kategorie steht in der **weißen Pille** (`card`, Tinte darauf 15,8:1).
+- Alle sieben Flächen sind verschieden. Zwei Karten derselben Palettenfarbe (z. B. Basteln und Bewegung) unterscheiden sich durch die Tiefe des Tons, das Symbol und den Namen in der Pille; die Farbe ist nie das einzige Merkmal.
+- Ein Test prüft, dass jeder berechnete Wert in dieser Tabelle steht. **Ändert sich ein Rezept in `theme.ts`, die Tabelle hier anpassen** (der Test meldet dann die Werte, die fehlen).
+- Der Dunkelmodus ist vorbereitet, bleibt aber bis D5 aus (die Dunkelwerte sind wie alle anderen abgeleitet und werden von Ani bestätigt).
+
+### Kategorie-Fotos: Mindestzahl
+
+Ein Kategorie-Foto erscheint auf den Karten **nur, wenn die Kategorie mindestens drei Fotos hat**: Konstante `minPhotosPerCategory` (heute **3**), sie steht nur in
+`src/features/activities/categoryPhotoFiles.ts`. Hat eine Kategorie weniger, zeigen ihre Karten die Farbfläche mit Symbol (die Fotos bleiben in der Liste und im Ordner, sie werden nur nicht gezeigt).
+
+- **Warum:** Mit einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: ein Schachbrett bei der Kissenburg). Mit drei und mehr verteilen sich die Fotos, und ein einzelnes unpassendes fällt weniger auf.
+- **Heute:** Natur (4 Fotos) und Kochen (3) zeigen Fotos. Basteln und Spiel (je 1), Bewegung, Experiment und Ausflug (je 0) zeigen die Farbfläche. Kommt das dritte Foto einer Kategorie dazu, erscheinen ihre Fotos ohne weitere Änderung (Ablauf: `docs/bildquellen.md`).
+- **Vorrang bleibt:** Das `image` einer einzelnen Aktivität gilt weiterhin vor allem anderen und zählt bei der Mindestzahl nicht mit.
+- **Geprüft** in `src/features/suggestions/cardImage.test.ts` (0, 1, 2 Fotos: Farbfläche; 3, 4, 7: Fotos; `image` gewinnt immer; jede Kategorie entscheidet für sich) und `categoryPhotos.test.ts` (diese Zahl steht in dieser Datei).
+- `npm run photos:index` zeigt je Kategorie, ob sie die Mindestzahl erreicht.
+
+Zuordnung Kategorie → Symbol: nur in `src/features/activities/CategoryIcon.tsx` (`categoryIcons`). Symbole für Spielplatz, Bad und Termine kommen erst mit M10 und M11 (Entscheidung 12).
 
 ## Bausteine und Besonderheiten (seit D2)
 
@@ -111,6 +152,8 @@ Neu im Theme: `card`, `selected`, `onSelected` (siehe Farbtabelle) sowie `iconSi
 - **Symbole und Systemschrift:** Ionicons sind Schrift-Zeichen und wachsen mit der Systemschrift mit (die Skalierung bleibt an, nie `allowFontScaling={false}`).
   Zeichen in Kreisen wachsen deshalb mit (`fontScale` aus `useWindowDimensions`, Kinder-Kachel), dekorative Symbole
   teilen ihre Größe durch `fontScale` und bleiben so gleich groß (Stimmungsbild-Platzhalter, `MoodPlaceholder.tsx`).
+- **Ergebnis (D3):** Der runde Zurück-Knopf (`ResultsHeader`) ist weiß mit feinem Rand und mindestens `size.touch` breit und hoch. Die feste Wetterzeile ist Sand (`surface`) mit einer kleinen weißen Pille „Ändern“.
+  Die Kategorie-Pille auf dem Bildbereich ist weiß (`card`) mit Tinte darauf. Ein Foto bringt seine eigene Größe mit, deshalb haben Bilder auf Karten ausdrücklich Breite und Höhe 100 %.
 - **Raster:** Breiten stehen nicht im Theme. Die Mindestbreiten für Kacheln und Chips und die Regeln für die Spalten liegen in
   `src/features/suggestions/startLayout.ts` (getestet).
 
