@@ -15,7 +15,7 @@ Der frühere Bildschirm „Was machen wir?“ (`app/suggestions/index.tsx`) ist 
 Die Auswahl reist als Parameter in der Bildschirm-Adresse zum Ergebnis (`selection.ts`). Das bleibt auf dem Gerät.
 Das Wetter reist nicht mit. Der Start setzt den Parameter `weather` nie; er entsteht erst im Wetter-Schritt auf dem Ergebnis (Handwahl, im Bildschirm gehalten).
 Sonst holt sich der Ergebnis-Bildschirm das Wetter selbst (`docs/weather.md`).
-Eine Karte zeigt Foto oder Farbfläche mit Kategorie-Pille, Titel, Kurzbeschreibung, Dauer und Altersspanne (Details: „Ergebnis mit Karten (D3)“ unten). Antippen öffnet die Detailansicht (M7, siehe `docs/history.md`).
+Eine Karte zeigt Foto oder Farbfläche mit Kategorie-Pille, Titel, Kurzbeschreibung, Dauer und Altersspanne (Details: „Ergebnis mit Karten (D3)“ unten). Antippen öffnet die Detailansicht (M7 siehe `docs/history.md`, Design seit D4 siehe `docs/detail.md`).
 
 ## Wo was liegt
 

@@ -13,14 +13,17 @@ import type { CardImageChain, CardImageSource } from './cardImage';
 type CardMediaProps = {
   category: ActivityCategory;
   chain: CardImageChain; // die Bild-Stufen dieser Karte (cardImage.ts), bestes zuerst, zuletzt die Farbfläche
+  // Die weiße Pille mit Kategorie-Symbol und Name. In der Detailansicht aus: Dort steht die Kategorie über dem Titel.
+  showPill?: boolean;
 };
 
 // Der Bildbereich oben auf der Vorschlagskarte (DESIGN.md, Entscheidung 21). Immer dieselbe Form und Höhe (Seitenverhältnis 2:1):
 //  1. das `image` der Aktivität (Web-Adresse), 2. ein gebündeltes Kategorie-Foto, 3. die Farbfläche der Kategorie mit großem,
 //  dünnem, angeschnittenem Symbol. Lädt eine Web-Adresse nicht, zeigt der Bereich die nächste Stufe.
-// Dazu die weiße Pille mit Kategorie-Symbol und Name (Fläche und Foto gleich).
+// Dazu die weiße Pille mit Kategorie-Symbol und Name (Fläche und Foto gleich), auf Wunsch (`showPill`) auch ohne.
+// Die Detailansicht (D4) nutzt denselben Bildbereich, ohne Pille.
 // Für die Sprachausgabe ist der Bereich Dekoration: Titel und Kategorie stehen in der Beschriftung der Karte.
-export function CardMedia({ category, chain }: CardMediaProps) {
+export function CardMedia({ category, chain, showPill = true }: CardMediaProps) {
   const { t } = useTranslation();
   const { styles, categoryTones, colors } = useThemedStyles(createStyles);
   // Das Symbol ist ein Schrift-Zeichen und würde mit der Systemschrift mitwachsen. Als Dekoration soll es gleich groß bleiben,
@@ -57,10 +60,12 @@ export function CardMedia({ category, chain }: CardMediaProps) {
           onError={() => setFailed((current) => [...current, stepKey(step)])}
         />
       )}
-      <View style={styles.pill}>
-        <Ionicons name={categoryIcons[category]} size={iconSize.sm} color={colors.text} />
-        <Text style={styles.pillLabel}>{t(`categories.${category}`)}</Text>
-      </View>
+      {showPill && (
+        <View style={styles.pill}>
+          <Ionicons name={categoryIcons[category]} size={iconSize.sm} color={colors.text} />
+          <Text style={styles.pillLabel}>{t(`categories.${category}`)}</Text>
+        </View>
+      )}
     </View>
   );
 }

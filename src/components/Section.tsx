@@ -8,15 +8,17 @@ type SectionProps = {
   title: string;
   tag?: string; // z. B. „(Pflicht)“ oder „(freiwillig)“
   hint?: string;
+  // Größere Überschrift und mehr Luft darunter (Detailansicht: „Das braucht ihr“, „So geht’s“).
+  large?: boolean;
   children: ReactNode;
 };
 
 // Abschnitt in einem Formular: Überschrift, optional Zusatz und Hinweis, darunter der Inhalt.
-export function Section({ title, tag, hint, children }: SectionProps) {
+export function Section({ title, tag, hint, large = false, children }: SectionProps) {
   const styles = useThemedStyles(createStyles);
   return (
-    <View style={styles.section}>
-      <Text style={styles.title} accessibilityRole="header">
+    <View style={[styles.section, large && styles.sectionLarge]}>
+      <Text style={[styles.title, large && styles.titleLarge]} accessibilityRole="header">
         {title}
         {tag ? (
           <>
@@ -36,11 +38,18 @@ const createStyles = ({ colors }: Theme) =>
     section: {
       gap: spacing.sm,
     },
+    sectionLarge: {
+      gap: spacing.md,
+    },
     title: {
       fontFamily: fonts.title,
       fontSize: fontSize.lg,
       lineHeight: lineHeight.lg,
       color: colors.text,
+    },
+    titleLarge: {
+      fontSize: fontSize.xl,
+      lineHeight: lineHeight.xl,
     },
     tag: {
       fontFamily: fonts.body,

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
 import { ActivityDetails } from '@/features/activities/ActivityDetails';
 import type { Activity } from '@/features/activities/activities';
@@ -12,13 +13,18 @@ import { FeedbackPanel } from '@/features/history/FeedbackPanel';
 import type { Rating } from '@/features/history/history';
 import { useHistory } from '@/features/history/HistoryContext';
 import { useProfiles } from '@/features/profiles/ProfilesContext';
-import { colors, fontSize, lineHeight, spacing } from '@/lib/theme';
+import { fonts, fontSize, lineHeight, spacing, type Theme } from '@/lib/theme';
+import { useThemedStyles } from '@/lib/useThemedStyles';
 
 function single(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
-// Details einer Idee: lesen, „Das machen wir“, nach der Anleitung „Fertig“, dann „Wie war’s?“.
+// Details einer Idee (DESIGN.md, Bildschirm 03): lesen, „Das machen wir“, nach der Anleitung „Fertig“, dann „Wie war’s?“.
+// Aufbau: runder Zurück-Knopf, scrollender Inhalt (`ActivityDetails`), darunter der feste untere Bereich mit dem Hauptknopf.
+// Der feste Bereich ist ein Nachbar des Scrollbereichs, nicht darüber gelegt: Der Scrollbereich endet über ihm und wird nie verdeckt,
+// auch nicht bei großer Schrift oder mit Sicherheitsbereich am unteren Rand (SafeAreaView). „Wie war’s?“ erscheint im selben festen Bereich,
+// also nach „Fertig“ ohne Scrollen.
 export default function ActivityScreen() {
   const params = useLocalSearchParams();
   const { status: profilesStatus, profiles } = useProfiles();
@@ -43,6 +49,7 @@ type Phase = 'viewing' | 'started' | 'saving' | 'feedback';
 function ActivityContent({ activity, childIds }: { activity: Activity; childIds: string[] }) {
   const { t } = useTranslation();
   const router = useRouter();
+  const styles = useThemedStyles(createStyles);
   const { addEntry, setEntryRating } = useHistory();
   const [phase, setPhase] = useState<Phase>('viewing');
   const [entryId, setEntryId] = useState<string | null>(null);
@@ -72,6 +79,16 @@ function ActivityContent({ activity, childIds }: { activity: Activity; childIds:
     }
   }
 
+  // Zurück zu den Ideen: eine Stufe zurück im Verlauf. Dasselbe tut die Zurück-Taste von Android (der Bildschirm fängt sie nicht ab).
+  // Ohne Verlauf (z. B. direkt geöffnet) bleibt nur der Start.
+  function goBack() {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  }
+
   // Zurück zum Start. Die Bildschirme dazwischen (Ideen, Auswahl) werden geschlossen: Das Handy kann weg.
   function leave() {
     router.dismissTo('/');
@@ -90,13 +107,17 @@ function ActivityContent({ activity, childIds }: { activity: Activity; childIds:
   }
 
   return (
-    <SafeAreaView style={styles.screen} edges={['bottom']}>
-      <Stack.Screen options={{ title: t('detail.screenTitle') }} />
+    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
+      {/* Der Kopf ist eigener Inhalt (runder Zurück-Knopf), keine Navigationsleiste. Der Titel dient nur dem System. */}
+      <Stack.Screen options={{ title: t('detail.screenTitle'), headerShown: false }} />
+      <View style={styles.header}>
+        <BackButton label={t('detail.back')} onPress={goBack} />
+      </View>
       <ScrollView contentContainerStyle={styles.content}>
         <ActivityDetails activity={activity} />
       </ScrollView>
 
-      {/* Fest am unteren Rand, damit der Hauptknopf immer erreichbar ist, auch mitten in der Anleitung. */}
+      {/* Fest am unteren Rand (Entscheidung 14), damit der Hauptknopf immer erreichbar ist, auch mitten in der Anleitung. */}
       <View style={styles.bar}>
         {phase === 'feedback' ? (
           <FeedbackPanel onRate={rate} onSkip={leave} />
@@ -121,26 +142,35 @@ function ActivityContent({ activity, childIds }: { activity: Activity; childIds:
 }
 
 // Abstände nur mit Horizontal/Vertical oder Start/End, nie Left/Right (wegen rechts-nach-links).
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  bar: {
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.background,
-  },
-  hint: {
-    fontSize: fontSize.md,
-    lineHeight: lineHeight.md,
-    textAlign: 'center',
-    color: colors.textMuted,
-  },
-});
+const createStyles = ({ colors }: Theme) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      alignItems: 'flex-start', // der Knopf am Anfang (bei rechts-nach-links am anderen Rand)
+    },
+    // Unten genug Luft, damit der letzte Schritt nicht am festen Bereich klebt.
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.xl,
+    },
+    bar: {
+      gap: spacing.sm,
+      padding: spacing.md,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      backgroundColor: colors.background,
+    },
+    hint: {
+      fontFamily: fonts.body,
+      fontSize: fontSize.md,
+      lineHeight: lineHeight.md,
+      textAlign: 'center',
+      color: colors.textMuted,
+    },
+  });

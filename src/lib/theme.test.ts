@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { categoryKeys } from '@/features/activities/activities';
+import { contrastRatio as contrast } from './contrast';
 
 import {
   darkColors,
@@ -19,20 +20,6 @@ import {
   spacing,
   type Colors,
 } from './theme';
-
-// Kontrast nach WCAG 2.x (https://www.w3.org/TR/WCAG21/#dfn-contrast-ratio).
-function luminance(hex: string): number {
-  const channel = (start: number) => {
-    const c = parseInt(hex.slice(start, start + 2), 16) / 255;
-    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  };
-  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
-}
-
-function contrast(a: string, b: string): number {
-  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-  return (hi + 0.05) / (lo + 0.05);
-}
 
 // Text muss auf dem Grund WCAG AA (4,5:1) schaffen. Honig (`accent`) steht bewusst nicht in der Liste:
 // nur Akzent, nie für Text. Salbei (`secondary`) ist nur als Fläche mit `onSecondary` erlaubt.
@@ -55,6 +42,7 @@ const textPairs: [keyof Colors, keyof Colors][] = [
   ['warning', 'surface'],
   ['warning', 'warningSurface'],
   ['text', 'warningSurface'],
+  ['warning', 'card'], // „Mit Erwachsenen“ in der Sicherheitsbox (weiße Pille)
 ];
 
 // Symbole und andere Bedienelemente: mindestens 3:1 (WCAG 1.4.11).
@@ -79,6 +67,28 @@ describe.each([
 
   it('alle Werte sind gültige Hex-Farben', () => {
     for (const value of Object.values(palette)) expect(value).toMatch(/^#[0-9A-F]{6}$/);
+  });
+});
+
+// Abhak-Felder beim Material der Detailansicht (D4, Entscheidung 13 und 17): Der Rand kommt aus der Palette (`icon`) und hat mindestens 3:1
+// zum Grund (WCAG 1.4.11). Abgehakt ist Tinte (`selected`) mit Häkchen (`onSelected`). Gerendert wird das in ActivityScreen.test.tsx.
+describe.each([
+  ['hell', lightColors],
+  ['dunkel', darkColors],
+])('Abhak-Felder (%s, Entscheidung 17)', (_name, palette) => {
+  it('der Rand (`icon`) hat mindestens 3:1 zur weißen Karte, auf der die Liste steht, und zum Papier', () => {
+    expect(contrast(palette.icon, palette.card)).toBeGreaterThanOrEqual(3);
+    expect(contrast(palette.icon, palette.background)).toBeGreaterThanOrEqual(3);
+  });
+
+  it('der Rand ist nicht `border` (nur 1,7:1, gliedert nur die Zeilen)', () => {
+    expect(palette.icon).not.toBe(palette.border);
+    expect(contrast(palette.border, palette.card)).toBeLessThan(3);
+  });
+
+  it('abgehakt: Tinte gegen die Karte mindestens 3:1, das Häkchen darauf mindestens 4,5:1', () => {
+    expect(contrast(palette.selected, palette.card)).toBeGreaterThanOrEqual(3);
+    expect(contrast(palette.onSelected, palette.selected)).toBeGreaterThanOrEqual(4.5);
   });
 });
 

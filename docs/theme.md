@@ -12,6 +12,7 @@ Bausteine `Button`, `Chip` und `Section`. Bildschirme sind erst ab D2 dran.
 | `src/lib/useThemedStyles.ts`  | Styles, die von hell/dunkel abhängen                                            |
 | `src/lib/fonts.ts`            | Laden von Literata und Onest, Zeitlimit                                         |
 | `src/lib/theme.test.ts`       | Kontraste beider Paletten (WCAG AA) und die Vorgaben aus der DESIGN.md          |
+| `src/lib/contrast.ts`         | Kontrastberechnung nach WCAG, nur für Tests (`theme.test.ts`, Detail-Tests)     |
 
 ## So nutzt man das Theme (neue und umgebaute Bildschirme)
 
@@ -29,8 +30,8 @@ function Card() {
 ```
 
 - `createStyles` steht **außerhalb** der Komponente. `Theme`, `fonts`, `fontSize` usw. kommen aus `@/lib/theme`.
-- Der feste Export `colors` (immer hell) gibt es nur, bis jeder Bildschirm umgestellt ist. Umgestellt sind bisher der Start (D2) und das Ergebnis mit dem Wetter-Schritt (D3);
-  Detail (D4) sowie Verlauf und Kinderprofile (D5) folgen. Neue Bildschirme nehmen `useTheme()` oder `useThemedStyles`.
+- Der feste Export `colors` (immer hell) gibt es nur, bis jeder Bildschirm umgestellt ist. Umgestellt sind bisher der Start (D2), das Ergebnis mit dem Wetter-Schritt (D3) und die Detailansicht (D4);
+  nur noch „Wie war’s?“ (`FeedbackPanel`, `RatingButton`) sowie Verlauf und Kinderprofile (D5) folgen. Neue Bildschirme nehmen `useTheme()` oder `useThemedStyles`.
 - Die Lint-Regel gegen feste Farben, Größen, Abstände und Radien bleibt (`npx expo lint`).
 - Breiten und Höhen stehen nicht im Theme, **außer** den Mindestgrößen `size.touch` (44 pt Tippfläche)
   und `size.checkbox` (56 px Abhak-Feld). Beides schreibt die DESIGN.md vor.
@@ -160,6 +161,9 @@ Neu im Theme: `card`, `selected`, `onSelected` (siehe Farbtabelle) sowie `iconSi
   teilen ihre Größe durch `fontScale` und bleiben so gleich groß (Stimmungsbild-Platzhalter, `MoodPlaceholder.tsx`).
 - **Ergebnis (D3):** Der runde Zurück-Knopf (`ResultsHeader`) ist weiß mit feinem Rand und mindestens `size.touch` breit und hoch. Die feste Wetterzeile ist Sand (`surface`) mit einer kleinen weißen Pille „Ändern“.
   Die Kategorie-Pille auf dem Bildbereich ist weiß (`card`) mit Tinte darauf. Ein Foto bringt seine eigene Größe mit, deshalb haben Bilder auf Karten ausdrücklich Breite und Höhe 100 %.
+- **Detailansicht (D4):** Details und alle Maße in `docs/detail.md`. Neue Bausteine: `BackButton` (der runde Zurück-Knopf, auch im Kopf von „Eure Ideen“), `Section` mit `large` (größere Überschrift),
+  `CardMedia` mit `showPill={false}` (Bildbereich ohne Kategorie-Pille). **Abhak-Felder:** Zeile `size.checkbox` (56) hoch, Kästchen 32 px, Rand `icon` (mindestens 3:1 zu `card` und `background`, im Test geprüft, Entscheidung 17),
+  abgehakt `selected` mit `onSelected`. **Hinweisboxen:** `warningSurface` mit `warning`, nie `danger` (kein Alarm-Rot). Es gibt keine neuen Theme-Werte.
 - **Raster:** Breiten stehen nicht im Theme. Die Mindestbreiten für Kacheln und Chips und die Regeln für die Spalten liegen in
   `src/features/suggestions/startLayout.ts` (getestet).
 
