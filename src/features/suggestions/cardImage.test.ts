@@ -3,6 +3,7 @@
 // Am Ende prüft ein Test die echte Liste der App.
 
 import { categoryKeys, type ActivityCategory } from '../activities/activities';
+import { minPhotosPerCategory } from '../activities/categoryPhotoFiles';
 import { categoryPhotos } from '../activities/categoryPhotos.generated';
 import {
   assignCardImages,
@@ -10,6 +11,7 @@ import {
   hashText,
   pickCategoryPhoto,
   rankPhotos,
+  usablePhotos,
   type CardImageInput,
   type PhotoLibrary,
 } from './cardImage';
@@ -42,7 +44,7 @@ function activity(id: string, category: ActivityCategory, image?: string): CardI
 const manyIds = Array.from({ length: 200 }, (_, i) => `activity-${i}`);
 
 describe('Vorrang der Bilder (drei Fälle)', () => {
-  const photos = library({ nature: 2 });
+  const photos = library({ nature: 3 }); // genau die Mindestzahl
 
   it('1. Aktivität mit Bild: erst die Web-Adresse, dann das Kategorie-Foto, dann die Fläche', () => {
     const chain = getCardImageChain(activity('a', 'nature', 'https://example.org/a.jpg'), photos);
@@ -90,6 +92,11 @@ describe('Vorrang der Bilder (drei Fälle)', () => {
   it('Leerzeichen um eine gültige Adresse werden entfernt', () => {
     const [first] = getCardImageChain(activity('a', 'nature', '  https://example.org/a.jpg '), photos);
     expect(first).toEqual({ kind: 'activity', uri: 'https://example.org/a.jpg' });
+  });
+
+  it('Mit Bild, aber Kategorie unter der Mindestzahl: Web-Adresse, dann die Fläche', () => {
+    const chain = getCardImageChain(activity('a', 'nature', 'https://example.org/a.jpg'), library({ nature: 2 }));
+    expect(chain.map((step) => step.kind)).toEqual(['activity', 'placeholder']);
   });
 
   it('Eine Karte, deren Web-Adresse nicht lädt, rutscht Stufe für Stufe weiter (Kette von vorn nach hinten)', () => {
@@ -172,7 +179,7 @@ describe('Stabile Zuordnung pro Aktivität', () => {
 });
 
 describe('Die drei Karten eines Ergebnisses', () => {
-  const photos = library({ nature: 4, cooking: 3, craft: 1, game: 1 });
+  const photos = library({ nature: 4, cooking: 3, craft: 3, game: 2 });
 
   function files(chains: ReturnType<typeof assignCardImages<FakePhoto>>) {
     return chains.map((chain) => {
@@ -186,6 +193,7 @@ describe('Die drei Karten eines Ergebnisses', () => {
       const group = [activity(`n-${i}`, 'nature'), activity(`n-${i + 100}`, 'nature'), activity(`n-${i + 200}`, 'nature')];
       expect(new Set(files(assignCardImages(group, photos))).size).toBe(3);
     }
+    // Auch mit genau der Mindestzahl (drei Fotos) bekommen drei Karten drei verschiedene Fotos.
     for (let i = 0; i < 60; i++) {
       const group = [activity(`k-${i}`, 'cooking'), activity(`k-${i + 100}`, 'cooking'), activity(`k-${i + 200}`, 'cooking')];
       expect(new Set(files(assignCardImages(group, photos))).size).toBe(3);
@@ -193,14 +201,12 @@ describe('Die drei Karten eines Ergebnisses', () => {
   });
 
   it('wiederholen ein Foto nur, wenn die Kategorie weniger Fotos hat als Karten', () => {
-    const two = [activity('g-1', 'game'), activity('g-2', 'game'), activity('c-1', 'craft')];
-    expect(files(assignCardImages(two, photos))).toEqual(['spiel-1.jpg', 'spiel-1.jpg', 'basteln-1.jpg']);
-
     const four = [0, 1, 2, 3].map((i) => activity(`n-${i}`, 'nature'));
     expect(new Set(files(assignCardImages(four, photos))).size).toBe(4);
     const five = [0, 1, 2, 3, 4].map((i) => activity(`n-${i}`, 'nature'));
-    const fiveFiles = files(assignCardImages(five, photos));
-    expect(new Set(fiveFiles).size).toBe(4); // vier Fotos, fünf Karten: genau eines wiederholt sich
+    expect(new Set(files(assignCardImages(five, photos))).size).toBe(4); // vier Fotos, fünf Karten: genau eines wiederholt sich
+    const fourCooking = [0, 1, 2, 3].map((i) => activity(`k-${i}`, 'cooking'));
+    expect(new Set(files(assignCardImages(fourCooking, photos))).size).toBe(3); // drei Fotos, vier Karten
   });
 
   it('die Reihenfolge der Karten ändert nichts daran, welches Foto zu welcher Aktivität gehört', () => {
@@ -241,13 +247,61 @@ describe('Die drei Karten eines Ergebnisses', () => {
   });
 });
 
+describe('Mindestzahl: Kategorie-Fotos erst ab drei Fotos je Kategorie', () => {
+  it('die Mindestzahl ist 3 (Entscheidung von Clemens, steht nur in categoryPhotoFiles.ts)', () => {
+    expect(minPhotosPerCategory).toBe(3);
+  });
+
+  it.each([0, 1, 2])('eine Kategorie mit %s Foto(s) zeigt keines: nur die Farbfläche', (count) => {
+    const photos = library({ cooking: count });
+    expect(usablePhotos(photos.cooking)).toEqual([]);
+    expect(pickCategoryPhoto(activity('a', 'cooking'), photos)).toBeUndefined();
+    expect(getCardImageChain(activity('a', 'cooking'), photos)).toEqual([{ kind: 'placeholder' }]);
+    expect(assignCardImages([activity('a', 'cooking'), activity('b', 'cooking')], photos)).toEqual([
+      [{ kind: 'placeholder' }],
+      [{ kind: 'placeholder' }],
+    ]);
+  });
+
+  it.each([3, 4, 7])('eine Kategorie mit %s Fotos zeigt ihre Fotos', (count) => {
+    const photos = library({ cooking: count });
+    expect(usablePhotos(photos.cooking)).toHaveLength(count);
+    expect(pickCategoryPhoto(activity('a', 'cooking'), photos)).toBeDefined();
+    expect(getCardImageChain(activity('a', 'cooking'), photos).map((step) => step.kind)).toEqual(['category', 'placeholder']);
+  });
+
+  it('das Bild einer Aktivität hat weiterhin Vorrang, auch in einer Kategorie ohne genug Fotos', () => {
+    for (const count of [0, 1, 2]) {
+      const chain = getCardImageChain(activity('a', 'game', 'https://example.org/a.jpg'), library({ game: count }));
+      expect(chain).toEqual([{ kind: 'activity', uri: 'https://example.org/a.jpg' }, { kind: 'placeholder' }]);
+    }
+  });
+
+  it('jede Kategorie entscheidet für sich: eine mit zwei Fotos nimmt einer mit drei nichts weg', () => {
+    const photos = library({ cooking: 3, game: 2 });
+    const chains = assignCardImages([activity('a', 'cooking'), activity('b', 'game'), activity('c', 'cooking')], photos);
+    expect(chains.map((chain) => chain.map((step) => step.kind))).toEqual([
+      ['category', 'placeholder'],
+      ['placeholder'],
+      ['category', 'placeholder'],
+    ]);
+    expect(chains[0]).not.toEqual(chains[2]); // die beiden Kochen-Karten zeigen verschiedene Fotos
+  });
+});
+
 describe('Die Fotos der App (categoryPhotos.generated.ts)', () => {
-  it('jede Aktivität bekommt eine Kette, die auf der Farbfläche endet, auch in Kategorien ohne Foto', () => {
+  it('eine Kategorie zeigt Fotos genau dann, wenn sie mindestens die Mindestzahl hat; sonst die Farbfläche', () => {
     for (const category of categoryKeys) {
       const [chain] = assignCardImages([activity('echt-1', category)]);
       expect(chain[chain.length - 1]).toEqual({ kind: 'placeholder' });
-      // Mit Foto in der Kategorie: zuerst das Foto, sonst nur die Fläche.
-      expect(chain.length).toBe(categoryPhotos[category].length > 0 ? 2 : 1);
+      expect(chain.some((step) => step.kind === 'category')).toBe(categoryPhotos[category].length >= minPhotosPerCategory);
+    }
+  });
+
+  it('mit Bild der Aktivität: Web-Adresse zuerst, in jeder Kategorie', () => {
+    for (const category of categoryKeys) {
+      const [chain] = assignCardImages([activity('echt-1', category, 'https://example.org/a.jpg')]);
+      expect(chain[0]).toEqual({ kind: 'activity', uri: 'https://example.org/a.jpg' });
     }
   });
 });

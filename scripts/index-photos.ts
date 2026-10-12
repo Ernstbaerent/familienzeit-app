@@ -13,6 +13,7 @@ import { readdirSync, writeFileSync } from 'node:fs';
 import {
   buildPhotoIndex,
   categoryPhotoDir,
+  minPhotosPerCategory,
   photoIndexFile,
   renderPhotoIndexModule,
 } from '../src/features/activities/categoryPhotoFiles.ts';
@@ -25,10 +26,12 @@ try {
   writeFileSync(new URL(photoIndexFile, root), renderPhotoIndexModule(index));
 
   const total = categoryKeys.reduce((sum, category) => sum + index[category].length, 0);
-  console.log(`${photoIndexFile}: ${total} Fotos`);
+  console.log(`${photoIndexFile}: ${total} Fotos (Karten zeigen sie ab ${minPhotosPerCategory} Fotos je Kategorie)`);
   for (const category of categoryKeys) {
     const files = index[category];
-    console.log(`  ${category.padEnd(10)} ${files.length === 0 ? '– (Farbfläche mit Symbol)' : files.join(', ')}`);
+    const shown = files.length >= minPhotosPerCategory;
+    const list = files.length === 0 ? '–' : files.join(', ');
+    console.log(`  ${category.padEnd(10)} ${list}${shown ? '' : '  → Farbfläche mit Symbol (zu wenige Fotos)'}`);
   }
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);

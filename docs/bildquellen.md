@@ -13,8 +13,9 @@ Namensnennung. Pixabay garantiert keine Einwilligungen abgebildeter Personen, de
 **Prüfung:** Die Befunde stammen aus einer Sichtprüfung durch Claude Code am 12.10.2026 (Gesichter auch im Hintergrund, Marken, Logos,
 Verpackungen, Text). **Vor der Beta schaut ein Mensch alle Fotos noch einmal durch.**
 
-**Stand:** 9 Fotos (Natur 4, Kochen 3, Basteln 1, Spiel 1). Für **Bewegung**, **Experiment** und **Ausflug** gibt es noch kein Foto, dort zeigt die Karte
-die Farbfläche mit Symbol (Rückfall laut DESIGN.md, Entscheidung 21). Die Nummern dürfen Lücken haben (`kochen-3` fehlt).
+**Stand:** 9 Fotos (Natur 4, Kochen 3, Basteln 1, Spiel 1). Für **Bewegung**, **Experiment** und **Ausflug** gibt es noch kein Foto. **Die Karten zeigen Kategorie-Fotos erst,
+wenn die Kategorie mindestens drei Fotos hat** (`minPhotosPerCategory`, `docs/theme.md`, „Kategorie-Fotos: Mindestzahl“). Heute sind das Natur und Kochen; Basteln und Spiel (je ein Foto), Bewegung, Experiment
+und Ausflug zeigen die Farbfläche mit Symbol (Rückfall laut DESIGN.md, Entscheidung 21). Die Fotos von Basteln und Spiel bleiben hier und im Ordner, bis in ihren Kategorien zwei weitere dazukommen. Die Nummern dürfen Lücken haben (`kochen-3` fehlt).
 
 **Neues Foto aufnehmen:** Datei als `kategorie-nummer.jpg` nach `assets/images/categories/` legen, hier eintragen und `npm run photos:index` laufen
 lassen (erzeugt die Liste, die die App nutzt). Der Test `categoryPhotos.test.ts` meldet, wenn Datei, Liste und diese Tabelle nicht zusammenpassen.

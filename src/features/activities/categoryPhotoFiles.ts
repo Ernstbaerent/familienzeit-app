@@ -20,6 +20,12 @@ export const photoPrefixes: Record<ActivityCategory, string> = {
   outing: 'ausflug',
 };
 
+// Ab so vielen Fotos zeigt eine Kategorie ihre Fotos auf den Karten. Hat sie weniger, zeigen ihre Karten die Farbfläche mit Symbol.
+// Entscheidung von Clemens (DESIGN.md, Zusatz 34): Mit nur einem oder zwei Fotos passt das Bild oft nicht zur Aktivität
+// (Beispiel: ein Schachbrett bei der Kissenburg). Das `image` einer einzelnen Aktivität hat weiterhin Vorrang und zählt hier nicht mit.
+// Die Zahl steht nur hier (Erklärung: docs/theme.md, „Kategorie-Fotos: Mindestzahl“).
+export const minPhotosPerCategory = 3;
+
 // Wo die erzeugte Liste liegt (vom Projektordner aus).
 export const photoIndexFile = 'src/features/activities/categoryPhotos.generated.ts';
 

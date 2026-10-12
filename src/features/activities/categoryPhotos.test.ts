@@ -7,6 +7,7 @@ import { categoryKeys } from './activities';
 import {
   buildPhotoIndex,
   categoryPhotoDir,
+  minPhotosPerCategory,
   photoIndexFile,
   photoPrefixes,
   renderPhotoIndexModule,
@@ -81,5 +82,10 @@ describe('Fotos in assets/images/categories/', () => {
     const sources = readFileSync(join(root, 'docs/bildquellen.md'), 'utf8');
     const listed = [...sources.matchAll(/^\| `([^`]+\.jpg)` \|/gm)].map((match) => match[1]);
     expect([...listed].sort()).toEqual([...files].sort());
+  });
+
+  it('docs/theme.md nennt die Mindestzahl für Kategorie-Fotos mit ihrem heutigen Wert', () => {
+    const docs = readFileSync(join(root, 'docs/theme.md'), 'utf8');
+    expect(docs).toMatch(new RegExp(`minPhotosPerCategory\`\\s*\\(heute \\*\\*${minPhotosPerCategory}\\*\\*\\)`));
   });
 });

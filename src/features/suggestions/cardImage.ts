@@ -1,11 +1,13 @@
 // Welches Bild eine Vorschlagskarte zeigt (DESIGN.md, Entscheidung 21). Reine Funktionen, ohne UI.
 //
 // Vorrang: 1. `image` der Aktivität (Web-Adresse), 2. gebündeltes Kategorie-Foto, 3. Farbfläche mit Symbol.
+// Ein Kategorie-Foto gibt es nur, wenn die Kategorie mindestens `minPhotosPerCategory` Fotos hat (sonst passt das Bild zu oft nicht).
 // Jede Karte hat eine Kette dieser Stufen. Lädt eine Stufe nicht (Web-Adresse nicht erreichbar), zeigt die Karte die nächste.
 // Fotos gibt es nicht für jede Kategorie und nicht immer gleich viele: Die Liste kommt aus categoryPhotos.generated.ts
-// (`npm run photos:index`), es gibt keine feste Anzahl.
+// (`npm run photos:index`), es gibt keine feste Anzahl (nur die Mindestzahl, ab der eine Kategorie Fotos zeigt).
 
 import type { Activity, ActivityCategory } from '../activities/activities';
+import { minPhotosPerCategory } from '../activities/categoryPhotoFiles';
 import { categoryPhotos, type CategoryPhoto } from '../activities/categoryPhotos.generated';
 
 export type CardImageSource<Photo extends { file: string } = CategoryPhoto> =
@@ -54,12 +56,17 @@ export function rankPhotos<Photo extends { file: string }>(
     .map((entry) => entry.photo);
 }
 
+// Die Fotos einer Kategorie, die auf Karten erscheinen dürfen: alle, wenn es mindestens `minPhotosPerCategory` sind, sonst keines.
+export function usablePhotos<Photo extends { file: string }>(photos: readonly Photo[]): readonly Photo[] {
+  return photos.length >= minPhotosPerCategory ? photos : [];
+}
+
 // Das Foto, das diese Aktivität allein (ohne Nachbarkarten) bekommt. `undefined`, wenn die Kategorie kein Foto hat.
 export function pickCategoryPhoto<Photo extends { file: string }>(
   activity: Pick<Activity, 'id' | 'category'>,
   library: PhotoLibrary<Photo>,
 ): Photo | undefined {
-  return rankPhotos(activity.id, library[activity.category])[0];
+  return rankPhotos(activity.id, usablePhotos(library[activity.category]))[0];
 }
 
 // Nur echte Web-Adressen (https). Leer oder fehlend zählt als „kein Bild“.
@@ -92,7 +99,8 @@ export function getCardImageChain<Photo extends { file: string } = CategoryPhoto
 // Dasselbe Foto soll auf einem Bildschirm möglichst nur einmal vorkommen: Die Karten bekommen ihr Foto in der Reihenfolge
 // ihrer IDs (nicht ihrer Anzeige-Reihenfolge, so bleibt ein Foto bei der Aktivität, auch wenn sich die Reihenfolge ändert).
 // Jede nimmt das für sie bestplatzierte Foto, das noch frei ist. Nur wenn die Kategorie weniger Fotos hat als Karten,
-// wiederholt sich eines (dann ist es unvermeidlich).
+// wiederholt sich eines (dann ist es unvermeidlich). Bei der Mindestzahl von drei Fotos je Kategorie und drei Karten pro Gruppe
+// kommt das in einer Dreiergruppe nicht vor. Kategorien mit weniger Fotos zeigen die Farbfläche und nehmen anderen nichts weg.
 export function assignCardImages<Photo extends { file: string } = CategoryPhoto>(
   activities: readonly CardImageInput[],
   library: PhotoLibrary<Photo> = categoryPhotos as unknown as PhotoLibrary<Photo>,
@@ -105,7 +113,7 @@ export function assignCardImages<Photo extends { file: string } = CategoryPhoto>
     .sort((a, b) => compareText(activities[a].id, activities[b].id) || a - b);
   for (const index of order) {
     const activity = activities[index];
-    const ranked = rankPhotos(activity.id, library[activity.category]);
+    const ranked = rankPhotos(activity.id, usablePhotos(library[activity.category]));
     const photo = ranked.find((candidate) => !taken.has(candidate.file)) ?? ranked[0];
     if (photo) taken.add(photo.file);
     photos.set(index, photo);

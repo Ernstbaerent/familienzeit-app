@@ -126,6 +126,17 @@ Kontraste (geprüft in `src/lib/theme.test.ts`, für alle sieben Kategorien, hel
 - Ein Test prüft, dass jeder berechnete Wert in dieser Tabelle steht. **Ändert sich ein Rezept in `theme.ts`, die Tabelle hier anpassen** (der Test meldet dann die Werte, die fehlen).
 - Der Dunkelmodus ist vorbereitet, bleibt aber bis D5 aus (die Dunkelwerte sind wie alle anderen abgeleitet und werden von Ani bestätigt).
 
+### Kategorie-Fotos: Mindestzahl
+
+Ein Kategorie-Foto erscheint auf den Karten **nur, wenn die Kategorie mindestens drei Fotos hat**: Konstante `minPhotosPerCategory` (heute **3**), sie steht nur in
+`src/features/activities/categoryPhotoFiles.ts`. Hat eine Kategorie weniger, zeigen ihre Karten die Farbfläche mit Symbol (die Fotos bleiben in der Liste und im Ordner, sie werden nur nicht gezeigt).
+
+- **Warum:** Mit einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: ein Schachbrett bei der Kissenburg). Mit drei und mehr verteilen sich die Fotos, und ein einzelnes unpassendes fällt weniger auf.
+- **Heute:** Natur (4 Fotos) und Kochen (3) zeigen Fotos. Basteln und Spiel (je 1), Bewegung, Experiment und Ausflug (je 0) zeigen die Farbfläche. Kommt das dritte Foto einer Kategorie dazu, erscheinen ihre Fotos ohne weitere Änderung (Ablauf: `docs/bildquellen.md`).
+- **Vorrang bleibt:** Das `image` einer einzelnen Aktivität gilt weiterhin vor allem anderen und zählt bei der Mindestzahl nicht mit.
+- **Geprüft** in `src/features/suggestions/cardImage.test.ts` (0, 1, 2 Fotos: Farbfläche; 3, 4, 7: Fotos; `image` gewinnt immer; jede Kategorie entscheidet für sich) und `categoryPhotos.test.ts` (diese Zahl steht in dieser Datei).
+- `npm run photos:index` zeigt je Kategorie, ob sie die Mindestzahl erreicht.
+
 Zuordnung Kategorie → Symbol: nur in `src/features/activities/CategoryIcon.tsx` (`categoryIcons`). Symbole für Spielplatz, Bad und Termine kommen erst mit M10 und M11 (Entscheidung 12).
 
 ## Bausteine und Besonderheiten (seit D2)
