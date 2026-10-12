@@ -9,7 +9,7 @@ Die App merkt sich, was gemacht wurde, und schlägt es nicht gleich wieder vor. 
 | ------------------------------ | --------------------------- | ----- |
 | Eure Ideen                     | `app/suggestions/results.tsx` | Karten sind antippbar und öffnen die Details. |
 | Details                        | `app/activity/[id].tsx`     | Idee lesen, „Das machen wir“, „Fertig“, „Wie war’s?“. |
-| Was wir zusammen gemacht haben | `app/history.tsx`           | Liste, Bewertung ändern oder entfernen, löschen. Erreichbar vom Start, sobald es einen Eintrag gibt. |
+| Was wir zusammen gemacht haben | `app/history.tsx`           | Liste, Bewertung ändern oder entfernen, löschen. Erreichbar über die Pille „Verlauf“ oben auf dem Start, sobald es einen Eintrag gibt. |
 
 **Details:** Titel, Kategorie-Symbol, Dauer, Altersspanne, Elternenergie (wenig/mittel/viel), Kosten, dann:
 
@@ -85,7 +85,7 @@ mit Daumen runter) lässt dieselben Ideen übrig wie ein leerer, und jede Gruppe
 
 ## Verlauf löschen
 
-- **In der App:** Start → „Was wir zusammen gemacht haben“. Pro Eintrag „Löschen“, ganz unten „Ganzen Verlauf löschen“ (jeweils mit Rückfrage).
+- **In der App:** Start → „Verlauf“ (Pille oben). Pro Eintrag „Löschen“, ganz unten „Ganzen Verlauf löschen“ (jeweils mit Rückfrage).
   Danach liegt `{ "version": 1, "entries": [] }` auf dem Gerät. Der Knopf auf dem Start verschwindet, sobald kein Eintrag mehr da ist.
 - **App löschen** entfernt alles, was die App gespeichert hat (auch die Kinderprofile). Eine Cloud-Sicherung gibt es nicht.
 - Beim Entwickeln: `history.v1` in AsyncStorage löschen (oder die App-Daten in den Handy-Einstellungen löschen).
@@ -116,5 +116,5 @@ Von Hand: `npx expo start`, mit Expo Go öffnen.
    bei Schere, Messer, Herd oder Wasser das Schild „Mit Erwachsenen“.
 2. „Das machen wir“ tippen: Anleitung bleibt, unten steht „Fertig“. Zurückgehen und die App schließen: kein Eintrag.
 3. „Fertig“ schnell zweimal tippen: ein Eintrag. Daumen hoch oder runter wählen (oder „Überspringen“), die App landet auf dem Start.
-4. Der Knopf „Was wir zusammen gemacht haben“ erscheint. Dort Bewertung ändern, nochmal tippen = entfernen, Einträge löschen.
+4. Die Pille „Verlauf“ erscheint oben auf dem Start. Dort Bewertung ändern, nochmal tippen = entfernen, Einträge löschen.
 5. Erneut „Was machen wir?“: Die gerade gemachte Idee steht nicht mehr vorn. Eine mit Daumen runter steht noch weiter hinten.

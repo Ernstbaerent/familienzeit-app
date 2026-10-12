@@ -98,6 +98,22 @@ Regeln, die aus den Kontrasten folgen:
 - `shadow.card` und `shadow.primaryButton` gibt es. `shadow.primaryButton` trägt seit D2 der große Hauptknopf auf dem Start.
   `shadow.card` setzt D3 für die Ergebniskarten ein; die Kinder-Kacheln auf dem Start haben nur einen feinen Rand.
 
+## Bausteine und Besonderheiten (seit D2)
+
+Neu im Theme: `card`, `selected`, `onSelected` (siehe Farbtabelle) sowie `iconSize.sm` (14, Häkchen im kleinen Kreis) und `iconSize.hero`
+(160, großes angeschnittenes Symbol auf Platzhalter-Flächen). Alle Paare sind im Kontrasttest geprüft (`theme.test.ts`).
+
+- **`Chip`:** nicht gewählt weiß (`card`) mit feinem Rand, gewählt Tinte (`selected`) mit hellem Text (`onSelected`). Optional `icon` (Linien-Symbol vor dem Text),
+  `stacked` (Symbol über dem Text, als Kachel mit Radius `tile`, schmaler Rand und kleinere Schrift für schmale gleich breite Reihen wie die Energie auf dem Start),
+  `accessibilityHint` und `style` (für Raster). Der Text darf umbrechen (`flexShrink`), nie abgeschnitten werden.
+- **`Button`:** optional `icon` hinter dem Text (`iconFlipsInRTL` für Pfeile), `accessibilityHint`. Der **große Hauptknopf** trägt den warmen Schein
+  (`shadow.primaryButton`), ein gesperrter nicht.
+- **Symbole und Systemschrift:** Ionicons sind Schrift-Zeichen und wachsen mit der Systemschrift mit (die Skalierung bleibt an, nie `allowFontScaling={false}`).
+  Zeichen in Kreisen wachsen deshalb mit (`fontScale` aus `useWindowDimensions`, Kinder-Kachel), dekorative Symbole
+  teilen ihre Größe durch `fontScale` und bleiben so gleich groß (Stimmungsbild-Platzhalter, `MoodPlaceholder.tsx`).
+- **Raster:** Breiten stehen nicht im Theme. Die Mindestbreiten für Kacheln und Chips und die Regeln für die Spalten liegen in
+  `src/features/suggestions/startLayout.ts` (getestet).
+
 ## Schrift
 
 Literata für Titel und Zahlen, Onest für Text und Bedienung (beides Google Fonts, OFL).
@@ -136,7 +152,7 @@ wechselt nicht mitten in der Nutzung).
 
 ## Dunkelmodus
 
-- Die Dunkelwerte und `useTheme()` sind fertig. `useTheme()` folgt der Handy-Einstellung.
+- Die Dunkelwerte (auch `card`, `selected`, `onSelected`) und `useTheme()` sind fertig. `useTheme()` folgt der Handy-Einstellung.
 - **Eingeschaltet wird er erst in D5.** Bis dahin liefert `useTheme()` immer das helle Theme
   (Schalter `darkModeEnabled` in `src/lib/theme.ts`). Zwei Gründe:
   1. Die meisten Bildschirme nutzen noch den festen hellen `colors`-Export. Sonst gäbe es halb dunkle Bildschirme.

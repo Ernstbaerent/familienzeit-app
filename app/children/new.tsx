@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChildForm } from '@/features/profiles/ChildForm';
 import { useProfiles } from '@/features/profiles/ProfilesContext';
+import { useSelectedChildren } from '@/features/suggestions/SelectedChildrenContext';
 import { closeScreen } from '@/lib/navigation';
 import { colors, fontSize, lineHeight, spacing } from '@/lib/theme';
 
@@ -20,6 +21,7 @@ function NewChildForm() {
   const { t } = useTranslation();
   const router = useRouter();
   const { profiles, addChild } = useProfiles();
+  const { selectChild } = useSelectedChildren();
   // Nur beim Öffnen entscheiden: Der Willkommenstext soll beim Speichern nicht plötzlich verschwinden.
   const [isFirstChild] = useState(profiles.length === 0);
 
@@ -29,7 +31,9 @@ function NewChildForm() {
       <ChildForm
         header={isFirstChild ? <Welcome /> : undefined}
         onSubmit={async (draft) => {
-          await addChild(draft);
+          const child = await addChild(draft);
+          // Das neue Kind soll auf dem Start gleich mitzählen (es wurde ja für heute angelegt).
+          selectChild(child.id);
           closeScreen(router);
         }}
       />

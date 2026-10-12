@@ -3,22 +3,20 @@
     "name": "Miki"
   },
   "home": {
-    "greeting": "Hallo!",
-    "intro": "Was macht ihr heute zusammen? In 30 Sekunden bekommst du 3 passende Ideen.",
+    "title": "Wer ist heute dabei?",
+    "childLabel": "{{name}}, {{age}}",
+    "editChild": "{{name}} bearbeiten",
+    "editChildUnnamed": "Kind, {{age}} bearbeiten",
+    "timeTitle": "Wie viel Zeit habt ihr?",
+    "energyTitle": "Und deine Energie?",
+    "energyClear": "Nochmal tippen hebt die Auswahl auf.",
     "start": "Was machen wir?",
-    "childrenTitle": "Eure Kinder",
-    "history": "Was wir zusammen gemacht haben"
+    "issueChildren": "Bitte wähle mindestens ein Kind.",
+    "issueTime": "Bitte wähle, wie viel Zeit ihr habt.",
+    "privacy": "Kein Konto nötig. Deine Daten bleiben auf deinem Handy.",
+    "history": "Verlauf"
   },
   "suggest": {
-    "title": "Was machen wir?",
-    "childrenTitle": "Wer ist dabei?",
-    "childLabel": "{{name}} ({{age}})",
-    "childrenMissing": "Bitte wähle mindestens ein Kind.",
-    "timeTitle": "Wie viel Zeit habt ihr?",
-    "timeMissing": "Bitte wähle, wie viel Zeit ihr habt.",
-    "energyTitle": "Wie viel Energie hast du heute?",
-    "energyHint": "Nochmal tippen hebt die Auswahl auf.",
-    "show": "Vorschläge zeigen",
     "resultsTitle": "Eure Ideen",
     "more": "Andere Vorschläge",
     "changeSelection": "Auswahl ändern",
@@ -54,8 +52,8 @@
     },
     "manual": {
       "title": "Wie ist das Wetter?",
-      "hint": "Ohne Standort fragen wir kurz nach.",
-      "hintUnavailable": "Das Wetter ließ sich gerade nicht abrufen. Wie ist es bei euch?"
+      "hint": "Ohne Standort fragen wir kurz nach. Tippe auf das Wetter, dann zeigen wir euch die Ideen.",
+      "hintUnavailable": "Das Wetter ließ sich gerade nicht abrufen. Wie ist es bei euch? Tippe auf das Wetter, dann zeigen wir euch die Ideen."
     },
     "allowLocation": "Standort erlauben",
     "openSettings": "Standort in den Einstellungen erlauben",

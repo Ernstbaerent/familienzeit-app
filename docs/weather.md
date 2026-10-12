@@ -4,21 +4,31 @@ Die App holt das Wetter beim Deutschen Wetterdienst (über die freie Schnittstel
 und nutzt es für die Vorschläge. Ohne Standort fragt sie stattdessen „Wie ist das Wetter?“. Die Tageszeit kommt
 automatisch aus der Uhrzeit.
 
+**Seit D2:** Der Start (`app/index.tsx`) hat keinen Wetter-Teil mehr. Gefragt wird erst nach dem Tipp auf den Hauptknopf
+„Was machen wir?“ (DESIGN.md, Entscheidung 7 und 22). Beim Öffnen des Starts darf das Wetter **vorgeladen** werden, aber nur,
+wenn die Erlaubnis für den Standort schon da ist. Die Erlaubnis wird beim Öffnen **nie** erfragt. Was dabei an Bright Sky geht,
+steht im Abschnitt „Vorladen beim Öffnen des Starts“.
+
 ## Ablauf in der App
 
 | Wann | Was passiert |
 | ---- | ------------ |
-| App-Start | Nichts. Es wird weder der Standort gelesen noch das Wetter geholt. |
-| „Was machen wir?“ öffnen | Das Wetter wird besorgt (`useWeatherRefresh`). Standort noch nie gefragt: Erklär-Karte mit **„Standort erlauben“** und **„Wetter selbst wählen“**. |
-| „Standort erlauben“ | Erst jetzt zeigt das Handy seinen Dialog (nur „während der Nutzung“). |
-| Standort erlaubt | Nichts zu tun. Das Wetter kommt automatisch. |
-| Standort verweigert, „selbst wählen“ oder Wetter nicht abrufbar | Auswahl **„Wie ist das Wetter?“** (Sonne, Bewölkt, Regen, Gewitter, Schnee) und ein kleiner Link „Standort erlauben“. |
+| App-Start (vor dem Start-Bildschirm) | Nichts. Es wird weder der Standort gelesen noch das Wetter geholt. |
+| Start öffnen (und beim Zurückkommen in die App) | **Vorladen**, nur mit schon erteilter Erlaubnis (`useWeatherRefresh`, Details unten). Ohne Erlaubnis passiert nichts, es gibt weder eine Frage noch eine Erklär-Karte. |
+| Hauptknopf „Was machen wir?“ | Die Vorschläge öffnen sich. Je nach Stand des Standorts kommt vorher ein **Wetter-Schritt** (`WeatherStep`, Regel `getWeatherStep` in `manualWeather.ts`), sonst gleich die Vorschläge. |
+| Standort noch nie gefragt | Wetter-Schritt 1: Erklär-Karte mit **„Standort erlauben“** und **„Wetter selbst wählen“**. |
+| „Standort erlauben“ | Erst jetzt zeigt das Handy seinen Dialog (nur „während der Nutzung“). Erlaubt: Das Wetter kommt automatisch, die Vorschläge erscheinen. |
+| Standort erlaubt | Kein Schritt. Das Wetter kommt automatisch (war oft schon vorgeladen). |
+| Standort verweigert, „selbst wählen“ oder Wetter nicht abrufbar | Wetter-Schritt 2: **„Wie ist das Wetter?“** (Sonne, Bewölkt, Regen, Gewitter, Schnee). **Ein Tipp** wählt das Wetter und zeigt gleich die Vorschläge. Dazu ein kleiner Link „Standort erlauben“. |
 | Ergebnis „Eure Ideen“ | Oben eine Zeile mit dem angenommenen Wetter, z. B. „Bewölkt, Regen ab 15 Uhr · 11 °C“, darunter „Quelle: Deutscher Wetterdienst“. |
 | Dort: „Wetter ändern“ | Wetter von Hand überschreiben, **auch wenn der Standort klappt**. „Automatisch“ hebt die Handwahl wieder auf. |
 | Dort: „Standort erlauben“ | Kleiner Link, solange der Standort nicht erlaubt ist. Hat das Handy ihn dauerhaft abgelehnt, führt er in die Einstellungen. |
 
 Die Handwahl ersetzt nur die **Wetterlage**. Eine amtliche Warnung und die Temperatur bleiben, wenn es sie gibt:
 Sicherheit wird nie aufgeweicht.
+
+Wer das Wetter schon von Hand gewählt hat, wird nicht noch einmal gefragt, auch nicht mit der Erklär-Karte
+(der Standort lässt sich dann oben bei der Wetterzeile erlauben). Zurück vom Ergebnis führt zum Start, die Auswahl bleibt erhalten.
 
 ## Welche Regeln gelten
 
@@ -89,6 +99,7 @@ gibt es noch nicht: Sie kommen als **M6b** (eigener Schritt, mit einem Feld im D
 
 - Standort **nur im Vordergrund** und nur nach der Erklär-Karte. Es gibt weder im Code noch in `app.json` Hintergrund-Standort
   (Plugin `expo-location` mit allen Hintergrund-Optionen aus; iOS fragt nur „während der Nutzung“).
+- **Vorladen beim Öffnen des Starts:** siehe eigener Abschnitt unten. Kurz: Ohne schon erteilte Erlaubnis geht nichts an Bright Sky.
 - Die App fragt „ungefähr“ ab (`Accuracy.Low`, letzter bekannter Standort höchstens 30 Min. alt) und rundet **sofort** auf 2 Nachkommastellen
   (`getRoundedPlace` in `getLocation.ts`). Genauere Werte gibt es sonst nirgends. Die Internet-Adressen runden zusätzlich selbst
   (`buildUrls`), damit nie ein genauerer Wert nach außen gehen kann. Beides ist getestet.
@@ -113,8 +124,8 @@ gibt es noch nicht: Sie kommen als **M6b** (eigener Schritt, mit einem Feld im D
 | Wetterlage für die Vorschläge (Fenster, Regel-Mindestmenge, Warnungen, Temperatur) | `situation.ts` |
 | Texte zusammensetzen (Zeile, Warnung, Uhrzeit) | `weatherText.ts`, `formatClock.ts` |
 | Zustand für die Bildschirme | `WeatherProvider.tsx` |
-| Oberfläche | `LocationExplainer.tsx`, `WeatherSection.tsx`, `WeatherChips.tsx`, `WeatherSummary.tsx`, `AllowLocationLink.tsx`, `WeatherIcon.tsx` |
-| Wann die Handwahl erscheint | `manualWeather.ts` |
+| Oberfläche | `LocationExplainer.tsx`, `WeatherStep.tsx` (Schritt vor den Vorschlägen), `WeatherChips.tsx`, `WeatherSummary.tsx`, `AllowLocationLink.tsx`, `WeatherIcon.tsx` |
+| Wann die Handwahl und der Wetter-Schritt erscheinen | `manualWeather.ts` (`needsManualWeather`, `getWeatherStep`) |
 
 `location.ts`, `brightSky.ts`, `situation.ts`, `weatherCache.ts`, `weatherText.ts` und `manualWeather.ts` sind reine Funktionen mit Tests.
 Die Vorschlagslogik (`src/features/suggestions/`) kennt weder Standort noch Internet: Sie bekommt Wetterlage, Temperatur und
@@ -130,13 +141,16 @@ npx expo lint
 
 Von Hand mit Expo Go (`npx expo start`, QR-Code scannen). Der Standort lässt sich nur auf einem echten Handy prüfen:
 
-1. **Erstes Mal:** „Was machen wir?“ antippen. Es erscheint die Erklär-Karte, noch **kein** Dialog des Handys.
-2. **„Standort erlauben“ → „Beim Verwenden der App“.** Zeit wählen, „Vorschläge zeigen“: oben steht das Wetter mit „Quelle: Deutscher Wetterdienst“.
-3. **Zweites Mal (innerhalb von 30 Min.):** geht schnell, es wird nicht neu abgerufen.
+1. **Erstes Mal:** Die App öffnen. Auf dem Start ist **kein** Wetter zu sehen und das Handy fragt **nicht** nach dem Standort.
+   Zeit wählen, „Was machen wir?“ antippen. Es erscheint die Erklär-Karte, noch **kein** Dialog des Handys.
+2. **„Standort erlauben“ → „Beim Verwenden der App“.** Die Vorschläge erscheinen, oben steht das Wetter mit „Quelle: Deutscher Wetterdienst“.
+   Danach die App schließen und wieder öffnen: Der Start lädt das Wetter jetzt vor (siehe unten), gefragt wird nichts.
+3. **Zweites Mal (innerhalb von 30 Min.):** geht schnell, es wird nicht neu abgerufen (der Zwischenspeicher gilt).
 4. **„Wetter ändern“ → Regen:** Die Zeile zeigt „Eure Auswahl: Regen“, die Vorschläge ändern sich (nichts, was trocken sein muss). „Automatisch“ stellt zurück.
 5. **Flugmodus an:** Innerhalb von 30 Minuten nach Schritt 2 geht alles wie gewohnt (Daten noch frisch). Danach, mit Daten unter 3 Std.,
    steht „Stand …, gerade nicht aktualisierbar“. Gibt es keine Daten (z. B. frisch installiert), erscheint „Wie ist das Wetter?“.
-6. **Standort verweigern** (Einstellungen → Familienzeit → Standort aus, oder „Wetter selbst wählen“): „Wie ist das Wetter?“ mit Sonne, Bewölkt, Regen, Gewitter, Schnee und dem Link „Standort erlauben“.
+6. **Standort verweigern** (Einstellungen → Miki → Standort aus, oder „Wetter selbst wählen“): Nach dem Tipp auf „Was machen wir?“ erscheint „Wie ist das Wetter?“ mit Sonne, Bewölkt, Regen, Gewitter, Schnee und dem Link „Standort erlauben“.
+   Ein Tipp aufs Wetter zeigt gleich die Vorschläge. Zurück führt zum Start, Kinder, Zeit und Energie sind noch gewählt.
 7. **Außerhalb von Deutschland** liefert Bright Sky keine Daten: auch dann die Auswahl von Hand.
 
 Die Wetter-Abfragen lassen sich mit Beispielen ausprobieren:
@@ -146,4 +160,48 @@ Die Wetter-Abfragen lassen sich mit Beispielen ausprobieren:
 
 - Bright Sky ist ein freier Dienst ohne Zusage. Fällt er aus, fragt die App von Hand. Eine zweite Wetterquelle steht unter „Später“.
 - Wetter im Ausland (Urlaub) gibt es noch nicht; Bright Sky deckt nur Deutschland ab.
-- Das Wetter wird beim Öffnen von „Was machen wir?“ und beim Zurückkommen in die App besorgt, nicht ständig und nie im Hintergrund.
+- Das Wetter wird beim Öffnen des Starts, beim Öffnen der Vorschläge und beim Zurückkommen in die App besorgt (jeweils mit dem Zwischenspeicher von 30 Minuten),
+  nicht ständig und nie im Hintergrund.
+
+## Vorladen beim Öffnen des Starts
+
+*Vorarbeit für die Datenschutzerklärung (M12). Der Stand gilt ab D2.*
+
+**Wann:** Der Start-Bildschirm ruft `useWeatherRefresh` auf (`app/index.tsx`), und zwar
+
+1. beim Öffnen des Start-Bildschirms (beim Start der App, und auch, wenn der Start nach „Kind anlegen“ neu aufgebaut wird), und
+2. wenn die App aus dem Hintergrund wieder in den Vordergrund kommt, solange der Start im Bildschirm-Stapel liegt
+   (auch wenn gerade ein anderer Bildschirm darüber offen ist).
+
+Zurück vom Ergebnis zum Start löst **kein** neues Vorladen aus (der Start bleibt dabei im Hintergrund offen).
+Dasselbe Besorgen geschieht beim Öffnen der Vorschläge (Ergebnis-Bildschirm). Das Vorladen ist also nur ein Vorsprung,
+kein zusätzlicher Dienst.
+
+**Bedingung:** Nur wenn die Erlaubnis für den Standort **schon erteilt** ist („beim Verwenden der App“). Das Vorladen liest den Stand
+der Erlaubnis nur (`getForegroundPermissionsAsync`) und **fragt nie nach**. Ohne Erlaubnis (nie gefragt, verweigert, „Wetter selbst wählen“,
+dauerhaft abgelehnt) gehen weder Standort noch Wetter-Anfrage irgendwohin, und gespeicherte Wetterdaten werden gelöscht.
+
+**Was mit dem Standort geschieht:** Er wird nur auf dem Gerät gelesen (ungefähre Genauigkeit, höchstens 30 Minuten alter letzter Standort,
+sonst eine neue ungefähre Ortung mit 6 Sekunden Zeitlimit) und **sofort auf 2 Nachkommastellen gerundet** (etwa 1 km).
+Alles Weitere sieht nur diesen gerundeten Ort.
+
+**Was geht an Bright Sky (`api.brightsky.dev`):** Bei einem Abruf drei Anfragen (`current_weather`, `weather` für 8 Stunden Vorhersage, `alerts`),
+jeweils mit
+
+- dem **gerundeten Ort** (`lat` und `lon` mit 2 Nachkommastellen),
+- bei der Vorhersage dem **Zeitfenster** (volle Stunde jetzt bis 8 Stunden später),
+- und, wie bei jeder Internetverbindung unvermeidbar, der **IP-Adresse** des Handys sowie den Kopfzeilen, die das Betriebssystem
+  üblicherweise mitschickt (z. B. User-Agent). Die App selbst setzt nur `Accept: application/json`.
+
+Es geht **kein** Konto, keine Kennung, kein Kind, keine Auswahl (Kinder, Zeit, Energie) und kein Verlauf an Bright Sky.
+
+**Wie oft:** Höchstens ein Abruf (drei Anfragen) alle 30 Minuten, solange der gerundete Ort gleich bleibt. Ist der gespeicherte Stand
+jünger als 30 Minuten und gehört zum selben gerundeten Ort, geht **keine** Anfrage ins Internet (nur der Standort wird auf dem Gerät gelesen).
+Ein anderer gerundeter Ort löst einen neuen Abruf aus. Bei Fehlern gilt der Stand bis 3 Stunden (siehe oben).
+Es gibt kein Vorladen im Hintergrund und keinen Zeitplan.
+
+**Warum vorladen:** Die Vorschläge stehen nach dem Tipp auf den Hauptknopf sofort da (30-Sekunden-Prinzip), statt erst auf das Wetter zu warten.
+
+**Prüfen:** Flugmodus an, App öffnen: Der Start erscheint ohne Verzögerung und ohne Fehlermeldung (das Vorladen scheitert still).
+Standort-Erlaubnis in den Einstellungen entziehen, App öffnen: Es erscheint keine Erlaubnis-Frage und keine Erklär-Karte auf dem Start.
+Automatisch geprüft ist, dass `resolveWeather` ohne Erlaubnis nichts abruft und nie nachfragt (`weatherService.test.ts`).

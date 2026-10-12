@@ -17,11 +17,14 @@ import { useColorScheme, type ViewStyle } from 'react-native';
 
 const light = {
   background: '#FAF6F0', // Papier: Grund der Bildschirme (DESIGN.md)
-  surface: '#F0E6D8', // Sand: Karten und Flächen (DESIGN.md)
+  card: '#FFFFFF', // Karten, Kacheln, nicht gewählte Chips: weiß (PDF gemessen, bestätigt mit Entscheidung 11). Text darauf: `text`
+  surface: '#F0E6D8', // Sand: Flächen und Platzhalter, keine Karten (DESIGN.md, Entscheidung 11)
   text: '#2A211C', // Tinte: normaler Text, Überschriften (DESIGN.md)
   textMuted: '#6B5D53', // Nebentext, Hinweise (PDF)
-  primary: '#B4532F', // Terrakotta: Hauptknöpfe (DESIGN.md). Als Textfarbe nur auf `background`.
+  primary: '#B4532F', // Terrakotta: nur der Hauptknopf (DESIGN.md, Entscheidung 11). Als Textfarbe nur auf `background`.
   onPrimary: '#FFFFFF', // Text auf `primary` (DESIGN.md)
+  selected: '#2A211C', // Tinte: gewählter Zustand von Chips und Kacheln (PDF, Entscheidung 11)
+  onSelected: '#FAF6F0', // Text und Häkchen auf `selected` (Papier)
   secondary: '#5F7A5A', // Salbei: Zweitfarbe (DESIGN.md)
   onSecondary: '#FFFFFF', // Text auf `secondary` (DESIGN.md)
   accent: '#E8A94F', // Honig: nur Akzent, NIE für Text (DESIGN.md)
@@ -41,11 +44,14 @@ export const lightColors: Colors = light;
 // gleicher warmer Braunton, Kontraste per Test geprüft (src/lib/theme.test.ts).
 export const darkColors: Colors = {
   background: '#1C1714', // DESIGN.md
+  card: '#332A24', // abgeleitet: heller als `surface`, damit Karten im Dunkeln vom Grund abheben
   surface: '#2A221D', // abgeleitet
   text: '#F3EBE2', // DESIGN.md
   textMuted: '#B8A99B', // abgeleitet
   primary: '#E3825C', // DESIGN.md
   onPrimary: '#1C1714', // dunkle Schrift auf dem Knopf (DESIGN.md)
+  selected: '#F3EBE2', // abgeleitet: heller Text-Ton als gewählter Zustand
+  onSelected: '#1C1714', // abgeleitet
   secondary: '#8FA887', // abgeleitet
   onSecondary: '#1C1714', // abgeleitet
   accent: '#E8A94F', // unverändert, nur Akzent
@@ -201,6 +207,8 @@ export const opacity = {
 
 // Größe von Symbolen (Icons), z. B. <CategoryIcon size="lg" />.
 export const iconSize = {
+  sm: 14, // Häkchen im kleinen Kreis (Kinder-Kachel auf dem Start)
   md: 24,
   lg: 32,
+  hero: 160, // großes, angeschnittenes Symbol auf Platzhalter-Flächen (DESIGN.md: „großes dünnes Kategorie-Symbol“)
 } as const;
