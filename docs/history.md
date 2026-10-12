@@ -11,13 +11,13 @@ Die App merkt sich, was gemacht wurde, und schlägt es nicht gleich wieder vor. 
 | Details                        | `app/activity/[id].tsx`     | Idee lesen, „Das machen wir“, „Fertig“, „Wie war’s?“. |
 | Was wir zusammen gemacht haben | `app/history.tsx`           | Liste, Bewertung ändern oder entfernen, löschen. Erreichbar über die Pille „Verlauf“ oben auf dem Start, sobald es einen Eintrag gibt. |
 
-**Details:** Titel, Kategorie-Symbol, Dauer, Altersspanne, Elternenergie (wenig/mittel/viel), Kosten, dann:
+**Details** (seit D4 im Design „Sonntagslicht“, Aufbau, Maße und Regeln: `docs/detail.md`): Bildbereich, Titel, fünf Eckdaten-Kacheln, dann:
 
-1. **Allergene** in einer hervorgehobenen Box. Sie werden aus dem Material abgeleitet (`getAllergens`), nicht aus dem Hinweistext.
+1. **Allergene** in einer hervorgehobenen Box, nur wenn welche erkannt wurden. Sie werden aus dem Material abgeleitet (`getAllergens`), nicht aus dem Hinweistext. Darunter steht dauerhaft „Bei Allergien bitte die Zutatenlisten prüfen.“
 2. **Sicherheit**: Der Hinweistext der Aktivität und das Schild „Mit Erwachsenen“, wenn das Material Schere, Messer, Hitze, Feuer,
    Wasser oder ein Elektrogerät enthält (`needsAdults`, dieselbe Regel wie Punkt 2 der Sicherheits-Checkliste).
-3. **Material** als Liste (Texte unter `materials` in `de.json`/`en.json`).
-4. **Anleitung** nummeriert, mit der größeren Schrift `fontSize.reading` aus dem Theme und viel Platz zwischen den Schritten.
+3. **Material** als Liste zum Abhaken (Texte unter `materials` in `de.json`/`en.json`; die Haken gelten nur auf dem Bildschirm).
+4. **Anleitung** nummeriert, mit der größeren Schrift `fontSize.reading` aus dem Theme und 28 px Platz zwischen den Schritten.
 
 Der Hauptknopf liegt fest am unteren Rand. „Das machen wir“ speichert **noch nichts**, der Text bleibt sichtbar und der Knopf wird zu
 „Fertig“. Erst „Fertig“ legt einen Eintrag an und fragt „Wie war’s?“ (Daumen hoch, Daumen runter oder „Überspringen“). Danach geht es
@@ -113,7 +113,7 @@ Alle Tests laufen in deutscher Ortszeit (`jest.global-setup.js` setzt `TZ=Europe
 Von Hand: `npx expo start`, mit Expo Go öffnen.
 
 1. „Was machen wir?“ → Zeit wählen → eine Karte antippen: Details mit Eckdaten, Material, Schritten. Bei Backen/Kochen die Allergen-Box,
-   bei Schere, Messer, Herd oder Wasser das Schild „Mit Erwachsenen“.
+   bei Schere, Messer, Herd oder Wasser das Schild „Mit Erwachsenen“ (weitere Prüfpunkte: `docs/detail.md`, „Von Hand testen“).
 2. „Das machen wir“ tippen: Anleitung bleibt, unten steht „Fertig“. Zurückgehen und die App schließen: kein Eintrag.
 3. „Fertig“ schnell zweimal tippen: ein Eintrag. Daumen hoch oder runter wählen (oder „Überspringen“), die App landet auf dem Start.
 4. Die Pille „Verlauf“ erscheint oben auf dem Start. Dort Bewertung ändern, nochmal tippen = entfernen, Einträge löschen.

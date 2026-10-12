@@ -105,22 +105,32 @@
   },
   "detail": {
     "screenTitle": "Details",
-    "duration": "Time: {{value}}",
-    "age": "Age: {{min}}–{{max}} years",
-    "ageSingle_one": "Age: {{count}} year",
-    "ageSingle_other": "Age: {{count}} years",
-    "energy": {
-      "low": "Energy from you: low",
-      "medium": "Energy from you: medium",
-      "high": "Energy from you: high"
+    "back": "Back to ideas",
+    "facts": {
+      "duration": "Duration",
+      "age": "Age",
+      "energy": "Energy from you",
+      "cost": "Cost",
+      "setting": "Place"
     },
-    "cost": {
+    "energyValue": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "costValue": {
       "free": "Free",
-      "low": "Costs a little",
-      "high": "Costs a bit more"
+      "low": "A little",
+      "high": "A bit more"
+    },
+    "settingValue": {
+      "indoor": "Indoors",
+      "outdoor": "Outdoors",
+      "both": "Indoors or outdoors"
     },
     "allergensTitle": "Watch out, allergens",
     "allergensText": "May contain: {{list}}.",
+    "allergensNote": "If you have allergies, please check the ingredient lists.",
     "safetyTitle": "Safety",
     "withAdults": "With adults",
     "materialsTitle": "What you need",

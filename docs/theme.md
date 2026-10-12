@@ -12,6 +12,7 @@ Bausteine `Button`, `Chip` und `Section`. Bildschirme sind erst ab D2 dran.
 | `src/lib/useThemedStyles.ts`  | Styles, die von hell/dunkel abhängen                                            |
 | `src/lib/fonts.ts`            | Laden von Literata und Onest, Zeitlimit                                         |
 | `src/lib/theme.test.ts`       | Kontraste beider Paletten (WCAG AA) und die Vorgaben aus der DESIGN.md          |
+| `src/lib/contrast.ts`         | Kontrastberechnung nach WCAG, nur für Tests (`theme.test.ts`, Detail-Tests)     |
 
 ## So nutzt man das Theme (neue und umgebaute Bildschirme)
 
@@ -29,8 +30,8 @@ function Card() {
 ```
 
 - `createStyles` steht **außerhalb** der Komponente. `Theme`, `fonts`, `fontSize` usw. kommen aus `@/lib/theme`.
-- Der feste Export `colors` (immer hell) gibt es nur, bis jeder Bildschirm umgestellt ist. Umgestellt sind bisher der Start (D2) und das Ergebnis mit dem Wetter-Schritt (D3);
-  Detail (D4) sowie Verlauf und Kinderprofile (D5) folgen. Neue Bildschirme nehmen `useTheme()` oder `useThemedStyles`.
+- Der feste Export `colors` (immer hell) gibt es nur, bis jeder Bildschirm umgestellt ist. Umgestellt sind bisher der Start (D2), das Ergebnis mit dem Wetter-Schritt (D3) und die Detailansicht (D4);
+  nur noch „Wie war’s?“ (`FeedbackPanel`, `RatingButton`) sowie Verlauf und Kinderprofile (D5) folgen. Neue Bildschirme nehmen `useTheme()` oder `useThemedStyles`.
 - Die Lint-Regel gegen feste Farben, Größen, Abstände und Radien bleibt (`npx expo lint`).
 - Breiten und Höhen stehen nicht im Theme, **außer** den Mindestgrößen `size.touch` (44 pt Tippfläche)
   und `size.checkbox` (56 px Abhak-Feld). Beides schreibt die DESIGN.md vor.
@@ -128,13 +129,19 @@ Kontraste (geprüft in `src/lib/theme.test.ts`, für alle sieben Kategorien, hel
 
 ### Kategorie-Fotos: Mindestzahl
 
-Ein Kategorie-Foto erscheint auf den Karten **nur, wenn die Kategorie mindestens drei Fotos hat**: Konstante `minPhotosPerCategory` (heute **3**), sie steht nur in
-`src/features/activities/categoryPhotoFiles.ts`. Hat eine Kategorie weniger, zeigen ihre Karten die Farbfläche mit Symbol (die Fotos bleiben in der Liste und im Ordner, sie werden nur nicht gezeigt).
+**Erst einmal ganz ohne Fotos (DESIGN.md, Zusatz 36).** Ein Kategorie-Foto erscheint auf den Karten und in der Detailansicht **nur, wenn die Kategorie mindestens so viele Fotos hat wie die Mindestzahl**:
+Konstante `minPhotosPerCategory` (heute **99**), sie steht nur in `src/features/activities/categoryPhotoFiles.ts`. Keine Kategorie erreicht 99 Fotos, also zeigen alle Karten und die Detailansicht
+die Farbfläche mit Symbol, solange eine Aktivität kein eigenes `image` hat. **Der Mechanismus, die Foto-Liste (`categoryPhotos.generated.ts`) und die Dateien in `assets/images/categories/` bleiben unverändert.**
+Fotos kommen später über M9b (Bilder-Pipeline); dann wird die Zahl gesenkt (vorher stand sie auf 3, Zusatz 34), und der Test in `cardImage.test.ts` („Heute keine Kategorie-Fotos“) und diese Zeile werden angepasst.
 
-- **Warum:** Mit einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: ein Schachbrett bei der Kissenburg). Mit drei und mehr verteilen sich die Fotos, und ein einzelnes unpassendes fällt weniger auf.
-- **Heute:** Natur (4 Fotos) und Kochen (3) zeigen Fotos. Basteln und Spiel (je 1), Bewegung, Experiment und Ausflug (je 0) zeigen die Farbfläche. Kommt das dritte Foto einer Kategorie dazu, erscheinen ihre Fotos ohne weitere Änderung (Ablauf: `docs/bildquellen.md`).
+- **Warum 3 und nicht 1:** Mit einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: ein Schachbrett bei der Kissenburg). Mit drei und mehr verteilen sich die Fotos, und ein einzelnes unpassendes fällt weniger auf.
+  Das war der Stand bis Zusatz 36 (damals zeigten Natur mit 4 und Kochen mit 3 Fotos). Warum jetzt gar keine: Die vorhandenen Fotos reichen nicht, um den Anspruch der DESIGN.md zu erfüllen (passend zur Aktivität), bis die Pipeline sie liefert.
+- **Heute:** Es liegen 9 Fotos im Ordner (Natur 4, Kochen 3, Basteln 1, Spiel 1), keines wird gezeigt. Alle Karten zeigen die Farbfläche mit Symbol, ebenso die Detailansicht.
 - **Vorrang bleibt:** Das `image` einer einzelnen Aktivität gilt weiterhin vor allem anderen und zählt bei der Mindestzahl nicht mit.
-- **Geprüft** in `src/features/suggestions/cardImage.test.ts` (0, 1, 2 Fotos: Farbfläche; 3, 4, 7: Fotos; `image` gewinnt immer; jede Kategorie entscheidet für sich) und `categoryPhotos.test.ts` (diese Zahl steht in dieser Datei).
+- **Technik:** `usablePhotos`, `pickCategoryPhoto`, `getCardImageChain` und `assignCardImages` in `src/features/suggestions/cardImage.ts` nehmen die Mindestzahl als letzten, freiwilligen Parameter (Vorgabe: die Konstante).
+  So lässt sich der Mechanismus in den Tests mit 3 prüfen, obwohl die echte Zahl 99 ist.
+- **Geprüft** in `src/features/suggestions/cardImage.test.ts` (Mechanismus mit 3: 0, 1, 2 Fotos zeigen die Farbfläche, 3, 4, 7 Fotos die Fotos; `image` gewinnt immer; jede Kategorie entscheidet für sich;
+  echte Werte der App: keine Kategorie hat Fotos, die Konstante ist der Schalter) und `categoryPhotos.test.ts` (diese Zahl steht in dieser Datei).
 - `npm run photos:index` zeigt je Kategorie, ob sie die Mindestzahl erreicht.
 
 Zuordnung Kategorie → Symbol: nur in `src/features/activities/CategoryIcon.tsx` (`categoryIcons`). Symbole für Spielplatz, Bad und Termine kommen erst mit M10 und M11 (Entscheidung 12).
@@ -154,6 +161,9 @@ Neu im Theme: `card`, `selected`, `onSelected` (siehe Farbtabelle) sowie `iconSi
   teilen ihre Größe durch `fontScale` und bleiben so gleich groß (Stimmungsbild-Platzhalter, `MoodPlaceholder.tsx`).
 - **Ergebnis (D3):** Der runde Zurück-Knopf (`ResultsHeader`) ist weiß mit feinem Rand und mindestens `size.touch` breit und hoch. Die feste Wetterzeile ist Sand (`surface`) mit einer kleinen weißen Pille „Ändern“.
   Die Kategorie-Pille auf dem Bildbereich ist weiß (`card`) mit Tinte darauf. Ein Foto bringt seine eigene Größe mit, deshalb haben Bilder auf Karten ausdrücklich Breite und Höhe 100 %.
+- **Detailansicht (D4):** Details und alle Maße in `docs/detail.md`. Neue Bausteine: `BackButton` (der runde Zurück-Knopf, auch im Kopf von „Eure Ideen“), `Section` mit `large` (größere Überschrift),
+  `CardMedia` mit `showPill={false}` (Bildbereich ohne Kategorie-Pille). **Abhak-Felder:** Zeile `size.checkbox` (56) hoch, Kästchen 32 px, Rand `icon` (mindestens 3:1 zu `card` und `background`, im Test geprüft, Entscheidung 17),
+  abgehakt `selected` mit `onSelected`. **Hinweisboxen:** `warningSurface` mit `warning`, nie `danger` (kein Alarm-Rot). Es gibt keine neuen Theme-Werte.
 - **Raster:** Breiten stehen nicht im Theme. Die Mindestbreiten für Kacheln und Chips und die Regeln für die Spalten liegen in
   `src/features/suggestions/startLayout.ts` (getestet).
 

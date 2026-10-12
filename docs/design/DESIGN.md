@@ -74,7 +74,7 @@ Format: Querformat, etwa 1200 px breit, deutlich unter 300 KB. Ablage unter asse
 Das Foto passt zur Aktivität und widerspricht nicht der Altersgruppe (kein Babyspielzeug bei einer Aktivität für Teenager).
 Vor der Beta schaut ein Mensch einmal alle Fotos durch (wie bei den Aktivitäten).
 
-Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse (nur von unserem eigenen Speicher, Zusatz 35). Auf der Karte gilt dieser Vorrang: 1. image der Aktivität, 2. gebündeltes Kategorie-Foto aus assets/images/categories/ (nur bei mindestens drei Fotos in der Kategorie, Zusatz 34), 3. Farbfläche mit Symbol (Entscheidung 21).
+Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse (nur von unserem eigenen Speicher, Zusatz 35). Auf der Karte gilt dieser Vorrang: 1. image der Aktivität, 2. gebündeltes Kategorie-Foto aus assets/images/categories/ (nur ab der Mindestzahl Fotos in der Kategorie, Zusatz 34, heute 99: erst einmal ganz ohne Fotos, Zusatz 36), 3. Farbfläche mit Symbol (Entscheidung 21).
 
 Logo A1 „Zwei Bögen"
 
@@ -150,8 +150,19 @@ Zusätze beim Umsetzen von D3 (von Clemens bestätigt, 34 und 35 von Clemens nac
 31. „Keine passt? Drei neue Ideen“ ist ein Nebenknopf (Sand, Tinte), nicht Terrakotta und kein Textlink wie im PDF (Entscheidung 11). Links im Wetter-Schritt sind Tinte mit Unterstreichung.
 32. Nicht gebaut aus dem PDF: die Überschrift „Drei Ideen für eure Stunde“ mit Untertitel („Mila & Jonas · 1 Std · Energie normal · Ändern“) und die Angabe „Drinnen/Draußen“ auf der Karte. Der Kopf trägt den Titel „Eure Ideen“. „Drinnen/Draußen“ steht auf der Feinschliff-Liste in der CLAUDE.md.
 33. Die Karte zeigt die Altersspanne („3–8 Jahre“, 0 bis 16 „Alle Alter“) statt „ab 3 J.“. Die sieben Kategorie-Farben (Entscheidung 10) stehen mit allen Werten und Kontrasten in docs/theme.md.
-34. Ein Kategorie-Foto erscheint nur, wenn die Kategorie mindestens drei Fotos hat (Konstante `minPhotosPerCategory` in `src/features/activities/categoryPhotoFiles.ts`, Erklärung in docs/theme.md). Mit nur einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: Schachbrett bei der Kissenburg). Das `image` einer einzelnen Aktivität hat weiterhin Vorrang. Heute zeigen nur Natur und Kochen Fotos, alle anderen die Farbfläche mit Symbol.
+34. Ein Kategorie-Foto erscheint nur, wenn die Kategorie mindestens drei Fotos hat (Konstante `minPhotosPerCategory` in `src/features/activities/categoryPhotoFiles.ts`, Erklärung in docs/theme.md). Mit nur einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: Schachbrett bei der Kissenburg). Das `image` einer einzelnen Aktivität hat weiterhin Vorrang. Stand bei dieser Entscheidung: Natur und Kochen zeigten Fotos, alle anderen die Farbfläche mit Symbol (abgelöst durch Zusatz 36).
 35. Das Feld `image` darf nur Adressen von unserem eigenen Speicher laden (Allowlist), damit keine IP-Adressen an fremde Server gehen. Die Allowlist kommt mit M8, der Speicher-Host steht unter „Entscheidungen vor M12“ in der CLAUDE.md. Bis dahin prüft der Code nur `https://`.
+
+Zusätze beim Umsetzen von D4 (36 von Clemens am Anfang von D4 festgelegt, 37 bis 41 im Plan von Clemens bestätigt, 42 bis 44 von Clemens nach dem Plan ergänzt; Details: docs/detail.md)
+36. Erst einmal ganz ohne Fotos: Die Mindestzahl `minPhotosPerCategory` steht auf 99, keine Kategorie erreicht sie. Alle Karten und die Detailansicht zeigen die Farbfläche mit Symbol, solange eine Aktivität kein eigenes `image` hat. Mechanismus, Foto-Liste und Dateien bleiben. Fotos kommen später über M9b (Bilder-Pipeline). Löst den Stand von Zusatz 34 („heute Natur und Kochen“), nicht dessen Grund.
+37. „Abhak-Felder 56 px hoch“ (Entscheidung 13) heißt: Die ganze Zeile ist 56 px hoch und die Tippfläche. Das sichtbare Kästchen darin ist etwa 32 px groß, wie im PDF.
+38. Der Bildbereich der Detailansicht hat die Form und Rundung der Karten, aber keine Kategorie-Pille. Die Kategorie steht klein über dem Titel.
+39. Abgehakt ist Tinte mit Häkchen (nach Nr. 11 und 23), nicht Terrakotta wie im PDF. Der Rand der leeren Kästchen ist `icon` aus der Palette (Nr. 17).
+40. Die Sicherheitsbox steht vor Material und Anleitung (im PDF am Ende), nach der Allergen-Box. Beide Boxen in den Warnfarben (Honig-Ton), ohne Alarm-Rot.
+41. Fünf Eckdaten-Kacheln statt vier im PDF: Dauer, Alter, Energie, Kosten, Ort. Der Wert „beides“ heißt „Drinnen oder draußen“ (en „Indoors or outdoors“). Steht die letzte Kachel allein in ihrer Zeile, füllt sie die Zeile.
+42. Die Allergen-Box erscheint nur, wenn Allergene erkannt wurden. Es gibt nie eine Aussage wie „frei von Allergenen“. Unter der Box steht dauerhaft der Satz „Bei Allergien bitte die Zutatenlisten prüfen.“ (en „If you have allergies, please check the ingredient lists.“).
+43. Der feste Bereich unten ist ein Nachbar des Scrollbereichs, nicht darüber gelegt: Der Scrollbereich endet über ihm, auch bei großer Schrift und mit Sicherheitsbereich am unteren Rand, und hat unten zusätzlich Luft. Die Zurück-Taste von Android führt zu den Ideen (eine Stufe zurück im Stapel).
+44. Nach „Fertig“ ist „Wie war’s?“ ohne Scrollen sichtbar: Es steht im selben festen Bereich wie der Hauptknopf. Funktion und Aussehen bleiben bis D5 unverändert.
 
 Offene Punkte
  Logo und App-Icon als Dateien exportieren und unter assets/ ablegen

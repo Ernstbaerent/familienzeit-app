@@ -15,7 +15,7 @@ Der frühere Bildschirm „Was machen wir?“ (`app/suggestions/index.tsx`) ist 
 Die Auswahl reist als Parameter in der Bildschirm-Adresse zum Ergebnis (`selection.ts`). Das bleibt auf dem Gerät.
 Das Wetter reist nicht mit. Der Start setzt den Parameter `weather` nie; er entsteht erst im Wetter-Schritt auf dem Ergebnis (Handwahl, im Bildschirm gehalten).
 Sonst holt sich der Ergebnis-Bildschirm das Wetter selbst (`docs/weather.md`).
-Eine Karte zeigt Foto oder Farbfläche mit Kategorie-Pille, Titel, Kurzbeschreibung, Dauer und Altersspanne (Details: „Ergebnis mit Karten (D3)“ unten). Antippen öffnet die Detailansicht (M7, siehe `docs/history.md`).
+Eine Karte zeigt Foto oder Farbfläche mit Kategorie-Pille, Titel, Kurzbeschreibung, Dauer und Altersspanne (Details: „Ergebnis mit Karten (D3)“ unten). Antippen öffnet die Detailansicht (M7 siehe `docs/history.md`, Design seit D4 siehe `docs/detail.md`).
 
 ## Wo was liegt
 
@@ -105,8 +105,8 @@ Der Schatten liegt am äußeren Element, das Zuschneiden der Ecken am inneren (s
 Jede Karte hat eine Kette von Stufen (`cardImage.ts`), bestes Bild zuerst. **Alle drei Fälle haben dieselbe Form und Höhe** (Seitenverhältnis 2:1), mit derselben Pille:
 
 1. **`image` der Aktivität** (Web-Adresse, nur `https://`). Lädt sie nicht (`onError`), zeigt die Karte die nächste Stufe.
-2. **Gebündeltes Kategorie-Foto** aus `assets/images/categories/`, **aber nur, wenn die Kategorie mindestens drei Fotos hat** (`minPhotosPerCategory`, Zusatz 34, `docs/theme.md`). Heute: Natur und Kochen.
-3. **Farbfläche der Kategorie** (alle Kategorien mit weniger als drei Fotos) mit großem, dünnem, am unteren Rand angeschnittenem Symbol (`categoryIcons`) und einem weichen großen Kreis. Farben: `docs/theme.md`, „Kategorie-Farben“.
+2. **Gebündeltes Kategorie-Foto** aus `assets/images/categories/`, **aber nur, wenn die Kategorie mindestens `minPhotosPerCategory` Fotos hat** (Zusatz 34 und 36, `docs/theme.md`). **Heute steht die Zahl auf 99: erst einmal ganz ohne Fotos**, die Stufe ist vorhanden, wird aber von keiner Kategorie erreicht.
+3. **Farbfläche der Kategorie** (heute alle Kategorien, solange sie die Mindestzahl nicht erreichen) mit großem, dünnem, am unteren Rand angeschnittenem Symbol (`categoryIcons`) und einem weichen großen Kreis. Farben: `docs/theme.md`, „Kategorie-Farben“.
    Das Symbol ist Dekoration und bleibt bei großer Systemschrift gleich groß (die Skalierung bleibt an).
 
 **Die Foto-Liste.** Es gibt nicht für jede Kategorie Fotos und nicht immer gleich viele, eine feste Anzahl wird nirgends angenommen. Die Liste für die App wird **erzeugt**:
@@ -125,8 +125,8 @@ fällt eines weg, wechseln nur die, die es vorn hatten.
 
 **Die drei Karten eines Ergebnisses.** Dasselbe Foto soll auf einem Bildschirm möglichst nur einmal vorkommen (`assignCardImages`): Die Karten bekommen ihr Foto in der Reihenfolge ihrer IDs
 (nicht der Anzeige-Reihenfolge, so bleibt ein Foto bei seiner Aktivität, wenn sich die Reihenfolge ändert), jede nimmt das für sie bestplatzierte Foto, das noch frei ist.
-Nur wenn die Kategorie weniger Fotos hat als Karten, wiederholt sich eines (mit der Mindestzahl von drei Fotos und drei Karten pro Gruppe kommt das nicht vor). Heißt: Eine Aktivität zeigt immer ihr eigenes Foto, **außer** eine Nachbarkarte derselben Kategorie hätte genau dasselbe,
-dann weicht eine von beiden aus. Die Detailansicht (D4) kann `pickCategoryPhoto` nutzen und bekommt damit dasselbe Foto wie die Karte; nur im Ausweichfall könnte es dort ein anderes sein.
+Nur wenn die Kategorie weniger Fotos hat als Karten, wiederholt sich eines (mit einer Mindestzahl von drei Fotos und drei Karten pro Gruppe kommt das nicht vor; heute gibt es ohnehin keine Kategorie-Fotos, Zusatz 36). Heißt: Eine Aktivität zeigt immer ihr eigenes Foto, **außer** eine Nachbarkarte derselben Kategorie hätte genau dasselbe,
+dann weicht eine von beiden aus. Die Detailansicht (D4) nutzt `getCardImageChain` (dieselbe Wahl wie `pickCategoryPhoto`) und bekommt damit dasselbe Foto wie die Karte; nur im Ausweichfall könnte es dort ein anderes sein. Solange es keine Kategorie-Fotos gibt, zeigen beide die Farbfläche.
 
 **Datenschutz-Hinweis zu `image` (Zusatz 35):** Eine Web-Adresse in `image` lädt das Bild beim Anzeigen von einem Server (die IP-Adresse geht dorthin). Deshalb darf `image` **nur Adressen von unserem eigenen Speicher** laden (Allowlist), damit keine IP-Adressen an fremde Server gehen.
 Die Allowlist kommt mit M8 (Supabase); vorher ist der Speicher-Host festzulegen (CLAUDE.md, „Entscheidungen vor M12“). **Heute prüft der Code nur `https://`, die Allowlist gibt es noch nicht.** Bisher hat keine Aktivität ein `image`, es darf bis dahin keine mit fremder Adresse geben.
