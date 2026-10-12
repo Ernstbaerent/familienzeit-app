@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Familienzeit",
+    "name": "Miki",
     "slug": "familienzeit-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "familienzeit",
+    "scheme": "miki",
     "userInterfaceStyle": "light",
     "plugins": [
       "expo-router",
@@ -19,7 +19,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Familienzeit asks for your location only while the app is open. It is rounded to about 1 km and only used for the weather where you are.",
+          "locationWhenInUsePermission": "Miki asks for your location only while the app is open. It is rounded to about 1 km and only used for the weather where you are.",
           "locationAlwaysAndWhenInUsePermission": false,
           "locationAlwaysPermission": false,
           "motionUsagePermission": false,

@@ -1,4 +1,7 @@
 {
+  "app": {
+    "name": "Miki"
+  },
   "home": {
     "greeting": "Hello!",
     "intro": "What will you do together today? Get 3 matching ideas in 30 seconds.",
