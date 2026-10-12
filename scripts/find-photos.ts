@@ -3,16 +3,19 @@
  *
  * KEINE App-Funktion und KEINE Pipeline. Ein einmaliger Schritt, den ein Mensch auslöst, um für die sieben
  * Kategorien (Basteln, Spiel, Bewegung, Experiment, Natur, Kochen, Ausflug) Kandidaten-Fotos zu holen. Danach
- * schaut ein Mensch die Bilder an und wählt aus (siehe docs/bilder-pruefung.md). Regeln für die Fotos:
- * docs/design/DESIGN.md, Abschnitt „Regeln für Fotos“.
+ * schaut ein Mensch die Bilder an und wählt aus. Regeln für die Fotos: docs/design/DESIGN.md, Abschnitt „Regeln für Fotos“.
+ *
+ * Die gewählten Fotos liegen dauerhaft unter assets/images/categories/ (Namensschema kategorie-nummer.jpg), ihre Quellen
+ * stehen in docs/bildquellen.md. Die Kandidaten (assets/images/candidates/) und die Prüfseite (docs/bilder-pruefung.md) sind
+ * nur Zwischenstufen einer Auswahlrunde: --publish legt sie an, nach der Auswahl werden sie wieder gelöscht.
  *
  * Start (im Projektordner, Node 22 oder neuer, ImageMagick `convert` zum Verkleinern):
  *   npm run photos:find                  # ein Lauf: Suchen, Vorauswahl, Download, Verkleinern
  *   npm run photos:find -- --plan        # nur zeigen, was gesucht würde (kein Netz, kein Schlüssel nötig)
  *   npm run photos:find -- --offline     # nur aus dem Zwischenspeicher auswerten, keine Anfragen, keine Downloads
  *   npm run photos:find -- --publish scripts/.cache/photos/verdicts.json
- *                                        # Befunde übernehmen: bestandene Bilder nach assets/images/candidates/,
- *                                        # candidates.json schreiben, Tabellen in docs/bilder-pruefung.md erzeugen
+ *                                        # Befunde übernehmen: bestandene Bilder nach assets/images/candidates/, candidates.json
+ *                                        # schreiben, Prüfseite docs/bilder-pruefung.md mit Tabellen anlegen (Zwischenstufe)
  *   npm run photos:find -- --selftest    # Rechenfunktionen prüfen, kein Netz
  *
  * Schlüssel: nur aus der Umgebungsvariable PIXABAY_API_KEY. Er wird nie ausgegeben, nie geloggt, nie
@@ -25,7 +28,9 @@
  * - Die Schnittstelle ist für menschliche Anfragen gedacht, „systematische Massen-Downloads“ und „Bulk, large-scale
  *   or systematic copying“ sind nicht erlaubt. Darum: genau EIN Lauf (zweiter Start wird verweigert), harte
  *   Obergrenzen (siehe unten) und eine Buchführung (ledger.json), die auch die Probeabfragen davor mitzählt.
- *   Vor einer automatischen Pipeline (M9b) beim Anbieter anfragen oder eine andere Quelle wählen.
+ *   Vor einer automatischen Pipeline (M9b) beim Anbieter anfragen oder eine andere Quelle wählen. Sperre und Zähler
+ *   liegen nur in scripts/.cache dieses Rechners: Wer neu klont, beginnt bei null und muss die Grenzen und die Regeln von
+ *   Pixabay (keine automatisierten Massenabfragen) selbst einhalten.
  * - Pixabay bittet um einen Hinweis zur Herkunft der Bilder („Bilder: Pixabay“, siehe CLAUDE.md).
  *
  * Rahmen: höchstens 25 Suchen und 80 Downloads. Je Kategorie 2 Begriffe normal und 1 Begriff mit editors_choice
@@ -710,6 +715,21 @@ function buildTables(items: ShortItem[], verdicts: Record<string, Verdict>): str
   return lines.join('\n');
 }
 
+/** Rumpf der Prüfseite, falls es sie nicht (mehr) gibt: nur Titel und Marker, die Tabellen setzt --publish ein. */
+function reviewDocSkeleton(): string {
+  return [
+    '# Foto-Auswahl für die Kategorie-Karten (Prüfseite)',
+    '',
+    'Zwischenstufe einer Auswahlrunde: Kandidaten unter `assets/images/candidates/`. Nach der Auswahl gehören die gewählten Fotos',
+    'nach `assets/images/categories/` (Namen `kategorie-nummer.jpg`) und ihre Quellen nach `docs/bildquellen.md`. Danach werden diese',
+    'Seite und der Ordner `candidates` wieder gelöscht.',
+    '',
+    DOC_START,
+    DOC_END,
+    '',
+  ].join('\n');
+}
+
 function publish(verdictsPath: string) {
   const items = readJson<ShortItem[]>(SHORTLIST_FILE);
   const verdicts = readJson<Record<string, Verdict>>(verdictsPath);
@@ -733,6 +753,10 @@ function publish(verdictsPath: string) {
   }
   writeJson(CANDIDATES_JSON, candidates);
 
+  if (!existsSync(REVIEW_DOC)) {
+    ensureDir(dirname(REVIEW_DOC));
+    writeFileSync(REVIEW_DOC, reviewDocSkeleton());
+  }
   const doc = readFileSync(REVIEW_DOC, 'utf8');
   const start = doc.indexOf(DOC_START);
   const end = doc.indexOf(DOC_END);
@@ -815,6 +839,11 @@ function selftest() {
   assert.match(tables, /Aussortiert \(1\)/);
   assert.match(tables, /Gesicht im Hintergrund/);
   assert.ok(!tables.includes('a|b'), 'Pipe im Namen würde die Tabelle zerreißen');
+  const skeleton = reviewDocSkeleton();
+  assert.ok(
+    skeleton.indexOf(DOC_START) >= 0 && skeleton.indexOf(DOC_START) < skeleton.indexOf(DOC_END),
+    'Rumpf der Prüfseite enthält beide Marker in der richtigen Reihenfolge',
+  );
 
   console.log('Selbsttest bestanden.');
 }
