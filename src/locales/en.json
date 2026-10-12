@@ -3,22 +3,20 @@
     "name": "Miki"
   },
   "home": {
-    "greeting": "Hello!",
-    "intro": "What will you do together today? Get 3 matching ideas in 30 seconds.",
+    "title": "Who's joining today?",
+    "childLabel": "{{name}}, {{age}}",
+    "editChild": "Edit {{name}}",
+    "editChildUnnamed": "Edit child, {{age}}",
+    "timeTitle": "How much time do you have?",
+    "energyTitle": "And your energy?",
+    "energyClear": "Tap again to clear your choice.",
     "start": "What shall we do?",
-    "childrenTitle": "Your children",
-    "history": "What we did together"
+    "issueChildren": "Please choose at least one child.",
+    "issueTime": "Please choose how much time you have.",
+    "privacy": "No account needed. Your data stays on your phone.",
+    "history": "History"
   },
   "suggest": {
-    "title": "What shall we do?",
-    "childrenTitle": "Who's joining?",
-    "childLabel": "{{name}} ({{age}})",
-    "childrenMissing": "Please choose at least one child.",
-    "timeTitle": "How much time do you have?",
-    "timeMissing": "Please choose how much time you have.",
-    "energyTitle": "How much energy do you have today?",
-    "energyHint": "Tap again to clear your choice.",
-    "show": "Show ideas",
     "resultsTitle": "Your ideas",
     "more": "Other ideas",
     "changeSelection": "Change selection",
@@ -54,8 +52,8 @@
     },
     "manual": {
       "title": "What is the weather like?",
-      "hint": "Without your location we simply ask.",
-      "hintUnavailable": "We could not get the weather just now. What is it like where you are?"
+      "hint": "Without your location we simply ask. Tap the weather and we will show you the ideas.",
+      "hintUnavailable": "We could not get the weather just now. What is it like where you are? Tap the weather and we will show you the ideas."
     },
     "allowLocation": "Allow location",
     "openSettings": "Allow location in settings",

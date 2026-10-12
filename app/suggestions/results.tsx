@@ -32,7 +32,9 @@ import {
   manualSituation,
   toConditions,
 } from '@/features/weather/situation';
+import { getWeatherStep } from '@/features/weather/manualWeather';
 import { useWeather, useWeatherRefresh } from '@/features/weather/WeatherProvider';
+import { WeatherStep } from '@/features/weather/WeatherStep';
 import { WeatherSummary } from '@/features/weather/WeatherSummary';
 import { colors, fontSize, lineHeight, radius, spacing } from '@/lib/theme';
 
@@ -43,10 +45,10 @@ export default function ResultsScreen() {
   const { status: historyStatus, entries } = useHistory();
   if (status === 'loading' || historyStatus === 'loading') return null;
 
-  // Unvollständige Auswahl oder kein ausgewähltes Kind mehr da: zurück zur Auswahl.
+  // Unvollständige Auswahl oder kein ausgewähltes Kind mehr da: zurück zum Start (dort steht die Auswahl).
   const selection = parseSelectionParams(params);
   const hasChild = profiles.some((child) => selection?.childIds.includes(child.id));
-  if (!selection || !hasChild) return <Redirect href="/suggestions" />;
+  if (!selection || !hasChild) return <Redirect href="/" />;
 
   return <Results selection={selection} profiles={profiles} historyEntries={entries} />;
 }
@@ -71,8 +73,10 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
   // Wetter von Hand: aus der Auswahl („Wie ist das Wetter?“) oder hier mit „Wetter ändern“.
   // `null` heißt: Das Wetter kommt automatisch vom Deutschen Wetterdienst.
   const [manualWeather, setManualWeather] = useState<Weather | null>(selection.weather ?? null);
-  const { status, data, stale } = useWeather();
+  const { access, status, data, stale } = useWeather();
   useWeatherRefresh();
+  // Fehlt noch etwas zum Wetter, kommt vor den Vorschlägen ein Schritt (nur wenn nötig, siehe WeatherStep).
+  const weatherStep = getWeatherStep(access, status, manualWeather !== null);
 
   // Das Wetter für die gewählte Zeit. Eine Handwahl ersetzt nur die Wetterlage: Amtliche Warnungen bleiben.
   const automatic = data ? buildSituation(data, getMinutes(selection.time), now, { stale }) : null;
@@ -107,8 +111,20 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace('/suggestions');
+      router.replace('/');
     }
+  }
+
+  // Vor den Vorschlägen: erst das Wetter klären (Erklär-Karte oder „Wie ist das Wetter?“).
+  if (weatherStep !== null) {
+    return (
+      <SafeAreaView style={styles.screen} edges={['bottom']}>
+        <Stack.Screen options={{ title: t('suggest.resultsTitle') }} />
+        <ScrollView contentContainerStyle={styles.content}>
+          <WeatherStep step={weatherStep} onChooseWeather={changeWeather} />
+        </ScrollView>
+      </SafeAreaView>
+    );
   }
 
   // Die Vorschläge hängen vom Wetter ab: Kurz warten, bis es da ist (der Abruf hat ein Zeitlimit).

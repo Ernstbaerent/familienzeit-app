@@ -1,4 +1,4 @@
-# Theme „Sonntagslicht“ (Design Stufe D1)
+# Theme „Sonntagslicht“ (Design ab Stufe D1)
 
 Das Design kommt aus `docs/design/DESIGN.md` und dem PDF im selben Ordner. Umgesetzt wird es in Stufen
 (Roadmap D1 bis D5 in der CLAUDE.md). **D1** legt die Grundlagen: Theme, Schriften, App-Name und die drei
@@ -29,8 +29,8 @@ function Card() {
 ```
 
 - `createStyles` steht **außerhalb** der Komponente. `Theme`, `fonts`, `fontSize` usw. kommen aus `@/lib/theme`.
-- Der feste Export `colors` (immer hell) gibt es nur, bis jeder Bildschirm umgestellt ist (D2 bis D5).
-  Neue Bildschirme nehmen `useTheme()` oder `useThemedStyles`.
+- Der feste Export `colors` (immer hell) gibt es nur, bis jeder Bildschirm umgestellt ist. Umgestellt ist bisher der Start (D2);
+  Ergebnis (D3), Detail (D4) sowie Verlauf, Kinderprofile und Wetter-Erklärung (D5) folgen. Neue Bildschirme nehmen `useTheme()` oder `useThemedStyles`.
 - Die Lint-Regel gegen feste Farben, Größen, Abstände und Radien bleibt (`npx expo lint`).
 - Breiten und Höhen stehen nicht im Theme, **außer** den Mindestgrößen `size.touch` (44 pt Tippfläche)
   und `size.checkbox` (56 px Abhak-Feld). Beides schreibt die DESIGN.md vor.
@@ -45,24 +45,28 @@ Die DESIGN.md nennt nicht alles. Im Code steht an jedem Wert, woher er kommt:
   - Schriftgrößen aus der Textebene (Chrome druckt 1 px als 0,75 pt, also pt ÷ 0,75; die Anleitung mit 15,0 pt ergibt
     genau die 20 px der DESIGN.md), zusammengefasst auf die Stufen 12/14/16/18/20/22/28/34.
   - Zeilenhöhe des Anleitungstextes (30 px = 1,5 × 20) und Farben für Nebentext, Rahmen, Symbole, Allergen- und
-    Sicherheitsflächen aus den gerenderten Bildschirmen.
+    Sicherheitsflächen aus den gerenderten Bildschirmen. Auch das Weiß der Karten (`card`) ist im PDF gemessen.
   - Der Kartenschatten nach Augenmaß (weich und kurz: etwa 4 px Versatz, 16 px Unschärfe, höchstens 10 % Abdunklung).
     Der warme Schein unter dem Hauptknopf ist ebenfalls nach Augenmaß.
-- **abgeleitet:** von uns ergänzt, weil es im Design fehlt. Das sind alle Dunkelwerte außer Hintergrund, Text und Hauptfarbe.
-  Sie haben denselben warmen Braunton und sind per Test auf AA geprüft. **Ani bestätigt sie noch.**
+- **abgeleitet:** von uns ergänzt, weil es im Design fehlt. Das sind alle Dunkelwerte außer Hintergrund, Text und Hauptfarbe
+  (auch `card` und `selected` im Dunkeln). Sie haben denselben warmen Braunton und sind per Test auf AA geprüft.
+  **Ani bestätigt sie noch** (Entscheidung 18/19 in der DESIGN.md).
 
 ### Farben
 
 | Name             | Hell      | Dunkel    | Zweck                                                              |
 | ---------------- | --------- | --------- | ------------------------------------------------------------------ |
 | `background`     | `#FAF6F0` | `#1C1714` | Papier, Grund                                                      |
-| `surface`        | `#F0E6D8` | `#2A221D` | Sand: Karten und Flächen                                           |
+| `card`           | `#FFFFFF` | `#332A24` | Karten, Kacheln, nicht gewählte Chips (Text darauf `text`)         |
+| `surface`        | `#F0E6D8` | `#2A221D` | Sand: Flächen, Platzhalter, Nebenknöpfe (keine Karten)             |
 | `text`           | `#2A211C` | `#F3EBE2` | Tinte: Text, Überschriften (14,6:1 auf Papier, 15,1:1 dunkel)      |
 | `textMuted`      | `#6B5D53` | `#B8A99B` | Nebentext                                                          |
-| `primary`        | `#B4532F` | `#E3825C` | Terrakotta: Hauptknöpfe, gewählte Chips                            |
+| `primary`        | `#B4532F` | `#E3825C` | Terrakotta: nur der Hauptknopf                                     |
 | `onPrimary`      | `#FFFFFF` | `#1C1714` | Text auf `primary` (5,0:1 hell, 6,4:1 dunkel)                      |
 | `secondary`      | `#5F7A5A` | `#8FA887` | Salbei: Zweitfarbe                                                 |
 | `onSecondary`    | `#FFFFFF` | `#1C1714` | Text auf `secondary` (4,8:1 hell)                                  |
+| `selected`       | `#2A211C` | `#F3EBE2` | Tinte: gewählter Zustand von Chips und Kacheln                     |
+| `onSelected`     | `#FAF6F0` | `#1C1714` | Text und Häkchen auf `selected` (14,6:1 hell, 15,1:1 dunkel)       |
 | `accent`         | `#E8A94F` | `#E8A94F` | Honig: nur Akzent                                                  |
 | `border`         | `#CDBFAE` | `#4A3F37` | Linien zum Gliedern                                                |
 | `danger`         | `#9A3B22` | `#F2A892` | Löschen, Fehler, Sicherheit                                        |
@@ -79,18 +83,36 @@ Regeln, die aus den Kontrasten folgen:
 - **Terrakotta (`primary`) als Textfarbe nur auf `background`** (4,6:1), nicht auf `surface` (4,0:1).
 - **`border` gliedert nur.** Mit 1,7:1 reicht er nicht als einziges Merkmal eines Bedienelements (WCAG 1.4.11 verlangt 3:1).
   Bedienelemente erkennt man an Fläche, Text und Symbol.
+- **Karten sind weiß (`card`), Sand (`surface`) ist für Flächen.** Auf `card` hat `text` 15,8:1 und `textMuted` 6,3:1.
+  Terrakotta (`primary`) ist nur als Hauptknopf erlaubt, nicht als Rand, Häkchen oder Chip-Farbe (Entscheidung 11).
 - Die in der DESIGN.md genannten Kontraste weichen minimal von der Rechnung ab (Tinte auf Papier 14,6 statt 15,4:1,
   dunkel 15,1 statt 14,9:1). Alle Paare bestehen AA, geprüft in `src/lib/theme.test.ts`.
 
 ### Eigene Ergänzungen und Abweichungen vom PDF
 
-- Im PDF sind Karten und Chips **weiß** (`#FFFFFF`) mit Schatten, und gewählte Chips sind Tinte. Entschieden ist:
-  **Karten und Flächen sind Sand** (`surface`), wie in der DESIGN.md. Es gibt deshalb **keine** Kartenfarbe Weiß.
-  Weiß kommt nur als `onPrimary` und `onSecondary` vor (steht in der DESIGN.md: „mit weißem Text“).
-  Braucht ein Bildschirm später doch Weiß, wird es hier als eigene Ergänzung eingetragen.
-- Gewählte Chips bleiben in der Hauptfarbe (`primary`), wie schon vor dem Design.
-- Die Schatten `shadow.card` und `shadow.primaryButton` sind da, aber noch nicht eingesetzt. Ob Sandkarten einen
-  Schatten tragen, entscheidet D3.
+- **Karten sind weiß** (`card`, `#FFFFFF`, aus dem PDF gemessen), **Sand ist für Flächen.** Das war bis D1 anders entschieden
+  (Sandkarten, keine Kartenfarbe Weiß). Clemens hat es mit Entscheidung 11 (DESIGN.md) zugunsten des PDF geändert: **`card` gilt damit als
+  bestätigt.** Den Dunkelwert (`#332A24`, abgeleitet) bestätigt Ani noch.
+- **Gewählter Zustand von Chips und Kacheln ist Tinte** (`selected` mit `onSelected`), wie im PDF bei den Chips. Das PDF zeigt gewählte
+  Kinder-Kacheln mit Terrakotta-Rand: Das ist durch „Terrakotta nur für den Hauptknopf“ ersetzt (DESIGN.md, Entscheidung 11 und 23).
+- `shadow.card` und `shadow.primaryButton` gibt es. `shadow.primaryButton` trägt seit D2 der große Hauptknopf auf dem Start.
+  `shadow.card` setzt D3 für die Ergebniskarten ein; die Kinder-Kacheln auf dem Start haben nur einen feinen Rand.
+
+## Bausteine und Besonderheiten (seit D2)
+
+Neu im Theme: `card`, `selected`, `onSelected` (siehe Farbtabelle) sowie `iconSize.sm` (14, Häkchen im kleinen Kreis) und `iconSize.hero`
+(160, großes angeschnittenes Symbol auf Platzhalter-Flächen). Alle Paare sind im Kontrasttest geprüft (`theme.test.ts`).
+
+- **`Chip`:** nicht gewählt weiß (`card`) mit feinem Rand, gewählt Tinte (`selected`) mit hellem Text (`onSelected`). Optional `icon` (Linien-Symbol vor dem Text),
+  `stacked` (Symbol über dem Text, als Kachel mit Radius `tile`, schmaler Rand und kleinere Schrift für schmale gleich breite Reihen wie die Energie auf dem Start),
+  `accessibilityHint` und `style` (für Raster). Der Text darf umbrechen (`flexShrink`), nie abgeschnitten werden.
+- **`Button`:** optional `icon` hinter dem Text (`iconFlipsInRTL` für Pfeile), `accessibilityHint`. Der **große Hauptknopf** trägt den warmen Schein
+  (`shadow.primaryButton`), ein gesperrter nicht.
+- **Symbole und Systemschrift:** Ionicons sind Schrift-Zeichen und wachsen mit der Systemschrift mit (die Skalierung bleibt an, nie `allowFontScaling={false}`).
+  Zeichen in Kreisen wachsen deshalb mit (`fontScale` aus `useWindowDimensions`, Kinder-Kachel), dekorative Symbole
+  teilen ihre Größe durch `fontScale` und bleiben so gleich groß (Stimmungsbild-Platzhalter, `MoodPlaceholder.tsx`).
+- **Raster:** Breiten stehen nicht im Theme. Die Mindestbreiten für Kacheln und Chips und die Regeln für die Spalten liegen in
+  `src/features/suggestions/startLayout.ts` (getestet).
 
 ## Schrift
 
@@ -130,7 +152,7 @@ wechselt nicht mitten in der Nutzung).
 
 ## Dunkelmodus
 
-- Die Dunkelwerte und `useTheme()` sind fertig. `useTheme()` folgt der Handy-Einstellung.
+- Die Dunkelwerte (auch `card`, `selected`, `onSelected`) und `useTheme()` sind fertig. `useTheme()` folgt der Handy-Einstellung.
 - **Eingeschaltet wird er erst in D5.** Bis dahin liefert `useTheme()` immer das helle Theme
   (Schalter `darkModeEnabled` in `src/lib/theme.ts`). Zwei Gründe:
   1. Die meisten Bildschirme nutzen noch den festen hellen `colors`-Export. Sonst gäbe es halb dunkle Bildschirme.
@@ -139,8 +161,8 @@ wechselt nicht mitten in der Nutzung).
      Stelle, die zuverlässig hell hält. Dasselbe gilt für `backgroundColor` in `app.json`, deshalb ist keines gesetzt.
 - **Einschalten in D5:** `darkModeEnabled` auf `true`, den Test in `theme.test.ts` anpassen, in `app.json`
   `userInterfaceStyle` auf `"automatic"` stellen (oder ganz weglassen: Android folgt dem Handy ohnehin), alle Bildschirme in
-  Hell und Dunkel prüfen. Ob dafür `expo-system-ui` nötig wird (z. B. für den Hintergrund beim Start), vorher mit Clemens klären,
-  es wäre ein neues Paket.
+  Hell und Dunkel prüfen. `expo-system-ui` ist dafür freigegeben (Entscheidung 19 in der DESIGN.md), aber nur, wenn es zum Einschalten
+  wirklich nötig ist (z. B. für den Hintergrund beim Start). Dann kurz begründen, welches Problem es löst.
 
 ## App-Name
 
@@ -168,7 +190,11 @@ Sobald die Dateien da sind, werden Icon, adaptives Android-Icon und Startbild in
 
 ## Offen für Ani
 
-- Dunkelwerte bestätigen (alle außer Hintergrund, Text, Hauptfarbe).
-- `border` hat nur 1,7:1 auf Papier. Für Eingabefelder und Abhak-Felder (D4) braucht es einen kräftigeren Rand
-  oder eine andere Erkennung.
-- Weiße Karten oder Sandkarten? (siehe „Eigene Ergänzungen“)
+- Dunkelwerte bestätigen (alle außer Hintergrund, Text, Hauptfarbe; dazu `card` und `selected` im Dunkeln).
+- Entwürfe für Verlauf, „Wie war’s?“, Kinderprofile und Standort-Erklärung prüfen, sobald D5 sie aus dem Stil abgeleitet hat (Entscheidung 18).
+
+Entschieden und deshalb nicht mehr offen:
+
+- Weiße Karten oder Sandkarten? **Weiße Karten** (Entscheidung 11).
+- `border` hat nur 1,7:1 auf Papier. Der Rand der Abhak-Felder (D4) kommt deshalb aus der Palette mit mindestens 3:1 und wird im Test
+  geprüft (Entscheidung 17). `border` bleibt zum Gliedern.

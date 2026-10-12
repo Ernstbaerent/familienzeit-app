@@ -60,7 +60,7 @@ Gespeichert wird der Schlüssel, nie der Text. Deshalb gilt:
 
 | Bildschirm        | Datei                       | Zweck                                                         |
 | ----------------- | --------------------------- | ------------------------------------------------------------- |
-| Start             | `app/index.tsx`             | Liste der Kinder. Ohne Kind geht es automatisch zu „Kind anlegen“. |
+| Start             | `app/index.tsx`             | Kinder-Kacheln (Tipp wählt aus oder ab, Stift-Symbol bearbeitet, Kachel „Kind hinzufügen“), dazu die Auswahl für die Vorschläge (`docs/suggestions.md`, „Start und Auswahl“). Ohne Kind geht es automatisch zu „Kind anlegen“. |
 | Kind anlegen      | `app/children/new.tsx`      | Beim ersten Kind mit Willkommenstext.                         |
 | Kind bearbeiten   | `app/children/[id].tsx`     | Ändern oder löschen (mit Sicherheitsabfrage).                  |
 

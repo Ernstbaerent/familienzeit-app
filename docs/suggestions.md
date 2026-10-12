@@ -1,17 +1,20 @@
 # Vorschläge (M5, Wetter ab M6)
 
 Eltern wählen, wer dabei ist und wie viel Zeit sie haben. Die App zeigt genau 3 passende Ideen.
+Die Auswahl sitzt seit D2 direkt auf dem Start (siehe „Start und Auswahl“ unten).
 
 ## Ablauf in der App
 
 | Bildschirm        | Datei                          | Zweck |
 | ----------------- | ------------------------------ | ----- |
-| Start             | `app/index.tsx`                | Großer Knopf „Was machen wir?“ |
-| Was machen wir?   | `app/suggestions/index.tsx`    | Kinder (alle vorausgewählt), Zeit (Pflicht), Energie (freiwillig), Wetter-Teil (Erklär-Karte für den Standort oder „Wie ist das Wetter?“) |
-| Eure Ideen        | `app/suggestions/results.tsx`  | Wetterzeile, 3 Karten, „Andere Vorschläge“, „Auswahl ändern“ |
+| Start mit Auswahl | `app/index.tsx`                | Kinder-Kacheln, Zeit (Pflicht), Energie (freiwillig), Hauptknopf „Was machen wir?“, Verlauf (nur mit Einträgen) |
+| Eure Ideen        | `app/suggestions/results.tsx`  | Falls nötig zuerst der Wetter-Schritt (Erklär-Karte oder „Wie ist das Wetter?“), dann Wetterzeile, 3 Karten, „Andere Vorschläge“, „Auswahl ändern“ |
+
+Der frühere Bildschirm „Was machen wir?“ (`app/suggestions/index.tsx`) ist entfallen (DESIGN.md, Entscheidung 1).
 
 Die Auswahl reist als Parameter in der Bildschirm-Adresse zum Ergebnis (`selection.ts`). Das bleibt auf dem Gerät.
-Das Wetter reist nicht mit, nur eine **Handwahl** („Wie ist das Wetter?“) als freiwilliger Parameter `weather`. Sonst holt sich der Ergebnis-Bildschirm das Wetter selbst (`docs/weather.md`).
+Das Wetter reist nicht mit. Der Start setzt den Parameter `weather` nie; er entsteht erst im Wetter-Schritt auf dem Ergebnis (Handwahl, im Bildschirm gehalten).
+Sonst holt sich der Ergebnis-Bildschirm das Wetter selbst (`docs/weather.md`).
 Eine Karte zeigt Kategorie-Symbol, Titel, Dauer und Kurzbeschreibung. Antippen öffnet die Detailansicht (M7, siehe `docs/history.md`).
 
 ## Wo was liegt
@@ -23,14 +26,55 @@ Eine Karte zeigt Kategorie-Symbol, Titel, Dauer und Kurzbeschreibung. Antippen �
 | Gewichtung (alle Gewichte in einer Tabelle)| `suggestions/scoring.ts`              |
 | Dreiergruppen, Blättern, Tipps             | `suggestions/suggest.ts`              |
 | Auswahl ↔ Bildschirm-Parameter             | `suggestions/selection.ts`            |
+| Start: Bildschirm (nur Anzeige), Kachel, Platzhalter | `suggestions/StartScreen.tsx`, `ChildTile.tsx`, `MoodPlaceholder.tsx` |
+| Start: Wann ist der Hauptknopf gesperrt, Auswahl für die Vorschläge bauen | `suggestions/startState.ts` |
+| Start: Spalten bei großer Schrift und vielen Kindern | `suggestions/startLayout.ts` |
+| Gewählte Kinder: bereinigen, merken, Zustand | `suggestions/selectedChildren.ts`, `selectedChildrenStorage.ts`, `SelectedChildrenContext.tsx` |
 | Verlauf auswerten (kürzlich gemacht, Bewertung) | `suggestions/historyIndex.ts`, Punkte in `scoring.ts` |
 | Karte                                      | `suggestions/SuggestionCard.tsx`      |
 | Wetter und Standort (Abruf, Zwischenspeicher, Anzeige) | `weather/`, siehe `docs/weather.md` |
 | Kategorie → Symbol                         | `activities/CategoryIcon.tsx`         |
 | Dauer als Text, Text in der App-Sprache    | `activities/activityDisplay.ts`, `activities/formatDuration.ts` |
 
-Alles in `exclusions.ts`, `scoring.ts`, `suggest.ts`, `conditions.ts` und `selection.ts` sind reine Funktionen ohne UI.
+Alles in `exclusions.ts`, `scoring.ts`, `suggest.ts`, `conditions.ts`, `selection.ts`, `startState.ts`, `startLayout.ts` und `selectedChildren.ts` sind reine Funktionen ohne UI.
 Die Tests liegen daneben (`*.test.ts`).
+
+## Start und Auswahl (D2)
+
+Ein Bildschirm, ein Tipp bis zu den Vorschlägen (DESIGN.md, Entscheidungen 1 bis 7 und 22 bis 28). Von oben nach unten:
+Wortmarke „miki“ (Platzhalter-Text bis zur Logo-Datei) mit der Pille „Verlauf“ (nur wenn es Einträge gibt), Stimmungsbild-Platzhalter
+(Sand mit angeschnittener Sonne, für die Sprachausgabe versteckt), „Wer ist heute dabei?“, Zeit, Energie, Hauptknopf, Datenschutz-Satz.
+
+**Kinder-Kacheln.** Ein Tipp auf die Kachel wählt das Kind aus oder ab. Gewählt zeigt ein Tinte-Rand und ein Tinte-Häkchen
+(nicht Terrakotta). Das Stift-Symbol (mindestens 44 × 44) bearbeitet das Kind. Es ist **neben** der Kachel, nicht darin, damit die
+Sprachausgabe beide Tippflächen getrennt erreicht. Beschriftung für die Sprachausgabe:
+„Mila bearbeiten“, ohne Spitzname „Kind, 4 Jahre bearbeiten“ (en: „Edit Mila“, „Edit child, 4 years“). Dazu die Kachel „Kind hinzufügen“.
+
+**Hauptknopf.** Gesperrt, solange **kein Kind gewählt ist oder keine Zeit** (`getStartIssues`). Energie ist freiwillig und nie vorbelegt.
+Unter dem Knopf steht für jeden fehlenden Grund eine Zeile („Bitte wähle mindestens ein Kind.“, „Bitte wähle, wie viel Zeit ihr habt.“),
+dieselben Sätze liest die Sprachausgabe als Hinweis am Knopf.
+
+**Merken (Entscheidung 4).** Gemerkt werden **nur die gewählten Kinder**: lokal auf dem Gerät, Schlüssel `selectedChildren.v1`,
+Inhalt `{ "version": 1, "childIds": [ … ] }` (nur zufällige IDs, keine Namen, keine Zeit, keine Energie). Zeit und Energie bleiben nur stehen,
+solange der Start offen ist; zurück vom Ergebnis führt zum Start mit unveränderter Auswahl, weil der Start im Hintergrund offen bleibt.
+
+| Fall | Ergebnis |
+| ---- | -------- |
+| Noch nie gewählt, kaputter Speicher, andere Version | Alle Kinder sind gewählt. Später angelegte Kinder zählen von selbst mit. |
+| Gemerkte Kinder, einige gelöscht | Gelöschte fliegen raus, auch aus dem Speicher. |
+| Alle gemerkten Kinder gelöscht oder zuletzt niemand gewählt | Wieder alle Kinder gewählt (der Start steht nie mit niemandem da). |
+| Alle Kinder von Hand abgewählt | Bleibt leer, der Hauptknopf ist gesperrt. Beim nächsten Öffnen sind wieder alle gewählt. |
+| Neues Kind angelegt (`app/children/new.tsx`) | Es wird gleich mitgewählt. |
+| Speichern schlägt fehl | Die Wahl gilt für diese Sitzung weiter, nur das Merken fehlt (es ist eine Bequemlichkeit). |
+
+**Wetter nach dem Tipp (Entscheidung 7 und 22).** Der Start zeigt kein Wetter und fragt nie nach dem Standort. Er lädt das Wetter höchstens vor,
+wenn die Erlaubnis schon da ist (Details und Datenschutz: `docs/weather.md`, „Vorladen beim Öffnen des Starts“). Erst nach dem Hauptknopf
+kommt bei Bedarf der Wetter-Schritt auf dem Ergebnis.
+
+**Umbruch und große Schrift (Entscheidung 28).** Nichts wird abgeschnitten, kein Text hat `numberOfLines`. Aus Fensterbreite und
+Systemschrift (`fontScale`) ergibt sich, wie viele Zellen nebeneinander passen (`startLayout.ts`): Kinder-Kacheln höchstens 3 pro Zeile, Zeit-Chips 2,
+Energie-Kacheln 3. Bei vielen Kindern bricht die Reihe um. Wächst die Schrift, gibt es weniger Spalten, bis zu einer pro Zeile, und die Texte brechen um.
+Die Energie ist eine schmale Kachel mit dem Symbol über dem Text und kleinerer Schrift, damit auch das längste englische Wort („Energetic“) hineinpasst.
 
 ## Harte Ausschlüsse (`exclusions.ts`)
 
@@ -123,7 +167,15 @@ und für ein Kind mit 5 Jahren und 1 Stunde gibt es in jedem Monat, bei jedem We
 Diese letzten Tests prüfen nur Regeln, keine einzelnen IDs. Sie laufen also auch, wenn sich die Aktivitäten ändern.
 Der Verlauf hat eigene Tests in `history.test.ts` (Zahlen, Grenzen, Kalendertage mit Zeitumstellung, Garantie „genau 3“ bei vollem Verlauf).
 
-Von Hand: `npx expo start`, mit Expo Go öffnen, „Was machen wir?“ antippen. Das Wetter lässt sich mit „Wetter ändern“ auf „Eure Ideen“
+Von Hand: `npx expo start`, mit Expo Go öffnen. Auf dem Start mindestens ein Kind und eine Zeit wählen, dann „Was machen wir?“ antippen:
+
+1. **Hauptknopf:** Er ist gesperrt, solange keine Zeit gewählt ist. Der Hinweis darunter sagt, was fehlt. Alle Kinder abwählen: gesperrt mit „Bitte wähle mindestens ein Kind.“
+2. **Merken:** Ein Kind abwählen, die App ganz schließen und neu öffnen: Dasselbe Kind ist wieder abgewählt, Zeit und Energie sind leer.
+3. **Stift:** Er öffnet „Kind bearbeiten“. Ein Tipp auf die Kachel wählt nur aus oder ab. Ein Kind löschen: Es verschwindet vom Start und aus der Auswahl.
+4. **Zurück:** Auf „Eure Ideen“ zurück tippen: Der Start ist unverändert (Kinder, Zeit, Energie).
+5. **Große Schrift:** In den Handy-Einstellungen die Schrift auf die größte Stufe stellen, Start öffnen: Die Kacheln stehen untereinander, nichts ist abgeschnitten (auch mit sieben Kindern und auf Englisch prüfen).
+
+Das Wetter lässt sich mit „Wetter ändern“ auf „Eure Ideen“
 (oder ohne Standort mit „Wie ist das Wetter?“) selbst wählen, z. B. ausprobieren (Wetter und Standort: `docs/weather.md`):
 
 - Gewitter: keine Ideen für draußen (Pfützen-Forscher, Waldtag mit Picknick, Draußen-Olympiade, Schnitzeljagd fehlen)

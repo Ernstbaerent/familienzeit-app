@@ -11,13 +11,18 @@ const mockLocation = {
   servicesEnabled: true,
   // Absichtlich sehr genau: Die App darf davon nur den gerundeten Wert weitergeben oder speichern.
   position: { coords: { latitude: 50.664912345, longitude: 12.194498765 } } as unknown,
+  // Wie oft die App das Handy aufgefordert hat, den Erlaubnis-Dialog zu zeigen.
+  dialogRequests: 0,
 };
 
 jest.mock('expo-location', () => ({
   PermissionStatus: { UNDETERMINED: 'undetermined', GRANTED: 'granted', DENIED: 'denied' },
   Accuracy: { Low: 2 },
   getForegroundPermissionsAsync: async () => mockLocation.permission,
-  requestForegroundPermissionsAsync: async () => mockLocation.permission,
+  requestForegroundPermissionsAsync: async () => {
+    mockLocation.dialogRequests += 1;
+    return mockLocation.permission;
+  },
   hasServicesEnabledAsync: async () => mockLocation.servicesEnabled,
   getLastKnownPositionAsync: async () => mockLocation.position,
   getCurrentPositionAsync: async () => mockLocation.position,
@@ -63,6 +68,7 @@ beforeEach(async () => {
   urls.length = 0;
   mockLocation.permission = { granted: true, status: 'granted', canAskAgain: true };
   mockLocation.servicesEnabled = true;
+  mockLocation.dialogRequests = 0;
   stubInternet(true);
 });
 
@@ -153,6 +159,32 @@ describe('Standort nicht erlaubt', () => {
     expect(await resolveWeather(testNow)).toEqual({ kind: 'unavailable', access: 'denied' });
     mockLocation.permission = { granted: false, status: 'denied', canAskAgain: false };
     expect(await resolveWeather(testNow)).toEqual({ kind: 'unavailable', access: 'blocked' });
+    expect(urls).toHaveLength(0);
+  });
+
+  it('Vorladen beim Öffnen des Starts fragt nie nach der Erlaubnis (DESIGN.md, Entscheidung 7)', async () => {
+    // `resolveWeather` ist das, was der Start beim Öffnen aufruft. Es darf den Dialog des Handys nie auslösen,
+    // egal in welchem Zustand die Erlaubnis ist.
+    const states = [
+      { granted: false, status: 'undetermined', canAskAgain: true },
+      { granted: false, status: 'denied', canAskAgain: true },
+      { granted: false, status: 'denied', canAskAgain: false },
+      { granted: true, status: 'granted', canAskAgain: true },
+    ];
+    for (const permission of states) {
+      mockLocation.permission = permission;
+      await resolveWeather(testNow);
+      await readAccess();
+    }
+    expect(mockLocation.dialogRequests).toBe(0);
+  });
+
+  it('ohne Erlaubnis geht beim Vorladen weder Standort noch Anfrage nach außen', async () => {
+    mockLocation.permission = { granted: false, status: 'undetermined', canAskAgain: true };
+    await resolveWeather(testNow);
+    expect(urls).toHaveLength(0);
+    mockLocation.permission = { granted: false, status: 'denied', canAskAgain: false };
+    await resolveWeather(testNow);
     expect(urls).toHaveLength(0);
   });
 

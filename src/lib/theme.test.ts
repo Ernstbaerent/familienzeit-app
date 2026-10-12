@@ -33,8 +33,11 @@ function contrast(a: string, b: string): number {
 const textPairs: [keyof Colors, keyof Colors][] = [
   ['text', 'background'],
   ['text', 'surface'],
+  ['text', 'card'],
   ['textMuted', 'background'],
   ['textMuted', 'surface'],
+  ['textMuted', 'card'],
+  ['onSelected', 'selected'], // gewählter Chip: Text auf Tinte
   ['onPrimary', 'primary'],
   ['onSecondary', 'secondary'],
   ['primary', 'background'], // Terrakotta als Textfarbe, z. B. „Ändern“: nur auf `background`
@@ -52,6 +55,8 @@ const textPairs: [keyof Colors, keyof Colors][] = [
 const graphicPairs: [keyof Colors, keyof Colors][] = [
   ['icon', 'background'],
   ['icon', 'surface'],
+  ['icon', 'card'],
+  ['selected', 'card'], // gewählt gegen nicht gewählt: Der Unterschied darf nicht nur an der Farbe hängen
 ];
 
 describe.each([
@@ -81,6 +86,17 @@ describe('Farben: Werte aus der DESIGN.md', () => {
       secondary: '#5F7A5A',
       accent: '#E8A94F',
     });
+  });
+
+  it('hell: Karten weiß, gewählt ist Tinte (Entscheidung 11)', () => {
+    expect(lightColors).toMatchObject({ card: '#FFFFFF', selected: '#2A211C', onSelected: '#FAF6F0' });
+  });
+
+  it('gewählt ist nicht Terrakotta und Karten sind nicht Sand (Entscheidung 11)', () => {
+    for (const palette of [lightColors, darkColors]) {
+      expect(palette.selected).not.toBe(palette.primary);
+      expect(palette.card).not.toBe(palette.surface);
+    }
   });
 
   it('dunkel: Grund, Text, Hauptfarbe mit dunkler Schrift', () => {
