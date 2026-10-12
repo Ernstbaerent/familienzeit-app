@@ -1,20 +1,34 @@
 // Bild einer Vorschlagskarte (DESIGN.md, Entscheidung 21): Vorrang, stabile Zuordnung, Kategorien ohne Foto.
 // Die Tests nehmen eigene Foto-Listen, damit sie nicht davon abhängen, welche Fotos gerade im Ordner liegen.
-// Am Ende prüft ein Test die echte Liste der App.
+// Den Mechanismus prüfen sie mit einer eigenen Mindestzahl (`testMin`, 3), nicht mit der echten Konstante: Die steht heute auf 99
+// (erst einmal ganz ohne Fotos, Zusatz 36) und würde sonst alle Foto-Tests stumm machen. Am Ende prüft ein eigener Block die echten Werte der App.
 
-import { categoryKeys, type ActivityCategory } from '../activities/activities';
+import { categoryKeys, type Activity, type ActivityCategory } from '../activities/activities';
 import { minPhotosPerCategory } from '../activities/categoryPhotoFiles';
 import { categoryPhotos } from '../activities/categoryPhotos.generated';
-import {
-  assignCardImages,
-  getCardImageChain,
-  hashText,
-  pickCategoryPhoto,
-  rankPhotos,
-  usablePhotos,
-  type CardImageInput,
-  type PhotoLibrary,
-} from './cardImage';
+import * as cardImage from './cardImage';
+import { hashText, rankPhotos, type CardImageInput, type PhotoLibrary } from './cardImage';
+
+// Mindestzahl für die Tests des Mechanismus (früher die echte Zahl, DESIGN.md Zusatz 34).
+const testMin = 3;
+
+const usablePhotos = <Photo extends { file: string }>(photos: readonly Photo[], minPhotos = testMin) =>
+  cardImage.usablePhotos(photos, minPhotos);
+const pickCategoryPhoto = <Photo extends { file: string }>(
+  activity: Pick<Activity, 'id' | 'category'>,
+  photoLibrary: PhotoLibrary<Photo>,
+  minPhotos = testMin,
+) => cardImage.pickCategoryPhoto(activity, photoLibrary, minPhotos);
+const getCardImageChain = <Photo extends { file: string }>(
+  activity: CardImageInput,
+  photoLibrary: PhotoLibrary<Photo>,
+  minPhotos = testMin,
+) => cardImage.getCardImageChain(activity, photoLibrary, minPhotos);
+const assignCardImages = <Photo extends { file: string }>(
+  activities: readonly CardImageInput[],
+  photoLibrary: PhotoLibrary<Photo>,
+  minPhotos = testMin,
+) => cardImage.assignCardImages(activities, photoLibrary, minPhotos);
 
 type FakePhoto = { file: string };
 
@@ -247,11 +261,7 @@ describe('Die drei Karten eines Ergebnisses', () => {
   });
 });
 
-describe('Mindestzahl: Kategorie-Fotos erst ab drei Fotos je Kategorie', () => {
-  it('die Mindestzahl ist 3 (Entscheidung von Clemens, steht nur in categoryPhotoFiles.ts)', () => {
-    expect(minPhotosPerCategory).toBe(3);
-  });
-
+describe('Mindestzahl: Kategorie-Fotos erst ab der Mindestzahl (hier mit 3 getestet)', () => {
   it.each([0, 1, 2])('eine Kategorie mit %s Foto(s) zeigt keines: nur die Farbfläche', (count) => {
     const photos = library({ cooking: count });
     expect(usablePhotos(photos.cooking)).toEqual([]);
@@ -268,6 +278,16 @@ describe('Mindestzahl: Kategorie-Fotos erst ab drei Fotos je Kategorie', () => {
     expect(usablePhotos(photos.cooking)).toHaveLength(count);
     expect(pickCategoryPhoto(activity('a', 'cooking'), photos)).toBeDefined();
     expect(getCardImageChain(activity('a', 'cooking'), photos).map((step) => step.kind)).toEqual(['category', 'placeholder']);
+  });
+
+  it('die Mindestzahl ist ein Parameter: dieselben Fotos erscheinen bei 1, aber nicht bei 5', () => {
+    const photos = library({ nature: 2 });
+    expect(usablePhotos(photos.nature, 1)).toHaveLength(2);
+    expect(usablePhotos(photos.nature, 2)).toHaveLength(2);
+    expect(usablePhotos(photos.nature, 3)).toEqual([]);
+    expect(usablePhotos(photos.nature, 5)).toEqual([]);
+    expect(getCardImageChain(activity('a', 'nature'), photos, 1).map((step) => step.kind)).toEqual(['category', 'placeholder']);
+    expect(getCardImageChain(activity('a', 'nature'), photos, 5)).toEqual([{ kind: 'placeholder' }]);
   });
 
   it('das Bild einer Aktivität hat weiterhin Vorrang, auch in einer Kategorie ohne genug Fotos', () => {
@@ -289,19 +309,48 @@ describe('Mindestzahl: Kategorie-Fotos erst ab drei Fotos je Kategorie', () => {
   });
 });
 
-describe('Die Fotos der App (categoryPhotos.generated.ts)', () => {
-  it('eine Kategorie zeigt Fotos genau dann, wenn sie mindestens die Mindestzahl hat; sonst die Farbfläche', () => {
+// Erst einmal ganz ohne Fotos (DESIGN.md, Zusatz 36): Die echte Mindestzahl steht auf 99, keine Kategorie erreicht sie.
+// Der Mechanismus bleibt: Mit der echten Zahl erscheinen Fotos wieder, sobald eine Kategorie genug hat.
+describe('Heute keine Kategorie-Fotos (echte Werte der App)', () => {
+  const photoCount = (category: ActivityCategory) => categoryPhotos[category].length;
+
+  it('die Mindestzahl steht auf 99 (beim Wiedereinschalten der Fotos über M9b hier und in docs/theme.md anpassen)', () => {
+    expect(minPhotosPerCategory).toBe(99);
+  });
+
+  it('keine Kategorie hat so viele Fotos, die Foto-Liste und die Dateien bleiben aber erhalten', () => {
+    for (const category of categoryKeys) expect(photoCount(category)).toBeLessThan(minPhotosPerCategory);
+    const total = categoryKeys.reduce((sum, category) => sum + photoCount(category), 0);
+    expect(total).toBeGreaterThan(0); // die Liste ist nicht leer geräumt worden
+  });
+
+  it('jede Kategorie ohne Bild der Aktivität: nur die Farbfläche, auf der Karte (Gruppe) und für sich allein (Detailansicht)', () => {
     for (const category of categoryKeys) {
-      const [chain] = assignCardImages([activity('echt-1', category)]);
-      expect(chain[chain.length - 1]).toEqual({ kind: 'placeholder' });
-      expect(chain.some((step) => step.kind === 'category')).toBe(categoryPhotos[category].length >= minPhotosPerCategory);
+      const [inGroup] = cardImage.assignCardImages([activity('echt-1', category)]);
+      expect(inGroup).toEqual([{ kind: 'placeholder' }]);
+      expect(cardImage.getCardImageChain(activity('echt-1', category))).toEqual([{ kind: 'placeholder' }]);
+      expect(cardImage.pickCategoryPhoto(activity('echt-1', category), categoryPhotos)).toBeUndefined();
     }
   });
 
-  it('mit Bild der Aktivität: Web-Adresse zuerst, in jeder Kategorie', () => {
+  it('auch ein Kochen-Rezept, das früher ein Foto bekam, zeigt jetzt die Farbfläche', () => {
+    const ids = Array.from({ length: 50 }, (_, i) => `m4-${i}`);
+    const chains = cardImage.assignCardImages(ids.map((id) => activity(id, 'cooking')));
+    for (const chain of chains) expect(chain.map((step) => step.kind)).toEqual(['placeholder']);
+  });
+
+  it('mit Bild der Aktivität: Web-Adresse zuerst, dann die Farbfläche, in jeder Kategorie', () => {
     for (const category of categoryKeys) {
-      const [chain] = assignCardImages([activity('echt-1', category, 'https://example.org/a.jpg')]);
-      expect(chain[0]).toEqual({ kind: 'activity', uri: 'https://example.org/a.jpg' });
+      const [chain] = cardImage.assignCardImages([activity('echt-1', category, 'https://example.org/a.jpg')]);
+      expect(chain).toEqual([{ kind: 'activity', uri: 'https://example.org/a.jpg' }, { kind: 'placeholder' }]);
     }
+  });
+
+  it('die Konstante ist der Schalter: Hat eine Kategorie genau so viele Fotos wie die Mindestzahl, erscheinen sie wieder', () => {
+    const enough = library({ nature: minPhotosPerCategory });
+    const [chain] = cardImage.assignCardImages([activity('x', 'nature')], enough);
+    expect(chain.map((step) => step.kind)).toEqual(['category', 'placeholder']);
+    const oneShort = library({ nature: minPhotosPerCategory - 1 });
+    expect(cardImage.assignCardImages([activity('x', 'nature')], oneShort)[0]).toEqual([{ kind: 'placeholder' }]);
   });
 });

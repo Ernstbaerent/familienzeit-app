@@ -74,7 +74,7 @@ Format: Querformat, etwa 1200 px breit, deutlich unter 300 KB. Ablage unter asse
 Das Foto passt zur Aktivität und widerspricht nicht der Altersgruppe (kein Babyspielzeug bei einer Aktivität für Teenager).
 Vor der Beta schaut ein Mensch einmal alle Fotos durch (wie bei den Aktivitäten).
 
-Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse (nur von unserem eigenen Speicher, Zusatz 35). Auf der Karte gilt dieser Vorrang: 1. image der Aktivität, 2. gebündeltes Kategorie-Foto aus assets/images/categories/ (nur bei mindestens drei Fotos in der Kategorie, Zusatz 34), 3. Farbfläche mit Symbol (Entscheidung 21).
+Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse (nur von unserem eigenen Speicher, Zusatz 35). Auf der Karte gilt dieser Vorrang: 1. image der Aktivität, 2. gebündeltes Kategorie-Foto aus assets/images/categories/ (nur ab der Mindestzahl Fotos in der Kategorie, Zusatz 34, heute 99: erst einmal ganz ohne Fotos, Zusatz 36), 3. Farbfläche mit Symbol (Entscheidung 21).
 
 Logo A1 „Zwei Bögen"
 
@@ -150,8 +150,11 @@ Zusätze beim Umsetzen von D3 (von Clemens bestätigt, 34 und 35 von Clemens nac
 31. „Keine passt? Drei neue Ideen“ ist ein Nebenknopf (Sand, Tinte), nicht Terrakotta und kein Textlink wie im PDF (Entscheidung 11). Links im Wetter-Schritt sind Tinte mit Unterstreichung.
 32. Nicht gebaut aus dem PDF: die Überschrift „Drei Ideen für eure Stunde“ mit Untertitel („Mila & Jonas · 1 Std · Energie normal · Ändern“) und die Angabe „Drinnen/Draußen“ auf der Karte. Der Kopf trägt den Titel „Eure Ideen“. „Drinnen/Draußen“ steht auf der Feinschliff-Liste in der CLAUDE.md.
 33. Die Karte zeigt die Altersspanne („3–8 Jahre“, 0 bis 16 „Alle Alter“) statt „ab 3 J.“. Die sieben Kategorie-Farben (Entscheidung 10) stehen mit allen Werten und Kontrasten in docs/theme.md.
-34. Ein Kategorie-Foto erscheint nur, wenn die Kategorie mindestens drei Fotos hat (Konstante `minPhotosPerCategory` in `src/features/activities/categoryPhotoFiles.ts`, Erklärung in docs/theme.md). Mit nur einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: Schachbrett bei der Kissenburg). Das `image` einer einzelnen Aktivität hat weiterhin Vorrang. Heute zeigen nur Natur und Kochen Fotos, alle anderen die Farbfläche mit Symbol.
+34. Ein Kategorie-Foto erscheint nur, wenn die Kategorie mindestens drei Fotos hat (Konstante `minPhotosPerCategory` in `src/features/activities/categoryPhotoFiles.ts`, Erklärung in docs/theme.md). Mit nur einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: Schachbrett bei der Kissenburg). Das `image` einer einzelnen Aktivität hat weiterhin Vorrang. Stand bei dieser Entscheidung: Natur und Kochen zeigten Fotos, alle anderen die Farbfläche mit Symbol (abgelöst durch Zusatz 36).
 35. Das Feld `image` darf nur Adressen von unserem eigenen Speicher laden (Allowlist), damit keine IP-Adressen an fremde Server gehen. Die Allowlist kommt mit M8, der Speicher-Host steht unter „Entscheidungen vor M12“ in der CLAUDE.md. Bis dahin prüft der Code nur `https://`.
+
+Zusätze beim Umsetzen von D4 (Entscheidung zu Fotos von Clemens am Anfang von D4 festgelegt; die übrigen aus dem Plan, siehe unten)
+36. Erst einmal ganz ohne Fotos: Die Mindestzahl `minPhotosPerCategory` steht auf 99, keine Kategorie erreicht sie. Alle Karten und die Detailansicht zeigen die Farbfläche mit Symbol, solange eine Aktivität kein eigenes `image` hat. Mechanismus, Foto-Liste und Dateien bleiben. Fotos kommen später über M9b (Bilder-Pipeline). Löst den Stand von Zusatz 34 („heute Natur und Kochen“), nicht dessen Grund.
 
 Offene Punkte
  Logo und App-Icon als Dateien exportieren und unter assets/ ablegen

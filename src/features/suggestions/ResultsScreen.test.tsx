@@ -341,16 +341,16 @@ describe('Karten', () => {
     });
   });
 
-  it('die drei Karten haben Fotos, auch wenn die Kategorie mehrere hat, und zeigen möglichst nicht dasselbe', () => {
-    const root = renderResults(); // drei Natur-Aktivitäten: Natur hat vier Fotos
-    const images = root.findAllByType(Image);
-    expect(images).toHaveLength(3);
-    const sources = images.map((image) => JSON.stringify(image.props.source));
-    expect(new Set(sources).size).toBe(3);
+  it('erst einmal ganz ohne Fotos (Zusatz 36): auch Natur mit vier Fotos in der Liste zeigt die Farbfläche mit großem Symbol', () => {
+    const root = renderResults(); // drei Natur-Aktivitäten: Natur hat vier Fotos im Ordner, die Mindestzahl steht auf 99
+    expect(cards(root)).toHaveLength(3);
+    expect(root.findAllByType(Image)).toHaveLength(0);
+    const marks = root.findAllByType(Text).filter((node) => node.props.name === 'leaf-outline' && node.props.size > 24);
+    expect(marks).toHaveLength(3);
   });
 
-  it('in Kategorien ohne Foto zeigen die Karten die Farbfläche mit großem Symbol, in gleicher Form', () => {
-    mockState.activities = catalog(7, 'outing'); // Ausflug hat (noch) kein Foto
+  it('in jeder Kategorie zeigen die Karten die Farbfläche mit großem Symbol, in gleicher Form', () => {
+    mockState.activities = catalog(7, 'outing');
     const root = renderResults();
     expect(cards(root)).toHaveLength(3);
     expect(root.findAllByType(Image)).toHaveLength(0);

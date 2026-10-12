@@ -128,13 +128,19 @@ Kontraste (geprüft in `src/lib/theme.test.ts`, für alle sieben Kategorien, hel
 
 ### Kategorie-Fotos: Mindestzahl
 
-Ein Kategorie-Foto erscheint auf den Karten **nur, wenn die Kategorie mindestens drei Fotos hat**: Konstante `minPhotosPerCategory` (heute **3**), sie steht nur in
-`src/features/activities/categoryPhotoFiles.ts`. Hat eine Kategorie weniger, zeigen ihre Karten die Farbfläche mit Symbol (die Fotos bleiben in der Liste und im Ordner, sie werden nur nicht gezeigt).
+**Erst einmal ganz ohne Fotos (DESIGN.md, Zusatz 36).** Ein Kategorie-Foto erscheint auf den Karten und in der Detailansicht **nur, wenn die Kategorie mindestens so viele Fotos hat wie die Mindestzahl**:
+Konstante `minPhotosPerCategory` (heute **99**), sie steht nur in `src/features/activities/categoryPhotoFiles.ts`. Keine Kategorie erreicht 99 Fotos, also zeigen alle Karten und die Detailansicht
+die Farbfläche mit Symbol, solange eine Aktivität kein eigenes `image` hat. **Der Mechanismus, die Foto-Liste (`categoryPhotos.generated.ts`) und die Dateien in `assets/images/categories/` bleiben unverändert.**
+Fotos kommen später über M9b (Bilder-Pipeline); dann wird die Zahl gesenkt (vorher stand sie auf 3, Zusatz 34), und der Test in `cardImage.test.ts` („Heute keine Kategorie-Fotos“) und diese Zeile werden angepasst.
 
-- **Warum:** Mit einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: ein Schachbrett bei der Kissenburg). Mit drei und mehr verteilen sich die Fotos, und ein einzelnes unpassendes fällt weniger auf.
-- **Heute:** Natur (4 Fotos) und Kochen (3) zeigen Fotos. Basteln und Spiel (je 1), Bewegung, Experiment und Ausflug (je 0) zeigen die Farbfläche. Kommt das dritte Foto einer Kategorie dazu, erscheinen ihre Fotos ohne weitere Änderung (Ablauf: `docs/bildquellen.md`).
+- **Warum 3 und nicht 1:** Mit einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: ein Schachbrett bei der Kissenburg). Mit drei und mehr verteilen sich die Fotos, und ein einzelnes unpassendes fällt weniger auf.
+  Das war der Stand bis Zusatz 36 (damals zeigten Natur mit 4 und Kochen mit 3 Fotos). Warum jetzt gar keine: Die vorhandenen Fotos reichen nicht, um den Anspruch der DESIGN.md zu erfüllen (passend zur Aktivität), bis die Pipeline sie liefert.
+- **Heute:** Es liegen 9 Fotos im Ordner (Natur 4, Kochen 3, Basteln 1, Spiel 1), keines wird gezeigt. Alle Karten zeigen die Farbfläche mit Symbol, ebenso die Detailansicht.
 - **Vorrang bleibt:** Das `image` einer einzelnen Aktivität gilt weiterhin vor allem anderen und zählt bei der Mindestzahl nicht mit.
-- **Geprüft** in `src/features/suggestions/cardImage.test.ts` (0, 1, 2 Fotos: Farbfläche; 3, 4, 7: Fotos; `image` gewinnt immer; jede Kategorie entscheidet für sich) und `categoryPhotos.test.ts` (diese Zahl steht in dieser Datei).
+- **Technik:** `usablePhotos`, `pickCategoryPhoto`, `getCardImageChain` und `assignCardImages` in `src/features/suggestions/cardImage.ts` nehmen die Mindestzahl als letzten, freiwilligen Parameter (Vorgabe: die Konstante).
+  So lässt sich der Mechanismus in den Tests mit 3 prüfen, obwohl die echte Zahl 99 ist.
+- **Geprüft** in `src/features/suggestions/cardImage.test.ts` (Mechanismus mit 3: 0, 1, 2 Fotos zeigen die Farbfläche, 3, 4, 7 Fotos die Fotos; `image` gewinnt immer; jede Kategorie entscheidet für sich;
+  echte Werte der App: keine Kategorie hat Fotos, die Konstante ist der Schalter) und `categoryPhotos.test.ts` (diese Zahl steht in dieser Datei).
 - `npm run photos:index` zeigt je Kategorie, ob sie die Mindestzahl erreicht.
 
 Zuordnung Kategorie → Symbol: nur in `src/features/activities/CategoryIcon.tsx` (`categoryIcons`). Symbole für Spielplatz, Bad und Termine kommen erst mit M10 und M11 (Entscheidung 12).
