@@ -2,6 +2,8 @@
 --
 -- So einspielen (Schritt für Schritt: docs/supabase.md): Im Supabase-Dashboard "SQL Editor" öffnen, "New query" wählen,
 -- diese ganze Datei einfügen und "Run" drücken. Danach die Daten einspielen (supabase/seed/, erzeugt mit `npm run db:seed-sql`).
+-- Immer die GANZE Datei ausführen und vorher nichts markieren: Der SQL-Editor führt bei markiertem Text nur die Markierung aus,
+-- und dann fehlen die Rechte ganz unten (Abschnitt "Rechte für die Daten-Schnittstelle").
 -- Die Datei darf mehrmals ausgeführt werden: Was es schon gibt, bleibt unverändert (die Tabelle wird nicht überschrieben).
 --
 -- Wichtig für die Sicherheit: Der öffentliche Schlüssel steckt in der App und ist damit für alle sichtbar.
@@ -101,6 +103,22 @@ create policy "Alle duerfen freigegebene Aktivitaeten lesen"
   using (status = 'approved');
 
 -- Es gibt keine Regel zum Einfügen, Ändern oder Löschen, die App kann also nicht schreiben.
--- Zusätzlich nehmen wir die Schreibrechte ganz weg (doppelt gesichert) und geben nur das Lesen frei.
+
+-- Rechte für die Daten-Schnittstelle (Data API) von Supabase.
+-- Zwei Schlösser, beide nötig:
+--   1. GRANT sagt, ob eine Rolle die Tabelle überhaupt anfassen darf. Supabase gibt neue Tabellen im Schema "public" nicht mehr
+--      automatisch für die Schnittstelle frei. Ohne GRANT zeigt der Table Editor "API DISABLED", und die App bekommt
+--      "permission denied for table activities".
+--   2. Row Level Security (oben) sagt, welche ZEILEN eine Rolle dann sieht: nur status = 'approved'.
+-- Freigegeben wird genau ein Recht: SELECT (lesen), für anon (ohne Anmeldung) und authenticated (angemeldet).
+-- Kein INSERT, UPDATE, DELETE oder TRUNCATE. Das revoke davor räumt alles weg, was Supabase oder ein früherer Lauf vergeben hat,
+-- danach bleibt nur SELECT. Die Reihenfolge ist wichtig: erst revoke, dann grant.
 revoke all on table public.activities from anon, authenticated;
 grant select on table public.activities to anon, authenticated;
+
+-- Kontrolle: Das Ergebnis dieser Abfrage erscheint unten im SQL-Editor. Erwartet sind genau zwei Zeilen:
+-- anon | SELECT und authenticated | SELECT. Fehlen sie oder steht dort mehr als SELECT, stimmen die Rechte nicht.
+select grantee, privilege_type
+from information_schema.role_table_grants
+where table_schema = 'public' and table_name = 'activities' and grantee in ('anon', 'authenticated')
+order by grantee, privilege_type;

@@ -153,6 +153,25 @@ describe(`die erzeugten Dateien in ${seedDir}/ (npm run db:seed-sql)`, () => {
   });
 });
 
+// Rechnet aus, welche Rechte `role` an public.activities hat, nachdem alle `grant`- und `revoke`-Anweisungen in dieser Reihenfolge gelaufen sind
+// (wie PostgreSQL es tut; ohne automatisch vergebene Rechte, so wie Supabase es für neue Tabellen jetzt handhabt). `sql` ist schon ohne Kommentare, klein geschrieben und mit einfachen Leerzeichen.
+const allTablePrivileges = ['select', 'insert', 'update', 'delete', 'truncate', 'references', 'trigger'];
+function effectivePrivileges(sql: string, role: string): string[] {
+  const have = new Set<string>();
+  for (const statement of sql.split(';').map((part) => part.trim())) {
+    const match = /^(grant|revoke) (.+?) on (?:table )?public\.activities (?:to|from) (.+)$/.exec(statement);
+    if (!match) continue;
+    const [, verb, list, roles] = match;
+    if (!roles.split(',').map((name) => name.trim()).some((name) => name === role || name === 'public')) continue;
+    const privileges = list.trim() === 'all' || list.trim() === 'all privileges' ? allTablePrivileges : list.split(',').map((name) => name.trim());
+    for (const privilege of privileges) {
+      if (verb === 'grant') have.add(privilege);
+      else have.delete(privilege);
+    }
+  }
+  return [...have].sort();
+}
+
 describe('die Datenbank-Vorlage supabase/migrations/0001_activities.sql', () => {
   const raw = read('supabase/migrations/0001_activities.sql');
   // Ohne Kommentare, Kleinbuchstaben, Leerraum zusammengezogen: so lässt sich auf Regeln prüfen, egal wie sie umbrochen sind.
@@ -179,15 +198,55 @@ describe('die Datenbank-Vorlage supabase/migrations/0001_activities.sql', () => 
       expect(sql).not.toMatch(/with check/);
     });
 
-    it('Schreibrechte werden entzogen, nur das Lesen wird freigegeben, an niemanden sonst', () => {
-      expect(sql).toContain('revoke all on table public.activities from anon, authenticated');
-      const grants = sql.match(/grant [^;]*;/g) ?? [];
-      expect(grants).toEqual(['grant select on table public.activities to anon, authenticated;']);
-      expect(sql).not.toMatch(/to public/);
-    });
+    describe('Rechte für die Daten-Schnittstelle (GRANT): Supabase vergibt für neue Tabellen nichts mehr von selbst', () => {
+      it('anon hat das SELECT-Recht (sonst zeigt Supabase „API DISABLED“ und die App bekommt „permission denied“)', () => {
+        expect(effectivePrivileges(sql, 'anon')).toContain('select');
+      });
 
-    it('die Regel kommt, bevor Rechte vergeben werden, und alles steht in einer Datei', () => {
-      expect(sql.indexOf('enable row level security')).toBeLessThan(sql.indexOf('grant select'));
+      it('authenticated hat ebenfalls SELECT', () => {
+        expect(effectivePrivileges(sql, 'authenticated')).toContain('select');
+      });
+
+      it('und sonst nichts: kein Schreibrecht für anon und authenticated (insert, update, delete, truncate, references, trigger)', () => {
+        for (const role of ['anon', 'authenticated']) {
+          expect(effectivePrivileges(sql, role)).toEqual(['select']);
+          for (const privilege of allTablePrivileges.filter((name) => name !== 'select')) {
+            expect(effectivePrivileges(sql, role)).not.toContain(privilege);
+          }
+        }
+      });
+
+      it('die Anweisungen im Wortlaut: erst alles entziehen, dann nur SELECT geben', () => {
+        expect(sql).toContain('revoke all on table public.activities from anon, authenticated;');
+        expect(sql).toContain('grant select on table public.activities to anon, authenticated;');
+        expect(sql.indexOf('revoke all on table public.activities')).toBeLessThan(sql.indexOf('grant select on table public.activities'));
+        const grants = sql.match(/grant [^;]*;/g) ?? [];
+        expect(grants).toEqual(['grant select on table public.activities to anon, authenticated;']);
+      });
+
+      it('nichts wird an alle oder weitere Rollen vergeben, nichts „für alle Tabellen“, nichts weitergebbar', () => {
+        expect(sql).not.toMatch(/to public/);
+        expect(sql).not.toMatch(/with grant option/);
+        expect(sql).not.toMatch(/alter default privileges/);
+        expect(sql).not.toMatch(/on all tables/);
+        expect(sql).not.toMatch(/to (service_role|postgres|supabase_)/);
+      });
+
+      it('der Rechenweg erkennt Fehler: in falscher Reihenfolge, ohne grant oder mit Schreibrecht ist das Ergebnis ein anderes', () => {
+        const revoke = 'revoke all on table public.activities from anon, authenticated';
+        const grant = 'grant select on table public.activities to anon, authenticated';
+        expect(effectivePrivileges(`${revoke}; ${grant};`, 'anon')).toEqual(['select']);
+        expect(effectivePrivileges(`${grant}; ${revoke};`, 'anon')).toEqual([]); // revoke nach grant löscht das Recht wieder
+        expect(effectivePrivileges(`${revoke};`, 'anon')).toEqual([]); // nur der Anfang wurde ausgeführt: nichts darf lesen
+        expect(effectivePrivileges(`${revoke}; ${grant}; grant insert on table public.activities to anon;`, 'anon')).toEqual(['insert', 'select']);
+        expect(effectivePrivileges(`${revoke}; grant all on table public.activities to anon;`, 'authenticated')).toEqual([]);
+      });
+
+      it('am Ende der Datei zeigt eine Kontrollabfrage, wer welches Recht hat (Ergebnis im SQL-Editor)', () => {
+        const last = sql.split(';').map((part) => part.trim()).filter(Boolean).pop() ?? '';
+        expect(last).toContain('select grantee, privilege_type from information_schema.role_table_grants');
+        expect(last).toContain("table_name = 'activities'");
+      });
     });
 
     it('die Funktion für updated_at legt ihren Suchpfad fest (Supabase-Empfehlung)', () => {

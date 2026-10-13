@@ -40,10 +40,11 @@ Du hast schon ein Supabase-Projekt. Prüfe im Dashboard unter **Project Settings
 
 1. Dashboard → links **SQL Editor** → **New query**.
 2. Die Datei `supabase/migrations/0001_activities.sql` öffnen (auf GitHub oder im Editor), **alles** markieren, kopieren, im SQL-Editor einfügen.
-3. **Run** drücken. Erwartet: „Success. No rows returned“.
-4. Kontrolle: links **Table Editor** → Tabelle **activities** ist da (noch leer). Neben dem Namen steht kein „RLS disabled“, die Sicherheitsregeln (Row Level Security) sind also an.
+3. **Run** drücken, **ohne im SQL-Editor etwas zu markieren**: Der Editor führt bei markiertem Text nur die Markierung aus, und dann fehlen die Rechte am Ende der Datei (siehe „Rechte für die Daten-Schnittstelle“ unten).
+   Erwartet: Unten erscheint das Ergebnis der letzten Abfrage, genau **zwei Zeilen**: `anon | SELECT` und `authenticated | SELECT`.
+4. Kontrolle: links **Table Editor** → Tabelle **activities** ist da (noch leer). Neben dem Namen steht kein „RLS disabled“ (die Sicherheitsregeln, Row Level Security, sind an) und auch kein **„API DISABLED“** (die Tabelle ist für die Daten-Schnittstelle freigegeben).
 
-Die Datei darf ein zweites Mal ausgeführt werden, das richtet nichts an.
+Die Datei darf ein zweites Mal ausgeführt werden, das richtet nichts an. Im Zweifel einfach noch einmal die ganze Datei ausführen.
 
 ### 3. Aktivitäten einspielen
 
@@ -110,7 +111,7 @@ Erwartet: eine Liste wie `[{"id":"animal-yoga"},{"id":"autumn-bingo"},{"id":"bak
 
 **b) Sind die Sicherheitsregeln dicht?** Das ist der wichtigste Test, weil der Schlüssel in der App steckt.
 
-- Schreiben muss scheitern: `curl -s -X POST "$URL/rest/v1/activities" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{"id":"test"}'` → Antwort mit „permission denied“ (Code 42501). Im Table Editor darf **kein** Eintrag „test“ entstehen.
+- Schreiben muss scheitern (und Lesen muss gehen, siehe „Rechte für die Daten-Schnittstelle“ oben): `curl -s -X POST "$URL/rest/v1/activities" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{"id":"test"}'` → Antwort mit „permission denied“ (Code 42501). Im Table Editor darf **kein** Eintrag „test“ entstehen.
 - Entwürfe müssen unsichtbar sein: Im SQL-Editor `update public.activities set status = 'draft' where id = 'marble-run';` ausführen. Jetzt liefert der Abruf (a) eine Aktivität weniger (103), und `…/rest/v1/activities?id=eq.marble-run&select=id` ergibt `[]`.
   Danach zurück: `update public.activities set status = 'approved' where id = 'marble-run';`
 
@@ -128,6 +129,46 @@ Im Terminal steht jetzt „103 von Supabase geladen“, und die Aktivität kommt
 
 **e) Der Rückfall.** (1) Flugmodus an, App neu laden: Sie läuft wie immer, im Terminal steht eine Warnung „Abruf bei Supabase fehlgeschlagen“. (2) Falscher Schlüssel in der `.env`: Warnung mit „HTTP 401“, die App läuft weiter.
 (3) `.env` umbenennen: Die App nutzt nur das Mitgelieferte und meldet nichts. In Expo Go erscheint bei Warnungen unten ein gelber Balken, das gibt es nur in der Entwicklung, nicht in der fertigen App.
+
+## Rechte für die Daten-Schnittstelle (GRANT) und „API DISABLED“
+
+**Warum das nötig ist.** Der Zugriff auf die Tabelle hat zwei Schlösser, und beide müssen stimmen:
+
+1. **Das Recht (GRANT)** entscheidet, ob eine Rolle die Tabelle überhaupt anfassen darf. Die App benutzt die Rolle `anon` (Besucher ohne Anmeldung). Supabase gibt neue Tabellen im Schema `public` **nicht mehr automatisch** für die Daten-Schnittstelle frei:
+   Ohne ausdrückliches `grant` zeigt der Table Editor an der Tabelle „API DISABLED“, und jede Anfrage der App scheitert.
+2. **Row Level Security (RLS)** entscheidet danach, welche **Zeilen** die Rolle sieht: nur `status = 'approved'`.
+
+Die Migration (`supabase/migrations/0001_activities.sql`, ganz unten) setzt deshalb genau diese zwei Zeilen, **nur lesen, kein Schreiben**:
+
+```sql
+revoke all on table public.activities from anon, authenticated;          -- erst alles wegnehmen
+grant select on table public.activities to anon, authenticated;          -- dann nur SELECT (lesen) geben
+```
+
+Die Reihenfolge ist wichtig. Ein `grant insert/update/delete` gibt es bewusst nicht; auch ohne Schreib-Rechte wäre RLS ohne Schreib-Regel dicht, es sind also zwei Sicherungen.
+
+**Wie du prüfst, dass es stimmt:**
+
+- **Table Editor:** Bei der Tabelle `activities` steht weder „API DISABLED“ noch „RLS disabled“. Oben rechts lässt sich die Rolle umstellen (je nach Oberfläche von `postgres` auf **`anon`**): Mit `anon` siehst du die Zeilen mit `status = approved`, aber keine Entwürfe.
+- **SQL-Editor:** Die Kontrollabfrage am Ende der Migration (einzeln ausführbar) muss genau zwei Zeilen liefern, `anon | SELECT` und `authenticated | SELECT`, und sonst nichts:
+
+  ```sql
+  select grantee, privilege_type from information_schema.role_table_grants
+  where table_schema = 'public' and table_name = 'activities' and grantee in ('anon', 'authenticated')
+  order by grantee, privilege_type;
+  ```
+
+  Dazu ein Blick auf RLS: `select relrowsecurity from pg_class where oid = 'public.activities'::regclass;` → `true`.
+- **Von außen (Schritt 6a und 6b):** Der Abruf mit `curl` liefert Aktivitäten, und der Schreibversuch scheitert mit „permission denied“.
+
+**Was passiert, wenn das Recht fehlt?** Die Schnittstelle antwortet der App mit einem Fehler (typisch „permission denied for table activities“ als HTTP 401, oder 404, weil die Tabelle für die Schnittstelle gar nicht sichtbar ist). Die App fängt das ab:
+sie schreibt eine Warnung in die Konsole („Abruf bei Supabase fehlgeschlagen (HTTP 401)“) und nutzt **still** den Zwischenspeicher oder den mitgelieferten Bestand. Eltern merken nichts, die App funktioniert wie vorher.
+**Der Haken:** Auch du merkst es an der App nicht. Neue und geänderte Aktivitäten kommen einfach nie an. Achte deshalb beim Testen (Schritt 6c) darauf, dass im Terminal wirklich `Aktivitäten: 104 von Supabase geladen.` steht und nicht die Warnung.
+
+**Reparatur:** Die Migration noch einmal **ganz** ausführen (sie ist wiederholbar). Oder nur die beiden Zeilen oben im SQL-Editor ausführen (`revoke … ; grant select …;`), danach die Kontrollabfrage. Die Tabelle und die Daten bleiben dabei unverändert.
+
+**Hinweis zur Entstehung:** Beim ersten Einrichten zeigte die Tabelle „API DISABLED“, behoben mit `grant select on table public.activities to anon, authenticated;`. Die Zeile stand schon in der Migration; vermutlich wurde das Ende der Datei nicht mit ausgeführt
+(z. B. weil im SQL-Editor ein Teil markiert war). Gewiss ist das nicht. Seitdem steht in der Migration ein Kommentar dazu und die Kontrollabfrage am Ende, und der Test `activitySql.test.ts` rechnet die Rechte nach (SELECT für `anon` und `authenticated`, kein Schreibrecht, RLS an).
 
 ## Was die App genau macht
 
@@ -250,4 +291,5 @@ npm run db:seed-sql    # erzeugt supabase/seed/ neu (der Test meldet, wenn sie v
 
 Die Tests laufen ohne Netz und ohne Supabase: Der Abruf wird mit gemockten Antworten geprüft (`fetchActivities.test.ts`, `activityRefresh.test.ts`, `ActivitiesContext.test.tsx`).
 Das SQL wurde zusätzlich einmal in einem lokalen Wegwerf-Postgres (PGlite, nicht Teil des Projekts) ausgeführt: Tabelle, Einspielen (auch wiederholt), Lesen als `anon`, Schreiben als `anon`/`authenticated` verboten, Entwürfe unsichtbar.
-**Gegen das echte Supabase-Projekt wurde nichts getestet** (kein Zugriff): Das übernimmt Schritt 6 oben.
+Der Test der Migration (`activitySql.test.ts`) rechnet auch die Rechte nach: `anon` und `authenticated` haben am Ende genau `SELECT`, kein Schreibrecht, Row Level Security ist an. Zusätzlich wurde die Migration in dem Wegwerf-Postgres so geprüft, wie Supabase neue Tabellen jetzt behandelt (keine automatisch vergebenen Rechte): Mit der ganzen Datei hat `anon` genau `SELECT`; fehlt das Ende der Datei, hat `anon` kein Recht und bekommt „permission denied“.
+**Ich selbst konnte nichts gegen das echte Supabase-Projekt testen** (kein Zugriff): Das übernimmt Schritt 6 oben.
