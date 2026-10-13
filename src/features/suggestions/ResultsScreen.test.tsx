@@ -58,8 +58,8 @@ jest.mock('@/features/weather/WeatherProvider', () => ({
   useWeather: () => mockState.weather,
   useWeatherRefresh: () => undefined,
 }));
-jest.mock('@/features/activities/loadActivities', () => ({
-  loadActivities: () => mockState.activities,
+jest.mock('@/features/activities/ActivitiesContext', () => ({
+  useActivities: () => ({ activities: mockState.activities, source: 'bundled' }),
 }));
 
 // Ionicons lädt seine Schrift asynchron und meldet das im Test als Warnung. Hier genügt der Name des Symbols als Text.
@@ -356,6 +356,34 @@ describe('Karten', () => {
     expect(root.findAllByType(Image)).toHaveLength(0);
     const marks = root.findAllByType(Text).filter((node) => node.props.name === 'map-outline' && node.props.size > 24);
     expect(marks).toHaveLength(3);
+  });
+});
+
+describe('Aktivitäten aus dem Hintergrund (M8)', () => {
+  it('friert die Aktivitäten beim Öffnen ein: Ein neuer Bestand ändert die Karten nicht, erst das nächste Öffnen nimmt ihn', () => {
+    let renderer!: ReturnType<typeof create>;
+    const screen = (
+      <I18nextProvider i18n={translator('de')}>
+        <ResultsScreen />
+      </I18nextProvider>
+    );
+    act(() => {
+      renderer = create(screen);
+    });
+    const before = cardTitles(renderer.root);
+    expect(before).toEqual(['Titel idea-1', 'Titel idea-2', 'Titel idea-3']);
+
+    // Im Hintergrund kommt ein anderer Bestand an (Provider liefert eine neue Liste).
+    mockState.activities = Array.from({ length: 7 }, (_, i) => makeActivity({ id: `neu-${i + 1}`, category: 'nature', ageMin: 0, ageMax: 12 }));
+    act(() => renderer.update(screen));
+    expect(cardTitles(renderer.root)).toEqual(before);
+
+    // „Keine passt?“ blättert weiter, aber weiter im eingefrorenen Bestand.
+    act(() => buttonWithText(renderer.root, 'Keine passt? Drei neue Ideen').props.onPress());
+    expect(cardTitles(renderer.root)).toEqual(['Titel idea-4', 'Titel idea-5', 'Titel idea-6']);
+
+    // Das nächste Öffnen sieht den neuen Bestand.
+    expect(cardTitles(renderResults())).toEqual(['Titel neu-1', 'Titel neu-2', 'Titel neu-3']);
   });
 });
 

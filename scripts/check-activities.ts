@@ -1,7 +1,7 @@
 // Prüfskript für Aktivitäten: npm run activities:check
 //
 // Liest alle Dateien in data/*.json und prüft
-//   1. die Form jeder Aktivität (Pflichtfelder, bekannte Schlüssel, de + en vollständig),
+//   1. die Form jeder Aktivität (Pflichtfelder, bekannte Schlüssel, de + en vollständig, `image` nur von unserem eigenen Speicher),
 //   2. die Sicherheits-Checkliste (docs/sicherheits-checkliste.md),
 //   3. ob zu jedem Material und Allergen ein Text in de.json und en.json steht.
 // Danach zeigt es eine Übersicht zum Durchlesen und eine Zählung, was die Daten abdecken.
@@ -10,104 +10,18 @@
 // wird aufgelistet und bleibt `draft`. Das Skript ändert keine Dateien.
 // Braucht Node 22+ (läuft ohne Zusatzprogramme, siehe package.json).
 
-import { readdirSync, readFileSync } from 'node:fs';
-
 import {
   categoryKeys,
   energyKeys,
-  parseActivities,
   settingKeys,
   type Activity,
 } from '../src/features/activities/activities.ts';
-import { allergenKeys, materialKeys } from '../src/features/activities/materials.ts';
-import {
-  checkSafety,
-  getAllergens,
-  type AllergenNames,
-} from '../src/features/activities/safetyCheck.ts';
+import { getAllergens } from '../src/features/activities/safetyCheck.ts';
 import { dislikeKeys, interestKeys } from '../src/features/profiles/preferences.ts';
+import { loadActivityData } from './lib/activityData.ts';
 
-const root = new URL('../', import.meta.url);
-const errors: string[] = [];
-
-function readText(path: string): string {
-  return readFileSync(new URL(path, root), 'utf8');
-}
-
-type Locale = { materials: Record<string, string>; allergens: Record<string, string> };
-
-// --- 3. Texte für Material und Allergene -------------------------------------------------------
-const locales: Record<string, Locale> = {
-  de: JSON.parse(readText('src/locales/de.json')),
-  en: JSON.parse(readText('src/locales/en.json')),
-};
-for (const [language, locale] of Object.entries(locales)) {
-  for (const key of materialKeys) {
-    if (!locale.materials[key]) errors.push(`Text fehlt: materials.${key} in ${language}.json`);
-  }
-  for (const key of allergenKeys) {
-    if (!locale.allergens[key]) errors.push(`Text fehlt: allergens.${key} in ${language}.json`);
-  }
-}
-const allergenNames: AllergenNames = {
-  de: locales.de.allergens,
-  en: locales.en.allergens,
-};
-
-// --- 1. und 2. Dateien in data/ ----------------------------------------------------------------
-const files = readdirSync(new URL('data/', root))
-  .filter((name) => name.endsWith('.json'))
-  .sort();
-if (files.length === 0) errors.push('Keine Datei in data/ gefunden');
-
-const loaderSource = readText('src/features/activities/loadActivities.ts');
-const all: Activity[] = [];
-const seenIds = new Map<string, string>(); // id -> Datei
-const notPassed: { activity: Activity; problems: string[] }[] = [];
-const passedDrafts: Activity[] = [];
-
-for (const file of files) {
-  if (!loaderSource.includes(file.replace(/\.json$/, ''))) {
-    errors.push(`${file}: nicht in src/features/activities/loadActivities.ts eingetragen`);
-  }
-
-  const { activities, rejected } = parseActivities(JSON.parse(readText(`data/${file}`)));
-  for (const item of rejected) {
-    const name = item.id ?? `Nr. ${item.index + 1}`;
-    errors.push(`${file}: ${name}: ${item.problems.join('; ')}`);
-  }
-
-  for (const activity of activities) {
-    const otherFile = seenIds.get(activity.id);
-    if (otherFile) {
-      errors.push(`${file}: ${activity.id}: id gibt es schon in ${otherFile}`);
-      continue;
-    }
-    seenIds.set(activity.id, file);
-    all.push(activity);
-
-    const problems = checkSafety(activity, allergenNames);
-    if (activity.status === 'approved' && problems.length > 0) {
-      errors.push(`${file}: ${activity.id} ist approved, besteht aber die Checkliste nicht:`);
-      for (const problem of problems) errors.push(`    - ${problem}`);
-    } else if (activity.status === 'draft') {
-      if (problems.length > 0) notPassed.push({ activity, problems });
-      else passedDrafts.push(activity);
-    }
-  }
-}
-
-// Keine doppelten Ideen: Gleicher Titel in derselben Sprache ist ein Fehler.
-for (const language of ['de', 'en']) {
-  const seenTitles = new Map<string, string>(); // Titel (klein geschrieben) -> id
-  for (const activity of all) {
-    const key = activity.translations[language]?.title.trim().toLowerCase();
-    if (!key) continue;
-    const other = seenTitles.get(key);
-    if (other) errors.push(`${activity.id}: Titel (${language}) gibt es schon bei ${other}`);
-    else seenTitles.set(key, activity.id);
-  }
-}
+// Das Lesen und Prüfen der Dateien steht in scripts/lib/activityData.ts (gemeinsam mit `npm run db:seed-sql`).
+const { files, activities: all, errors, notPassed, passedDrafts } = loadActivityData();
 
 // --- Ausgabe -----------------------------------------------------------------------------------
 function title(activity: Activity): string {

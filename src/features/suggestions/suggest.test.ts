@@ -1,6 +1,6 @@
 import type { Activity, DayPart } from '../activities/activities';
 import { dayPartKeys } from '../activities/activities';
-import { loadActivities } from '../activities/loadActivities';
+import { getBundledActivities } from '../activities/bundledActivities';
 import {
   longestMinutes,
   parentEnergyKeys,
@@ -540,7 +540,7 @@ describe('Tipps bei weniger als 3 Ideen (nur, wenn sie wirklich helfen)', () => 
 // Prüft die Sicherheitsregeln mit den echten Aktivitäten aus data/ für sehr viele Kombinationen.
 // Diese Tests hängen nicht davon ab, welche Aktivitäten es gibt, nur davon, dass die Regeln halten.
 describe('Regeln mit den echten Aktivitäten aus data/', () => {
-  const activities = loadActivities();
+  const activities = getBundledActivities();
   const childGroups: SuggestionChild[][] = [
     [makeChild({ years: 0, months: 6 })],
     [makeChild({ years: 2 })],

@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "places:test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/feasibility-places.ts",
-    "activities:check": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-activities.ts"
+    "activities:check": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-activities.ts",
+    "db:seed-sql": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/seed-sql.ts"
   },
   "dependencies": {
     "@expo-google-fonts/literata": "^0.4.3",

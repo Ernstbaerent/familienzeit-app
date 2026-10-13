@@ -5,6 +5,7 @@ import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
+import { ActivitiesProvider } from '@/features/activities/ActivitiesContext';
 import { HistoryProvider } from '@/features/history/HistoryContext';
 import { ProfilesProvider } from '@/features/profiles/ProfilesContext';
 import { SelectedChildrenProvider } from '@/features/suggestions/SelectedChildrenContext';
@@ -29,31 +30,34 @@ export default function RootLayout() {
   if (!fontsReady) return null;
 
   return (
-    <ProfilesProvider>
-      {/* Die zuletzt gewählten Kinder liegen wie die Profile nur auf dem Gerät (docs/suggestions.md). */}
-      <SelectedChildrenProvider>
-        {/* Der Verlauf liegt wie die Profile nur auf dem Gerät (docs/history.md). */}
-        <HistoryProvider>
-          {/* Holt nichts beim App-Start: Erst der Start (nur mit schon erteilter Erlaubnis) und die Vorschläge besorgen das Wetter. */}
-          <WeatherProvider>
-            <Stack
-              screenOptions={{
-                headerStyle: { backgroundColor: colors.background },
-                headerTintColor: colors.text,
-                headerTitleStyle: { fontFamily: fonts.title },
-                headerShadowVisible: false,
-                // Beim Zurück-Pfeil nur den Pfeil zeigen, nicht den Namen des vorigen Bildschirms.
-                headerBackButtonDisplayMode: 'minimal',
-                contentStyle: { backgroundColor: colors.background },
-              }}
-            >
-              {/* Der Start hat eine eigene Überschrift im Bildschirm, keine Kopfzeile. */}
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-            </Stack>
-            <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-          </WeatherProvider>
-        </HistoryProvider>
-      </SelectedChildrenProvider>
-    </ProfilesProvider>
+    // Die Aktivitäten starten mit dem Mitgelieferten und werden im Hintergrund aus Supabase aufgefrischt (docs/supabase.md). Nichts wartet darauf.
+    <ActivitiesProvider>
+      <ProfilesProvider>
+        {/* Die zuletzt gewählten Kinder liegen wie die Profile nur auf dem Gerät (docs/suggestions.md). */}
+        <SelectedChildrenProvider>
+          {/* Der Verlauf liegt wie die Profile nur auf dem Gerät (docs/history.md). */}
+          <HistoryProvider>
+            {/* Holt nichts beim App-Start: Erst der Start (nur mit schon erteilter Erlaubnis) und die Vorschläge besorgen das Wetter. */}
+            <WeatherProvider>
+              <Stack
+                screenOptions={{
+                  headerStyle: { backgroundColor: colors.background },
+                  headerTintColor: colors.text,
+                  headerTitleStyle: { fontFamily: fonts.title },
+                  headerShadowVisible: false,
+                  // Beim Zurück-Pfeil nur den Pfeil zeigen, nicht den Namen des vorigen Bildschirms.
+                  headerBackButtonDisplayMode: 'minimal',
+                  contentStyle: { backgroundColor: colors.background },
+                }}
+              >
+                {/* Der Start hat eine eigene Überschrift im Bildschirm, keine Kopfzeile. */}
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+              </Stack>
+              <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+            </WeatherProvider>
+          </HistoryProvider>
+        </SelectedChildrenProvider>
+      </ProfilesProvider>
+    </ActivitiesProvider>
   );
 }

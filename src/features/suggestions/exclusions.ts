@@ -6,7 +6,7 @@ import type { Activity } from '../activities/activities';
 import { getAgeInYears, getMonthNumber, type SuggestionRequest } from './request';
 
 export type ExclusionReason =
-  | 'notApproved' // Sicherheitsnetz: nur freigegebene Aktivitäten (loadActivities filtert schon)
+  | 'notApproved' // Sicherheitsnetz: nur freigegebene Aktivitäten (prepareActivities filtert schon)
   | 'age' // nicht altersgerecht für mindestens ein ausgewähltes Kind
   | 'time' // dauert länger als die verfügbare Zeit
   | 'dayPart' // passt nicht zur Tageszeit

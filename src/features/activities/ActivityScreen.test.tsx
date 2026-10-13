@@ -78,8 +78,8 @@ jest.mock('@/features/history/HistoryContext', () => ({
     setEntryRating: (...args: unknown[]) => mockState.setEntryRating(...args),
   }),
 }));
-jest.mock('@/features/activities/loadActivities', () => ({
-  loadActivities: () => mockState.activities,
+jest.mock('@/features/activities/ActivitiesContext', () => ({
+  useActivities: () => ({ activities: mockState.activities, source: 'bundled' }),
 }));
 // Gespeichert wird in dieser Ansicht nichts außer dem Verlaufseintrag (der ist oben ersetzt). Der Mock zeigt, ob jemand `setItem` aufruft.
 jest.mock('@react-native-async-storage/async-storage', () =>
@@ -349,15 +349,34 @@ describe('Bildbereich wie auf den Karten', () => {
     }
   });
 
-  it('mit Bild der Aktivität: dieses Bild, und lädt es nicht, die Farbfläche', () => {
-    setup(makeIdea({ image: 'https://example.org/wald.jpg' }));
-    const { root } = renderScreen();
-    const [image] = root.findAllByType(Image);
-    expect(image.props.source).toEqual({ uri: 'https://example.org/wald.jpg' });
-    expect(bigIcons(root)).toHaveLength(0);
-    act(() => image.props.onError());
-    expect(root.findAllByType(Image)).toHaveLength(0);
-    expect(bigIcons(root)).toHaveLength(1);
+  describe('`image` der Aktivität (nur von unserem eigenen Speicher, Zusatz 35)', () => {
+    const originalUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+    beforeEach(() => {
+      process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://abc.supabase.co';
+    });
+    afterEach(() => {
+      if (originalUrl === undefined) delete process.env.EXPO_PUBLIC_SUPABASE_URL;
+      else process.env.EXPO_PUBLIC_SUPABASE_URL = originalUrl;
+    });
+
+    it('mit Bild von unserem Speicher: dieses Bild, und lädt es nicht, die Farbfläche', () => {
+      const uri = 'https://abc.supabase.co/storage/v1/object/public/bilder/wald.svg';
+      setup(makeIdea({ image: uri }));
+      const { root } = renderScreen();
+      const [image] = root.findAllByType(Image);
+      expect(image.props.source).toEqual({ uri });
+      expect(bigIcons(root)).toHaveLength(0);
+      act(() => image.props.onError());
+      expect(root.findAllByType(Image)).toHaveLength(0);
+      expect(bigIcons(root)).toHaveLength(1);
+    });
+
+    it('mit Bild von einem fremden Server: wird nicht geladen, die Farbfläche (keine IP-Adresse an Fremde)', () => {
+      setup(makeIdea({ image: 'https://example.org/wald.jpg' }));
+      const { root } = renderScreen();
+      expect(root.findAllByType(Image)).toHaveLength(0);
+      expect(bigIcons(root)).toHaveLength(1);
+    });
   });
 
   it('der Bildbereich ist für die Sprachausgabe Dekoration, und die Kategorie steht nur einmal da (über dem Titel, keine Pille)', () => {
@@ -366,6 +385,31 @@ describe('Bildbereich wie auf den Karten', () => {
     expect(media.props.accessibilityElementsHidden).toBe(true);
     expect(media.props.importantForAccessibility).toBe('no-hide-descendants');
     expect(allTexts(root).filter((text) => text === 'Natur')).toHaveLength(1);
+  });
+});
+
+describe('Aktivitäten aus dem Hintergrund (M8)', () => {
+  it('friert die Aktivitäten beim Öffnen ein: Verschwindet die Idee im Hintergrund aus dem Bestand, bleibt sie beim Lesen stehen', () => {
+    setup();
+    const { root, renderer } = renderScreen();
+    expect(allTexts(root)).toContain('Waldspaziergang');
+    mockState.activities = [makeIdea({ id: 'andere-idee' })]; // neuer Bestand ohne diese Idee
+    act(() =>
+      renderer.update(
+        <I18nextProvider i18n={translator('de')}>
+          <ActivityScreen />
+        </I18nextProvider>,
+      ),
+    );
+    expect(allTexts(renderer.root)).toContain('Waldspaziergang');
+    expect(allTexts(renderer.root).some((text) => text.startsWith('redirect:'))).toBe(false);
+  });
+
+  it('eine Idee, die es beim Öffnen nicht gibt, führt zurück zum Start', () => {
+    setup();
+    mockState.params = { id: 'gibt-es-nicht', children: 'a' };
+    const { root } = renderScreen();
+    expect(allTexts(root)).toEqual(['redirect:/']);
   });
 });
 
@@ -868,8 +912,8 @@ describe('Illustrationen (Pilot)', () => {
 // Sockenpuppen-Theaters). Feste Maße oder eine Zeilenbegrenzung an einem Text oder an einem Element darüber machen das wahrscheinlich.
 // Dieser Block zeichnet die Detailansicht aller echten Aktivitäten und meldet jede solche Stelle, mit Aktivität und Text.
 describe('Kein Text wird abgeschnitten (alle 104 Aktivitäten)', () => {
-  const { loadActivities: loadRealActivities } = jest.requireActual<typeof import('./loadActivities')>('./loadActivities');
-  const realActivities = loadRealActivities();
+  const { getBundledActivities } = jest.requireActual<typeof import('./bundledActivities')>('./bundledActivities');
+  const realActivities = getBundledActivities();
   // Maße, die ein Element unabhängig von seinem Inhalt festlegen (Mindestmaße wie `minHeight` sind erlaubt: Sie wachsen mit).
   const fixedSizeKeys = ['width', 'height', 'maxWidth', 'maxHeight', 'aspectRatio'] as const;
   // Einzige Ausnahme: die Breiten des Rasters der Eckdaten-Kacheln (detailLayout.ts). Sie kommen aus der Bildschirmbreite und der

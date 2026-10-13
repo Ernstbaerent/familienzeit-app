@@ -109,7 +109,8 @@ Es gibt keine Stock-Fotos mehr, Bilder werden selbst gezeichnet (DESIGN.md, Zusa
    Das Symbol ist Dekoration und bleibt bei großer Systemschrift gleich groß (die Skalierung bleibt an).
 
 **Datenschutz-Hinweis zu `image` (Zusatz 35):** Eine Web-Adresse in `image` lädt das Bild beim Anzeigen von einem Server (die IP-Adresse geht dorthin). Deshalb darf `image` **nur Adressen von unserem eigenen Speicher** laden (Allowlist), damit keine IP-Adressen an fremde Server gehen.
-Die Allowlist kommt mit M8 (Supabase); vorher ist der Speicher-Host festzulegen (CLAUDE.md, „Entscheidungen vor M12“). **Heute prüft der Code nur `https://`, die Allowlist gibt es noch nicht.** Bisher hat keine Aktivität ein `image`, es darf bis dahin keine mit fremder Adresse geben.
+Seit M8 gibt es die Allowlist (`activities/imageAllowlist.ts`): Erlaubt sind nur Adressen, die mit `<EXPO_PUBLIC_SUPABASE_URL>/storage/v1/object/public/` beginnen (Supabase Storage unseres Projekts, Details `docs/supabase.md`).
+Sie gilt an drei Stellen: beim Laden (`prepareActivities` lässt ein fremdes Bild weg, die Aktivität bleibt), in der Prüfung der Daten (`parseActivity` und `npm run activities:check`, dort ein Fehler) und beim Anzeigen (`cardImage.ts`). Ohne Projekt-Adresse ist kein Bild erlaubt. Bisher hat keine Aktivität ein `image`.
 
 ## Harte Ausschlüsse (`exclusions.ts`)
 
@@ -123,7 +124,7 @@ Nur Sicherheit und Machbarkeit. Diese Regeln werden **nie** aufgeweicht.
 | `month`     | Die Aktivität hat `months` und der heutige Monat ist nicht dabei. Ohne `months` passt sie das ganze Jahr. Der Monat kommt aus dem Datum (`request.now`), es gibt keine Auswahl dafür. |
 | `danger`    | Gewitter **oder amtliche Warnung** (Gewitter, Sturm, Orkan, andere Unwetterwarnung ab Stufe 3) und `setting: 'outdoor'`. `both` bleibt, weil man es drinnen machen kann. |
 | `notDry`    | `weather.needsDry` und es regnet, gewittert oder schneit. |
-| `notApproved` | Sicherheitsnetz: nur `status: 'approved'` (filtert `loadActivities()` schon). |
+| `notApproved` | Sicherheitsnetz: nur `status: 'approved'` (filtert `prepareActivities()` schon). |
 
 **Uhrzeit-Grenzen der Tageszeiten** (`getDayPart`): Morgen 5:00–11:59, Nachmittag 12:00–16:59, Abend 17:00–4:59.
 Die Tageszeit kommt automatisch aus der Uhrzeit beim Öffnen von „Eure Ideen“ (`toSuggestionRequest`), es gibt keine Auswahl dafür.
