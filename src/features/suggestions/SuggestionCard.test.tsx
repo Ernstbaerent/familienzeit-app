@@ -1,6 +1,7 @@
 // Die Vorschlagskarte (DESIGN.md, Bildschirm 02): dieselbe Form und Höhe bei Foto, Web-Bild und Farbfläche,
 // Texte in de und en, Beschriftung für die Sprachausgabe. Ohne Handy: Die Bausteine werden mit echten Texten gezeichnet.
 
+import { Image as ExpoImage } from 'expo-image';
 import { createInstance } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 import { act, create, type ReactTestInstance } from 'react-test-renderer';
@@ -8,6 +9,7 @@ import { Image, StyleSheet, Text } from 'react-native';
 
 import type { Activity } from '@/features/activities/activities';
 import { categoryIcons } from '@/features/activities/CategoryIcon';
+import { getIllustration } from '@/features/activities/illustrations';
 import de from '@/locales/de.json';
 import en from '@/locales/en.json';
 import { iconSize, lightTheme, radius } from '@/lib/theme';
@@ -223,6 +225,63 @@ describe('Bild der Karte (drei Fälle)', () => {
     expect(allTexts(root).filter((text) => !text.endsWith('-outline'))).toEqual(
       before.filter((text) => !text.endsWith('-outline')),
     );
+  });
+});
+
+// PILOT Illustrationen (docs/design/ILLUSTRATIONEN.md): Vorrang image → Illustration → Kategorie-Foto → Farbfläche.
+describe('Illustration (Pilot)', () => {
+  const pizza = makeActivity({ id: 'homemade-pizza', category: 'cooking' });
+  const illustration = getIllustration('homemade-pizza');
+
+  it('ohne Foto: die Illustration statt der Farbfläche (kein großes Symbol, Sand als Grund), mit Pille', () => {
+    const root = renderCard(chains.placeholder, pizza);
+    const [image] = root.findAllByType(ExpoImage);
+    expect(image.props.source).toBe(illustration?.source);
+    expect(image.props.contentFit).toBe('cover');
+    expect(flat(image)).toMatchObject({ position: 'absolute', width: '100%', height: '100%' });
+    expect(bigIcon(root)).toHaveLength(0);
+    expect(flat(media(root)).backgroundColor).toBe(lightTheme.colors.surface);
+    expect(allTexts(root)).toContain(de.categories.cooking);
+  });
+
+  it('die Illustration gewinnt vor dem Kategorie-Foto', () => {
+    const root = renderCard(chains.category, pizza);
+    expect(root.findAllByType(ExpoImage)).toHaveLength(1);
+    expect(root.findAllByType(Image)).toHaveLength(0);
+  });
+
+  it('das `image` der Aktivität gewinnt vor der Illustration; lädt es nicht, kommt die Illustration (nicht das Foto)', () => {
+    const root = renderCard(chains.web, pizza);
+    expect(root.findAllByType(Image)[0].props.source).toEqual({ uri: 'https://example.org/wald.jpg' });
+    expect(root.findAllByType(ExpoImage)).toHaveLength(0);
+    act(() => root.findAllByType(Image)[0].props.onError());
+    expect(root.findAllByType(Image)).toHaveLength(0);
+    expect(root.findAllByType(ExpoImage)[0].props.source).toBe(illustration?.source);
+  });
+
+  it('lädt die Illustration nicht, zeigt die Karte die übrige Kette (Foto, dann Farbfläche)', () => {
+    const withPhoto = renderCard(chains.category, pizza);
+    act(() => withPhoto.findAllByType(ExpoImage)[0].props.onError());
+    expect(withPhoto.findAllByType(ExpoImage)).toHaveLength(0);
+    expect(withPhoto.findAllByType(Image)[0].props.source).toBe(photo.source);
+
+    const withoutPhoto = renderCard(chains.placeholder, pizza);
+    act(() => withoutPhoto.findAllByType(ExpoImage)[0].props.onError());
+    expect(bigIcon(withoutPhoto)).toHaveLength(1);
+    expect(flat(media(withoutPhoto)).backgroundColor).toBe(lightTheme.categoryTones.cooking.field);
+  });
+
+  it('für die Sprachausgabe Dekoration, Form und Texte wie bei jeder Karte', () => {
+    const root = renderCard(chains.placeholder, pizza);
+    expect(media(root).props.accessibilityElementsHidden).toBe(true);
+    expect(media(root).props.importantForAccessibility).toBe('no-hide-descendants');
+    expect(flat(media(root)).aspectRatio).toBe(2);
+  });
+
+  it('Aktivitäten ohne Illustration bleiben unverändert bei der Farbfläche', () => {
+    const root = renderCard(chains.placeholder);
+    expect(root.findAllByType(ExpoImage)).toHaveLength(0);
+    expect(bigIcon(root)).toHaveLength(1);
   });
 });
 

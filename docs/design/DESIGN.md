@@ -76,6 +76,8 @@ Vor der Beta schaut ein Mensch einmal alle Fotos durch (wie bei den Aktivitäten
 
 Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse (nur von unserem eigenen Speicher, Zusatz 35). Auf der Karte gilt dieser Vorrang: 1. image der Aktivität, 2. gebündeltes Kategorie-Foto aus assets/images/categories/ (nur ab der Mindestzahl Fotos in der Kategorie, Zusatz 34, heute 99: erst einmal ganz ohne Fotos, Zusatz 36), 3. Farbfläche mit Symbol (Entscheidung 21).
 
+Pilot Illustrationen (Oktober 2026, nicht endgültig, keine nummerierte Entscheidung): Drei Aktivitäten haben gezeichnete Illustrationen. Für sie gilt der Vorrang image → Illustration → Kategorie-Foto → Farbfläche. Stilregeln: docs/design/ILLUSTRATIONEN.md, Ergebnis: docs/illustrationen-pilot.md.
+
 Logo A1 „Zwei Bögen"
 
 Das „m" hat einen großen und einen kleinen Bogen: Erwachsene und Kind nebeneinander, zugleich zwei Hügel. Eigene Linien-Schrift, kleingeschrieben. Darunter die Zeile „mit Kindern" (im PDF in Großbuchstaben).

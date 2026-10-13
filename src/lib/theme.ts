@@ -230,17 +230,47 @@ export const shadow = lightShadow;
 // Schrift
 // ---------------------------------------------------------------------------
 
-// Namen der geladenen Schriftschnitte (geladen in src/lib/fonts.ts). Literata für Titel und Zahlen,
+// Namen der eingebundenen Schriftschnitte (geladen in src/lib/fonts.ts). Literata für Titel und Zahlen,
 // Onest für Text und Bedienung (DESIGN.md). Auf Android wählt `fontWeight` bei eigenen Schriften keinen
 // Schnitt aus, sondern verfälscht ihn: immer den passenden Namen nehmen, nie `fontWeight`.
 // Arabisch (Noto Naskh Arabic) kommt mit der arabischen Übersetzung.
-export const fonts = {
+export const fontFaces = {
   title: 'Literata_600SemiBold', // Titel und Überschriften
   number: 'Literata_500Medium', // Zahlen (Zeit, Alter, Schrittnummern)
   body: 'Onest_400Regular', // Fließtext
   bodyMedium: 'Onest_500Medium', // Bedienung, Chips, Knöpfe
   bodyStrong: 'Onest_600SemiBold', // betonter Text
 } as const;
+
+// Sind die Schriften beim Start nicht rechtzeitig da (Zeitlimit) oder fehlerhaft, nutzt die App bis zum nächsten Start
+// die Systemschrift (docs/theme.md, „Laden und Zeitlimit“). Das muss für die ganze Sitzung gelten: iOS merkt sich die
+// gemessene Größe eines Textes unter dem Schriftnamen. Kommt die Schrift später doch noch, würde ein Text, der mit der
+// Systemschrift gemessen wurde, mit der breiteren Schrift gezeichnet und unten abgeschnitten (die letzte Zeile läuft
+// dann rechts aus dem Rand). Umgeschaltet wird nur in src/lib/fonts.ts, bevor der erste Text erscheint.
+let systemFontsForSession = false;
+
+export function switchToSystemFontsForSession(): void {
+  systemFontsForSession = true;
+}
+
+// Die Namen für `fontFamily`. Sie lesen den Schalter oben: `undefined` heißt Systemschrift.
+export const fonts: { readonly [Role in keyof typeof fontFaces]: (typeof fontFaces)[Role] | undefined } = {
+  get title() {
+    return systemFontsForSession ? undefined : fontFaces.title;
+  },
+  get number() {
+    return systemFontsForSession ? undefined : fontFaces.number;
+  },
+  get body() {
+    return systemFontsForSession ? undefined : fontFaces.body;
+  },
+  get bodyMedium() {
+    return systemFontsForSession ? undefined : fontFaces.bodyMedium;
+  },
+  get bodyStrong() {
+    return systemFontsForSession ? undefined : fontFaces.bodyStrong;
+  },
+};
 
 // Größen in px, aus dem PDF gemessen (pt ÷ 0,75) und auf diese Stufen zusammengefasst.
 // Die Systemschrift-Skalierung bleibt an: nie `allowFontScaling={false}` setzen.

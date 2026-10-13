@@ -10,6 +10,7 @@ import type { Activity } from './activities';
 import { getActivityText } from './activityDisplay';
 import { AllergenNotice, SafetyNotice } from './ActivityNotices';
 import { FactTiles } from './FactTiles';
+import { getIllustration, getStepIllustrations } from './illustrations';
 import { MaterialChecklist } from './MaterialChecklist';
 import { getAllergens, needsAdults } from './safetyCheck';
 import { StepList } from './StepList';
@@ -26,9 +27,14 @@ export function ActivityDetails({ activity }: { activity: Activity }) {
   return (
     <View style={styles.root}>
       <View style={styles.hero}>
-        {/* Derselbe Bildbereich wie auf der Karte: Foto der Aktivität, sonst die Farbfläche mit großem Symbol (Zusatz 36: keine Kategorie-Fotos). */}
+        {/* Derselbe Bildbereich wie auf der Karte: Foto der Aktivität, sonst (Pilot) ihre Illustration, sonst die Farbfläche mit großem Symbol (Zusatz 36: keine Kategorie-Fotos). */}
         <View style={styles.media}>
-          <CardMedia category={activity.category} chain={getCardImageChain(activity)} showPill={false} />
+          <CardMedia
+            category={activity.category}
+            chain={getCardImageChain(activity)}
+            showPill={false}
+            illustration={getIllustration(activity.id)}
+          />
         </View>
         <View style={styles.titleBlock}>
           <Text style={styles.category}>{t(`categories.${activity.category}`)}</Text>
@@ -46,7 +52,7 @@ export function ActivityDetails({ activity }: { activity: Activity }) {
       <SafetyNotice withAdults={needsAdults(activity)} note={text.safetyNote} />
 
       <MaterialChecklist materials={activity.materials} />
-      <StepList steps={text.steps} />
+      <StepList steps={text.steps} illustrations={getStepIllustrations(activity.id)} />
     </View>
   );
 }

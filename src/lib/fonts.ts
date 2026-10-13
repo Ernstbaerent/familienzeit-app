@@ -10,7 +10,7 @@ import { Onest_600SemiBold } from '@expo-google-fonts/onest/600SemiBold';
 import { useFonts } from 'expo-font';
 import { useEffect, useState } from 'react';
 
-import { fonts } from '@/lib/theme';
+import { fontFaces, switchToSystemFontsForSession } from '@/lib/theme';
 
 // So lange wartet die App höchstens auf die Schriften (Startbild bleibt stehen). Danach startet sie
 // mit der Systemschrift, damit nie ein leerer Bildschirm bleibt. Die Dateien liegen in der App selbst,
@@ -19,14 +19,16 @@ import { fonts } from '@/lib/theme';
 export const FONT_LOAD_TIMEOUT_MS = 4000;
 
 const fontFiles = {
-  [fonts.title]: Literata_600SemiBold,
-  [fonts.number]: Literata_500Medium,
-  [fonts.body]: Onest_400Regular,
-  [fonts.bodyMedium]: Onest_500Medium,
-  [fonts.bodyStrong]: Onest_600SemiBold,
+  [fontFaces.title]: Literata_600SemiBold,
+  [fontFaces.number]: Literata_500Medium,
+  [fontFaces.body]: Onest_400Regular,
+  [fontFaces.bodyMedium]: Onest_500Medium,
+  [fontFaces.bodyStrong]: Onest_600SemiBold,
 };
 
 // true, sobald die App starten darf: Schriften geladen, Ladefehler oder Zeitlimit erreicht.
+// Startet sie ohne die Schriften, bleibt sie bis zum nächsten Start bei der Systemschrift, auch wenn die Schriften
+// später doch noch ankommen (Grund: theme.ts bei `switchToSystemFontsForSession`).
 export function useAppFonts(timeoutMs: number = FONT_LOAD_TIMEOUT_MS): boolean {
   const [loaded, error] = useFonts(fontFiles);
   const [timedOut, setTimedOut] = useState(false);
@@ -41,5 +43,16 @@ export function useAppFonts(timeoutMs: number = FONT_LOAD_TIMEOUT_MS): boolean {
     if (error) console.warn('Schriften konnten nicht geladen werden, die App nutzt die Systemschrift.', error);
   }, [error]);
 
-  return loaded || error != null || timedOut;
+  const ready = loaded || error != null || timedOut;
+  const withoutFonts = ready && !loaded;
+  // Vor dem ersten Text umschalten: Bis `ready` zeigt die App nichts (app/_layout.tsx). Der Schalter bleibt für die Sitzung.
+  if (withoutFonts) switchToSystemFontsForSession();
+
+  useEffect(() => {
+    if (withoutFonts && !error) {
+      console.warn(`Schriften nicht innerhalb von ${timeoutMs / 1000} s geladen: Diese Sitzung nutzt die Systemschrift.`);
+    }
+  }, [withoutFonts, error, timeoutMs]);
+
+  return ready;
 }
