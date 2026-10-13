@@ -4,10 +4,10 @@ import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { iconSize, radius, spacing, type Theme } from '@/lib/theme';
 import { useThemedStyles } from '@/lib/useThemedStyles';
 
-// Stimmungsbild auf dem Start, solange es kein geprüftes Foto gibt (DESIGN.md, Entscheidung 6):
+// Stimmungsbild auf dem Start, solange es kein gezeichnetes Bild gibt (DESIGN.md, Entscheidung 6 und Zusatz 45):
 // sandfarbene Fläche mit großem, dünnem, angeschnittenem Sonnen-Symbol.
 // Reine Dekoration, deshalb für die Sprachausgabe versteckt (sie liest hier nichts vor).
-// Kommt ein Foto (Regeln: DESIGN.md, „Regeln für Fotos“), ersetzt es diese Fläche in gleicher Form.
+// Kommt ein gezeichnetes Bild (Regeln: docs/design/ILLUSTRATIONEN.md), ersetzt es diese Fläche in gleicher Form.
 export function MoodPlaceholder() {
   const { styles, colors } = useThemedStyles(createStyles);
   // Das Symbol ist ein Schrift-Zeichen und würde mit der Systemschrift mitwachsen. Als Dekoration soll es gleich groß bleiben,

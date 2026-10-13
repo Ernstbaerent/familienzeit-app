@@ -14,19 +14,18 @@ import type { CardImageChain, CardImageSource } from './cardImage';
 
 type CardMediaProps = {
   category: ActivityCategory;
-  chain: CardImageChain; // die Bild-Stufen dieser Karte (cardImage.ts), bestes zuerst, zuletzt die Farbfläche
+  chain: CardImageChain; // die Bild-Stufen dieser Karte (cardImage.ts): `image` der Aktivität, zuletzt die Farbfläche
   // Die weiße Pille mit Kategorie-Symbol und Name. In der Detailansicht aus: Dort steht die Kategorie über dem Titel.
   showPill?: boolean;
-  // PILOT: die Illustration dieser Aktivität (illustrations.ts). Sie steht nach dem `image` der Aktivität und vor Kategorie-Foto und Farbfläche.
+  // Die Illustration dieser Aktivität (illustrations.ts). Sie steht nach dem `image` der Aktivität und vor der Farbfläche.
   illustration?: Illustration;
 };
 
-// Der Bildbereich oben auf der Vorschlagskarte (DESIGN.md, Entscheidung 21). Immer dieselbe Form und Höhe (Seitenverhältnis 2:1):
-//  1. das `image` der Aktivität (Web-Adresse), 2. ein gebündeltes Kategorie-Foto, 3. die Farbfläche der Kategorie mit großem,
-//  dünnem, angeschnittenem Symbol. Lädt eine Web-Adresse nicht, zeigt der Bereich die nächste Stufe.
-// PILOT Illustrationen (docs/design/ILLUSTRATIONEN.md): Hat die Aktivität eine Illustration, steht sie zwischen 1 und 2.
-//  Die Bildkette aus cardImage.ts (Foto-Mechanik) bleibt dafür unverändert, die Illustration wird nur hier eingeschoben.
-// Dazu die weiße Pille mit Kategorie-Symbol und Name (Fläche und Foto gleich), auf Wunsch (`showPill`) auch ohne.
+// Der Bildbereich oben auf der Vorschlagskarte (DESIGN.md, Zusatz 45). Immer dieselbe Form und Höhe (Seitenverhältnis 2:1):
+//  1. das `image` der Aktivität (Web-Adresse), 2. die Illustration der Aktivität (illustrations.ts, gezeichnet, gebündelt),
+//  3. die Farbfläche der Kategorie mit großem, dünnem, angeschnittenem Symbol. Lädt eine Stufe nicht, zeigt der Bereich die nächste.
+//  Die Bildkette aus cardImage.ts kennt `image` und die Farbfläche, die Illustration wird nur hier dazwischen eingeschoben.
+// Dazu die weiße Pille mit Kategorie-Symbol und Name (bei Bild, Illustration und Fläche gleich), auf Wunsch (`showPill`) auch ohne.
 // Die Detailansicht (D4) nutzt denselben Bildbereich, ohne Pille.
 // Für die Sprachausgabe ist der Bereich Dekoration: Titel und Kategorie stehen in der Beschriftung der Karte.
 export function CardMedia({ category, chain, showPill = true, illustration }: CardMediaProps) {
@@ -71,7 +70,7 @@ export function CardMedia({ category, chain, showPill = true, illustration }: Ca
         </>
       ) : (
         <Image
-          source={step.kind === 'activity' ? { uri: step.uri } : step.photo.source}
+          source={{ uri: step.uri }}
           style={styles.image}
           resizeMode="cover"
           onError={() => setFailed((current) => [...current, stepKey(step)])}
@@ -88,9 +87,7 @@ export function CardMedia({ category, chain, showPill = true, illustration }: Ca
 }
 
 function stepKey(step: CardImageSource): string {
-  if (step.kind === 'activity') return step.uri;
-  if (step.kind === 'category') return step.photo.file;
-  return 'placeholder';
+  return step.kind === 'activity' ? step.uri : 'placeholder';
 }
 
 // Abstände nur mit Horizontal/Vertical oder Start/End, nie Left/Right (wegen rechts-nach-links).
@@ -99,11 +96,11 @@ const createStyles = ({ colors, categoryTones }: Theme) => ({
   categoryTones,
   styles: StyleSheet.create({
     media: {
-      aspectRatio: 2, // gleiche Form und Höhe bei Foto und Farbfläche
-      overflow: 'hidden', // schneidet Foto, Kreis und Symbol an
+      aspectRatio: 2, // gleiche Form und Höhe bei Bild, Illustration und Farbfläche
+      overflow: 'hidden', // schneidet Bild, Kreis und Symbol an
       backgroundColor: colors.surface, // Sand, solange ein Bild lädt
     },
-    // Breite und Höhe ausdrücklich: Ein gebündeltes Foto bringt seine eigene Größe mit (z. B. 1200 × 795),
+    // Breite und Höhe ausdrücklich: Ein Bild bringt seine eigene Größe mit (z. B. 1200 × 795),
     // und die würde sonst stärker gelten als `absoluteFill` und den Zuschnitt zerstören.
     image: {
       ...StyleSheet.absoluteFill,

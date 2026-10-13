@@ -5,6 +5,7 @@
 // diese Dateien direkt mit Node liest. Die App (Metro) kommt damit genauso zurecht.
 
 import { isDislikeKey, type DislikeKey } from '../profiles/preferences.ts';
+import { isAllowedImageUrl } from './imageAllowlist.ts';
 import { isMaterialKey, type MaterialKey } from './materials.ts';
 
 export const categoryKeys = [
@@ -73,7 +74,7 @@ export type Activity = {
   status: ActivityStatus; // nur "approved" erscheint in der App
   source: ActivitySource;
   createdAt: string; // ISO-Zeitpunkt
-  image?: string; // freiwillig: Web-Adresse. Ohne Bild zeigt die App das Symbol der Kategorie.
+  image?: string; // freiwillig: Web-Adresse, nur von unserem eigenen Speicher (imageAllowlist.ts). Ohne Bild zeigt die App die Illustration oder das Symbol der Kategorie.
 };
 
 export type ParseResult =
@@ -204,10 +205,15 @@ function readTranslations(raw: unknown, problems: string[]): Record<string, Acti
   return valid ? (raw as Record<string, ActivityText>) : null;
 }
 
+// Einstellungen für die Prüfung.
+// `imagePrefix` steuert das Feld `image` (Allowlist, Zusatz 35): ein Text = Adressen müssen damit beginnen,
+// `null` = es ist kein Speicher festgelegt, also ist kein Bild erlaubt, nicht angegeben = nur `https://` wird geprüft.
+export type ParseOptions = { imagePrefix?: string | null };
+
 // Prüft einen Eintrag aus den Daten (JSON). Gibt entweder die fertige Aktivität zurück
 // oder eine Liste verständlicher Probleme.
 // Geprüft wird die Form. Ob eine Aktivität sicher ist, prüft safetyCheck.ts.
-export function parseActivity(raw: unknown): ParseResult {
+export function parseActivity(raw: unknown, options: ParseOptions = {}): ParseResult {
   if (!isRecord(raw)) return { ok: false, problems: ['Eintrag ist kein Objekt'] };
 
   const problems: string[] = [];
@@ -258,8 +264,18 @@ export function parseActivity(raw: unknown): ParseResult {
   if (!isNonEmptyString(raw.createdAt) || Number.isNaN(Date.parse(raw.createdAt))) {
     problems.push('createdAt: ISO-Zeitpunkt erwartet');
   }
-  if (raw.image !== undefined && !(isNonEmptyString(raw.image) && raw.image.startsWith('https://'))) {
-    problems.push('image: Web-Adresse mit https:// erwartet (oder weglassen)');
+  if (raw.image !== undefined) {
+    if (options.imagePrefix === undefined) {
+      if (!(isNonEmptyString(raw.image) && raw.image.startsWith('https://'))) {
+        problems.push('image: Web-Adresse mit https:// erwartet (oder weglassen)');
+      }
+    } else if (!isAllowedImageUrl(raw.image, options.imagePrefix)) {
+      problems.push(
+        options.imagePrefix === null
+          ? 'image: kein eigener Speicher festgelegt (EXPO_PUBLIC_SUPABASE_URL fehlt), deshalb ist kein Bild erlaubt (oder weglassen)'
+          : `image: nur Adressen von unserem eigenen Speicher erlaubt (beginnen mit ${options.imagePrefix}) oder weglassen`,
+      );
+    }
   }
 
   if (problems.length > 0) return { ok: false, id, problems };
@@ -271,7 +287,10 @@ export type RejectedActivity = { index: number; id?: string; problems: string[] 
 
 // Prüft eine ganze Liste (z. B. den Inhalt einer Datei aus data/).
 // Kaputte Einträge und doppelte IDs werden aussortiert und mit Grund zurückgegeben.
-export function parseActivities(raw: unknown): {
+export function parseActivities(
+  raw: unknown,
+  options: ParseOptions = {},
+): {
   activities: Activity[];
   rejected: RejectedActivity[];
 } {
@@ -282,7 +301,7 @@ export function parseActivities(raw: unknown): {
   const activities: Activity[] = [];
   const rejected: RejectedActivity[] = [];
   raw.forEach((item, index) => {
-    const result = parseActivity(item);
+    const result = parseActivity(item, options);
     if (!result.ok) {
       rejected.push({ index, id: result.id, problems: result.problems });
     } else if (seenIds.has(result.activity.id)) {

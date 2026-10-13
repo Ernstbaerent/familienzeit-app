@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import { getActivityText } from '@/features/activities/activityDisplay';
-import { loadActivities } from '@/features/activities/loadActivities';
+import { useActivities } from '@/features/activities/ActivitiesContext';
 import { formatHistoryDate } from '@/features/history/formatDate';
 import { sortNewestFirst, type HistoryEntry, type Rating } from '@/features/history/history';
 import { useHistory } from '@/features/history/HistoryContext';
@@ -17,14 +17,14 @@ import { colors, fontSize, lineHeight, radius, spacing } from '@/lib/theme';
 export default function HistoryScreen() {
   const { t, i18n } = useTranslation();
   const { status, entries, setEntryRating, deleteEntry, clearHistory } = useHistory();
+  const { activities } = useActivities();
   if (status === 'loading') return null;
 
   const language = i18n.resolvedLanguage ?? i18n.language;
-  const activities = loadActivities();
 
   function titleOf(entry: HistoryEntry): string {
     const activity = activities.find((item) => item.id === entry.activityId);
-    // Die Idee kann inzwischen aus dem Bestand verschwunden sein (ab M8 kommt er aus der Datenbank).
+    // Die Idee kann inzwischen aus dem Bestand verschwunden sein (er kommt seit M8 aus der Datenbank und kann sich ändern).
     return activity ? getActivityText(activity, language).title : t('history.unknownActivity');
   }
 

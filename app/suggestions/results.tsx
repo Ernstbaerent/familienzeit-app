@@ -6,12 +6,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import type { Activity } from '@/features/activities/activities';
-import { loadActivities } from '@/features/activities/loadActivities';
+import { useActivities } from '@/features/activities/ActivitiesContext';
 import type { HistoryEntry } from '@/features/history/history';
 import { useHistory } from '@/features/history/HistoryContext';
 import type { ChildProfile } from '@/features/profiles/profiles';
 import { useProfiles } from '@/features/profiles/ProfilesContext';
-import { assignCardImages } from '@/features/suggestions/cardImage';
+import { getCardImageChain } from '@/features/suggestions/cardImage';
 import { getMinutes, longestMinutes, type Weather } from '@/features/suggestions/conditions';
 import { ResultsHeader } from '@/features/suggestions/ResultsHeader';
 import {
@@ -73,6 +73,9 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
   // Der Verlauf beim Öffnen dieses Bildschirms. Er bleibt eingefroren, damit sich die Karten nicht umsortieren,
   // während man zwischen Details und Vorschlägen hin- und herwechselt. Beim nächsten Öffnen gilt der neue Stand.
   const [history] = useState(historyEntries);
+  // Ebenso die Aktivitäten: Kommt im Hintergrund ein neuer Bestand von Supabase, gilt er erst beim nächsten Öffnen (M8).
+  const { activities: currentActivities } = useActivities();
+  const [activities] = useState(currentActivities);
   // Wie oft „Keine passt? Drei neue Ideen“ gedrückt wurde.
   const [pageIndex, setPageIndex] = useState(0);
   // Wetter von Hand: aus der Auswahl („Wie ist das Wetter?“) oder hier mit „Wetter ändern“.
@@ -91,14 +94,12 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
     ? manualSituation(manualWeather, automatic)
     : (automatic ?? assumedSituation());
 
-  const activities = loadActivities();
   const request = toSuggestionRequest(selection, profiles, now, toConditions(situation), history);
   const suggestions = suggest(activities, request);
   const page = getPage(suggestions, pageIndex);
   const tooFew = suggestions.matchCount < suggestionsPerPage;
-  // Bild je Karte: Aktivität, Kategorie-Foto oder Farbfläche. Die Fotos werden für die ganze Gruppe zusammen verteilt,
-  // damit möglichst nicht zwei Karten dasselbe zeigen.
-  const imageChains = assignCardImages(page);
+  // Bild je Karte: `image` der Aktivität oder Farbfläche (die Illustration schiebt CardMedia dazwischen ein).
+  const imageChains = page.map((activity) => getCardImageChain(activity));
 
   function changeWeather(weather: Weather | null) {
     setManualWeather(weather);

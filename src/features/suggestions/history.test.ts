@@ -3,7 +3,7 @@
 
 import type { Activity, ActivityCategory } from '../activities/activities';
 import { dayPartKeys } from '../activities/activities';
-import { loadActivities } from '../activities/loadActivities';
+import { getBundledActivities } from '../activities/bundledActivities';
 import { maxHistoryEntries, type HistoryEntry, type Rating } from '../history/history';
 import { timeOptions, weatherKeys } from './conditions';
 import { buildHistoryIndex } from './historyIndex';
@@ -342,7 +342,7 @@ describe('Garantie „mindestens 3, wenn überhaupt so viele passen“ mit Verla
   });
 
   describe('mit den echten Aktivitäten aus data/', () => {
-    const activities = loadActivities();
+    const activities = getBundledActivities();
     const childGroups = [
       [makeChild({ years: 0, months: 6 })],
       [makeChild({ years: 5 })],

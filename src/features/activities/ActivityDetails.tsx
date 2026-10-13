@@ -27,7 +27,7 @@ export function ActivityDetails({ activity }: { activity: Activity }) {
   return (
     <View style={styles.root}>
       <View style={styles.hero}>
-        {/* Derselbe Bildbereich wie auf der Karte: Foto der Aktivität, sonst (Pilot) ihre Illustration, sonst die Farbfläche mit großem Symbol (Zusatz 36: keine Kategorie-Fotos). */}
+        {/* Derselbe Bildbereich wie auf der Karte: `image` der Aktivität, sonst ihre Illustration, sonst die Farbfläche mit großem Symbol. */}
         <View style={styles.media}>
           <CardMedia
             category={activity.category}

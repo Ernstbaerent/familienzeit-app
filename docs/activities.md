@@ -10,13 +10,15 @@ M5b den Startbestand geschrieben. Wie die App daraus auswählt, steht in `docs/s
 | Datentyp und Prüfung der Form        | `src/features/activities/activities.ts`        |
 | Material, Gefahren, Allergene        | `src/features/activities/materials.ts`         |
 | Sicherheits-Checkliste (Code)        | `src/features/activities/safetyCheck.ts`       |
-| Laden (lokal)                        | `src/features/activities/loadActivities.ts`    |
+| Laden für die App (Supabase, Zwischenspeicher, Rückfall) | `src/features/activities/ActivitiesContext.tsx` (`useActivities()`), Details: `docs/supabase.md` |
+| Mitgelieferte Aktivitäten (Rückfall, Tests) | `src/features/activities/bundledActivities.ts` (liest `data/`) |
 | Aktivitäten (Bestand)                | `data/activities-*.json`                       |
 | Prüfskript                           | `scripts/check-activities.ts`                  |
 | Checkliste (Regeln)                  | `docs/sicherheits-checkliste.md`               |
 
-In der App: `loadActivities()` gibt alle Aktivitäten mit Status `approved` zurück. Kaputte Einträge werden
-übersprungen und in der Konsole gemeldet.
+In der App: `useActivities()` (Bildschirme) gibt alle Aktivitäten mit Status `approved` zurück. Sie kommen seit M8 aus Supabase
+(einmal pro Tag im Hintergrund geholt, lokal zwischengespeichert); sind keine Daten ladbar, nutzt die App die mitgelieferten aus `data/`
+(`getBundledActivities()`). Kaputte Einträge werden in jedem Fall übersprungen und in der Konsole gemeldet.
 
 ## Die Felder
 
@@ -39,7 +41,7 @@ In der App: `loadActivities()` gibt alle Aktivitäten mit Status `approved` zur�
 | `status`          | `draft`, `approved`, `rejected`. Nur `approved` erscheint in der App. |
 | `source`          | `ai` oder `manual`. |
 | `createdAt`       | ISO-Zeitpunkt. |
-| `image`           | **Freiwillig.** Web-Adresse (`https://…`) eines Bildes. Fehlt es, zeigt die App ein Kategorie-Foto (nur bei mindestens drei Fotos in der Kategorie) oder die Farbfläche mit Symbol. **Geplant (M8): nur Adressen von unserem eigenen Speicher, per Allowlist** (keine IP-Adressen an fremde Server), heute prüft der Code nur `https://`. In M4 und M5b gibt es keine Bilder. |
+| `image`           | **Freiwillig.** Web-Adresse (`https://…`) eines Bildes. Fehlt es, zeigt die App die Illustration der Aktivität (falls sie eine hat) oder die Farbfläche mit Symbol. **Seit M8 nur Adressen von unserem eigenen Speicher** (Allowlist, keine IP-Adressen an fremde Server): Die Adresse muss mit `<EXPO_PUBLIC_SUPABASE_URL>/storage/v1/object/public/` beginnen (`imageAllowlist.ts`). Ein fremdes Bild lässt die App beim Laden weg (die Aktivität bleibt), `npm run activities:check` meldet es als Fehler, ohne Projekt-Adresse in der `.env` ist gar kein Bild erlaubt. Bisher hat keine Aktivität ein Bild. |
 
 ### Verknüpfung mit den Interessen der Kinder
 
@@ -93,14 +95,15 @@ Ausflüge sind bewusst allgemein (Bücherei, Spielplatz-Tour, Bahnhof), konkrete
 **Bewusst noch nicht dabei:** Ideen, die Schnee brauchen. Sie kommen, sobald das Wetter in M6 Schnee kennt,
 sonst würden sie im Januar auch ohne Schnee vorgeschlagen.
 
-Mit M8 kommen die Aktivitäten aus Supabase. Die Dateien in `data/` sind dann der Startbestand für die Datenbank.
+Seit M8 kommen die Aktivitäten aus Supabase (`docs/supabase.md`). Die Dateien in `data/` sind der Startbestand für die Datenbank (`npm run db:seed-sql`) und der Rückfall in der App.
 
 ## Neue Datei mit Aktivitäten ergänzen
 
 1. Datei in `data/` anlegen (Liste von Aktivitäten, gleiches Format).
-2. In `src/features/activities/loadActivities.ts` bei `rawActivities` eintragen.
+2. In `src/features/activities/bundledActivities.ts` bei `rawActivities` eintragen.
 3. `npm run activities:check` ausführen. Das Skript prüft **alle** Dateien in `data/`
-   und meldet, wenn eine nicht in `loadActivities.ts` eingetragen ist.
+   und meldet, wenn eine nicht in `bundledActivities.ts` eingetragen ist.
+4. `npm run db:seed-sql` ausführen und die neuen Teile in Supabase einspielen (`docs/supabase.md`). Der Test `activitySql.test.ts` meldet, wenn `supabase/seed/` nicht zu `data/` passt.
 
 ## Testen
 

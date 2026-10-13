@@ -8,7 +8,7 @@ import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
 import { ActivityDetails } from '@/features/activities/ActivityDetails';
 import type { Activity } from '@/features/activities/activities';
-import { loadActivities } from '@/features/activities/loadActivities';
+import { useActivities } from '@/features/activities/ActivitiesContext';
 import { FeedbackPanel } from '@/features/history/FeedbackPanel';
 import type { Rating } from '@/features/history/history';
 import { useHistory } from '@/features/history/HistoryContext';
@@ -29,10 +29,13 @@ export default function ActivityScreen() {
   const params = useLocalSearchParams();
   const { status: profilesStatus, profiles } = useProfiles();
   const { status: historyStatus } = useHistory();
+  // Die Aktivitäten beim Öffnen einfrieren: Kommt im Hintergrund ein neuer Bestand von Supabase, ändert sich diese Ansicht nicht mitten im Lesen.
+  const { activities: currentActivities } = useActivities();
+  const [activities] = useState(currentActivities);
   if (profilesStatus === 'loading' || historyStatus === 'loading') return null;
 
   // Unbekannte Idee (z. B. alter Link): zurück zum Start.
-  const activity = loadActivities().find((item) => item.id === single(params.id));
+  const activity = activities.find((item) => item.id === single(params.id));
   if (!activity) return <Redirect href="/" />;
 
   // Die Kinder der Auswahl, soweit es sie noch gibt. Sie kommen als Parameter von „Eure Ideen“ mit.

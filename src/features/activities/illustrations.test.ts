@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { lightColors } from '@/lib/theme';
 
 import { activityIllustrations, getIllustration, getStepIllustrations, illustrationDir } from './illustrations';
-import { loadActivities } from './loadActivities';
+import { getBundledActivities } from './bundledActivities';
 
 const root = join(__dirname, '../../..');
 const dir = join(root, illustrationDir);
@@ -71,7 +71,7 @@ describe('Dateien in assets/illustrations/', () => {
 });
 
 describe('Zuordnung Aktivität → Illustration', () => {
-  const activities = new Map(loadActivities().map((activity) => [activity.id, activity]));
+  const activities = new Map(getBundledActivities().map((activity) => [activity.id, activity]));
 
   it.each(entries.map((entry) => [entry.file, entry] as const))('%s gehört zu einer freigegebenen Aktivität', (_, entry) => {
     expect(activities.has(entry.id)).toBe(true);

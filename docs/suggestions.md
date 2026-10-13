@@ -15,7 +15,7 @@ Der frühere Bildschirm „Was machen wir?“ (`app/suggestions/index.tsx`) ist 
 Die Auswahl reist als Parameter in der Bildschirm-Adresse zum Ergebnis (`selection.ts`). Das bleibt auf dem Gerät.
 Das Wetter reist nicht mit. Der Start setzt den Parameter `weather` nie; er entsteht erst im Wetter-Schritt auf dem Ergebnis (Handwahl, im Bildschirm gehalten).
 Sonst holt sich der Ergebnis-Bildschirm das Wetter selbst (`docs/weather.md`).
-Eine Karte zeigt Foto oder Farbfläche mit Kategorie-Pille, Titel, Kurzbeschreibung, Dauer und Altersspanne (Details: „Ergebnis mit Karten (D3)“ unten). Antippen öffnet die Detailansicht (M7 siehe `docs/history.md`, Design seit D4 siehe `docs/detail.md`).
+Eine Karte zeigt Bild, Illustration oder Farbfläche mit Kategorie-Pille, Titel, Kurzbeschreibung, Dauer und Altersspanne (Details: „Ergebnis mit Karten (D3)“ unten). Antippen öffnet die Detailansicht (M7 siehe `docs/history.md`, Design seit D4 siehe `docs/detail.md`).
 
 ## Wo was liegt
 
@@ -32,8 +32,7 @@ Eine Karte zeigt Foto oder Farbfläche mit Kategorie-Pille, Titel, Kurzbeschreib
 | Gewählte Kinder: bereinigen, merken, Zustand | `suggestions/selectedChildren.ts`, `selectedChildrenStorage.ts`, `SelectedChildrenContext.tsx` |
 | Verlauf auswerten (kürzlich gemacht, Bewertung) | `suggestions/historyIndex.ts`, Punkte in `scoring.ts` |
 | Ergebnis: Kopf, Karte, Bildbereich         | `suggestions/ResultsHeader.tsx`, `SuggestionCard.tsx`, `CardMedia.tsx` |
-| Welches Bild eine Karte zeigt (Vorrang, stabile Zuordnung) | `suggestions/cardImage.ts` |
-| Liste der Kategorie-Fotos (erzeugt)        | `activities/categoryPhotos.generated.ts`, `activities/categoryPhotoFiles.ts`, Skript `scripts/index-photos.ts` |
+| Welches Bild eine Karte zeigt (Vorrang)    | `suggestions/cardImage.ts`, Illustration: `activities/illustrations.ts` |
 | Altersspanne als Text                      | `activities/formatAgeRange.ts`        |
 | Wetter und Standort (Abruf, Zwischenspeicher, Anzeige) | `weather/`, siehe `docs/weather.md` |
 | Kategorie → Symbol                         | `activities/CategoryIcon.tsx`         |
@@ -100,36 +99,18 @@ Kurzbeschreibung, Dauer und Altersspanne („3–8 Jahre“, genau ein Alter „
 Beschriftung, die mit dem Titel beginnt („Waldspaziergang. Natur, 30–60 Min., 3–8 Jahre. Ein Spaziergang …“) und dem Hinweis „Öffnet die Details“. Der Bildbereich ist Dekoration.
 Der Schatten liegt am äußeren Element, das Zuschneiden der Ecken am inneren (sonst ginge der Schatten verloren).
 
-### Welches Bild die Karte zeigt (Entscheidung 21)
+### Welches Bild die Karte zeigt (Zusatz 45)
 
-Jede Karte hat eine Kette von Stufen (`cardImage.ts`), bestes Bild zuerst. **Alle drei Fälle haben dieselbe Form und Höhe** (Seitenverhältnis 2:1), mit derselben Pille:
+Es gibt keine Stock-Fotos mehr, Bilder werden selbst gezeichnet (DESIGN.md, Zusatz 45). Jede Karte hat eine Kette von Stufen, bestes Bild zuerst. **Alle Fälle haben dieselbe Form und Höhe** (Seitenverhältnis 2:1), mit derselben Pille:
 
-1. **`image` der Aktivität** (Web-Adresse, nur `https://`). Lädt sie nicht (`onError`), zeigt die Karte die nächste Stufe.
-2. **Gebündeltes Kategorie-Foto** aus `assets/images/categories/`, **aber nur, wenn die Kategorie mindestens `minPhotosPerCategory` Fotos hat** (Zusatz 34 und 36, `docs/theme.md`). **Heute steht die Zahl auf 99: erst einmal ganz ohne Fotos**, die Stufe ist vorhanden, wird aber von keiner Kategorie erreicht.
-3. **Farbfläche der Kategorie** (heute alle Kategorien, solange sie die Mindestzahl nicht erreichen) mit großem, dünnem, am unteren Rand angeschnittenem Symbol (`categoryIcons`) und einem weichen großen Kreis. Farben: `docs/theme.md`, „Kategorie-Farben“.
+1. **`image` der Aktivität** (Web-Adresse, nur `https://`, `cardImage.ts`). Lädt sie nicht (`onError`), zeigt die Karte die nächste Stufe.
+2. **Illustration der Aktivität** (gezeichnet, SVG, gebündelt, Zuordnung nur in `activities/illustrations.ts`, Regeln `docs/design/ILLUSTRATIONEN.md`). `CardMedia` schiebt sie nach dem `image` ein. Heute haben drei Aktivitäten eine; M9b zeichnet die übrigen.
+3. **Farbfläche der Kategorie** (heute der Normalfall) mit großem, dünnem, am unteren Rand angeschnittenem Symbol (`categoryIcons`) und einem weichen großen Kreis. Farben: `docs/theme.md`, „Kategorie-Farben“.
    Das Symbol ist Dekoration und bleibt bei großer Systemschrift gleich groß (die Skalierung bleibt an).
 
-**Die Foto-Liste.** Es gibt nicht für jede Kategorie Fotos und nicht immer gleich viele, eine feste Anzahl wird nirgends angenommen. Die Liste für die App wird **erzeugt**:
-
-```bash
-npm run photos:index   # liest assets/images/categories/ und schreibt src/features/activities/categoryPhotos.generated.ts
-```
-
-Neues Foto: Datei als `kategorie-nummer.jpg` ablegen (basteln, spiel, bewegung, experiment, natur, kochen, ausflug; Nummern dürfen Lücken haben), in `docs/bildquellen.md` eintragen,
-`npm run photos:index` ausführen. Der Test `categoryPhotos.test.ts` meldet, wenn die erzeugte Datei nicht zu den Dateien passt, ein Foto 300 KB oder mehr hat
-oder ein Foto nicht in `docs/bildquellen.md` steht (und umgekehrt). Das braucht kein zusätzliches Paket (das `Image` von React Native genügt).
-
-**Stabil pro Aktivität.** Jede Aktivität bekommt aus ihrer ID und den Dateinamen der Fotos ihrer Kategorie eine feste Rangfolge (jedes Foto erhält aus „ID + Dateiname“ einen festen Wert, der höchste steht vorn).
-Dieselbe Aktivität zeigt deshalb immer dasselbe Foto. Weil die Rangfolge am Dateinamen hängt und nicht an der Nummer in der Liste, ändert ein neues Foto nur die Aktivitäten, bei denen es vorn landet;
-fällt eines weg, wechseln nur die, die es vorn hatten.
-
-**Die drei Karten eines Ergebnisses.** Dasselbe Foto soll auf einem Bildschirm möglichst nur einmal vorkommen (`assignCardImages`): Die Karten bekommen ihr Foto in der Reihenfolge ihrer IDs
-(nicht der Anzeige-Reihenfolge, so bleibt ein Foto bei seiner Aktivität, wenn sich die Reihenfolge ändert), jede nimmt das für sie bestplatzierte Foto, das noch frei ist.
-Nur wenn die Kategorie weniger Fotos hat als Karten, wiederholt sich eines (mit einer Mindestzahl von drei Fotos und drei Karten pro Gruppe kommt das nicht vor; heute gibt es ohnehin keine Kategorie-Fotos, Zusatz 36). Heißt: Eine Aktivität zeigt immer ihr eigenes Foto, **außer** eine Nachbarkarte derselben Kategorie hätte genau dasselbe,
-dann weicht eine von beiden aus. Die Detailansicht (D4) nutzt `getCardImageChain` (dieselbe Wahl wie `pickCategoryPhoto`) und bekommt damit dasselbe Foto wie die Karte; nur im Ausweichfall könnte es dort ein anderes sein. Solange es keine Kategorie-Fotos gibt, zeigen beide die Farbfläche.
-
 **Datenschutz-Hinweis zu `image` (Zusatz 35):** Eine Web-Adresse in `image` lädt das Bild beim Anzeigen von einem Server (die IP-Adresse geht dorthin). Deshalb darf `image` **nur Adressen von unserem eigenen Speicher** laden (Allowlist), damit keine IP-Adressen an fremde Server gehen.
-Die Allowlist kommt mit M8 (Supabase); vorher ist der Speicher-Host festzulegen (CLAUDE.md, „Entscheidungen vor M12“). **Heute prüft der Code nur `https://`, die Allowlist gibt es noch nicht.** Bisher hat keine Aktivität ein `image`, es darf bis dahin keine mit fremder Adresse geben.
+Seit M8 gibt es die Allowlist (`activities/imageAllowlist.ts`): Erlaubt sind nur Adressen, die mit `<EXPO_PUBLIC_SUPABASE_URL>/storage/v1/object/public/` beginnen (Supabase Storage unseres Projekts, Details `docs/supabase.md`).
+Sie gilt an drei Stellen: beim Laden (`prepareActivities` lässt ein fremdes Bild weg, die Aktivität bleibt), in der Prüfung der Daten (`parseActivity` und `npm run activities:check`, dort ein Fehler) und beim Anzeigen (`cardImage.ts`). Ohne Projekt-Adresse ist kein Bild erlaubt. Bisher hat keine Aktivität ein `image`.
 
 ## Harte Ausschlüsse (`exclusions.ts`)
 
@@ -143,7 +124,7 @@ Nur Sicherheit und Machbarkeit. Diese Regeln werden **nie** aufgeweicht.
 | `month`     | Die Aktivität hat `months` und der heutige Monat ist nicht dabei. Ohne `months` passt sie das ganze Jahr. Der Monat kommt aus dem Datum (`request.now`), es gibt keine Auswahl dafür. |
 | `danger`    | Gewitter **oder amtliche Warnung** (Gewitter, Sturm, Orkan, andere Unwetterwarnung ab Stufe 3) und `setting: 'outdoor'`. `both` bleibt, weil man es drinnen machen kann. |
 | `notDry`    | `weather.needsDry` und es regnet, gewittert oder schneit. |
-| `notApproved` | Sicherheitsnetz: nur `status: 'approved'` (filtert `loadActivities()` schon). |
+| `notApproved` | Sicherheitsnetz: nur `status: 'approved'` (filtert `prepareActivities()` schon). |
 
 **Uhrzeit-Grenzen der Tageszeiten** (`getDayPart`): Morgen 5:00–11:59, Nachmittag 12:00–16:59, Abend 17:00–4:59.
 Die Tageszeit kommt automatisch aus der Uhrzeit beim Öffnen von „Eure Ideen“ (`toSuggestionRequest`), es gibt keine Auswahl dafür.

@@ -1,4 +1,4 @@
-// Die Vorschlagskarte (DESIGN.md, Bildschirm 02): dieselbe Form und Höhe bei Foto, Web-Bild und Farbfläche,
+// Die Vorschlagskarte (DESIGN.md, Bildschirm 02): dieselbe Form und Höhe bei Web-Bild, Illustration und Farbfläche,
 // Texte in de und en, Beschriftung für die Sprachausgabe. Ohne Handy: Die Bausteine werden mit echten Texten gezeichnet.
 
 import { Image as ExpoImage } from 'expo-image';
@@ -71,14 +71,8 @@ function makeActivity(overrides: Partial<Activity> = {}): Activity {
   };
 }
 
-const photo = { file: 'natur-1.jpg', source: { uri: 'bundled://natur-1.jpg' } };
 const chains: Record<string, CardImageChain> = {
-  web: [
-    { kind: 'activity', uri: 'https://example.org/wald.jpg' },
-    { kind: 'category', photo },
-    { kind: 'placeholder' },
-  ],
-  category: [{ kind: 'category', photo }, { kind: 'placeholder' }],
+  web: [{ kind: 'activity', uri: 'https://example.org/wald.jpg' }, { kind: 'placeholder' }],
   placeholder: [{ kind: 'placeholder' }],
 };
 
@@ -148,14 +142,13 @@ describe('Form der Karte', () => {
     expect(clip).toBeDefined();
   });
 
-  it('alle drei Fälle haben denselben Bildbereich (Form, Höhe) und denselben Text darunter', () => {
+  it('beide Fälle haben denselben Bildbereich (Form, Höhe) und denselben Text darunter', () => {
     const shapes = Object.keys(chains).map((name) => {
       const root = renderCard(chains[name]);
       const { aspectRatio, overflow } = flat(media(root));
       return { aspectRatio, overflow, texts: allTexts(root).filter((text) => !text.endsWith('-outline')) };
     });
     expect(shapes[1]).toEqual(shapes[0]);
-    expect(shapes[2]).toEqual(shapes[0]);
   });
 
   it('die Karte wird nur bei Druck durchsichtig (Druck-Rückmeldung), sonst nicht', () => {
@@ -165,7 +158,7 @@ describe('Form der Karte', () => {
   });
 });
 
-describe('Bild der Karte (drei Fälle)', () => {
+describe('Bild der Karte (Web-Adresse oder Farbfläche)', () => {
   it('1. Web-Adresse der Aktivität: ein Bild mit dieser Adresse, kein großes Symbol', () => {
     const root = renderCard(chains.web);
     const [image] = root.findAllByType(Image);
@@ -174,21 +167,15 @@ describe('Bild der Karte (drei Fälle)', () => {
     expect(bigIcon(root)).toHaveLength(0);
   });
 
-  it.each(['web', 'category'])('bei „%s“ füllt das Bild den Bereich ausdrücklich (nicht seine eigene Größe)', (name) => {
-    // Ein gebündeltes Foto bringt seine eigene Größe mit; ohne Breite und Höhe 100 % wäre es 1200 breit statt so breit wie die Karte.
-    const [image] = renderCard(chains[name]).findAllByType(Image);
-    expect(flat(image)).toMatchObject({ position: 'absolute', width: '100%', height: '100%' });
-  });
-
-  it('2. Kategorie-Foto: ein Bild mit dem Foto, Sand als Grund, kein großes Symbol', () => {
-    const root = renderCard(chains.category);
+  it('das Bild füllt den Bereich ausdrücklich (nicht seine eigene Größe)', () => {
+    // Ein Bild bringt seine eigene Größe mit; ohne Breite und Höhe 100 % wäre es so groß wie die Datei statt so breit wie die Karte.
+    const root = renderCard(chains.web);
     const [image] = root.findAllByType(Image);
-    expect(image.props.source).toBe(photo.source);
-    expect(flat(media(root)).backgroundColor).toBe(lightTheme.colors.surface);
-    expect(bigIcon(root)).toHaveLength(0);
+    expect(flat(image)).toMatchObject({ position: 'absolute', width: '100%', height: '100%' });
+    expect(flat(media(root)).backgroundColor).toBe(lightTheme.colors.surface); // Sand, solange das Bild lädt
   });
 
-  it('3. Farbfläche: kein Bild, die Fläche der Kategorie, das große Symbol in der Farbe der Kategorie', () => {
+  it('2. Farbfläche: kein Bild, die Fläche der Kategorie, das große Symbol in der Farbe der Kategorie', () => {
     const root = renderCard(chains.placeholder);
     expect(root.findAllByType(Image)).toHaveLength(0);
     const tone = lightTheme.categoryTones.nature;
@@ -213,11 +200,9 @@ describe('Bild der Karte (drei Fälle)', () => {
     expect(bigIcon(root)[0].props.size).toBe(iconSize.hero / 2);
   });
 
-  it('Web-Bild lädt nicht: erst das Kategorie-Foto, dann die Farbfläche (Karte behält Form und Texte)', () => {
+  it('Web-Bild lädt nicht: die Farbfläche (Karte behält Form und Texte)', () => {
     const root = renderCard(chains.web);
     const before = allTexts(root);
-    act(() => root.findAllByType(Image)[0].props.onError());
-    expect(root.findAllByType(Image)[0].props.source).toBe(photo.source);
     act(() => root.findAllByType(Image)[0].props.onError());
     expect(root.findAllByType(Image)).toHaveLength(0);
     expect(bigIcon(root)).toHaveLength(1);
@@ -228,12 +213,12 @@ describe('Bild der Karte (drei Fälle)', () => {
   });
 });
 
-// PILOT Illustrationen (docs/design/ILLUSTRATIONEN.md): Vorrang image → Illustration → Kategorie-Foto → Farbfläche.
+// PILOT Illustrationen (docs/design/ILLUSTRATIONEN.md): Vorrang image → Illustration → Farbfläche.
 describe('Illustration (Pilot)', () => {
   const pizza = makeActivity({ id: 'homemade-pizza', category: 'cooking' });
   const illustration = getIllustration('homemade-pizza');
 
-  it('ohne Foto: die Illustration statt der Farbfläche (kein großes Symbol, Sand als Grund), mit Pille', () => {
+  it('ohne `image`: die Illustration statt der Farbfläche (kein großes Symbol, Sand als Grund), mit Pille', () => {
     const root = renderCard(chains.placeholder, pizza);
     const [image] = root.findAllByType(ExpoImage);
     expect(image.props.source).toBe(illustration?.source);
@@ -244,13 +229,7 @@ describe('Illustration (Pilot)', () => {
     expect(allTexts(root)).toContain(de.categories.cooking);
   });
 
-  it('die Illustration gewinnt vor dem Kategorie-Foto', () => {
-    const root = renderCard(chains.category, pizza);
-    expect(root.findAllByType(ExpoImage)).toHaveLength(1);
-    expect(root.findAllByType(Image)).toHaveLength(0);
-  });
-
-  it('das `image` der Aktivität gewinnt vor der Illustration; lädt es nicht, kommt die Illustration (nicht das Foto)', () => {
+  it('das `image` der Aktivität gewinnt vor der Illustration; lädt es nicht, kommt die Illustration', () => {
     const root = renderCard(chains.web, pizza);
     expect(root.findAllByType(Image)[0].props.source).toEqual({ uri: 'https://example.org/wald.jpg' });
     expect(root.findAllByType(ExpoImage)).toHaveLength(0);
@@ -259,16 +238,12 @@ describe('Illustration (Pilot)', () => {
     expect(root.findAllByType(ExpoImage)[0].props.source).toBe(illustration?.source);
   });
 
-  it('lädt die Illustration nicht, zeigt die Karte die übrige Kette (Foto, dann Farbfläche)', () => {
-    const withPhoto = renderCard(chains.category, pizza);
-    act(() => withPhoto.findAllByType(ExpoImage)[0].props.onError());
-    expect(withPhoto.findAllByType(ExpoImage)).toHaveLength(0);
-    expect(withPhoto.findAllByType(Image)[0].props.source).toBe(photo.source);
-
-    const withoutPhoto = renderCard(chains.placeholder, pizza);
-    act(() => withoutPhoto.findAllByType(ExpoImage)[0].props.onError());
-    expect(bigIcon(withoutPhoto)).toHaveLength(1);
-    expect(flat(media(withoutPhoto)).backgroundColor).toBe(lightTheme.categoryTones.cooking.field);
+  it('lädt die Illustration nicht, zeigt die Karte die Farbfläche', () => {
+    const root = renderCard(chains.placeholder, pizza);
+    act(() => root.findAllByType(ExpoImage)[0].props.onError());
+    expect(root.findAllByType(ExpoImage)).toHaveLength(0);
+    expect(bigIcon(root)).toHaveLength(1);
+    expect(flat(media(root)).backgroundColor).toBe(lightTheme.categoryTones.cooking.field);
   });
 
   it('für die Sprachausgabe Dekoration, Form und Texte wie bei jeder Karte', () => {
@@ -332,7 +307,7 @@ describe('Inhalt und Texte', () => {
 
 describe('Sprachausgabe', () => {
   it('die ganze Karte ist ein Knopf mit einer Beschriftung, die mit dem Titel beginnt, plus Hinweis', () => {
-    const button = press(renderCard(chains.category));
+    const button = press(renderCard(chains.web));
     expect(button.props.accessibilityLabel).toBe(
       'Waldspaziergang. Natur, 30–60 Min., 3–8 Jahre. Ein Spaziergang mit offenen Augen.',
     );
@@ -340,14 +315,14 @@ describe('Sprachausgabe', () => {
   });
 
   it('Englisch: Beschriftung und Hinweis in der App-Sprache', () => {
-    const button = press(renderCard(chains.category, makeActivity(), 'en'));
+    const button = press(renderCard(chains.web, makeActivity(), 'en'));
     expect(button.props.accessibilityLabel).toBe(
       'Forest walk. Nature, 30–60 min, 3–8 years. A walk with open eyes.',
     );
     expect(button.props.accessibilityHint).toBe('Opens the details');
   });
 
-  it.each(Object.keys(chains))('bei „%s“: Der Bildbereich (Foto, Fläche, Pille) ist für die Sprachausgabe Dekoration', (name) => {
+  it.each(Object.keys(chains))('bei „%s“: Der Bildbereich (Bild, Fläche, Pille) ist für die Sprachausgabe Dekoration', (name) => {
     const area = media(renderCard(chains[name]));
     expect(area.props.accessibilityElementsHidden).toBe(true);
     expect(area.props.importantForAccessibility).toBe('no-hide-descendants');

@@ -2,7 +2,7 @@
 
 Stand: Oktober 2026. **Pilot:** Wir testen mit drei Aktivitäten, ob ein selbst gezeichneter Stil trägt
 (Sockenpuppen-Theater, Pizza selber machen, Natron-Vulkan). Nichts davon ist endgültig, es gibt keine Automatik.
-Ergebnis und Bilder: `docs/illustrationen-pilot.md`. Die Regeln für Fotos (DESIGN.md, „Regeln für Fotos“) bleiben unverändert.
+Ergebnis und Bilder: `docs/illustrationen-pilot.md`. Seit DESIGN.md, Zusatz 45, gibt es keine Stock-Fotos mehr: Bilder werden selbst gezeichnet, diese Datei ist die Regelsammlung dafür (M9b zeichnet die Bilder für alle Aktivitäten). Der Pilot gilt weiter als „nicht endgültig“, bis ein Mensch die Bilder durchgesehen hat.
 
 ## Gefühl
 
@@ -51,7 +51,7 @@ Nur die sechs Farben der Palette, flach, ohne Verläufe und ohne Transparenz:
 - **Versetzte Flächen:** Farbflächen sitzen 3 bis 4 Einheiten neben ihrem Umriss, wie beim Druck mit leicht verrutschter Farbe.
   Das macht den handgemachten Eindruck und kostet keine Bytes.
 - **Grund:** Sand mit einem großen, weichen Kreis in Papier hinter dem Motiv (das Echo der Farbfläche mit dem Kreis).
-- **Dunkelmodus (D5):** Die Bilder bleiben hell, wie Fotos. Sie sind auf der Karte gerahmt und stehen für sich.
+- **Dunkelmodus (D5):** Die Bilder bleiben hell (wie Fotos es wären). Sie sind auf der Karte gerahmt und stehen für sich.
 
 ## Figuren
 
@@ -101,18 +101,16 @@ widerspricht. **Ein Bild darf nichts zeigen, was der Text nicht sagt.** Für jed
 **Bekannte Ausnahme im Pilot:** Der Natron-Vulkan zeigt eine Schutzbrille, sein Sicherheitshinweis nennt sie noch nicht.
 Das steht als Punkt für die Durchsicht vor der Beta in der CLAUDE.md (Text ergänzen oder Bild anpassen).
 
-## Vorrang im Bildbereich (Pilot)
+## Vorrang im Bildbereich
 
 Im Bildbereich der Karte und der Detailansicht gilt:
 
 1. `image` der Aktivität (Web-Adresse),
 2. **Illustration** aus der zentralen Zuordnung (`src/features/activities/illustrations.ts`),
-3. gebündeltes Kategorie-Foto (heute keines, Mindestzahl 99),
-4. Farbfläche mit Symbol.
+3. Farbfläche mit Symbol.
 
-Die Illustration gewinnt vor dem Kategorie-Foto, weil sie genau zu dieser Aktivität passt, ein Kategorie-Foto nur zur Kategorie.
-Die Foto-Mechanik (`src/features/suggestions/cardImage.ts`) bleibt für den Pilot unverändert: Der Bildbereich (`CardMedia`)
-zeigt die Illustration, sobald die Kette kein geladenes `image` hat.
+Die Bildkette (`src/features/suggestions/cardImage.ts`) kennt `image` und die Farbfläche; der Bildbereich (`CardMedia`)
+schiebt die Illustration dazwischen, sobald die Kette kein geladenes `image` hat.
 
 ## Schrittbilder
 
@@ -129,4 +127,4 @@ zeigt die Illustration, sobald die Kette kein geladenes `image` hat.
 2. Fragen: Erkennt man das Motiv im Daumennagel? Ist jede Hand und jeder Gegenstand eindeutig? Stimmt das Bild mit Text und Sicherheitshinweis überein?
 3. `npm test` (prüft Größe, Format, Farben, erlaubten SVG-Code und die Zuordnung, Test `src/features/activities/illustrations.test.ts`).
    Linienstärken, Lesbarkeit und Sicherheit prüft der Test nicht.
-4. Vor der Beta schaut ein Mensch alle Illustrationen durch (wie Fotos und Aktivitäten).
+4. Vor der Beta schaut ein Mensch alle Illustrationen durch (wie die Aktivitäten).

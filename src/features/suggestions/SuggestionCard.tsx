@@ -24,11 +24,11 @@ import { CardMedia } from './CardMedia';
 
 type SuggestionCardProps = {
   activity: Activity;
-  imageChain: CardImageChain; // Bild-Stufen dieser Karte, die Wahl liegt bei den Karten des ganzen Ergebnisses (assignCardImages)
+  imageChain: CardImageChain; // Bild-Stufen dieser Karte (getCardImageChain)
   onPress: () => void;
 };
 
-// Ein Vorschlag als Karte (DESIGN.md, Bildschirm 02): Bildbereich mit Kategorie-Pille (Foto oder Farbfläche mit Symbol),
+// Ein Vorschlag als Karte (DESIGN.md, Bildschirm 02): Bildbereich mit Kategorie-Pille (Bild, Illustration oder Farbfläche mit Symbol),
 // Titel, Kurzbeschreibung, Dauer und Altersspanne. Antippen öffnet die Details (app/activity/[id].tsx).
 export function SuggestionCard({ activity, imageChain, onPress }: SuggestionCardProps) {
   const { t, i18n } = useTranslation();

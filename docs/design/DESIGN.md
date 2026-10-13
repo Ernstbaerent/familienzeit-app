@@ -2,7 +2,7 @@ Miki – Design
 
 Stand: Oktober 2026. Quelle: PDF „Runde 1 · Drei Richtungen und Logo für Miki" aus Claude Design (liegt im selben Ordner). Die Werte sind aus dem PDF übernommen, nichts ist dazuerfunden.
 
-Gewählte Richtung: A „Sonntagslicht" (warm und fotografisch) Gewähltes Logo: A1 „Zwei Bögen" Name: Miki steht für „Mit Kindern". Wortmarke kleingeschrieben: miki, darunter optional die Zeile „mit Kindern".
+Gewählte Richtung: A „Sonntagslicht" (warm; das PDF zeigt Fotos, in der App ersetzen gezeichnete Bilder sie, Zusatz 45) Gewähltes Logo: A1 „Zwei Bögen" Name: Miki steht für „Mit Kindern". Wortmarke kleingeschrieben: miki, darunter optional die Zeile „mit Kindern".
 
 Richtung B „Stille Wiese" und Richtung C wurden nicht gewählt. Ihre Werte stehen nur noch im PDF.
 
@@ -13,7 +13,7 @@ Funktionen, die es in der App noch nicht gibt, werden nicht still mitgebaut. Sie
 Widersprüche zu den Regeln in der CLAUDE.md (Mehrsprachigkeit, Rechts-nach-links, Datenschutz) melden, nicht eigenmächtig lösen.
 Gefühl
 
-Wie ein heller Samstagmorgen am Küchentisch: warmes Licht, echte Momente, nichts Inszeniertes. Große Fotos tragen die Stimmung, die Oberfläche tritt bescheiden zurück. Ruhig und warm, keine Punkte, Abzeichen oder Serien, genau drei Karten, ein Hauptknopf.
+Wie ein heller Samstagmorgen am Küchentisch: warmes Licht, echte Momente, nichts Inszeniertes. Große Bilder tragen die Stimmung (im PDF Fotos, in der App gezeichnete Illustrationen, Zusatz 45), die Oberfläche tritt bescheiden zurück. Ruhig und warm, keine Punkte, Abzeichen oder Serien, genau drei Karten, ein Hauptknopf.
 
 Vorgaben für alle Bildschirme
 Tippflächen mindestens 44 pt.
@@ -58,25 +58,15 @@ Karte 22, Knopf Pille (vollständig rund), Kachel 16.
 
 Bildsprache
 
-Mit Foto: Natürliches Tageslicht, echte Wohnungen, Hände bei der Arbeit. Kinder schauen nicht in die Kamera, nichts ist aufgeräumt-perfekt.
+Stimmung der Bilder: Warm, ruhig, wie mit dem Stift auf Papier gezeichnet, nichts ist aufgeräumt-perfekt. Die Stilregeln stehen in docs/design/ILLUSTRATIONEN.md. (Das PDF zeigt Fotos mit natürlichem Tageslicht; die App verwendet keine Fotos, Zusatz 45.)
 
-Ohne Foto (Rückfall, solange es weder ein Bild der Aktivität noch ein Kategorie-Foto gibt, heute der Normalfall): ruhige Farbfläche mit großem, dünnem Kategorie-Symbol, angeschnitten. Gleiche Kartenform, gleiche Höhe wie die Karte mit Foto. Diese Karte muss genauso hochwertig aussehen wie die mit Foto.
+Ohne Bild (Rückfall, solange eine Aktivität weder ein eigenes Bild noch eine Illustration hat): ruhige Farbfläche mit großem, dünnem Kategorie-Symbol, angeschnitten. Gleiche Kartenform, gleiche Höhe wie die Karte mit Bild. Diese Karte muss genauso hochwertig aussehen wie die mit Bild.
 
-Regeln für Fotos
+Bilder (seit Zusatz 45)
 
-Gelten für jedes Foto in der App, egal ob von Hand oder automatisch ausgewählt:
+Es gibt keine Stock-Fotos mehr. Bilder werden selbst gezeichnet (SVG), die Regeln dafür stehen in docs/design/ILLUSTRATIONEN.md (Format, Linie, Farben, Figuren, Sicherheit). Vor der Beta schaut ein Mensch einmal alle Illustrationen durch (wie bei den Aktivitäten).
 
-Keine erkennbaren Gesichter, besonders keine von Kindern. Gut sind Hände bei der Arbeit, Rückenansichten, Nahaufnahmen, Material, Essen, Natur.
-Keine erkennbaren Marken, Logos oder Produktverpackungen. Kein Text im Bild.
-Nur Bilder, deren Lizenz kommerzielle Nutzung erlaubt (z. B. Unsplash, Pexels). Die Plattformen prüfen nicht, ob Einwilligungen für abgebildete Personen vorliegen, deshalb Regel 1.
-Quellenliste: Zu jedem Foto werden gespeichert: Link, Fotograf, Plattform, Lizenz, Datum des Abrufs. Die Liste liegt in docs/bildquellen.md.
-Format: Querformat, etwa 1200 px breit, deutlich unter 300 KB. Ablage unter assets/images/ (Kategorie-Fotos unter assets/images/categories/).
-Das Foto passt zur Aktivität und widerspricht nicht der Altersgruppe (kein Babyspielzeug bei einer Aktivität für Teenager).
-Vor der Beta schaut ein Mensch einmal alle Fotos durch (wie bei den Aktivitäten).
-
-Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse (nur von unserem eigenen Speicher, Zusatz 35). Auf der Karte gilt dieser Vorrang: 1. image der Aktivität, 2. gebündeltes Kategorie-Foto aus assets/images/categories/ (nur ab der Mindestzahl Fotos in der Kategorie, Zusatz 34, heute 99: erst einmal ganz ohne Fotos, Zusatz 36), 3. Farbfläche mit Symbol (Entscheidung 21).
-
-Pilot Illustrationen (Oktober 2026, nicht endgültig, keine nummerierte Entscheidung): Drei Aktivitäten haben gezeichnete Illustrationen. Für sie gilt der Vorrang image → Illustration → Kategorie-Foto → Farbfläche. Stilregeln: docs/design/ILLUSTRATIONEN.md, Ergebnis: docs/illustrationen-pilot.md.
+Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse (nur von unserem eigenen Speicher, Zusatz 35). Im Bildbereich der Karte und der Detailansicht gilt dieser Vorrang: 1. image der Aktivität, 2. Illustration der Aktivität (src/features/activities/illustrations.ts), 3. Farbfläche mit Symbol (Entscheidung 21, geändert durch Zusatz 45). Die Illustrationen für alle Aktivitäten entstehen in M9b.
 
 Logo A1 „Zwei Bögen"
 
@@ -100,9 +90,9 @@ Abhak-Felder bei den Schritten der Anleitung	Übernommen, aber beim Material (�
 Knopf „Anleitung starten" im PDF	Der Name aus der App bleibt: „Das machen wir“ (Nr. 14).
 „Keine passt? Drei neue Ideen"	Ersetzt „Andere Vorschläge“, der Durchlauf mit Hinweis bleibt (Nr. 8).
 Text „Ohne Konto. Ohne Tracking." auf dem Start	Ersetzt durch: de „Kein Konto nötig. Deine Daten bleiben auf deinem Handy.“, en „No account needed. Your data stays on your phone.“ Nicht „Ohne Tracking“ (Nr. 5).
-Stimmungsbild auf dem Start	Platzhalter: Sandfläche mit großem, dünnem Sonnen-Symbol (Nr. 6), bis ein geprüftes Foto da ist (siehe Regeln für Fotos).
+Stimmungsbild auf dem Start	Platzhalter: Sandfläche mit großem, dünnem Sonnen-Symbol (Nr. 6), bis ein gezeichnetes Bild da ist (Zusatz 45).
 Kartenansicht „In der Nähe"	Erst mit M10. Jetzt nicht bauen.
-Aktivitäten haben bisher kein Foto	Vorrang auf der Karte: image der Aktivität, dann Kategorie-Foto, dann Farbfläche mit Symbol (Nr. 21). Fotos kommen schrittweise dazu.
+Aktivitäten haben bisher kein Foto	Vorrang auf der Karte: image der Aktivität, dann Illustration, dann Farbfläche mit Symbol (Nr. 21, geändert durch Zusatz 45). Illustrationen kommen schrittweise dazu (M9b).
 Entscheidungen
 Stand: 12. Oktober 2026. Clemens (Technik) hat die Fragenliste von Claude Code beantwortet. Die Entscheidungen gelten ab sofort und gehen widersprechenden Stellen in dieser Datei und im PDF vor. Die Nummern werden in CLAUDE.md, docs/theme.md und im Code als Verweis benutzt.
 
@@ -135,7 +125,7 @@ Stufe D5 (Verlauf und Profile, Dunkelmodus)
 
 Widersprüche zur CLAUDE.md
 20. Ionicons (nur Outline) bleiben, es gibt keinen eigenen Symbolsatz. Dass die Linienstärke nicht genau 1,75 px auf dem 24er-Raster ist, ist akzeptiert.
-21. Das Feld `image` bleibt eine Web-Adresse. Vorrang auf der Karte: 1. `image` der Aktivität, 2. gebündeltes Kategorie-Foto aus `assets/images/categories/`, 3. Farbfläche mit Symbol. Ohne Foto ist deshalb nicht dauerhaft der Normalfall, sondern der Rückfall.
+21. Das Feld `image` bleibt eine Web-Adresse. Vorrang auf der Karte: 1. `image` der Aktivität, 2. gebündeltes Kategorie-Foto aus `assets/images/categories/`, 3. Farbfläche mit Symbol. Ohne Foto ist deshalb nicht dauerhaft der Normalfall, sondern der Rückfall. (Die Stufe „Kategorie-Foto“ ist durch Zusatz 45 entfallen, an ihrer Stelle steht die Illustration.)
 
 Zusätze beim Umsetzen von D2 (von Clemens bestätigt)
 22. Das Wetter nach dem Tipp (Auslegung von Nr. 7): Ein Schritt auf dem Ergebnis-Bildschirm kommt nur, wenn er nötig ist. Wurde der Standort noch nie gefragt, erscheint zuerst die Erklär-Karte. Fehlt danach das Wetter, genügt ein Tipp auf „Wie ist das Wetter?“, dann erscheinen die Vorschläge.
@@ -152,11 +142,11 @@ Zusätze beim Umsetzen von D3 (von Clemens bestätigt, 34 und 35 von Clemens nac
 31. „Keine passt? Drei neue Ideen“ ist ein Nebenknopf (Sand, Tinte), nicht Terrakotta und kein Textlink wie im PDF (Entscheidung 11). Links im Wetter-Schritt sind Tinte mit Unterstreichung.
 32. Nicht gebaut aus dem PDF: die Überschrift „Drei Ideen für eure Stunde“ mit Untertitel („Mila & Jonas · 1 Std · Energie normal · Ändern“) und die Angabe „Drinnen/Draußen“ auf der Karte. Der Kopf trägt den Titel „Eure Ideen“. „Drinnen/Draußen“ steht auf der Feinschliff-Liste in der CLAUDE.md.
 33. Die Karte zeigt die Altersspanne („3–8 Jahre“, 0 bis 16 „Alle Alter“) statt „ab 3 J.“. Die sieben Kategorie-Farben (Entscheidung 10) stehen mit allen Werten und Kontrasten in docs/theme.md.
-34. Ein Kategorie-Foto erscheint nur, wenn die Kategorie mindestens drei Fotos hat (Konstante `minPhotosPerCategory` in `src/features/activities/categoryPhotoFiles.ts`, Erklärung in docs/theme.md). Mit nur einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: Schachbrett bei der Kissenburg). Das `image` einer einzelnen Aktivität hat weiterhin Vorrang. Stand bei dieser Entscheidung: Natur und Kochen zeigten Fotos, alle anderen die Farbfläche mit Symbol (abgelöst durch Zusatz 36).
-35. Das Feld `image` darf nur Adressen von unserem eigenen Speicher laden (Allowlist), damit keine IP-Adressen an fremde Server gehen. Die Allowlist kommt mit M8, der Speicher-Host steht unter „Entscheidungen vor M12“ in der CLAUDE.md. Bis dahin prüft der Code nur `https://`.
+34. Ein Kategorie-Foto erscheint nur, wenn die Kategorie mindestens drei Fotos hat (Konstante `minPhotosPerCategory` in `src/features/activities/categoryPhotoFiles.ts`, Erklärung in docs/theme.md). Mit nur einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: Schachbrett bei der Kissenburg). Das `image` einer einzelnen Aktivität hat weiterhin Vorrang. Stand bei dieser Entscheidung: Natur und Kochen zeigten Fotos, alle anderen die Farbfläche mit Symbol (abgelöst durch Zusatz 36, danach durch Zusatz 45).
+35. Das Feld `image` darf nur Adressen von unserem eigenen Speicher laden (Allowlist), damit keine IP-Adressen an fremde Server gehen. Die Allowlist ist seit M8 eingebaut (Supabase Storage unseres Projekts, `src/features/activities/imageAllowlist.ts`, Details docs/supabase.md).
 
 Zusätze beim Umsetzen von D4 (36 von Clemens am Anfang von D4 festgelegt, 37 bis 41 im Plan von Clemens bestätigt, 42 bis 44 von Clemens nach dem Plan ergänzt; Details: docs/detail.md)
-36. Erst einmal ganz ohne Fotos: Die Mindestzahl `minPhotosPerCategory` steht auf 99, keine Kategorie erreicht sie. Alle Karten und die Detailansicht zeigen die Farbfläche mit Symbol, solange eine Aktivität kein eigenes `image` hat. Mechanismus, Foto-Liste und Dateien bleiben. Fotos kommen später über M9b (Bilder-Pipeline). Löst den Stand von Zusatz 34 („heute Natur und Kochen“), nicht dessen Grund.
+36. (Abgelöst durch Zusatz 45: Es gibt keine Kategorie-Fotos mehr.) Erst einmal ganz ohne Fotos: Die Mindestzahl `minPhotosPerCategory` steht auf 99, keine Kategorie erreicht sie. Alle Karten und die Detailansicht zeigen die Farbfläche mit Symbol, solange eine Aktivität kein eigenes `image` hat. Mechanismus, Foto-Liste und Dateien bleiben. Fotos kommen später über M9b (Bilder-Pipeline). Löst den Stand von Zusatz 34 („heute Natur und Kochen“), nicht dessen Grund.
 37. „Abhak-Felder 56 px hoch“ (Entscheidung 13) heißt: Die ganze Zeile ist 56 px hoch und die Tippfläche. Das sichtbare Kästchen darin ist etwa 32 px groß, wie im PDF.
 38. Der Bildbereich der Detailansicht hat die Form und Rundung der Karten, aber keine Kategorie-Pille. Die Kategorie steht klein über dem Titel.
 39. Abgehakt ist Tinte mit Häkchen (nach Nr. 11 und 23), nicht Terrakotta wie im PDF. Der Rand der leeren Kästchen ist `icon` aus der Palette (Nr. 17).
@@ -166,8 +156,11 @@ Zusätze beim Umsetzen von D4 (36 von Clemens am Anfang von D4 festgelegt, 37 bi
 43. Der feste Bereich unten ist ein Nachbar des Scrollbereichs, nicht darüber gelegt: Der Scrollbereich endet über ihm, auch bei großer Schrift und mit Sicherheitsbereich am unteren Rand, und hat unten zusätzlich Luft. Die Zurück-Taste von Android führt zu den Ideen (eine Stufe zurück im Stapel).
 44. Nach „Fertig“ ist „Wie war’s?“ ohne Scrollen sichtbar: Es steht im selben festen Bereich wie der Hauptknopf. Funktion und Aussehen bleiben bis D5 unverändert.
 
+Zusatz nach dem Pilot der Illustrationen (13. Oktober 2026, von Clemens festgelegt)
+45. Wir verwenden keine Stock-Fotos mehr. Bilder werden künftig selbst gezeichnet (SVG, Regeln in docs/design/ILLUSTRATIONEN.md). Die Foto-Mechanik ist entfernt: die Dateien unter assets/images/categories/, die Quellenliste, das Auswahl-Skript und die Foto-Liste der App samt Tests. Das Feld `image` bleibt, der Vorrang im Bildbereich ist: 1. `image` der Aktivität, 2. Illustration, 3. Farbfläche mit Symbol. Die Zusätze 34 und 36, der Teil „Kategorie-Foto“ der Entscheidung 21 und die Regeln für Fotos gelten nicht mehr. Wo in älteren Entscheidungen „Foto“ steht, gilt jetzt „gezeichnetes Bild“. Die Illustrationen für alle Aktivitäten entstehen in M9b. Die Fotos stehen im Verlauf von Git (Stand vor dieser Änderung: Commit 4332e79), falls je wieder welche gebraucht würden.
+
 Offene Punkte
  Logo und App-Icon als Dateien exportieren und unter assets/ ablegen
  Name „Miki": Markenregister (DPMA) und App Store / Play Store prüfen
  Bundle-ID und Paketname festlegen (nach der Store-Veröffentlichung nicht mehr änderbar)
- Erste Fotos für die Kategorien auswählen (siehe Regeln für Fotos)
+ Illustrationen für alle Aktivitäten zeichnen (M9b)

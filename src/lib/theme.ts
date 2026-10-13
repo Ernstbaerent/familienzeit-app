@@ -66,10 +66,10 @@ export const darkColors: Colors = {
 };
 
 // ---------------------------------------------------------------------------
-// Kategorie-Farben (Karte ohne Foto, DESIGN.md Entscheidung 10)
+// Kategorie-Farben (Karte ohne Bild, DESIGN.md Entscheidung 10)
 // ---------------------------------------------------------------------------
 
-// Jede Kategorie hat eine eigene Farbe für die Fläche, auf der die Karte ohne Foto ihr großes Symbol zeigt.
+// Jede Kategorie hat eine eigene Farbe für die Fläche, auf der die Karte ohne Bild ihr großes Symbol zeigt.
 // Es gibt keine neuen Farbtöne: Jeder Ton wird aus den Farben der Palette gemischt (Papier, Sand, Terrakotta, Salbei, Honig, Tinte),
 // im Dunkeln aus den Dunkelwerten. Vier Farbtöne für sieben Kategorien: Terrakotta, Salbei und Honig je zweimal
 // (hell und kräftiger getönt), Sand einmal. Die berechneten Werte stehen in docs/theme.md, die Kontraste prüft src/lib/theme.test.ts.
@@ -77,7 +77,7 @@ export const darkColors: Colors = {
 // Auf der Fläche liegt nur das Symbol (mindestens 3:1) und, falls je Text darauf stehen soll, `text` (mindestens 4,5:1).
 // Der Name der Kategorie steht in einer weißen Pille (`card`), nicht auf der Fläche.
 export type CategoryTone = {
-  field: string; // Fläche der Karte (Rückfall ohne Foto)
+  field: string; // Fläche der Karte (Rückfall ohne Bild)
   mark: string; // das große, dünne Symbol auf der Fläche: Palettenfarbe, zur Tinte hin abgedunkelt
   shape: string; // der weiche große Kreis auf der Fläche, nur Dekoration
 };
