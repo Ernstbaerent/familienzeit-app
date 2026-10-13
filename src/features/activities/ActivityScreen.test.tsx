@@ -6,11 +6,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image as ExpoImage } from 'expo-image';
 import { createInstance } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
-import { Alert, BackHandler, Image, ScrollView, StyleSheet, Text } from 'react-native';
+import { Alert, BackHandler, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { act, create, type ReactTestInstance } from 'react-test-renderer';
 
 import type { Activity } from '@/features/activities/activities';
 import { categoryIcons } from '@/features/activities/CategoryIcon';
+import { getFactTileWidths } from '@/features/activities/detailLayout';
 import { getIllustration, getStepIllustrations } from '@/features/activities/illustrations';
 import { makeActivity } from '@/features/suggestions/testHelpers';
 import { contrastRatio } from '@/lib/contrast';
@@ -826,6 +827,12 @@ describe('Illustrationen (Pilot)', () => {
     const row = stepRow(root, 1);
     const frame = closest(row.findAllByType(ExpoImage)[0], (style) => style.aspectRatio === 2);
     expect(flat(frame)).toMatchObject({ width: '100%', aspectRatio: 2, borderRadius: radius.tile, overflow: 'hidden' });
+    // Zum eigenen Text 16 px, zum nächsten Schritt deutlich mehr (28 + 16): So gehört das Bild sichtbar zu seinem Schritt.
+    const textToImage = flat(hostParent(frame)).gap as number;
+    const imageToNextStep = (flat(frame).marginBottom as number) + spacing.stepGap;
+    expect(textToImage).toBe(spacing.md);
+    expect(imageToNextStep).toBe(spacing.md + spacing.stepGap);
+    expect(imageToNextStep).toBeGreaterThan(2 * textToImage);
     expect(frame.props.accessibilityElementsHidden).toBe(true);
     expect(frame.props.importantForAccessibility).toBe('no-hide-descendants');
     // Die Sprachausgabe liest weiter nur den Satz, der Text bleibt in Lesegröße.
@@ -852,6 +859,101 @@ describe('Illustrationen (Pilot)', () => {
     const images = root.findAllByType(ExpoImage);
     expect(images).toHaveLength(1);
     expect(images[0].props.source).toBe(getIllustration('homemade-pizza')?.source);
+  });
+});
+
+// --- Kein Text wird abgeschnitten (alle Aktivitäten) ---------------------------------------------------------------
+
+// Auf iOS schneidet ein zu niedriger Textrahmen die letzte Zeile rechts ab, statt umzubrechen (gesehen im Pilot bei Schritt 2 des
+// Sockenpuppen-Theaters). Feste Maße oder eine Zeilenbegrenzung an einem Text oder an einem Element darüber machen das wahrscheinlich.
+// Dieser Block zeichnet die Detailansicht aller echten Aktivitäten und meldet jede solche Stelle, mit Aktivität und Text.
+describe('Kein Text wird abgeschnitten (alle 104 Aktivitäten)', () => {
+  const { loadActivities: loadRealActivities } = jest.requireActual<typeof import('./loadActivities')>('./loadActivities');
+  const realActivities = loadRealActivities();
+  // Maße, die ein Element unabhängig von seinem Inhalt festlegen (Mindestmaße wie `minHeight` sind erlaubt: Sie wachsen mit).
+  const fixedSizeKeys = ['width', 'height', 'maxWidth', 'maxHeight', 'aspectRatio'] as const;
+  // Einzige Ausnahme: die Breiten des Rasters der Eckdaten-Kacheln (detailLayout.ts). Sie kommen aus der Bildschirmbreite und der
+  // Systemschrift, die Höhe wächst mit, die Texte brechen darin um. Dass dort jedes Wort hineinpasst, prüft die Webprüfung (docs/detail.md).
+  const factTileWidths = () =>
+    new Set<unknown>(
+      getFactTileWidths({ count: 5, containerWidth: mockWindow.width - 2 * spacing.lg, gap: spacing.md, fontScale: mockWindow.fontScale }),
+    );
+
+  // Alle Stellen eines Bildschirms, an denen Text abgeschnitten werden könnte. Symbole (Ionicons) zählen nicht: Sie sind ein Zeichen und brechen nicht um.
+  function clippingRisks(root: ReactTestInstance): string[] {
+    const risks: string[] = [];
+    const allowedWidths = factTileWidths();
+    for (const node of root.findAllByType(Text)) {
+      if (typeof node.props.name === 'string') continue;
+      const label = `„${textOf(node).slice(0, 40)}“`;
+      for (const prop of ['numberOfLines', 'ellipsizeMode', 'adjustsFontSizeToFit', 'maxFontSizeMultiplier'] as const) {
+        if (node.props[prop] !== undefined && node.props[prop] !== false) risks.push(`${label}: ${prop}`);
+      }
+      if (node.props.allowFontScaling === false) risks.push(`${label}: allowFontScaling={false}`);
+      const style = flat(node) as Record<string, unknown>;
+      if (typeof style.lineHeight === 'number' && typeof style.fontSize === 'number' && style.lineHeight < style.fontSize) {
+        risks.push(`${label}: Zeilenhöhe ${style.lineHeight} kleiner als Schrift ${style.fontSize}`);
+      }
+      // Der Text selbst und jedes Element darüber: keine festen Maße.
+      for (let current: ReactTestInstance | null = node; current; current = current.parent) {
+        if (typeof current.type !== 'string' && current !== node) continue;
+        const own = flat(current) as Record<string, unknown>;
+        for (const key of fixedSizeKeys) {
+          const value = own[key];
+          // 100 % heißt „so breit wie der Platz“ und hängt nicht am Inhalt fest.
+          if (key === 'width' && allowedWidths.has(value)) continue;
+          if (value !== undefined && value !== '100%') risks.push(`${label}: ${current === node ? 'Text' : 'Element darüber'} hat ${key} ${String(value)}`);
+        }
+        if (current === node && own.overflow === 'hidden') risks.push(`${label}: overflow hidden`);
+      }
+    }
+    return risks;
+  }
+
+  it('es sind wirklich alle Aktivitäten (mindestens 100)', () => {
+    expect(realActivities.length).toBeGreaterThanOrEqual(100);
+  });
+
+  it.each(['de', 'en'] as const)('%s: kein Text hat eine Zeilenbegrenzung oder feste Maße, auch nicht darüber', (language) => {
+    const risks: string[] = [];
+    for (const activity of realActivities) {
+      setup(activity);
+      const { root, renderer } = renderScreen(language);
+      for (const risk of clippingRisks(root)) risks.push(`${activity.id}: ${risk}`);
+      act(() => renderer.unmount());
+    }
+    expect(risks).toEqual([]);
+  });
+
+  it('auch bei doppelter Systemschrift (andere Spalten bei den Kacheln)', () => {
+    mockWindow.fontScale = 2;
+    const risks: string[] = [];
+    for (const activity of realActivities) {
+      setup(activity);
+      const { root, renderer } = renderScreen();
+      for (const risk of clippingRisks(root)) risks.push(`${activity.id}: ${risk}`);
+      act(() => renderer.unmount());
+    }
+    expect(risks).toEqual([]);
+  });
+
+  it('der Prüfer findet eine Zeilenbegrenzung und feste Maße (Gegenprobe)', () => {
+    let renderer!: ReturnType<typeof create>;
+    act(() => {
+      renderer = create(
+        <View style={{ height: 60 }}>
+          <Text numberOfLines={2} style={{ fontSize: fontSize.reading, lineHeight: lineHeight.xs }}>
+            Langer Text
+          </Text>
+        </View>,
+      );
+    });
+    expect(clippingRisks(renderer.root)).toEqual([
+      '„Langer Text“: numberOfLines',
+      `„Langer Text“: Zeilenhöhe ${lineHeight.xs} kleiner als Schrift ${fontSize.reading}`,
+      '„Langer Text“: Element darüber hat height 60',
+    ]);
+    act(() => renderer.unmount());
   });
 });
 

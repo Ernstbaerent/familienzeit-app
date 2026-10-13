@@ -14,7 +14,7 @@ Der Ablauf dahinter (Das machen wir → Fertig → Wie war’s? → Verlauf) ist
 | Allergen-Box | nur wenn Allergene erkannt wurden, darunter dauerhaft ein Satz | `activities/ActivityNotices.tsx` |
 | Sicherheitsbox | wo nötig, mit „Mit Erwachsenen“ | `activities/ActivityNotices.tsx` |
 | Das braucht ihr | Liste mit Abhak-Feldern | `activities/MaterialChecklist.tsx` |
-| So geht’s | nummerierte Schritte, 20 px, 28 px Abstand; (Pilot) Schrittbild unter dem Text, 2:1, Radius 16, Dekoration (`docs/design/ILLUSTRATIONEN.md`) | `activities/StepList.tsx` |
+| So geht’s | nummerierte Schritte, 20 px, 28 px Abstand; (Pilot) Schrittbild unter dem Text, 2:1, Radius 16, danach 16 px mehr Luft, Dekoration (`docs/design/ILLUSTRATIONEN.md`) | `activities/StepList.tsx` |
 | Fester Bereich unten | Hauptknopf „Das machen wir“, danach „Fertig“, danach „Wie war’s?“ | `app/activity/[id].tsx` |
 
 Der Bildschirm ist in drei Blöcke geteilt, die untereinander stehen: Kopf, Scrollbereich, fester Bereich. Der **feste Bereich ist ein Nachbar des Scrollbereichs**,
@@ -79,7 +79,9 @@ Keine Hinweise je Schritt (Entscheidung 15).
 
 ## Große Systemschrift, Rechts-nach-links, Sprachausgabe
 
-- Die Skalierung bleibt an (nie `allowFontScaling={false}`, nie `fontWeight` bei diesen Schriften). Höhen sind Mindesthöhen, Texte haben kein `numberOfLines`. Das Häkchen im Kästchen und das große Symbol im Bildbereich bleiben gleich groß (Division durch `fontScale`).
+- Die Skalierung bleibt an (nie `allowFontScaling={false}`, nie `fontWeight` bei diesen Schriften). Höhen sind Mindesthöhen, Texte haben kein `numberOfLines`.
+  Ein Test prüft das für alle 104 Aktivitäten (de/en, normale und doppelte Schrift): keine Zeilenbegrenzung, keine feste Höhe oder Breite am Text oder darüber,
+  außer dem Raster der Eckdaten-Kacheln. Hintergrund (abgeschnittener Schritt-Text auf dem iPhone, Ursache, Webprüfung, lange Wörter): `docs/textpruefung.md`. Das Häkchen im Kästchen und das große Symbol im Bildbereich bleiben gleich groß (Division durch `fontScale`).
 - Nur `start`/`end` und logische Abstände, der Zurück-Pfeil wird bei rechts-nach-links gespiegelt (`mirrorInRTL`). Ein Test prüft, dass keine festen linken oder rechten Werte vorkommen.
 - Rollen und Beschriftungen: Titel, Boxen und Abschnitte sind Überschriften, Abhak-Felder sind „checkbox“ mit Zustand, Kacheln und Schritte je ein Satz, der Bildbereich ist Dekoration, der Zurück-Knopf ist beschriftet.
 - Der Dunkelmodus bleibt bis D5 aus. Alle Farben kommen aus dem Theme (ein Test prüft, dass jede gezeichnete Farbe in der Palette oder den Kategorie-Farben steht).
@@ -106,7 +108,9 @@ Lädt ein `image` nicht, zeigt der Bildbereich die Farbfläche.
 2. Material abhaken, zurückgehen und die Karte wieder öffnen: alles ist wieder leer.
 3. Nach unten scrollen: Der Hauptknopf bleibt unten stehen, der letzte Schritt ist über ihm ganz zu lesen.
 4. In den Handy-Einstellungen die Schrift auf „Sehr groß“ stellen: Kacheln stehen untereinander, nichts ist abgeschnitten.
-5. „Das machen wir“ → „Fertig“: „Wie war’s?“ ist sofort ganz zu sehen. Die Zurück-Taste von Android (auf einem Android-Handy) führt von den Details zu den Ideen.
+5. Sockenpuppen-Theater öffnen: Alle Schritte sind ganz zu lesen (Schritt 2 endet mit „Filzstift.“), die Schrittbilder stehen unter Schritt 1 bis 3.
+   Vorher Expo Go ganz schließen, falls die Schriften in einer früheren Sitzung zu spät kamen (`docs/textpruefung.md`).
+6. „Das machen wir“ → „Fertig“: „Wie war’s?“ ist sofort ganz zu sehen. Die Zurück-Taste von Android (auf einem Android-Handy) führt von den Details zu den Ideen.
 
 ## Sichtprüfung im Browser (D4)
 

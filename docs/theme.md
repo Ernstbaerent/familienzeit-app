@@ -201,8 +201,17 @@ meldet, dass die App starten darf. Das ist der Fall, wenn
 In Fall 2 und 3 startet die App mit der Systemschrift. So springt beim Start nichts um, und es bleibt nie ein leerer Bildschirm.
 Die 4 Sekunden: Die Dateien liegen in der fertigen App selbst, das Laden dauert Millisekunden. Nur im Entwicklungsmodus
 (Expo Go) kommen sie über das Netzwerk, dort reichen 4 Sekunden auch bei langsamem WLAN. Länger soll niemand auf ein
-Startbild schauen. Kommt die Schrift nach dem Zeitlimit doch noch, gilt sie ab dem nächsten Start (bereits gezeigter Text
-wechselt nicht mitten in der Nutzung).
+Startbild schauen. Kommt die Schrift nach dem Zeitlimit doch noch, gilt sie erst ab dem nächsten Start: **Die ganze Sitzung bleibt bei der Systemschrift.**
+
+Warum das wichtig ist (seit dem Pilot Illustrationen umgesetzt, vorher stand es nur hier): iOS merkt sich die gemessene Größe eines Textes
+unter dem **Schriftnamen**, nicht unter der Schrift, die tatsächlich benutzt wurde. Wird ein Text gemessen, solange Onest noch nicht da ist,
+gilt die Messung mit der schmaleren Systemschrift weiter. Wird er danach mit Onest gezeichnet, fehlt Platz: iOS schneidet die letzte Zeile
+rechts ab und lässt die Zeile darunter weg. Deshalb liest `fonts` in `theme.ts` einen Schalter: Nach Zeitlimit oder Ladefehler schaltet
+`useAppFonts` (`src/lib/fonts.ts`) vor dem ersten Text auf die Systemschrift (`fontFamily` leer), und das bleibt bis zum nächsten Start.
+Die Namen der Schriftschnitte stehen in `fontFaces`. In der Konsole erscheint dazu eine Warnung. Geprüft in `src/lib/fonts.test.ts`.
+
+**Beim Testen in Expo Go:** Nach einer Sitzung, in der die Schriften zu spät kamen, Expo Go ganz schließen (nicht nur neu laden). Der Speicher
+der gemessenen Größen gehört zu Expo Go und kann ein Neuladen der App überstehen.
 
 ## Dunkelmodus
 

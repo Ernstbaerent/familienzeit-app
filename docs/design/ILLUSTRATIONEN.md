@@ -117,6 +117,7 @@ zeigt die Illustration, sobald die Kette kein geladenes `image` hat.
 ## Schrittbilder
 
 - Ein Schrittbild steht **unter dem Text seines Schritts**, in der Textspalte (gleich breit wie der Text), Radius `tile` (16).
+  Zum eigenen Text sind es 16 px, nach dem Bild bis zum nächsten Schritt 44 px (28 + 16): So gehört es sichtbar zu seinem Schritt.
   Neben dem Text wäre die Anleitung (20 px) zu schmal.
 - Es zeigt genau die Handlung dieses Schritts, nicht das Ergebnis eines späteren.
 - Die Zuordnung hängt an der Schrittnummer. **Ändert sich die Anleitung, müssen die Schrittbilder mitgeprüft werden**

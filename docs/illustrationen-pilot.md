@@ -81,13 +81,14 @@ Daumennagel (96 × 48 und 64 × 32), jeweils in einfacher und doppelter Pixeldic
 
 ## Ist die Zuordnung Schrittbild zu Schritt-Text eindeutig?
 
-**Weitgehend ja.** Das Bild steht in derselben Spalte wie der Text, eingerückt neben der Nummer, 16 px unter dem Text. Bis zur nächsten Nummer sind es 28 px.
-Nähe und Einrückung zeigen, wozu es gehört. Zwei Einschränkungen:
+**Ja, nach zwei Änderungen.** Das Bild steht in derselben Spalte wie der Text, eingerückt neben der Nummer, 16 px unter dem Text.
 
-- Der Unterschied zwischen 16 px (zum eigenen Text) und 28 px (zum nächsten Schritt) ist nicht groß. Wer schnell scrollt, könnte ein Bild
-  dem folgenden Schritt zuordnen. Mehr Luft nach einem Schrittbild würde helfen, das wäre eine kleine Änderung.
-- **Inhaltlich passt Schritt 1 nur halb:** Der Text sagt „Socke aussuchen und überlegen, wer sie sein soll“, das Bild zeigt die Socke schon
-  über der Hand. Schritt 2 (Augen, Wolle, Kleber; der gemalte Mund fehlt) und Schritt 3 (Erwachsener schneidet das Fenster) passen genau.
+- **Mehr Luft nach dem Bild (umgesetzt):** Vorher waren es 16 px zum eigenen Text und nur 28 px bis zum nächsten Schritt. Wer schnell scrollte,
+  konnte ein Bild dem folgenden Schritt zuordnen. Jetzt sind es nach einem Schrittbild 44 px (28 + 16), fast dreimal so viel wie zum eigenen Text.
+- **Text von Schritt 1 an das Bild angepasst (umgesetzt):** Vorher sagte der Text nur „Socke aussuchen“, das Bild zeigte die Socke schon über der Hand.
+  Jetzt: „Jedes Kind sucht sich eine Socke aus, zieht sie über die Hand und überlegt, wer sie sein soll.“ (en: „Each child picks a sock, pulls it
+  over one hand and decides who it should be.“). Kein neues Material, die Sicherheits-Checkliste besteht weiter.
+- Schritt 2 (Augen, Wolle, Kleber; der gemalte Mund fehlt im Bild) und Schritt 3 (Erwachsener schneidet das Fenster) passen.
 
 ## Wie viele Bilder pro Sitzung?
 

@@ -18,6 +18,7 @@ type StepListProps = {
 // damit man sie in der Küche auch aus Armlänge lesen kann (DESIGN.md, Bildschirm 03). Keine Abhak-Felder bei den Schritten (Entscheidung 13),
 // keine Hinweise je Schritt (Entscheidung 15). Für die Sprachausgabe ist jeder Schritt ein Satz („Schritt 1. …“).
 // Ein Schrittbild (Pilot) steht unter dem Text seines Schritts, so breit wie der Text. Daneben wäre die Anleitung zu schmal.
+// Nach dem Bild ist mehr Luft als zwischen Text und Bild, damit es nicht wie das Bild des nächsten Schritts wirkt.
 // Es ist Dekoration: Die Sprachausgabe liest nur den Satz des Schritts.
 export function StepList({ steps, illustrations }: StepListProps) {
   const { t } = useTranslation();
@@ -96,8 +97,10 @@ const createStyles = ({ colors }: Theme) =>
       lineHeight: lineHeight.reading,
       color: colors.text,
     },
-    // Schrittbild: 2:1 wie der Bildbereich der Karten, Ecken wie Kacheln.
+    // Schrittbild: 2:1 wie der Bildbereich der Karten, Ecken wie Kacheln. Unten zusätzlich Luft: Zum eigenen Text sind es 16 px,
+    // zum nächsten Schritt 28 + 16 = 44 px. So ist klar, zu welchem Schritt das Bild gehört.
     stepImage: {
+      marginBottom: spacing.md,
       width: '100%',
       aspectRatio: 2,
       overflow: 'hidden',
