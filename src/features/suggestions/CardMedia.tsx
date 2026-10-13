@@ -1,10 +1,12 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Image as ExpoImage } from 'expo-image';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import type { ActivityCategory } from '@/features/activities/activities';
 import { categoryIcons } from '@/features/activities/CategoryIcon';
+import type { Illustration } from '@/features/activities/illustrations';
 import { fonts, fontSize, iconSize, lineHeight, radius, spacing, type Theme } from '@/lib/theme';
 import { useThemedStyles } from '@/lib/useThemedStyles';
 
@@ -15,15 +17,19 @@ type CardMediaProps = {
   chain: CardImageChain; // die Bild-Stufen dieser Karte (cardImage.ts), bestes zuerst, zuletzt die Farbfläche
   // Die weiße Pille mit Kategorie-Symbol und Name. In der Detailansicht aus: Dort steht die Kategorie über dem Titel.
   showPill?: boolean;
+  // PILOT: die Illustration dieser Aktivität (illustrations.ts). Sie steht nach dem `image` der Aktivität und vor Kategorie-Foto und Farbfläche.
+  illustration?: Illustration;
 };
 
 // Der Bildbereich oben auf der Vorschlagskarte (DESIGN.md, Entscheidung 21). Immer dieselbe Form und Höhe (Seitenverhältnis 2:1):
 //  1. das `image` der Aktivität (Web-Adresse), 2. ein gebündeltes Kategorie-Foto, 3. die Farbfläche der Kategorie mit großem,
 //  dünnem, angeschnittenem Symbol. Lädt eine Web-Adresse nicht, zeigt der Bereich die nächste Stufe.
+// PILOT Illustrationen (docs/design/ILLUSTRATIONEN.md): Hat die Aktivität eine Illustration, steht sie zwischen 1 und 2.
+//  Die Bildkette aus cardImage.ts (Foto-Mechanik) bleibt dafür unverändert, die Illustration wird nur hier eingeschoben.
 // Dazu die weiße Pille mit Kategorie-Symbol und Name (Fläche und Foto gleich), auf Wunsch (`showPill`) auch ohne.
 // Die Detailansicht (D4) nutzt denselben Bildbereich, ohne Pille.
 // Für die Sprachausgabe ist der Bereich Dekoration: Titel und Kategorie stehen in der Beschriftung der Karte.
-export function CardMedia({ category, chain, showPill = true }: CardMediaProps) {
+export function CardMedia({ category, chain, showPill = true, illustration }: CardMediaProps) {
   const { t } = useTranslation();
   const { styles, categoryTones, colors } = useThemedStyles(createStyles);
   // Das Symbol ist ein Schrift-Zeichen und würde mit der Systemschrift mitwachsen. Als Dekoration soll es gleich groß bleiben,
@@ -32,17 +38,28 @@ export function CardMedia({ category, chain, showPill = true }: CardMediaProps) 
   // Stufen, die nicht geladen werden konnten (Schlüssel = Web-Adresse). Die letzte Stufe, die Farbfläche, kann nicht fehlschlagen.
   const [failed, setFailed] = useState<readonly string[]>([]);
 
+  // Lädt die Illustration nicht (sollte bei einer gebündelten Datei nicht vorkommen), zeigt der Bereich die Kette ohne sie.
+  const [illustrationFailed, setIllustrationFailed] = useState(false);
+
   const step: CardImageSource =
     chain.find((entry) => entry.kind === 'placeholder' || !failed.includes(stepKey(entry))) ?? { kind: 'placeholder' };
+  const showIllustration = illustration !== undefined && !illustrationFailed && step.kind !== 'activity';
   const tone = categoryTones[category];
 
   return (
     <View
-      style={[styles.media, step.kind === 'placeholder' && { backgroundColor: tone.field }]}
+      style={[styles.media, step.kind === 'placeholder' && !showIllustration && { backgroundColor: tone.field }]}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      {step.kind === 'placeholder' ? (
+      {showIllustration ? (
+        <ExpoImage
+          source={illustration.source}
+          style={styles.image}
+          contentFit="cover"
+          onError={() => setIllustrationFailed(true)}
+        />
+      ) : step.kind === 'placeholder' ? (
         <>
           <View style={[styles.shape, { backgroundColor: tone.shape }]} />
           <Ionicons

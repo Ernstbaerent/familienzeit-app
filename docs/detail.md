@@ -8,13 +8,13 @@ Der Ablauf dahinter (Das machen wir → Fertig → Wie war’s? → Verlauf) ist
 | Teil | Was | Datei |
 | ---- | --- | ----- |
 | Kopf | runder Zurück-Knopf (mindestens 44 pt, beschriftet „Zurück zu den Ideen“), keine Navigationsleiste | `components/BackButton.tsx`, `app/activity/[id].tsx` |
-| Bildbereich | wie auf den Karten (2:1, Radius 22): Foto der Aktivität (`image`), sonst Farbfläche mit großem Symbol, **ohne Pille** | `suggestions/CardMedia.tsx` (`showPill={false}`) |
+| Bildbereich | wie auf den Karten (2:1, Radius 22): Foto der Aktivität (`image`), sonst (Pilot) ihre Illustration, sonst Farbfläche mit großem Symbol, **ohne Pille** | `suggestions/CardMedia.tsx` (`showPill={false}`) |
 | Titel | Kategorie klein darüber, Titel in Literata 34 px (Überschrift), Kurzbeschreibung darunter | `activities/ActivityDetails.tsx` |
 | Eckdaten | fünf weiße Kacheln: Dauer, Alter, Energie von dir, Kosten, Ort | `activities/FactTiles.tsx`, Raster `detailLayout.ts` |
 | Allergen-Box | nur wenn Allergene erkannt wurden, darunter dauerhaft ein Satz | `activities/ActivityNotices.tsx` |
 | Sicherheitsbox | wo nötig, mit „Mit Erwachsenen“ | `activities/ActivityNotices.tsx` |
 | Das braucht ihr | Liste mit Abhak-Feldern | `activities/MaterialChecklist.tsx` |
-| So geht’s | nummerierte Schritte, 20 px, 28 px Abstand | `activities/StepList.tsx` |
+| So geht’s | nummerierte Schritte, 20 px, 28 px Abstand; (Pilot) Schrittbild unter dem Text, 2:1, Radius 16, Dekoration (`docs/design/ILLUSTRATIONEN.md`) | `activities/StepList.tsx` |
 | Fester Bereich unten | Hauptknopf „Das machen wir“, danach „Fertig“, danach „Wie war’s?“ | `app/activity/[id].tsx` |
 
 Der Bildschirm ist in drei Blöcke geteilt, die untereinander stehen: Kopf, Scrollbereich, fester Bereich. Der **feste Bereich ist ein Nachbar des Scrollbereichs**,

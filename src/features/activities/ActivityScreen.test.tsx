@@ -3,6 +3,7 @@
 // Ohne Handy: Der Bildschirm wird mit echten Texten gezeichnet, Navigation, Profile, Verlauf und Aktivitäten sind ersetzt.
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Image as ExpoImage } from 'expo-image';
 import { createInstance } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 import { Alert, BackHandler, Image, ScrollView, StyleSheet, Text } from 'react-native';
@@ -10,6 +11,7 @@ import { act, create, type ReactTestInstance } from 'react-test-renderer';
 
 import type { Activity } from '@/features/activities/activities';
 import { categoryIcons } from '@/features/activities/CategoryIcon';
+import { getIllustration, getStepIllustrations } from '@/features/activities/illustrations';
 import { makeActivity } from '@/features/suggestions/testHelpers';
 import { contrastRatio } from '@/lib/contrast';
 import { mirrorInRTL } from '@/lib/rtl';
@@ -762,6 +764,94 @@ describe('„So geht’s“', () => {
     expect(flat(textNode(root, 'Zum Wald gehen.')).fontSize).toBe(fontSize.reading);
     expect(closest(textNode(root, 'Zum Wald gehen.'), (style) => style.gap === spacing.stepGap)).toBeDefined();
     for (const node of root.findAllByType(Text)) expect(node.props.numberOfLines).toBeUndefined();
+  });
+});
+
+// --- Illustrationen (Pilot, docs/design/ILLUSTRATIONEN.md) ----------------------------------------------------------
+
+describe('Illustrationen (Pilot)', () => {
+  const puppetSteps = {
+    de: ['Socke aussuchen.', 'Augen ankleben.', 'Bühne bauen.', 'Geschichte ausdenken.', 'Vorspielen.'],
+    en: ['Pick a sock.', 'Glue on eyes.', 'Build the stage.', 'Make up a story.', 'Perform.'],
+  };
+  const puppetIdea = () =>
+    makeIdea({
+      id: 'sock-puppet-theater',
+      category: 'craft',
+      translations: {
+        de: { title: 'Sockenpuppen-Theater', summary: 'Puppen aus Socken.', steps: puppetSteps.de },
+        en: { title: 'Sock Puppet Theater', summary: 'Puppets from socks.', steps: puppetSteps.en },
+      },
+    });
+  const stepRow = (root: ReactTestInstance, number: number, language: 'de' | 'en' = 'de') =>
+    root.find(
+      (node) =>
+        typeof node.type === 'string' &&
+        node.props.accessibilityLabel === `${language === 'de' ? 'Schritt' : 'Step'} ${number}. ${puppetSteps[language][number - 1]}`,
+    );
+
+  it('der Bildbereich zeigt das Titelbild statt der Farbfläche (ohne Pille)', () => {
+    setup(puppetIdea());
+    const { root } = renderScreen();
+    const [hero] = root.findAll((node) => typeof node.type === 'string' && flat(node).aspectRatio === 2);
+    const [image] = hero.findAllByType(ExpoImage);
+    expect(image.props.source).toBe(getIllustration('sock-puppet-theater')?.source);
+    expect(hero.findAll((node) => typeof node.props.name === 'string' && node.props.size === iconSize.hero)).toHaveLength(0);
+    expect(hero.props.accessibilityElementsHidden).toBe(true);
+    expect(allTexts(hero)).toHaveLength(0);
+  });
+
+  it('Schrittbilder stehen unter dem Text der Schritte 1 bis 3, die Schritte 4 und 5 haben keins', () => {
+    setup(puppetIdea());
+    const { root } = renderScreen();
+    const steps = getStepIllustrations('sock-puppet-theater') ?? {};
+    for (const number of [1, 2, 3]) {
+      const row = stepRow(root, number);
+      const images = row.findAllByType(ExpoImage);
+      expect(images).toHaveLength(1);
+      expect(images[0].props.source).toBe(steps[number].source);
+      // Unter dem Text: Text und Bild sind Geschwister in derselben Spalte, der Text zuerst.
+      const text = textNode(row, puppetSteps.de[number - 1]);
+      const column = hostParent(text);
+      const children = column.children.filter((child): child is ReactTestInstance => typeof child !== 'string');
+      const imageIndex = children.findIndex((child) => child.findAllByType(ExpoImage).length > 0);
+      expect(children.indexOf(text)).toBeLessThan(imageIndex);
+    }
+    for (const number of [4, 5]) expect(stepRow(root, number).findAllByType(ExpoImage)).toHaveLength(0);
+  });
+
+  it('Schrittbild: 2:1, so breit wie der Text, Ecken wie Kacheln, für die Sprachausgabe Dekoration', () => {
+    setup(puppetIdea());
+    const { root } = renderScreen();
+    const row = stepRow(root, 1);
+    const frame = closest(row.findAllByType(ExpoImage)[0], (style) => style.aspectRatio === 2);
+    expect(flat(frame)).toMatchObject({ width: '100%', aspectRatio: 2, borderRadius: radius.tile, overflow: 'hidden' });
+    expect(frame.props.accessibilityElementsHidden).toBe(true);
+    expect(frame.props.importantForAccessibility).toBe('no-hide-descendants');
+    // Die Sprachausgabe liest weiter nur den Satz, der Text bleibt in Lesegröße.
+    expect(row.props.accessible).toBe(true);
+    expect(flat(textNode(row, 'Socke aussuchen.'))).toMatchObject({ fontSize: fontSize.reading, lineHeight: lineHeight.reading });
+  });
+
+  it('Englisch: dieselben Bilder bei denselben Schritten', () => {
+    setup(puppetIdea());
+    const { root } = renderScreen('en');
+    expect(stepRow(root, 2, 'en').findAllByType(ExpoImage)).toHaveLength(1);
+    expect(stepRow(root, 4, 'en').findAllByType(ExpoImage)).toHaveLength(0);
+  });
+
+  it('Aktivitäten ohne Illustration: Farbfläche oben, keine Bilder bei den Schritten', () => {
+    setup();
+    const { root } = renderScreen();
+    expect(root.findAllByType(ExpoImage)).toHaveLength(0);
+  });
+
+  it('Titelbild ohne Schrittbilder (Pizza): nur oben ein Bild', () => {
+    setup(makeIdea({ id: 'homemade-pizza', category: 'cooking' }));
+    const { root } = renderScreen();
+    const images = root.findAllByType(ExpoImage);
+    expect(images).toHaveLength(1);
+    expect(images[0].props.source).toBe(getIllustration('homemade-pizza')?.source);
   });
 });
 

@@ -6,6 +6,7 @@ import type { Activity } from '@/features/activities/activities';
 import { getActivityText } from '@/features/activities/activityDisplay';
 import { formatAgeRange } from '@/features/activities/formatAgeRange';
 import { formatDuration } from '@/features/activities/formatDuration';
+import { getIllustration } from '@/features/activities/illustrations';
 import {
   fonts,
   fontSize,
@@ -53,7 +54,7 @@ export function SuggestionCard({ activity, imageChain, onPress }: SuggestionCard
       style={({ pressed }) => [styles.card, cardShadow, pressed && styles.cardPressed]}
     >
       <View style={styles.clip}>
-        <CardMedia category={activity.category} chain={imageChain} />
+        <CardMedia category={activity.category} chain={imageChain} illustration={getIllustration(activity.id)} />
         <View style={styles.body}>
           <Text style={styles.title}>{text.title}</Text>
           <Text style={styles.summary}>{text.summary}</Text>

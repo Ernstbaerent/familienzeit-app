@@ -137,6 +137,7 @@ Fotos kommen später über M9b (Bilder-Pipeline); dann wird die Zahl gesenkt (vo
 - **Warum 3 und nicht 1:** Mit einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: ein Schachbrett bei der Kissenburg). Mit drei und mehr verteilen sich die Fotos, und ein einzelnes unpassendes fällt weniger auf.
   Das war der Stand bis Zusatz 36 (damals zeigten Natur mit 4 und Kochen mit 3 Fotos). Warum jetzt gar keine: Die vorhandenen Fotos reichen nicht, um den Anspruch der DESIGN.md zu erfüllen (passend zur Aktivität), bis die Pipeline sie liefert.
 - **Heute:** Es liegen 9 Fotos im Ordner (Natur 4, Kochen 3, Basteln 1, Spiel 1), keines wird gezeigt. Alle Karten zeigen die Farbfläche mit Symbol, ebenso die Detailansicht.
+  Ausnahme (Pilot, nicht endgültig): Drei Aktivitäten zeigen eine gezeichnete Illustration, sie steht nach `image` und vor dem Kategorie-Foto (`docs/design/ILLUSTRATIONEN.md`).
 - **Vorrang bleibt:** Das `image` einer einzelnen Aktivität gilt weiterhin vor allem anderen und zählt bei der Mindestzahl nicht mit.
 - **Technik:** `usablePhotos`, `pickCategoryPhoto`, `getCardImageChain` und `assignCardImages` in `src/features/suggestions/cardImage.ts` nehmen die Mindestzahl als letzten, freiwilligen Parameter (Vorgabe: die Konstante).
   So lässt sich der Mechanismus in den Tests mit 3 prüfen, obwohl die echte Zahl 99 ist.
