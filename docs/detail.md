@@ -8,7 +8,7 @@ Der Ablauf dahinter (Das machen wir → Fertig → Wie war’s? → Verlauf) ist
 | Teil | Was | Datei |
 | ---- | --- | ----- |
 | Kopf | runder Zurück-Knopf (mindestens 44 pt, beschriftet „Zurück zu den Ideen“), keine Navigationsleiste | `components/BackButton.tsx`, `app/activity/[id].tsx` |
-| Bildbereich | wie auf den Karten (2:1, Radius 22): Foto der Aktivität (`image`), sonst (Pilot) ihre Illustration, sonst Farbfläche mit großem Symbol, **ohne Pille** | `suggestions/CardMedia.tsx` (`showPill={false}`) |
+| Bildbereich | wie auf den Karten (2:1, Radius 22): `image` der Aktivität, sonst ihre Illustration, sonst Farbfläche mit großem Symbol, **ohne Pille** | `suggestions/CardMedia.tsx` (`showPill={false}`) |
 | Titel | Kategorie klein darüber, Titel in Literata 34 px (Überschrift), Kurzbeschreibung darunter | `activities/ActivityDetails.tsx` |
 | Eckdaten | fünf weiße Kacheln: Dauer, Alter, Energie von dir, Kosten, Ort | `activities/FactTiles.tsx`, Raster `detailLayout.ts` |
 | Allergen-Box | nur wenn Allergene erkannt wurden, darunter dauerhaft ein Satz | `activities/ActivityNotices.tsx` |
@@ -86,10 +86,10 @@ Keine Hinweise je Schritt (Entscheidung 15).
 - Rollen und Beschriftungen: Titel, Boxen und Abschnitte sind Überschriften, Abhak-Felder sind „checkbox“ mit Zustand, Kacheln und Schritte je ein Satz, der Bildbereich ist Dekoration, der Zurück-Knopf ist beschriftet.
 - Der Dunkelmodus bleibt bis D5 aus. Alle Farben kommen aus dem Theme (ein Test prüft, dass jede gezeichnete Farbe in der Palette oder den Kategorie-Farben steht).
 
-## Bild (Zusatz 36)
+## Bild (Zusatz 45)
 
-Wie auf den Karten: `image` der Aktivität, sonst die Farbfläche der Kategorie mit großem Symbol. Kategorie-Fotos gibt es **erst einmal gar nicht** (Mindestzahl `minPhotosPerCategory` = 99, `docs/theme.md`), Fotos kommen später über M9b.
-Lädt ein `image` nicht, zeigt der Bildbereich die Farbfläche.
+Wie auf den Karten: `image` der Aktivität, sonst ihre Illustration, sonst die Farbfläche der Kategorie mit großem Symbol. Kategorie-Fotos gibt es nicht mehr, Illustrationen für alle Aktivitäten kommen mit M9b.
+Lädt ein `image` nicht, zeigt der Bildbereich die nächste Stufe.
 
 ## Tests
 
@@ -98,7 +98,7 @@ Lädt ein `image` nicht, zeigt der Bildbereich die Farbfläche.
   Rollen, Schriften, Rechts-nach-links, keine festen Farben.
 - `src/features/activities/detailLayout.test.ts`: Spalten der Eckdaten.
 - `src/lib/theme.test.ts`: Kontrast von Rand und Häkchen der Abhak-Felder (hell und dunkel), `warning` auf `card`.
-- `src/features/suggestions/cardImage.test.ts`: keine Kategorie-Fotos (Zusatz 36).
+- `src/features/suggestions/cardImage.test.ts`: Bildkette (`image` oder Farbfläche).
 
 ## Von Hand testen
 

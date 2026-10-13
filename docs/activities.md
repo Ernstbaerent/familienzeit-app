@@ -39,7 +39,7 @@ In der App: `loadActivities()` gibt alle Aktivitäten mit Status `approved` zur�
 | `status`          | `draft`, `approved`, `rejected`. Nur `approved` erscheint in der App. |
 | `source`          | `ai` oder `manual`. |
 | `createdAt`       | ISO-Zeitpunkt. |
-| `image`           | **Freiwillig.** Web-Adresse (`https://…`) eines Bildes. Fehlt es, zeigt die App ein Kategorie-Foto (nur bei mindestens drei Fotos in der Kategorie) oder die Farbfläche mit Symbol. **Geplant (M8): nur Adressen von unserem eigenen Speicher, per Allowlist** (keine IP-Adressen an fremde Server), heute prüft der Code nur `https://`. In M4 und M5b gibt es keine Bilder. |
+| `image`           | **Freiwillig.** Web-Adresse (`https://…`) eines Bildes. Fehlt es, zeigt die App die Illustration der Aktivität (falls sie eine hat) oder die Farbfläche mit Symbol. **Geplant (M8): nur Adressen von unserem eigenen Speicher, per Allowlist** (keine IP-Adressen an fremde Server), heute prüft der Code nur `https://`. In M4 und M5b gibt es keine Bilder. |
 
 ### Verknüpfung mit den Interessen der Kinder
 

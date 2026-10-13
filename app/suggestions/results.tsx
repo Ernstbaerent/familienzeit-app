@@ -11,7 +11,7 @@ import type { HistoryEntry } from '@/features/history/history';
 import { useHistory } from '@/features/history/HistoryContext';
 import type { ChildProfile } from '@/features/profiles/profiles';
 import { useProfiles } from '@/features/profiles/ProfilesContext';
-import { assignCardImages } from '@/features/suggestions/cardImage';
+import { getCardImageChain } from '@/features/suggestions/cardImage';
 import { getMinutes, longestMinutes, type Weather } from '@/features/suggestions/conditions';
 import { ResultsHeader } from '@/features/suggestions/ResultsHeader';
 import {
@@ -96,9 +96,8 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
   const suggestions = suggest(activities, request);
   const page = getPage(suggestions, pageIndex);
   const tooFew = suggestions.matchCount < suggestionsPerPage;
-  // Bild je Karte: Aktivität, Kategorie-Foto oder Farbfläche. Die Fotos werden für die ganze Gruppe zusammen verteilt,
-  // damit möglichst nicht zwei Karten dasselbe zeigen.
-  const imageChains = assignCardImages(page);
+  // Bild je Karte: `image` der Aktivität oder Farbfläche (die Illustration schiebt CardMedia dazwischen ein).
+  const imageChains = page.map(getCardImageChain);
 
   function changeWeather(weather: Weather | null) {
     setManualWeather(weather);

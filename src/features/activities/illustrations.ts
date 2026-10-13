@@ -1,6 +1,6 @@
-// PILOT Illustrationen (docs/design/ILLUSTRATIONEN.md, nicht endgültig): die zentrale Zuordnung „Aktivität → Illustration“.
+// Illustrationen (docs/design/ILLUSTRATIONEN.md): die zentrale Zuordnung „Aktivität → Illustration“.
 // Nur hier steht, welche Aktivität ein Titelbild und welche Schritte ein Schrittbild haben. Alle anderen Aktivitäten zeigen
-// weiter die Farbfläche (oder ihr Foto). Vorrang im Bildbereich: `image` der Aktivität, dann Illustration, dann Kategorie-Foto, dann Farbfläche.
+// weiter die Farbfläche. Vorrang im Bildbereich: `image` der Aktivität, dann Illustration, dann Farbfläche.
 // Die Dateien liegen in assets/illustrations/ (SVG, angezeigt mit expo-image). Der Test illustrations.test.ts prüft Dateien und Zuordnung.
 //
 // Neue Illustration: SVG nach den Stilregeln ablegen (Name `aktivitaets-id.svg` bzw. `aktivitaets-id-step-N.svg`),

@@ -101,7 +101,7 @@ Regeln, die aus den Kontrasten folgen:
 
 ### Kategorie-Farben (seit D3, Entscheidung 10)
 
-Die Karte ohne Foto zeigt eine **Farbfläche mit einem großen, dünnen, angeschnittenen Kategorie-Symbol** (und einem weichen großen Kreis).
+Die Karte ohne Bild zeigt eine **Farbfläche mit einem großen, dünnen, angeschnittenen Kategorie-Symbol** (und einem weichen großen Kreis).
 Jede Kategorie hat ihren eigenen Ton. **Es gibt keine neuen Farbtöne:** Alle Werte werden in `src/lib/theme.ts` aus den Farben der Palette
 **gemischt** (`categoryTones`, Funktion `mixColors`), nicht von Hand eingetragen. Vier Palettenfarben für sieben Kategorien: Terrakotta, Salbei
 und Honig je zweimal (hell und kräftiger getönt), Sand einmal.
@@ -127,23 +127,10 @@ Kontraste (geprüft in `src/lib/theme.test.ts`, für alle sieben Kategorien, hel
 - Ein Test prüft, dass jeder berechnete Wert in dieser Tabelle steht. **Ändert sich ein Rezept in `theme.ts`, die Tabelle hier anpassen** (der Test meldet dann die Werte, die fehlen).
 - Der Dunkelmodus ist vorbereitet, bleibt aber bis D5 aus (die Dunkelwerte sind wie alle anderen abgeleitet und werden von Ani bestätigt).
 
-### Kategorie-Fotos: Mindestzahl
+### Bilder auf Karten und in der Detailansicht
 
-**Erst einmal ganz ohne Fotos (DESIGN.md, Zusatz 36).** Ein Kategorie-Foto erscheint auf den Karten und in der Detailansicht **nur, wenn die Kategorie mindestens so viele Fotos hat wie die Mindestzahl**:
-Konstante `minPhotosPerCategory` (heute **99**), sie steht nur in `src/features/activities/categoryPhotoFiles.ts`. Keine Kategorie erreicht 99 Fotos, also zeigen alle Karten und die Detailansicht
-die Farbfläche mit Symbol, solange eine Aktivität kein eigenes `image` hat. **Der Mechanismus, die Foto-Liste (`categoryPhotos.generated.ts`) und die Dateien in `assets/images/categories/` bleiben unverändert.**
-Fotos kommen später über M9b (Bilder-Pipeline); dann wird die Zahl gesenkt (vorher stand sie auf 3, Zusatz 34), und der Test in `cardImage.test.ts` („Heute keine Kategorie-Fotos“) und diese Zeile werden angepasst.
-
-- **Warum 3 und nicht 1:** Mit einem oder zwei Fotos passt das Bild oft nicht zur Aktivität (Beispiel: ein Schachbrett bei der Kissenburg). Mit drei und mehr verteilen sich die Fotos, und ein einzelnes unpassendes fällt weniger auf.
-  Das war der Stand bis Zusatz 36 (damals zeigten Natur mit 4 und Kochen mit 3 Fotos). Warum jetzt gar keine: Die vorhandenen Fotos reichen nicht, um den Anspruch der DESIGN.md zu erfüllen (passend zur Aktivität), bis die Pipeline sie liefert.
-- **Heute:** Es liegen 9 Fotos im Ordner (Natur 4, Kochen 3, Basteln 1, Spiel 1), keines wird gezeigt. Alle Karten zeigen die Farbfläche mit Symbol, ebenso die Detailansicht.
-  Ausnahme (Pilot, nicht endgültig): Drei Aktivitäten zeigen eine gezeichnete Illustration, sie steht nach `image` und vor dem Kategorie-Foto (`docs/design/ILLUSTRATIONEN.md`).
-- **Vorrang bleibt:** Das `image` einer einzelnen Aktivität gilt weiterhin vor allem anderen und zählt bei der Mindestzahl nicht mit.
-- **Technik:** `usablePhotos`, `pickCategoryPhoto`, `getCardImageChain` und `assignCardImages` in `src/features/suggestions/cardImage.ts` nehmen die Mindestzahl als letzten, freiwilligen Parameter (Vorgabe: die Konstante).
-  So lässt sich der Mechanismus in den Tests mit 3 prüfen, obwohl die echte Zahl 99 ist.
-- **Geprüft** in `src/features/suggestions/cardImage.test.ts` (Mechanismus mit 3: 0, 1, 2 Fotos zeigen die Farbfläche, 3, 4, 7 Fotos die Fotos; `image` gewinnt immer; jede Kategorie entscheidet für sich;
-  echte Werte der App: keine Kategorie hat Fotos, die Konstante ist der Schalter) und `categoryPhotos.test.ts` (diese Zahl steht in dieser Datei).
-- `npm run photos:index` zeigt je Kategorie, ob sie die Mindestzahl erreicht.
+Es gibt keine Kategorie-Fotos mehr (DESIGN.md, Zusatz 45). Im Bildbereich gilt: `image` der Aktivität, dann die Illustration (`src/features/activities/illustrations.ts`, Regeln: `docs/design/ILLUSTRATIONEN.md`), dann die Farbfläche mit großem Symbol.
+Heute zeigen drei Aktivitäten eine Illustration, alle anderen die Farbfläche. Die Illustrationen für alle Aktivitäten entstehen in M9b.
 
 Zuordnung Kategorie → Symbol: nur in `src/features/activities/CategoryIcon.tsx` (`categoryIcons`). Symbole für Spielplatz, Bad und Termine kommen erst mit M10 und M11 (Entscheidung 12).
 
@@ -161,7 +148,7 @@ Neu im Theme: `card`, `selected`, `onSelected` (siehe Farbtabelle) sowie `iconSi
   Zeichen in Kreisen wachsen deshalb mit (`fontScale` aus `useWindowDimensions`, Kinder-Kachel), dekorative Symbole
   teilen ihre Größe durch `fontScale` und bleiben so gleich groß (Stimmungsbild-Platzhalter, `MoodPlaceholder.tsx`).
 - **Ergebnis (D3):** Der runde Zurück-Knopf (`ResultsHeader`) ist weiß mit feinem Rand und mindestens `size.touch` breit und hoch. Die feste Wetterzeile ist Sand (`surface`) mit einer kleinen weißen Pille „Ändern“.
-  Die Kategorie-Pille auf dem Bildbereich ist weiß (`card`) mit Tinte darauf. Ein Foto bringt seine eigene Größe mit, deshalb haben Bilder auf Karten ausdrücklich Breite und Höhe 100 %.
+  Die Kategorie-Pille auf dem Bildbereich ist weiß (`card`) mit Tinte darauf. Ein Bild bringt seine eigene Größe mit, deshalb haben Bilder auf Karten ausdrücklich Breite und Höhe 100 %.
 - **Detailansicht (D4):** Details und alle Maße in `docs/detail.md`. Neue Bausteine: `BackButton` (der runde Zurück-Knopf, auch im Kopf von „Eure Ideen“), `Section` mit `large` (größere Überschrift),
   `CardMedia` mit `showPill={false}` (Bildbereich ohne Kategorie-Pille). **Abhak-Felder:** Zeile `size.checkbox` (56) hoch, Kästchen 32 px, Rand `icon` (mindestens 3:1 zu `card` und `background`, im Test geprüft, Entscheidung 17),
   abgehakt `selected` mit `onSelected`. **Hinweisboxen:** `warningSurface` mit `warning`, nie `danger` (kein Alarm-Rot). Es gibt keine neuen Theme-Werte.

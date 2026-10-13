@@ -340,7 +340,7 @@ describe('Bildbereich wie auf den Karten', () => {
     expect(isInside(media, clip)).toBe(true);
   });
 
-  it('Zusatz 36: auch eine Kategorie, die früher Fotos hatte (Kochen, Natur), zeigt die Farbfläche', () => {
+  it('Zusatz 45: auch Kochen und Natur (früher mit Kategorie-Fotos) zeigen die Farbfläche', () => {
     for (const category of ['cooking', 'nature'] as const) {
       setup(makeIdea({ category }));
       const { root } = renderScreen();

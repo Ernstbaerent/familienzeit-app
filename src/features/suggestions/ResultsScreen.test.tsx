@@ -341,8 +341,8 @@ describe('Karten', () => {
     });
   });
 
-  it('erst einmal ganz ohne Fotos (Zusatz 36): auch Natur mit vier Fotos in der Liste zeigt die Farbfläche mit großem Symbol', () => {
-    const root = renderResults(); // drei Natur-Aktivitäten: Natur hat vier Fotos im Ordner, die Mindestzahl steht auf 99
+  it('ohne `image` und ohne Illustration (Zusatz 45): die Farbfläche mit großem Symbol, keine Fotos', () => {
+    const root = renderResults(); // drei Natur-Aktivitäten ohne Bild
     expect(cards(root)).toHaveLength(3);
     expect(root.findAllByType(Image)).toHaveLength(0);
     const marks = root.findAllByType(Text).filter((node) => node.props.name === 'leaf-outline' && node.props.size > 24);

@@ -2,10 +2,10 @@
 
 Stand: 13. Oktober 2026. **Pilot, nichts davon ist endgültig.** Wir testen an drei Aktivitäten, ob ein selbst gezeichneter Stil
 zu „Sonntagslicht“ passt. Stilregeln: `docs/design/ILLUSTRATIONEN.md`. Gezeichnet von Claude Code als SVG (Code), ohne fremde Bilder als Vorlage.
-Deshalb stehen sie nicht in `docs/bildquellen.md` (dort stehen fremde Fotos mit Lizenz).
+Deshalb gibt es für sie keine Quellenliste (fremde Fotos gibt es in der App nicht mehr, DESIGN.md Zusatz 45).
 
 In der App erscheinen die Bilder nur bei diesen drei Aktivitäten, im Bildbereich der Karte und der Detailansicht
-(Vorrang: `image` der Aktivität, dann Illustration, dann Kategorie-Foto, dann Farbfläche). Die drei Schrittbilder stehen in der
+(Vorrang: `image` der Aktivität, dann Illustration, dann Farbfläche). Die drei Schrittbilder stehen in der
 Detailansicht unter dem Text der Schritte 1 bis 3 des Sockenpuppen-Theaters. Alle anderen Aktivitäten zeigen unverändert die Farbfläche.
 
 ## Titelbilder
@@ -77,7 +77,7 @@ Daumennagel (96 × 48 und 64 × 32), jeweils in einfacher und doppelter Pixeldic
    (Schritte 1 und 2) halten am besten. Diese Größe nutzt die App heute nirgends.
 7. **Nicht auf einem echten Handy geprüft.** Dass expo-image die SVGs auf iOS und Android scharf zeigt, folgt aus dem Code des Pakets
    (Android zeichnet sie in Zielgröße, iOS behält sie als Vektor). Gesehen habe ich es nicht.
-8. **Dunkelmodus:** Die Bilder bleiben hell (wie Fotos). Ob das im Dunkeln gut aussieht, entscheidet D5.
+8. **Dunkelmodus:** Die Bilder bleiben hell. Ob das im Dunkeln gut aussieht, entscheidet D5.
 
 ## Ist die Zuordnung Schrittbild zu Schritt-Text eindeutig?
 
