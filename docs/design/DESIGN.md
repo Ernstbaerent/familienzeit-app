@@ -110,7 +110,7 @@ Stufe D3 (Ergebnis mit Karten)
 9. Der Kopf hat einen runden Zurück-Knopf, kein Mischen-Symbol.
 10. Jede Kategorie hat eine eigene Farbe, abgetönt aus der Palette, mit Kontrastprüfung im Test.
 11. Karten sind weiß (`card`), Sand ist für Flächen (Farbtabelle oben berichtigt). Gewählter Zustand von Chips: Tinte. Terrakotta nur für den Hauptknopf.
-12. Symbole für Spielplatz, Bad und Termine kommen erst mit M10 und M11 (Spielplatz und Bad mit M10b, wenn Orte auf den Karten erscheinen).
+12. Symbole für Spielplatz, Bad und Termine kommen erst mit M10 und M11 (Spielplatz und Bad mit M10b, wenn Orte auf den Karten erscheinen; umgesetzt, Zusatz 47).
 
 Stufe D4 (Detailansicht)
 13. Abhak-Felder gibt es beim Material („Das braucht ihr“), nicht bei den Schritten. Sie gelten nur auf dem Bildschirm und werden nicht gespeichert.
@@ -158,6 +158,13 @@ Zusätze beim Umsetzen von D4 (36 von Clemens am Anfang von D4 festgelegt, 37 bi
 
 Zusatz nach dem Pilot der Illustrationen (13. Oktober 2026, von Clemens festgelegt)
 45. Wir verwenden keine Stock-Fotos mehr. Bilder werden künftig selbst gezeichnet (SVG, Regeln in docs/design/ILLUSTRATIONEN.md). Die Foto-Mechanik ist entfernt: die Dateien unter assets/images/categories/, die Quellenliste, das Auswahl-Skript und die Foto-Liste der App samt Tests. Das Feld `image` bleibt, der Vorrang im Bildbereich ist: 1. `image` der Aktivität, 2. Illustration, 3. Farbfläche mit Symbol. Die Zusätze 34 und 36, der Teil „Kategorie-Foto“ der Entscheidung 21 und die Regeln für Fotos gelten nicht mehr. Wo in älteren Entscheidungen „Foto“ steht, gilt jetzt „gezeichnetes Bild“. Die Illustrationen für alle Aktivitäten entstehen in M9b. Die Fotos stehen im Verlauf von Git (Stand vor dieser Änderung: Commit 4332e79), falls je wieder welche gebraucht würden.
+
+Zusätze beim Umsetzen von M10b (Orte in den Vorschlägen, 14. Oktober 2026, von Clemens im Plan bestätigt; Ani ist nicht mehr beteiligt, Clemens entscheidet)
+46. Ortskarte: dieselbe Karte wie bei den Aktivitäten (weiß, Radius 22, Schatten, Bildbereich 2:1 mit weißer Pille). In der Pille steht die Unterart („Hallenbad“, „Spielplatz“). Darunter der Titel (Name, sonst „Spielplatz in Pohlitz“), die Zeile „ca. 4 km · Pohlitz“ und, wenn nötig, „Öffnungszeiten vorher prüfen“ und bei Kinos „Programm und Altersfreigabe vorher prüfen“. Keine Kurzbeschreibung, keine Dauer. Für die Sprachausgabe ist die Karte ein Knopf.
+47. Bildgruppen und Farben der Orte: sieben eigene Gruppen (Spielplatz, Bad, Museum, Zoo, Burg, Kino, Bibliothek) mit eigenem Ton aus der Palette (auch als Mischung zweier Palettenfarben) und eigenem Ionicons-Symbol, Kontraste im Test geprüft wie bei Entscheidung 10. Die übrigen Unterarten nehmen Ton und Symbol einer Aktivitäts-Kategorie. Werte: docs/theme.md, „Farben und Symbole der Orte“. Damit sind die Symbole für Spielplatz und Bad aus Entscheidung 12 da.
+48. Spielplatz (Luftballon) und Burg (Fahne) sind Platzhalter-Symbole: Ionicons hat keine passenden.
+49. Quellenzeile der Orte: unter den Karten, nur wenn auf der Seite ein Ort steht, „Orte: © OpenStreetMap-Mitwirkende“ (Tinte, unterstrichen, Link auf openstreetmap.org/copyright) und darunter klein „Daten unter der Open Database License (ODbL)“, bei älteren Daten ohne Netz „Stand: vor n Tagen“. Ähnlich der Quelle in der Wetterzeile, aber im Scrollbereich. Dazu über den Karten „Umkreis auf 15 km erweitert“, wenn der Umkreis größer als 5 km ist. Solange die Orte noch laden (höchstens 4 Sekunden), steht unter der Wetterzeile ruhig „Orte in der Nähe werden gesucht …“.
+50. Detailansicht eines Ortes (einfach, bis M10c): runder Zurück-Knopf, Bildbereich ohne Pille, Unterart klein über dem Titel, zwei weiße Kacheln (Entfernung „ca. 4 km Luftlinie“, Ortsteil), Hinweise in einer Sand-Fläche, ein Satz zur geschätzten Entfernung, die Quellenzeile. Kein Hauptknopf, kein Teilen. „Route öffnen“ und Website kommen mit M10c.
 
 Offene Punkte
  Logo und App-Icon als Dateien exportieren und unter assets/ ablegen

@@ -10,6 +10,7 @@ import { toSelectionParams } from '@/features/suggestions/selection';
 import { useSelectedChildren } from '@/features/suggestions/SelectedChildrenContext';
 import { StartScreen } from '@/features/suggestions/StartScreen';
 import { buildStartSelection } from '@/features/suggestions/startState';
+import { usePlacesRefresh } from '@/features/places/PlacesContext';
 import { useWeatherRefresh } from '@/features/weather/WeatherProvider';
 import type { Theme } from '@/lib/theme';
 import { useThemedStyles } from '@/lib/useThemedStyles';
@@ -30,6 +31,8 @@ export default function HomeScreen() {
   // Wetter schon jetzt vorladen, damit es bei den Vorschlägen bereitliegt. Das geschieht nur, wenn die Erlaubnis für
   // den Standort schon da ist: Beim Öffnen wird nie nach ihr gefragt (Entscheidung 7, Details: docs/weather.md).
   useWeatherRefresh();
+  // Ebenso die Orte (M10b): nur mit schon erteilter Erlaubnis, sonst geht nichts nach außen (docs/orte.md, „Vorladen“).
+  usePlacesRefresh();
 
   // Solange Profile und gemerkte Auswahl vom Gerät gelesen werden, bleibt der Bildschirm leer (dauert Millisekunden).
   if (profilesStatus === 'loading' || selectionStatus === 'loading') {

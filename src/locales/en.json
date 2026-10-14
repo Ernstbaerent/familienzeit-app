@@ -393,5 +393,62 @@
     "peanut": "Peanuts",
     "soy": "Soy",
     "sesame": "Sesame"
+  },
+  "places": {
+    "subtypes": {
+      "playground": "Playground",
+      "indoorPlayground": "Indoor playground",
+      "trampolinePark": "Trampoline park",
+      "park": "Park",
+      "waterPark": "Water park",
+      "outdoorPool": "Outdoor pool",
+      "indoorPool": "Indoor pool",
+      "pool": "Swimming pool",
+      "bathingPlace": "Bathing spot",
+      "themePark": "Theme park",
+      "miniGolf": "Mini golf",
+      "zoo": "Zoo",
+      "aquarium": "Aquarium",
+      "museum": "Museum",
+      "castle": "Castle or palace",
+      "observationTower": "Observation tower",
+      "ruins": "Ruins",
+      "viewpoint": "Viewpoint",
+      "attraction": "Sight",
+      "natureReserve": "Nature reserve",
+      "lake": "Lake",
+      "pond": "Pond",
+      "picnicSite": "Picnic area",
+      "climbingHall": "Climbing hall",
+      "iceRink": "Ice rink",
+      "bowling": "Bowling",
+      "cinema": "Cinema",
+      "library": "Library"
+    },
+    "titleIn": "{{subtype}} in {{locality}}",
+    "titleAt": "{{subtype}}, {{street}}",
+    "distance": "approx. {{km}} km",
+    "distanceUnder1": "under 1 km",
+    "checkHours": "Check opening hours before you go",
+    "cinemaHint": "Check the programme and age rating before you go",
+    "radiusWidened": "Search radius widened to {{km}} km",
+    "loading": "Looking for places nearby …",
+    "source": "Places: © OpenStreetMap contributors",
+    "license": "Data under the Open Database License (ODbL)",
+    "sourceHint": "Opens openstreetmap.org in the browser",
+    "stale_one": "Data from {{count}} day ago",
+    "stale_other": "Data from {{count}} days ago",
+    "card": {
+      "label": "{{title}}. {{subtype}}, {{distance}}. {{notes}}"
+    },
+    "detail": {
+      "facts": {
+        "distance": "Distance",
+        "locality": "Area"
+      },
+      "distanceValue": "{{distance}} as the crow flies",
+      "distanceNote": "The distance is an estimate: it is measured from your approximate location (rounded to about 1 km).",
+      "openNote": "Whether this place is open today is not certain. Directions and website are coming soon."
+    }
   }
 }

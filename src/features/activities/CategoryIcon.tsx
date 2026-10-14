@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import { colors, iconSize } from '@/lib/theme';
 
+import { placeVisualKeys, type PlaceVisualKey } from '../places/placeKinds';
 import type { ActivityCategory } from './activities';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -25,6 +26,30 @@ export const categoryIcons: Record<ActivityCategory, IconName> = {
   cooking: 'restaurant-outline',
   outing: 'map-outline',
 };
+
+// Orte (M10b): Symbole der sieben eigenen Bildgruppen. Die übrigen Unterarten nehmen das Symbol einer Aktivitäts-Kategorie
+// (src/features/places/placeKinds.ts, `visual`). Spielplatz (Luftballon) und Burg (Fahne) sind Platzhalter:
+// Ionicons hat dafür kein passendes Symbol (docs/theme.md).
+export const placeVisualIcons: Record<PlaceVisualKey, IconName> = {
+  playground: 'balloon-outline', // Platzhalter
+  pool: 'water-outline',
+  museum: 'library-outline', // Gebäude mit Säulen
+  zoo: 'paw-outline',
+  castle: 'flag-outline', // Platzhalter
+  cinema: 'film-outline',
+  library: 'book-outline',
+};
+
+// Was der Bildbereich einer Karte zeigt: eine Aktivitäts-Kategorie oder eine Bildgruppe der Orte.
+export type CardVisual = ActivityCategory | PlaceVisualKey;
+
+export function isPlaceVisualKey(value: CardVisual): value is PlaceVisualKey {
+  return (placeVisualKeys as readonly string[]).includes(value);
+}
+
+export function cardVisualIcon(visual: CardVisual): IconName {
+  return isPlaceVisualKey(visual) ? placeVisualIcons[visual] : categoryIcons[visual];
+}
 
 type CategoryIconProps = {
   category: ActivityCategory;

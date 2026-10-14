@@ -1,7 +1,7 @@
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
@@ -9,10 +9,16 @@ import type { Activity } from '@/features/activities/activities';
 import { useActivities } from '@/features/activities/ActivitiesContext';
 import type { HistoryEntry } from '@/features/history/history';
 import { useHistory } from '@/features/history/HistoryContext';
+import { staleDays } from '@/features/places/placeDisplay';
+import { usePlaces, usePlacesRefresh } from '@/features/places/PlacesContext';
+import { PlacesSourceLine } from '@/features/places/PlacesSourceLine';
+import type { PlacesSnapshot } from '@/features/places/placesRefresh';
 import type { ChildProfile } from '@/features/profiles/profiles';
 import { useProfiles } from '@/features/profiles/ProfilesContext';
 import { getCardImageChain } from '@/features/suggestions/cardImage';
 import { getMinutes, longestMinutes, type Weather } from '@/features/suggestions/conditions';
+import { suggestWithPlaces, widenedRadius, type PlaceSuggestion } from '@/features/suggestions/mix';
+import { PlaceCard } from '@/features/suggestions/PlaceCard';
 import { ResultsHeader } from '@/features/suggestions/ResultsHeader';
 import {
   parseSelectionParams,
@@ -23,7 +29,6 @@ import {
   getPage,
   getTips,
   isStartingOver,
-  suggest,
   suggestionsPerPage,
   type Tip,
 } from '@/features/suggestions/suggest';
@@ -39,10 +44,14 @@ import { WeatherBar } from '@/features/weather/WeatherBar';
 import { WeatherPanel, type WeatherPanelMode } from '@/features/weather/WeatherPanel';
 import { useWeather, useWeatherRefresh } from '@/features/weather/WeatherProvider';
 import { WeatherStep } from '@/features/weather/WeatherStep';
-import { fonts, fontSize, lineHeight, radius, spacing, type Theme } from '@/lib/theme';
+import { fonts, fontSize, lineHeight, radius, spacing, useTheme, type Theme } from '@/lib/theme';
 import { useThemedStyles } from '@/lib/useThemedStyles';
 
+// So lange warten „Eure Ideen“ höchstens auf die Orte (gleichzeitig mit dem Wetter). Danach nur Aktivitäten (docs/orte.md).
+export const placesWaitMs = 4000;
+
 // Die Vorschläge (DESIGN.md, Bildschirm 02): genau 3 Karten, „Keine passt? Drei neue Ideen“ zeigt die nächsten 3.
+// Seit M10b mischen sich Orte aus der Umgebung darunter (höchstens 2 je Gruppe, Regeln in src/features/suggestions/mix.ts).
 export default function ResultsScreen() {
   const params = useLocalSearchParams();
   const { status, profiles } = useProfiles();
@@ -67,6 +76,7 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const styles = useThemedStyles(createStyles);
+  const theme = useTheme();
   const scrollRef = useRef<ScrollView>(null);
   // „Jetzt“ einmal festhalten (für das Alter der Kinder, die Tageszeit und das Wetter-Fenster).
   const [now] = useState(() => new Date());
@@ -88,6 +98,29 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
   // Fehlt noch etwas zum Wetter, kommt vor den Vorschlägen ein Schritt (nur wenn nötig, siehe WeatherStep).
   const weatherStep = getWeatherStep(access, status, manualWeather !== null);
 
+  // Orte (M10b): Sie werden besorgt, sobald der Standort erlaubt ist (auch direkt nach „Standort erlauben“ im Wetter-Schritt).
+  // Die Frist von 4 Sekunden beginnt, wenn die Vorschläge gezeigt werden können (nach dem Wetter-Schritt), und läuft gleichzeitig
+  // mit dem Laden des Wetters. Danach sind die Orte für diese Ansicht eingefroren, wie Aktivitäten und Verlauf.
+  const places = usePlaces();
+  usePlacesRefresh(access);
+  const [placesDeadlinePassed, setPlacesDeadlinePassed] = useState(false);
+  const readyForPlaces = weatherStep === null;
+  useEffect(() => {
+    if (!readyForPlaces) return;
+    const timer = setTimeout(() => setPlacesDeadlinePassed(true), placesWaitMs);
+    return () => clearTimeout(timer);
+  }, [readyForPlaces]);
+  // Ein altes „keine Erlaubnis“ zählt nicht, wenn der Standort inzwischen erlaubt ist: Dann läuft gleich ein neuer Versuch.
+  const placesOutdated = places.reason === 'noPermission' && access === 'granted';
+  const placesSettled =
+    places.status === 'ready' || (places.status === 'unavailable' && !placesOutdated) || placesDeadlinePassed;
+  // `undefined` = noch nicht eingefroren, `null` = ohne Orte.
+  const [frozenPlaces, setFrozenPlaces] = useState<PlacesSnapshot | null | undefined>(undefined);
+  const weatherSettled = !(status === 'loading' && data === null && manualWeather === null);
+  if (frozenPlaces === undefined && readyForPlaces && weatherSettled && placesSettled) {
+    setFrozenPlaces(places.status === 'ready' ? places.snapshot : null);
+  }
+
   // Das Wetter für die gewählte Zeit. Eine Handwahl ersetzt nur die Wetterlage: Amtliche Warnungen bleiben.
   const automatic = data ? buildSituation(data, getMinutes(selection.time), now, { stale }) : null;
   const situation = manualWeather
@@ -95,11 +128,18 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
     : (automatic ?? assumedSituation());
 
   const request = toSuggestionRequest(selection, profiles, now, toConditions(situation), history);
-  const suggestions = suggest(activities, request);
+  const suggestions = suggestWithPlaces(
+    activities,
+    request,
+    frozenPlaces ? { origin: frozenPlaces.origin, rows: frozenPlaces.rows } : undefined,
+  );
   const page = getPage(suggestions, pageIndex);
   const tooFew = suggestions.matchCount < suggestionsPerPage;
-  // Bild je Karte: `image` der Aktivität oder Farbfläche (die Illustration schiebt CardMedia dazwischen ein).
-  const imageChains = page.map((activity) => getCardImageChain(activity));
+  const pagePlaces = page.filter((item): item is PlaceSuggestion => item.kind === 'place');
+  const radiusHint = widenedRadius(suggestions, page);
+  const placesStale = frozenPlaces
+    ? staleDays(pagePlaces.map((item) => item.place), frozenPlaces.tileFetchedAt, now.getTime())
+    : null;
 
   function changeWeather(weather: Weather | null) {
     setManualWeather(weather);
@@ -110,6 +150,10 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
   function showOthers() {
     setPageIndex((current) => current + 1);
     scrollRef.current?.scrollTo({ y: 0, animated: true });
+  }
+
+  function openPlace(item: PlaceSuggestion) {
+    router.push({ pathname: '/place/[id]', params: { id: item.place.id } });
   }
 
   function openDetails(activity: Activity) {
@@ -143,7 +187,7 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
 
   // Die Vorschläge hängen vom Wetter ab: Kurz warten, bis es da ist (der Abruf hat ein Zeitlimit).
   // Die Wetterzeile zeigt dabei den Ladezustand, der Kopf bleibt benutzbar.
-  if (status === 'loading' && data === null && manualWeather === null) {
+  if (!weatherSettled) {
     return (
       <Frame header={header} weather={<WeatherBar state="loading" />}>
         <View style={styles.waiting} />
@@ -151,18 +195,29 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
     );
   }
 
+  const weatherBar = (
+    <WeatherBar
+      state="ready"
+      situation={situation}
+      changeOpen={panel === 'change'}
+      onToggleChange={() => setPanel((current) => (current === 'change' ? 'closed' : 'change'))}
+    />
+  );
+
+  // Das Wetter ist da, die Orte noch nicht: höchstens 4 Sekunden ruhig warten (die Wetterzeile ist schon benutzbar).
+  if (frozenPlaces === undefined) {
+    return (
+      <Frame header={header} weather={weatherBar}>
+        <View style={styles.waitingPlaces} accessibilityLiveRegion="polite" accessibilityState={{ busy: true }} accessible>
+          <ActivityIndicator color={theme.colors.icon} />
+          <Text style={styles.hint}>{t('places.loading')}</Text>
+        </View>
+      </Frame>
+    );
+  }
+
   return (
-    <Frame
-      header={header}
-      weather={
-        <WeatherBar
-          state="ready"
-          situation={situation}
-          changeOpen={panel === 'change'}
-          onToggleChange={() => setPanel((current) => (current === 'change' ? 'closed' : 'change'))}
-        />
-      }
-    >
+    <Frame header={header} weather={weatherBar}>
       <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
         <WeatherPanel
           situation={situation}
@@ -180,14 +235,26 @@ function Results({ selection, profiles, historyEntries }: ResultsProps) {
           </Text>
         )}
 
-        {page.map((activity, index) => (
-          <SuggestionCard
-            key={activity.id}
-            activity={activity}
-            imageChain={imageChains[index]}
-            onPress={() => openDetails(activity)}
-          />
-        ))}
+        {radiusHint !== null && (
+          <Text style={styles.hint}>{t('places.radiusWidened', { km: radiusHint })}</Text>
+        )}
+
+        {page.map((item) =>
+          item.kind === 'activity' ? (
+            <SuggestionCard
+              key={`activity:${item.activity.id}`}
+              activity={item.activity}
+              // Bild je Karte: `image` der Aktivität oder Farbfläche (die Illustration schiebt CardMedia dazwischen ein).
+              imageChain={getCardImageChain(item.activity)}
+              onPress={() => openDetails(item.activity)}
+            />
+          ) : (
+            <PlaceCard key={`place:${item.place.id}`} suggestion={item} onPress={() => openPlace(item)} />
+          ),
+        )}
+
+        {/* Quellenangabe der Orte (ODbL), nur wenn auf dieser Seite ein Ort zu sehen ist. */}
+        {pagePlaces.length > 0 && <PlacesSourceLine staleDays={placesStale} />}
 
         {tooFew && (
           <FewMatchesNotice
@@ -271,6 +338,13 @@ const createStyles = ({ colors }: Theme) =>
     },
     waiting: {
       flex: 1,
+    },
+    waitingPlaces: {
+      flex: 1,
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingTop: spacing.xl,
+      paddingHorizontal: spacing.lg,
     },
     hint: {
       fontFamily: fonts.body,

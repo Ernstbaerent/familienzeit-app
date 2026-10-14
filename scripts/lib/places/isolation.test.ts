@@ -28,11 +28,22 @@ function runtimeImports(path: string): string[] {
 }
 
 describe('opening_hours (LGPL) nur im Import', () => {
+  // Geprüft werden die Importe (auch `import type` und `require`), nicht jeder Text: Seit M10b heißt eine Spalte, die die App abruft,
+  // ebenfalls `opening_hours` (src/features/places/fetchPlaces.ts). Das ist nur ein Name, keine Bibliothek.
   it('keine Datei in app/ oder src/ lädt opening_hours', () => {
-    const offenders = [...filesIn(join(root, 'app')), ...filesIn(join(root, 'src'))].filter((file) =>
-      /['"]opening_hours['"]/.test(readFileSync(file, 'utf8')),
-    );
+    const loadsLibrary = (file: string) =>
+      /(?:from|require\(|import\()\s*['"]opening_hours(?:\/[^'"]*)?['"]/.test(readFileSync(file, 'utf8'));
+    const offenders = [...filesIn(join(root, 'app')), ...filesIn(join(root, 'src'))].filter(loadsLibrary);
     expect(offenders).toEqual([]);
+  });
+
+  it('die Prüfung erkennt jede Art, die Bibliothek zu laden', () => {
+    const pattern = /(?:from|require\(|import\()\s*['"]opening_hours(?:\/[^'"]*)?['"]/;
+    expect(pattern.test("import OpeningHours from 'opening_hours';")).toBe(true);
+    expect(pattern.test('const x = require("opening_hours");')).toBe(true);
+    expect(pattern.test("await import('opening_hours/index.js')")).toBe(true);
+    expect(pattern.test("import type X from 'opening_hours';")).toBe(true);
+    expect(pattern.test("const columns = ['opening_hours', 'website'];")).toBe(false);
   });
 
   it('steht nur unter devDependencies (nicht in dependencies)', () => {

@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { categoryKeys } from '@/features/activities/activities';
+import { placeVisualKeys } from '@/features/places/placeKinds';
 import { contrastRatio as contrast } from './contrast';
 
 import {
@@ -171,6 +172,36 @@ describe.each([
     const missing = categoryKeys.flatMap((category) =>
       Object.values(tones[category]).filter((value) => !docs.includes(value)),
     );
+    expect(missing).toEqual([]);
+  });
+});
+
+// Orte (M10b): sieben Töne für Spielplatz, Bad, Museum, Zoo, Burg, Kino, Bibliothek. Dieselben Prüfungen wie bei den Kategorien.
+describe.each([
+  ['hell', lightTheme],
+  ['dunkel', darkTheme],
+])('Farben der Orte (%s)', (_name, theme) => {
+  const tones = theme.placeTones;
+  const colors = theme.colors;
+
+  it('je ein Ton für die sieben Bildgruppen der Orte', () => {
+    expect(Object.keys(tones).sort()).toEqual([...placeVisualKeys].sort());
+  });
+
+  it.each(placeVisualKeys)('%s: Symbol auf der Fläche mindestens 3:1, Tinte mindestens 4,5:1', (key) => {
+    expect(contrast(tones[key].mark, tones[key].field)).toBeGreaterThanOrEqual(3);
+    expect(contrast(colors.text, tones[key].field)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('alle 14 Flächen (Aktivitäten und Orte) sind verschieden, der Kreis hebt sich ab', () => {
+    const fields = [...Object.values(theme.categoryTones), ...Object.values(tones)].map((tone) => tone.field);
+    expect(new Set(fields).size).toBe(14);
+    for (const key of placeVisualKeys) expect(tones[key].shape).not.toBe(tones[key].field);
+  });
+
+  it('alle Werte stehen in docs/theme.md (Tabelle „Farben der Orte“)', () => {
+    const docs = readFileSync(join(__dirname, '../../docs/theme.md'), 'utf8').toUpperCase();
+    const missing = placeVisualKeys.flatMap((key) => Object.values(tones[key]).filter((value) => !docs.includes(value)));
     expect(missing).toEqual([]);
   });
 });

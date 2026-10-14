@@ -127,12 +127,38 @@ Kontraste (geprüft in `src/lib/theme.test.ts`, für alle sieben Kategorien, hel
 - Ein Test prüft, dass jeder berechnete Wert in dieser Tabelle steht. **Ändert sich ein Rezept in `theme.ts`, die Tabelle hier anpassen** (der Test meldet dann die Werte, die fehlen).
 - Der Dunkelmodus ist vorbereitet, bleibt aber bis D5 aus (die Dunkelwerte sind wie alle anderen abgeleitet und werden von Ani bestätigt).
 
+### Farben und Symbole der Orte (seit M10b)
+
+Orte aus OpenStreetMap erscheinen seit M10b auf denselben Karten wie die Aktivitäten (Farbfläche mit großem Symbol, Pille mit der Unterart, z. B. „Hallenbad“).
+Sieben **Bildgruppen** haben einen eigenen Ton und ein eigenes Symbol. Alle anderen Unterarten nehmen Ton und Symbol einer Aktivitäts-Kategorie
+(Zuordnung `visual` in `src/features/places/placeKinds.ts`): Park, See, Teich, Rastplatz, Naturschutzgebiet → Natur; Indoorspielplatz, Trampolin-, Kletterhalle, Eisbahn → Bewegung;
+Freizeitpark, Aussichtsturm, Aussichtspunkt, Sehenswürdigkeit → Ausflug; Minigolf, Bowling → Spiel. Aquarium nimmt den Zoo, Ruine die Burg.
+
+Auch hier gibt es **keine neuen Farbtöne**: Vier Palettenfarben reichen nicht für 14 verschiedene Flächen, deshalb wird die Fläche bei einigen Orten
+zusätzlich mit einer zweiten Palettenfarbe gemischt (`blend` im Rezept, `src/lib/theme.ts`, `placeTones`). Symbol und Kreis wie bei den Kategorien.
+
+| Bildgruppe (Schlüssel) | Symbol | Mischung | Fläche (hell) | Symbol (hell) | Kreis (hell) | Fläche (dunkel) | Symbol (dunkel) | Kreis (dunkel) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Spielplatz (`playground`) | `balloon-outline` (Platzhalter) | Honig mit Terrakotta | `#EDCEAF` | `#92472A` | `#F5E4D3` | `#6E4C2E` | `#E9B05E` | `#79593C` |
+| Bad (`pool`) | `water-outline` | Salbei, sehr hell | `#E7E7DE` | `#4C5B44` | `#F2F2ED` | `#3F4337` | `#B7C3AB` | `#4D5045` |
+| Museum (`museum`) | `library-outline` (Gebäude mit Säulen) | Sand mit Terrakotta | `#E5CCBA` | `#844228` | `#F1E3D9` | `#623F30` | `#E9A78B` | `#6E4D3E` |
+| Zoo (`zoo`) | `paw-outline` | Salbei mit Honig | `#D8CBAB` | `#47523E` | `#EAE2D1` | `#61573C` | `#C1CAB5` | `#6D6349` |
+| Burg (`castle`) | `flag-outline` (Platzhalter) | Sand, kräftig abgedunkelt | `#D4CABE` | `#655C54` | `#E7E2DB` | `#524A44` | `#C1B9B1` | `#5F5751` |
+| Kino (`cinema`) | `film-outline` | Terrakotta, gedeckt | `#DDC2B4` | `#763D26` | `#ECDDD6` | `#654436` | `#EAB198` | `#705144` |
+| Bibliothek (`library`) | `book-outline` | Sand mit Honig und etwas Salbei | `#E0D0B0` | `#765730` | `#EEE5D4` | `#635438` | `#ECC082` | `#6F6046` |
+
+- **Kontraste** (geprüft in `src/lib/theme.test.ts`, hell und dunkel): Symbol auf der Fläche mindestens 3:1 (hell 4,0 bis 5,8:1, dunkel 4,0 bis 5,5:1), Tinte auf der Fläche mindestens 4,5:1 (hell 9,3 bis 12,7:1).
+  Alle 14 Flächen (7 Kategorien, 7 Bildgruppen) sind verschieden. Ein Test prüft, dass jeder Wert in dieser Tabelle steht.
+- **Platzhalter:** Für Spielplatz und Burg hat Ionicons kein passendes Symbol. Luftballon und Fahne sind Platzhalter, bis es eigene Symbole gibt (Entscheidung von Clemens, M10b).
+  Ändern: nur `placeVisualIcons` in `src/features/activities/CategoryIcon.tsx`.
+- Damit sind die Symbole für Spielplatz und Bad aus Entscheidung 12 der DESIGN.md da. Das Symbol für Termine kommt mit M11.
+
 ### Bilder auf Karten und in der Detailansicht
 
 Es gibt keine Kategorie-Fotos mehr (DESIGN.md, Zusatz 45). Im Bildbereich gilt: `image` der Aktivität, dann die Illustration (`src/features/activities/illustrations.ts`, Regeln: `docs/design/ILLUSTRATIONEN.md`), dann die Farbfläche mit großem Symbol.
 Heute zeigen drei Aktivitäten eine Illustration, alle anderen die Farbfläche. Die Illustrationen für alle Aktivitäten entstehen in M9b.
 
-Zuordnung Kategorie → Symbol: nur in `src/features/activities/CategoryIcon.tsx` (`categoryIcons`). Symbole für Spielplatz, Bad und Termine kommen erst mit M10 und M11 (Entscheidung 12).
+Zuordnung Kategorie → Symbol: nur in `src/features/activities/CategoryIcon.tsx` (`categoryIcons`, für Orte `placeVisualIcons`). Spielplatz und Bad gibt es seit M10b (siehe „Farben und Symbole der Orte“), Termine kommen mit M11 (Entscheidung 12).
 
 ## Bausteine und Besonderheiten (seit D2)
 
@@ -240,8 +266,11 @@ Sobald die Dateien da sind, werden Icon, adaptives Android-Icon und Startbild in
 
 ## Offen für Ani
 
-- Dunkelwerte bestätigen (alle außer Hintergrund, Text, Hauptfarbe; dazu `card` und `selected` im Dunkeln).
+(Seit M10b: Ani ist nicht mehr beteiligt, Clemens entscheidet. Die Punkte bleiben offen, bis Clemens sie bestätigt.)
+
+- Dunkelwerte bestätigen (alle außer Hintergrund, Text, Hauptfarbe; dazu `card` und `selected` im Dunkeln, und die Dunkelwerte der Orte).
 - Entwürfe für Verlauf, „Wie war’s?“, Kinderprofile und Standort-Erklärung prüfen, sobald D5 sie aus dem Stil abgeleitet hat (Entscheidung 18).
+- Eigene Symbole für Spielplatz und Burg (heute Platzhalter, siehe „Farben und Symbole der Orte“).
 
 Entschieden und deshalb nicht mehr offen:
 
