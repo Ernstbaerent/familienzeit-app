@@ -19,9 +19,10 @@ export type Suggestions = {
   matchCount: number;
 };
 
-type ScoredActivity = { activity: Activity; score: number };
+export type ScoredActivity = { activity: Activity; score: number };
 
-export function suggest(activities: readonly Activity[], request: SuggestionRequest): Suggestions {
+// Die passenden Aktivitäten (nach den harten Ausschlüssen), beste zuerst. Auch für die Mischung mit Orten (mix.ts).
+export function rankActivities(activities: readonly Activity[], request: SuggestionRequest): ScoredActivity[] {
   // Der Verlauf kommt erst nach den harten Ausschlüssen ins Spiel und ändert nur die Punkte.
   // Deshalb bleibt die Menge der passenden Ideen (und die Garantie „3, wenn so viele passen“) gleich.
   const history =
@@ -29,24 +30,30 @@ export function suggest(activities: readonly Activity[], request: SuggestionRequ
       ? buildHistoryIndex(request.history, activities, request.now)
       : undefined;
 
-  const sorted: ScoredActivity[] = activities
-    .filter((activity) => !isExcluded(activity, request))
-    .map((activity) => ({ activity, score: scoreActivity(activity, request, history) }))
-    // Bei gleicher Punktzahl bleibt die Reihenfolge aus den Daten (sort ist stabil).
-    .sort((a, b) => b.score - a.score);
+  return (
+    activities
+      .filter((activity) => !isExcluded(activity, request))
+      .map((activity) => ({ activity, score: scoreActivity(activity, request, history) }))
+      // Bei gleicher Punktzahl bleibt die Reihenfolge aus den Daten (sort ist stabil).
+      .sort((a, b) => b.score - a.score)
+  );
+}
 
+export function suggest(activities: readonly Activity[], request: SuggestionRequest): Suggestions {
+  const sorted = rankActivities(activities, request);
   return { pages: buildPages(sorted), matchCount: sorted.length };
 }
 
 // Die Gruppe, die nach `pageIndex`-mal „Andere Vorschläge“ erscheint.
 // Nach der letzten Gruppe geht es wieder von vorn los (kein Endlos-Feed, nur eine Runde).
-export function getPage(suggestions: Suggestions, pageIndex: number): Activity[] {
+// Gilt für Gruppen aus Aktivitäten (suggest) wie für gemischte Gruppen mit Orten (mix.ts).
+export function getPage<T>(suggestions: { pages: readonly T[][] }, pageIndex: number): T[] {
   if (suggestions.pages.length === 0) return [];
   return suggestions.pages[pageIndex % suggestions.pages.length];
 }
 
 // true, wenn alle Gruppen gezeigt wurden und jetzt wieder die erste kommt.
-export function isStartingOver(suggestions: Suggestions, pageIndex: number): boolean {
+export function isStartingOver(suggestions: { pages: readonly unknown[] }, pageIndex: number): boolean {
   return pageIndex > 0 && pageIndex % Math.max(suggestions.pages.length, 1) === 0;
 }
 
@@ -110,7 +117,7 @@ function buildPages(sorted: ScoredActivity[]): Activity[][] {
 
 // Index der besten Aktivität in `pool` für eine Gruppe, in der `group` schon steht.
 // Bei Gleichstand gewinnt die weiter vorn stehende.
-function pickBest(pool: ScoredActivity[], group: Activity[]): number {
+export function pickBest(pool: ScoredActivity[], group: readonly Activity[]): number {
   let bestIndex = 0;
   let bestValue = -Infinity;
   pool.forEach((candidate, index) => {

@@ -4,10 +4,12 @@
 
 import { createInstance } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
-import { Image, ScrollView, StyleSheet, Text } from 'react-native';
+import { Image, Linking, ScrollView, StyleSheet, Text } from 'react-native';
 import { act, create, type ReactTestInstance } from 'react-test-renderer';
 
 import type { Activity } from '@/features/activities/activities';
+import type { PlaceRow } from '@/features/places/placeRow';
+import { fixtureOrigin, makePlace } from '@/features/places/testHelpers';
 import type { ChildProfile } from '@/features/profiles/profiles';
 import de from '@/locales/de.json';
 import en from '@/locales/en.json';
@@ -27,6 +29,7 @@ const mockState = {
   profiles: [] as ChildProfile[],
   activities: [] as Activity[],
   weather: {} as Record<string, unknown>,
+  places: {} as Record<string, unknown>,
 };
 
 jest.mock('expo-router', () => ({
@@ -57,6 +60,10 @@ jest.mock('@/features/history/HistoryContext', () => ({
 jest.mock('@/features/weather/WeatherProvider', () => ({
   useWeather: () => mockState.weather,
   useWeatherRefresh: () => undefined,
+}));
+jest.mock('@/features/places/PlacesContext', () => ({
+  usePlaces: () => mockState.places,
+  usePlacesRefresh: () => undefined,
 }));
 jest.mock('@/features/activities/ActivitiesContext', () => ({
   useActivities: () => ({ activities: mockState.activities, source: 'bundled' }),
@@ -120,6 +127,10 @@ function catalog(count: number, category: Activity['category'] = 'nature'): Acti
 }
 
 function renderResults(language: 'de' | 'en' = 'de') {
+  return renderResultsWithRenderer(language).root;
+}
+
+function renderResultsWithRenderer(language: 'de' | 'en' = 'de') {
   let renderer!: ReturnType<typeof create>;
   act(() => {
     renderer = create(
@@ -128,8 +139,22 @@ function renderResults(language: 'de' | 'en' = 'de') {
       </I18nextProvider>,
     );
   });
-  return renderer.root;
+  return renderer;
 }
+
+// Orte (M10b): keine Orte (z. B. Supabase nicht eingerichtet) ist der Normalfall in den bisherigen Tests: nur Aktivitäten.
+const noPlaces = () => ({ status: 'unavailable', snapshot: null, reason: 'noData', refresh: noop });
+// Orte drinnen ohne Öffnungszeiten: Kein Ausschluss hängt an der Uhrzeit, zu der die Tests laufen.
+const placesReady = (rows: PlaceRow[]) => ({
+  status: 'ready',
+  snapshot: { origin: fixtureOrigin, rows, tileFetchedAt: Object.fromEntries(rows.map((row) => [row.tile, Date.now()])) },
+  reason: null,
+  refresh: noop,
+});
+const indoorPlaces = () => [
+  makePlace({ subtype: 'library', name: 'Stadtbibliothek Musterstadt' }, 0.5),
+  makePlace({ subtype: 'museum', name: 'Heimatmuseum im Kornhaus' }, 1.5),
+];
 
 const flat = (node: ReactTestInstance) => StyleSheet.flatten(node.props.style) ?? {};
 
@@ -164,6 +189,7 @@ beforeEach(() => {
   mockState.profiles = [child];
   mockState.activities = catalog(7);
   mockState.weather = weatherReady();
+  mockState.places = noPlaces();
 });
 
 // --- Tests ----------------------------------------------------------------------------------------------------------
@@ -486,6 +512,132 @@ describe('Wetter-Schritt vor den Vorschlägen (behält seine Funktion)', () => {
     expect(card).toBeDefined();
     expect(flat(buttonWithText(root, 'Standort erlauben')).backgroundColor).toBe(lightColors.primary);
     expect(flat(buttonWithText(root, 'Wetter selbst wählen')).backgroundColor).not.toBe(lightColors.primary);
+  });
+});
+
+describe('Orte (M10b)', () => {
+  beforeEach(() => {
+    mockState.params = { children: 'a', time: 'hours2' };
+  });
+
+  const placeCards = (root: ReactTestInstance) =>
+    cards(root).filter((card) => /Bibliothek|museum|Museum|Library/.test(card.props.accessibilityLabel));
+
+  it('Orte mischen sich unter die Aktivitäten: genau drei Karten, mit 2 Std. Ort – Aktivität – Ort', () => {
+    mockState.places = placesReady(indoorPlaces());
+    const root = renderResults();
+    expect(cards(root)).toHaveLength(3);
+    expect(cardTitles(root)).toEqual(['Stadtbibliothek Musterstadt', 'Titel idea-1', 'Heimatmuseum im Kornhaus']);
+  });
+
+  it('die Ortskarte zeigt Entfernung und den Hinweis zu den Öffnungszeiten, für die Sprachausgabe in einer Beschriftung', () => {
+    mockState.places = placesReady(indoorPlaces());
+    const root = renderResults();
+    const [library] = placeCards(root);
+    expect(allTexts(library)).toEqual(expect.arrayContaining(['Bibliothek', 'Stadtbibliothek Musterstadt', 'unter 1 km · Musterstadt', 'Öffnungszeiten vorher prüfen']));
+    expect(library.props.accessibilityLabel).toBe('Stadtbibliothek Musterstadt. Bibliothek, unter 1 km. Öffnungszeiten vorher prüfen');
+    // Farbfläche mit dem Symbol der Bibliothek
+    expect(library.findAllByType(Text).some((node) => node.props.name === 'book-outline')).toBe(true);
+  });
+
+  it('ein Tipp auf die Ortskarte öffnet die Detailansicht des Ortes', () => {
+    const rows = indoorPlaces();
+    mockState.places = placesReady(rows);
+    const root = renderResults();
+    act(() => placeCards(root)[0].props.onPress());
+    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/place/[id]', params: { id: rows[0].id } });
+  });
+
+  it('Quellenzeile „Orte: © OpenStreetMap-Mitwirkende“ mit ODbL nur, wenn ein Ort zu sehen ist; ein Tipp öffnet openstreetmap.org/copyright', () => {
+    const open = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    mockState.places = placesReady(indoorPlaces());
+    const root = renderResults();
+    expect(allTexts(root)).toEqual(expect.arrayContaining(['Orte: © OpenStreetMap-Mitwirkende', 'Daten unter der Open Database License (ODbL)']));
+    const [link] = root.findAllByProps({ accessibilityRole: 'link' }, { deep: false });
+    expect(flat(link).minHeight).toBe(size.touch);
+    act(() => link.props.onPress());
+    expect(open).toHaveBeenCalledWith('https://www.openstreetmap.org/copyright');
+    open.mockRestore();
+
+    mockState.places = noPlaces();
+    expect(allTexts(renderResults())).not.toContain('Orte: © OpenStreetMap-Mitwirkende');
+  });
+
+  it('Englisch: Quellenzeile und Hinweise in der App-Sprache', () => {
+    mockState.places = placesReady(indoorPlaces());
+    const texts = allTexts(renderResults('en'));
+    expect(texts).toEqual(expect.arrayContaining(['Places: © OpenStreetMap contributors', 'Check opening hours before you go', 'Library']));
+  });
+
+  it('weiter als 5 km: „Umkreis auf 15 km erweitert“', () => {
+    mockState.places = placesReady([
+      makePlace({ subtype: 'library', name: 'Bibliothek Nordheim' }, 7),
+      makePlace({ subtype: 'museum', name: 'Museum Nordheim' }, 8),
+    ]);
+    expect(allTexts(renderResults())).toContain('Umkreis auf 15 km erweitert');
+  });
+
+  it('Orte sind noch unterwegs: höchstens 4 Sekunden ein ruhiger Ladezustand, dann nur Aktivitäten; spätere Orte ändern nichts (eingefroren)', () => {
+    jest.useFakeTimers();
+    try {
+      mockState.places = { status: 'loading', snapshot: null, reason: null, refresh: noop };
+      const renderer = renderResultsWithRenderer();
+      expect(allTexts(renderer.root)).toContain('Orte in der Nähe werden gesucht …');
+      expect(cards(renderer.root)).toHaveLength(0);
+      // Die Wetterzeile ist schon da.
+      expect(allTexts(renderer.root)).toContain('Ändern');
+
+      act(() => jest.advanceTimersByTime(4000));
+      expect(cards(renderer.root)).toHaveLength(3);
+      expect(placeCards(renderer.root)).toHaveLength(0);
+
+      mockState.places = placesReady(indoorPlaces());
+      act(() =>
+        renderer.update(
+          <I18nextProvider i18n={translator('de')}>
+            <ResultsScreen />
+          </I18nextProvider>,
+        ),
+      );
+      expect(placeCards(renderer.root)).toHaveLength(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('kommen die Orte innerhalb der Frist, erscheinen sie sofort', () => {
+    jest.useFakeTimers();
+    try {
+      mockState.places = { status: 'loading', snapshot: null, reason: null, refresh: noop };
+      const renderer = renderResultsWithRenderer();
+      act(() => jest.advanceTimersByTime(1500));
+      mockState.places = placesReady(indoorPlaces());
+      act(() =>
+        renderer.update(
+          <I18nextProvider i18n={translator('de')}>
+            <ResultsScreen />
+          </I18nextProvider>,
+        ),
+      );
+      expect(placeCards(renderer.root)).toHaveLength(2);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('ein altes „keine Erlaubnis“ zählt nicht, wenn der Standort inzwischen erlaubt ist: kurz auf den neuen Versuch warten', () => {
+    mockState.places = { ...noPlaces(), reason: 'noPermission' };
+    mockState.weather = weatherReady(); // Standort erlaubt
+    expect(allTexts(renderResults())).toContain('Orte in der Nähe werden gesucht …');
+  });
+
+  it('ohne Standort (Handwahl des Wetters): gleich nur Aktivitäten, kein Warten', () => {
+    mockState.params = { children: 'a', time: 'hours2', weather: 'rain' };
+    mockState.weather = { ...weatherReady(), access: 'declined', status: 'unavailable', data: null };
+    mockState.places = { ...noPlaces(), reason: 'noPermission' };
+    const root = renderResults();
+    expect(cards(root)).toHaveLength(3);
+    expect(allTexts(root)).not.toContain('Orte in der Nähe werden gesucht …');
   });
 });
 

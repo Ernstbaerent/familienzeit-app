@@ -9,7 +9,8 @@ Du brauchst dafür kein Konto in der App und keinen Code zu schreiben. Die Anlei
 Seit M9 schreibt zusätzlich der **KI-Wochenlauf** jeden Sonntag neue Aktivitäten in dieselbe Tabelle (GitHub Action mit dem geheimen Schlüssel, Migration `0002_activity_runs.sql`). Einrichtung, Rückgängig machen und Durchsicht: `docs/wochenlauf.md`.
 
 Seit M10a gibt es zusätzlich die **Orte aus OpenStreetMap** in der Tabelle `places` (monatlicher Import je Bundesland, Migration `0003_places.sql`). Einrichtung und Ablauf: `docs/orte.md`.
-Lizenz (ODbL) und Datenschutz dazu stehen unten in den Abschnitten „OpenStreetMap und ODbL“ und „Was an Supabase geht“. Die App liest die Orte erst ab M10b.
+Lizenz (ODbL) und Datenschutz dazu stehen unten in den Abschnitten „OpenStreetMap und ODbL“ und „Was an Supabase geht“. Seit M10b liest die App die Orte in Kacheln (`docs/orte.md`, „Orte in der App (M10b)“).
+`anon` darf dafür `places` und `places_imports` lesen; beides steht schon in `0003_places.sql`, eine weitere Migration ist nicht nötig.
 
 ## Überblick
 
@@ -229,18 +230,27 @@ Beim Abruf (höchstens einmal pro Tag und Gerät, siehe oben) sieht Supabase tec
 Es gibt kein Konto, keine Cookies und keinen Tracker. Die App schickt nur diesen einen Lese-Abruf und schreibt nie in die Datenbank (die Datenbank würde es auch nicht erlauben).
 Die Aktivitäten selbst sind öffentliche Daten. Datenschutzrechtlich geht es deshalb nur um die **IP-Adresse** (und die Verbindungsdaten) beim Abruf.
 
-**Ab M10b: Orte.** Die App fragt Supabase dann zusätzlich nach Orten, aber **nur nach ganzen Kacheln** (0,2° × 0,3°, in Deutschland etwa 22 × 20 km, Details `docs/orte.md`, „Kacheln“), nie nach ihrem Standort.
+**Seit M10b: Orte.** Die App fragt Supabase zusätzlich nach Orten, aber **nur nach ganzen Kacheln** (0,2° × 0,3°, in Deutschland etwa 22 × 20 km, Details `docs/orte.md`, „Kacheln“ und „Orte in der App (M10b)“), nie nach ihrem Standort.
+Das passiert nur, wenn die Standort-Erlaubnis schon erteilt ist (beim Öffnen des Starts als Vorladen, auf „Eure Ideen“), und nur für Kacheln, die noch nicht oder zu lange auf dem Gerät liegen.
 Supabase sieht dabei:
 
-| Was | Wie |
+| Was geht an Supabase | Wie |
 | --- | --- |
-| **IP-Adresse** | wie beim Abruf der Aktivitäten |
-| Liste der Kachel-Schlüssel (z. B. `253_40,253_41,…`) | höchstens 16 Kacheln für einen Umkreis von 30 km. Daraus lässt sich die **Gegend** auf etwa ±10 bis 20 km ablesen, zusammen mit der IP-Adresse also ungefähr der Wohnort oder Aufenthaltsort. |
-| Zeitpunkt | Abruf nur, wenn eine Kachel noch nicht oder länger als 30 Tage auf dem Gerät liegt |
+| **IP-Adresse** des Handys | wie beim Abruf der Aktivitäten (Server- und API-Protokolle von Supabase) |
+| **Zeitpunkt** | Abruf nur, wenn eine Kachel fehlt, bei Kacheln mit Orten nach 30 Tagen, bei leeren nach 7 Tagen. Frische Kacheln kosten keinen Abruf. |
+| **Liste der Kachel-Schlüssel** (z. B. `253_40,253_41,…`) | meist 12 bis 16, im Norden bis 20 Kacheln für den Umkreis von 30 km, oder nur die fehlenden. Aus der Liste lässt sich die **Gegend auf etwa ±10 bis 20 km** ablesen (die Mitte der Kacheln), zusammen mit der IP-Adresse also ungefähr der Wohn- oder Aufenthaltsort. |
+| Abfrage von `places_imports` | zweimal je Abruf, ohne Parameter außer der Spaltenliste (für alle Geräte gleich) |
+| öffentlicher Projekt-Schlüssel, übliche Verbindungsangaben (User-Agent) | wie bei den Aktivitäten |
 
-**Nicht** an Supabase gehen auch dann: GPS-Position, die auf 1 km gerundete Position, Kinderdaten, Verlauf, Gerätekennung. Die Entfernung zu einem Ort rechnet die App selbst.
-Zwei weitere Stellen, an denen Daten das Handy verlassen, aber **nur nach einem Tipp**: „Route öffnen“ gibt die Koordinaten des **Ziels** an die Karten-App des Handys (Apple Karten, Google Maps …),
-ein Website-Link öffnet den Browser (die IP-Adresse geht dann an diese Website). Beides gehört in die Datenschutzerklärung, mit dem Hinweis, dass dort die Bedingungen dieser Anbieter gelten.
+**Nicht** an Supabase gehen: die **GPS-Position**, der auf etwa **1 km gerundete Standort** (er bleibt auf dem Handy, die Entfernungen rechnet die App selbst), **Kinderdaten** (Alter, Spitzname, Interessen, Abneigungen),
+Auswahl, Verlauf, Bewertungen, Wetter, **Gerätekennung**, Werbe-ID. Die Adresse der Abfrage enthält nur Kachel-Schlüssel (ein Test prüft, dass keine Koordinaten darin stehen: `src/features/places/fetchPlaces.test.ts`).
+
+Weitere Stellen, an denen Daten das Handy verlassen, aber **nur nach einem Tipp**:
+
+- **Seit M10b:** Die Quellenangabe „Orte: © OpenStreetMap-Mitwirkende“ öffnet https://www.openstreetmap.org/copyright im Browser (die IP-Adresse geht dann an die OpenStreetMap Foundation).
+- **Ab M10c:** „Route öffnen“ gibt die Koordinaten des **Ziels** an die Karten-App des Handys (Apple Karten, Google Maps …), ein Website-Link öffnet den Browser (die IP-Adresse geht dann an diese Website).
+
+Alles gehört in die Datenschutzerklärung, mit dem Hinweis, dass dort die Bedingungen dieser Anbieter gelten.
 Der Import selbst (GitHub Action) verarbeitet keine Daten von App-Nutzern; die OSM-Dateien von Geofabrik enthalten keine Namen oder IDs der Mitwirkenden.
 
 Kommen später Bilder aus Supabase Storage dazu, geht beim Laden eines Bildes ebenfalls die IP-Adresse dorthin (derselbe Anbieter, deshalb ist die Allowlist auf diesen Speicher beschränkt). Kommen später ein Konto oder eine Sicherung dazu, ist dieser Abschnitt neu zu bewerten.
@@ -312,7 +322,7 @@ Nach den Attribution Guidelines der OpenStreetMap Foundation:
 
 ### Prüfliste für dich (Clemens)
 
-- [ ] Quellenangabe in der App wie oben (kommt mit M10b und M10c; vor der Beta in der App ansehen).
+- [ ] Quellenangabe in der App wie oben (seit M10b unter den Karten und in der Detailansicht eines Ortes: „Orte: © OpenStreetMap-Mitwirkende“ mit Link und „Daten unter der Open Database License (ODbL)“; vor der Beta in der App ansehen).
 - [ ] Im Impressum oder auf einer Seite „Datenquellen“ der App: „Orte: © OpenStreetMap-Mitwirkende, Daten unter der Open Database License (ODbL)“ mit Link.
 - [ ] **Weitergabe auf Anfrage:** Wie wir die abgeleitete Datenbank herausgeben, wenn jemand fragt. Vorschlag: Hinweis „Die Ortsdaten erhältst du auf Anfrage unter der ODbL“ und ein Export
   (`copy (select * from public.places) to …` bzw. im Table Editor als CSV) plus der Hinweis auf das Verfahren (dieses Repo: `scripts/places-prepare.ts`). Festlegen, wer die Anfragen beantwortet.

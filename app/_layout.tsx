@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 
 import { ActivitiesProvider } from '@/features/activities/ActivitiesContext';
 import { HistoryProvider } from '@/features/history/HistoryContext';
+import { PlacesProvider } from '@/features/places/PlacesContext';
 import { ProfilesProvider } from '@/features/profiles/ProfilesContext';
 import { SelectedChildrenProvider } from '@/features/suggestions/SelectedChildrenContext';
 import { WeatherProvider } from '@/features/weather/WeatherProvider';
@@ -39,21 +40,24 @@ export default function RootLayout() {
           <HistoryProvider>
             {/* Holt nichts beim App-Start: Erst der Start (nur mit schon erteilter Erlaubnis) und die Vorschläge besorgen das Wetter. */}
             <WeatherProvider>
-              <Stack
-                screenOptions={{
-                  headerStyle: { backgroundColor: colors.background },
-                  headerTintColor: colors.text,
-                  headerTitleStyle: { fontFamily: fonts.title },
-                  headerShadowVisible: false,
-                  // Beim Zurück-Pfeil nur den Pfeil zeigen, nicht den Namen des vorigen Bildschirms.
-                  headerBackButtonDisplayMode: 'minimal',
-                  contentStyle: { backgroundColor: colors.background },
-                }}
-              >
-                {/* Der Start hat eine eigene Überschrift im Bildschirm, keine Kopfzeile. */}
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-              </Stack>
-              <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+              {/* Orte aus der Umgebung (M10b): nur mit schon erteilter Standort-Erlaubnis, in Kacheln aus Supabase (docs/orte.md). */}
+              <PlacesProvider>
+                <Stack
+                  screenOptions={{
+                    headerStyle: { backgroundColor: colors.background },
+                    headerTintColor: colors.text,
+                    headerTitleStyle: { fontFamily: fonts.title },
+                    headerShadowVisible: false,
+                    // Beim Zurück-Pfeil nur den Pfeil zeigen, nicht den Namen des vorigen Bildschirms.
+                    headerBackButtonDisplayMode: 'minimal',
+                    contentStyle: { backgroundColor: colors.background },
+                  }}
+                >
+                  {/* Der Start hat eine eigene Überschrift im Bildschirm, keine Kopfzeile. */}
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                </Stack>
+                <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+              </PlacesProvider>
             </WeatherProvider>
           </HistoryProvider>
         </SelectedChildrenProvider>

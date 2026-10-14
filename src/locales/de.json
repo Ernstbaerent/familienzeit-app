@@ -393,5 +393,62 @@
     "peanut": "Erdnüsse",
     "soy": "Soja",
     "sesame": "Sesam"
+  },
+  "places": {
+    "subtypes": {
+      "playground": "Spielplatz",
+      "indoorPlayground": "Indoorspielplatz",
+      "trampolinePark": "Trampolinhalle",
+      "park": "Park",
+      "waterPark": "Spaßbad",
+      "outdoorPool": "Freibad",
+      "indoorPool": "Hallenbad",
+      "pool": "Schwimmbad",
+      "bathingPlace": "Badestelle",
+      "themePark": "Freizeitpark",
+      "miniGolf": "Minigolf",
+      "zoo": "Zoo",
+      "aquarium": "Aquarium",
+      "museum": "Museum",
+      "castle": "Burg oder Schloss",
+      "observationTower": "Aussichtsturm",
+      "ruins": "Ruine",
+      "viewpoint": "Aussichtspunkt",
+      "attraction": "Sehenswürdigkeit",
+      "natureReserve": "Naturschutzgebiet",
+      "lake": "See",
+      "pond": "Teich",
+      "picnicSite": "Rastplatz",
+      "climbingHall": "Kletterhalle",
+      "iceRink": "Eisbahn",
+      "bowling": "Bowling",
+      "cinema": "Kino",
+      "library": "Bibliothek"
+    },
+    "titleIn": "{{subtype}} in {{locality}}",
+    "titleAt": "{{subtype}}, {{street}}",
+    "distance": "ca. {{km}} km",
+    "distanceUnder1": "unter 1 km",
+    "checkHours": "Öffnungszeiten vorher prüfen",
+    "cinemaHint": "Programm und Altersfreigabe vorher prüfen",
+    "radiusWidened": "Umkreis auf {{km}} km erweitert",
+    "loading": "Orte in der Nähe werden gesucht …",
+    "source": "Orte: © OpenStreetMap-Mitwirkende",
+    "license": "Daten unter der Open Database License (ODbL)",
+    "sourceHint": "Öffnet openstreetmap.org im Browser",
+    "stale_one": "Stand: vor {{count}} Tag",
+    "stale_other": "Stand: vor {{count}} Tagen",
+    "card": {
+      "label": "{{title}}. {{subtype}}, {{distance}}. {{notes}}"
+    },
+    "detail": {
+      "facts": {
+        "distance": "Entfernung",
+        "locality": "Ortsteil"
+      },
+      "distanceValue": "{{distance}} Luftlinie",
+      "distanceNote": "Die Entfernung ist geschätzt: Gerechnet wird vom ungefähren Standort aus (auf etwa 1 km gerundet).",
+      "openNote": "Ob der Ort heute geöffnet hat, steht nicht sicher fest. Route und Website kommen bald."
+    }
   }
 }

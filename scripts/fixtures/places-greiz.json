@@ -1,0 +1,1017 @@
+[
+ {
+  "region": "TH",
+  "id": "n900101",
+  "name": null,
+  "category": "playground",
+  "subtype": "playground",
+  "lat": 50.663597,
+  "lon": 12.204251,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Musterviertel",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900102",
+  "name": null,
+  "category": "playground",
+  "subtype": "playground",
+  "lat": 50.676187,
+  "lon": 12.187246,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Lindenau",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900103",
+  "name": null,
+  "category": "playground",
+  "subtype": "playground",
+  "lat": 50.683381,
+  "lon": 12.219839,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": null,
+  "street": "Erlenweg",
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900104",
+  "name": null,
+  "category": "playground",
+  "subtype": "playground",
+  "lat": 50.695072,
+  "lon": 12.168824,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": null,
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900105",
+  "name": "Stadtpark Musterstadt",
+  "category": "park",
+  "subtype": "park",
+  "lat": 50.670791,
+  "lon": 12.211337,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Musterstadt",
+  "street": null,
+  "kid_weight": 2
+ },
+ {
+  "region": "TH",
+  "id": "n900106",
+  "name": null,
+  "category": "park",
+  "subtype": "park",
+  "lat": 50.679784,
+  "lon": 12.228341,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Lindenau",
+  "street": null,
+  "kid_weight": 1
+ },
+ {
+  "region": "TH",
+  "id": "n900107",
+  "name": "Heimatmuseum im Kornhaus",
+  "category": "museum",
+  "subtype": "museum",
+  "lat": 50.668094,
+  "lon": 12.191498,
+  "tile": "253_40",
+  "setting": "indoor",
+  "months": null,
+  "opening_hours": "Tu-Su 10:00-17:00",
+  "hours_kind": "plan",
+  "hours_plan": {
+   "days": [
+    [],
+    [
+     [
+      600,
+      1020
+     ]
+    ],
+    [
+     [
+      600,
+      1020
+     ]
+    ],
+    [
+     [
+      600,
+      1020
+     ]
+    ],
+    [
+     [
+      600,
+      1020
+     ]
+    ],
+    [
+     [
+      600,
+      1020
+     ]
+    ],
+    [
+     [
+      600,
+      1020
+     ]
+    ]
+   ],
+   "ph": false
+  },
+  "website": "https://example.org/museum",
+  "locality": "Musterstadt",
+  "street": null,
+  "kid_weight": 2
+ },
+ {
+  "region": "TH",
+  "id": "n900108",
+  "name": "Stadtbibliothek Musterstadt",
+  "category": "indoor",
+  "subtype": "library",
+  "lat": 50.668993,
+  "lon": 12.202834,
+  "tile": "253_40",
+  "setting": "indoor",
+  "months": null,
+  "opening_hours": "Mo-Fr 10:00-18:00; Sa 10:00-13:00; PH off",
+  "hours_kind": "plan",
+  "hours_plan": {
+   "days": [
+    [
+     [
+      600,
+      1080
+     ]
+    ],
+    [
+     [
+      600,
+      1080
+     ]
+    ],
+    [
+     [
+      600,
+      1080
+     ]
+    ],
+    [
+     [
+      600,
+      1080
+     ]
+    ],
+    [
+     [
+      600,
+      1080
+     ]
+    ],
+    [
+     [
+      600,
+      780
+     ]
+    ],
+    []
+   ],
+   "ph": true
+  },
+  "website": null,
+  "locality": "Musterstadt",
+  "street": null,
+  "kid_weight": 2
+ },
+ {
+  "region": "TH",
+  "id": "n900109",
+  "name": "Hallenbad am Wehr",
+  "category": "pool",
+  "subtype": "indoorPool",
+  "lat": 50.687878,
+  "lon": 12.178744,
+  "tile": "253_40",
+  "setting": "indoor",
+  "months": null,
+  "opening_hours": "Mo-Su 08:00-21:00",
+  "hours_kind": "plan",
+  "hours_plan": {
+   "days": [
+    [
+     [
+      480,
+      1260
+     ]
+    ],
+    [
+     [
+      480,
+      1260
+     ]
+    ],
+    [
+     [
+      480,
+      1260
+     ]
+    ],
+    [
+     [
+      480,
+      1260
+     ]
+    ],
+    [
+     [
+      480,
+      1260
+     ]
+    ],
+    [
+     [
+      480,
+      1260
+     ]
+    ],
+    [
+     [
+      480,
+      1260
+     ]
+    ]
+   ],
+   "ph": false
+  },
+  "website": null,
+  "locality": "Lindenau",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900110",
+  "name": "Waldbad Erlengrund",
+  "category": "pool",
+  "subtype": "outdoorPool",
+  "lat": 50.686079,
+  "lon": 12.246763,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": [
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "opening_hours": "May-Sep 10:00-19:00",
+  "hours_kind": "plan",
+  "hours_plan": {
+   "days": [
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ]
+   ],
+   "ph": false
+  },
+  "website": null,
+  "locality": "Erlengrund",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900111",
+  "name": "Kino am Markt",
+  "category": "indoor",
+  "subtype": "cinema",
+  "lat": 50.673489,
+  "lon": 12.197166,
+  "tile": "253_40",
+  "setting": "indoor",
+  "months": null,
+  "opening_hours": "Mo-Su 14:00-23:00",
+  "hours_kind": "complex",
+  "hours_plan": null,
+  "website": null,
+  "locality": "Musterstadt",
+  "street": null,
+  "kid_weight": 1
+ },
+ {
+  "region": "TH",
+  "id": "n900112",
+  "name": "Burg Falkenfels",
+  "category": "sight",
+  "subtype": "castle",
+  "lat": 50.677986,
+  "lon": 12.157488,
+  "tile": "253_40",
+  "setting": "both",
+  "months": null,
+  "opening_hours": "Apr-Oct Tu-Su 10:00-17:00",
+  "hours_kind": "complex",
+  "hours_plan": null,
+  "website": "https://example.org/burg",
+  "locality": "Falkenfels",
+  "street": null,
+  "kid_weight": 2
+ },
+ {
+  "region": "TH",
+  "id": "n900113",
+  "name": "Blick am Hohen Stein",
+  "category": "sight",
+  "subtype": "viewpoint",
+  "lat": 50.691475,
+  "lon": 12.207085,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Musterstadt",
+  "street": null,
+  "kid_weight": 1
+ },
+ {
+  "region": "TH",
+  "id": "n900114",
+  "name": "Alte Postsäule",
+  "category": "sight",
+  "subtype": "attraction",
+  "lat": 50.666295,
+  "lon": 12.222673,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Musterstadt",
+  "street": null,
+  "kid_weight": 0
+ },
+ {
+  "region": "TH",
+  "id": "n900115",
+  "name": "Mühlteich",
+  "category": "nature",
+  "subtype": "pond",
+  "lat": 50.674388,
+  "lon": 12.215588,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Musterstadt",
+  "street": null,
+  "kid_weight": 0
+ },
+ {
+  "region": "TH",
+  "id": "n900116",
+  "name": "Bowlingtreff Nord",
+  "category": "indoor",
+  "subtype": "bowling",
+  "lat": 50.699568,
+  "lon": 12.2,
+  "tile": "253_40",
+  "setting": "indoor",
+  "months": null,
+  "opening_hours": "invalid hours",
+  "hours_kind": "invalid",
+  "hours_plan": null,
+  "website": null,
+  "locality": "Nordheim",
+  "street": null,
+  "kid_weight": 1
+ },
+ {
+  "region": "TH",
+  "id": "n900117",
+  "name": "Tiergehege Hirschberg",
+  "category": "animals",
+  "subtype": "zoo",
+  "lat": 50.727446,
+  "lon": 12.143317,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": "Mo-Su 09:00-18:00",
+  "hours_kind": "plan",
+  "hours_plan": {
+   "days": [
+    [
+     [
+      540,
+      1080
+     ]
+    ],
+    [
+     [
+      540,
+      1080
+     ]
+    ],
+    [
+     [
+      540,
+      1080
+     ]
+    ],
+    [
+     [
+      540,
+      1080
+     ]
+    ],
+    [
+     [
+      540,
+      1080
+     ]
+    ],
+    [
+     [
+      540,
+      1080
+     ]
+    ],
+    [
+     [
+      540,
+      1080
+     ]
+    ]
+   ],
+   "ph": false
+  },
+  "website": null,
+  "locality": "Hirschberg",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900118",
+  "name": "Minigolf am Kurpark",
+  "category": "funPark",
+  "subtype": "miniGolf",
+  "lat": 50.715755,
+  "lon": 12.270854,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": [
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Bad Musterbach",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900119",
+  "name": "Tobeland Nord",
+  "category": "indoor",
+  "subtype": "indoorPlayground",
+  "lat": 50.740935,
+  "lon": 12.228341,
+  "tile": "253_40",
+  "setting": "indoor",
+  "months": null,
+  "opening_hours": "Mo-Su 10:00-19:00",
+  "hours_kind": "plan",
+  "hours_plan": {
+   "days": [
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ],
+    [
+     [
+      600,
+      1140
+     ]
+    ]
+   ],
+   "ph": false
+  },
+  "website": null,
+  "locality": "Nordheim",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900120",
+  "name": "Kletterhalle Felsenfest",
+  "category": "indoor",
+  "subtype": "climbingHall",
+  "lat": 50.758921,
+  "lon": 12.114976,
+  "tile": "253_40",
+  "setting": "indoor",
+  "months": null,
+  "opening_hours": "Mo-Fr 15:00-22:00; Sa,Su 10:00-20:00",
+  "hours_kind": "plan",
+  "hours_plan": {
+   "days": [
+    [
+     [
+      900,
+      1320
+     ]
+    ],
+    [
+     [
+      900,
+      1320
+     ]
+    ],
+    [
+     [
+      900,
+      1320
+     ]
+    ],
+    [
+     [
+      900,
+      1320
+     ]
+    ],
+    [
+     [
+      900,
+      1320
+     ]
+    ],
+    [
+     [
+      600,
+      1200
+     ]
+    ],
+    [
+     [
+      600,
+      1200
+     ]
+    ]
+   ],
+   "ph": false
+  },
+  "website": null,
+  "locality": "Westdorf",
+  "street": null,
+  "kid_weight": 2
+ },
+ {
+  "region": "TH",
+  "id": "n900121",
+  "name": "Badestelle Talsperre Weida",
+  "category": "pool",
+  "subtype": "bathingPlace",
+  "lat": 50.736439,
+  "lon": 12.09372,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Weidatal",
+  "street": null,
+  "kid_weight": 2
+ },
+ {
+  "region": "TH",
+  "id": "n900122",
+  "name": "Brauteich",
+  "category": "nature",
+  "subtype": "lake",
+  "lat": 50.77241,
+  "lon": 12.249597,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Seedorf",
+  "street": null,
+  "kid_weight": 1
+ },
+ {
+  "region": "TH",
+  "id": "n900123",
+  "name": "Rastplatz Fuchsbau",
+  "category": "nature",
+  "subtype": "picnicSite",
+  "lat": 50.713957,
+  "lon": 12.185829,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Westdorf",
+  "street": null,
+  "kid_weight": 0
+ },
+ {
+  "region": "TH",
+  "id": "n900124",
+  "name": "Turm auf dem Kuhberg",
+  "category": "sight",
+  "subtype": "observationTower",
+  "lat": 50.776906,
+  "lon": 12.313366,
+  "tile": "253_41",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Kuhberg",
+  "street": null,
+  "kid_weight": 2
+ },
+ {
+  "region": "TH",
+  "id": "n900125",
+  "name": null,
+  "category": "playground",
+  "subtype": "playground",
+  "lat": 50.745432,
+  "lon": 12.072464,
+  "tile": "253_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Westdorf",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "SN",
+  "id": "n900126",
+  "name": null,
+  "category": "playground",
+  "subtype": "playground",
+  "lat": 50.767914,
+  "lon": 12.341707,
+  "tile": "253_41",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Ostdorf",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900127",
+  "name": "Freizeitpark Sonnenland",
+  "category": "funPark",
+  "subtype": "themePark",
+  "lat": 50.857842,
+  "lon": 12.129146,
+  "tile": "254_40",
+  "setting": "outdoor",
+  "months": [
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Sonnenhain",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "SN",
+  "id": "n900128",
+  "name": "Vogelpark Auenwald",
+  "category": "animals",
+  "subtype": "zoo",
+  "lat": 50.498129,
+  "lon": 12.327536,
+  "tile": "252_41",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Auenwald",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900129",
+  "name": "Spielzeugmuseum Talburg",
+  "category": "museum",
+  "subtype": "museum",
+  "lat": 50.444173,
+  "lon": 12.114976,
+  "tile": "252_40",
+  "setting": "indoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Talburg",
+  "street": null,
+  "kid_weight": 2
+ },
+ {
+  "region": "SN",
+  "id": "n900130",
+  "name": "Erlebnisbad Regenbogen",
+  "category": "pool",
+  "subtype": "indoorPool",
+  "lat": 50.830863,
+  "lon": 12.39839,
+  "tile": "254_41",
+  "setting": "indoor",
+  "months": null,
+  "opening_hours": "Mo-Su 10:00-22:00",
+  "hours_kind": "plan",
+  "hours_plan": {
+   "days": [
+    [
+     [
+      600,
+      1320
+     ]
+    ],
+    [
+     [
+      600,
+      1320
+     ]
+    ],
+    [
+     [
+      600,
+      1320
+     ]
+    ],
+    [
+     [
+      600,
+      1320
+     ]
+    ],
+    [
+     [
+      600,
+      1320
+     ]
+    ],
+    [
+     [
+      600,
+      1320
+     ]
+    ],
+    [
+     [
+      600,
+      1320
+     ]
+    ]
+   ],
+   "ph": false
+  },
+  "website": null,
+  "locality": "Brückendorf",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "SN",
+  "id": "n900131",
+  "name": null,
+  "category": "playground",
+  "subtype": "playground",
+  "lat": 50.417194,
+  "lon": 12.242512,
+  "tile": "252_40",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Südhausen",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "TH",
+  "id": "n900132",
+  "name": "Tierpark Fernau",
+  "category": "animals",
+  "subtype": "zoo",
+  "lat": 50.408201,
+  "lon": 11.859903,
+  "tile": "252_39",
+  "setting": "outdoor",
+  "months": null,
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Fernau",
+  "street": null,
+  "kid_weight": 3
+ },
+ {
+  "region": "SN",
+  "id": "n900127",
+  "name": "Freizeitpark Sonnenland",
+  "category": "funPark",
+  "subtype": "themePark",
+  "lat": 50.857842,
+  "lon": 12.129146,
+  "tile": "254_40",
+  "setting": "outdoor",
+  "months": [
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "opening_hours": null,
+  "hours_kind": null,
+  "hours_plan": null,
+  "website": null,
+  "locality": "Sonnenhain",
+  "street": null,
+  "kid_weight": 3
+ }
+]

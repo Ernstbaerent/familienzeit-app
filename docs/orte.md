@@ -1,8 +1,9 @@
-# Orte aus OpenStreetMap (M10a: Import)
+# Orte aus OpenStreetMap (M10a: Import, M10b: in der App)
 
 Einmal im Monat lädt eine GitHub Action die OpenStreetMap-Daten je Bundesland bei Geofabrik, filtert daraus familientaugliche Orte
 (Spielplätze, Bäder, Zoos, Museen, Burgen …) und legt sie in die Supabase-Tabelle `places`. **Die App liest ab M10b nur von dort**,
-in groben Kacheln, nie live bei Overpass oder Geofabrik. In M10a ändert sich an der App nichts.
+in groben Kacheln, nie live bei Overpass oder Geofabrik. Wie die App die Orte holt und speichert, steht unten in „Orte in der App (M10b)“,
+die Regeln der Vorschläge (Ausschlüsse, Gewichtung, Umkreis, Mischung) in `docs/suggestions.md`, „Orte in den Vorschlägen (M10b)“.
 
 | Was | Wo |
 | --- | --- |
@@ -12,6 +13,8 @@ in groben Kacheln, nie live bei Overpass oder Geofabrik. In M10a ändert sich an
 | Teil „Hochladen“ (mit Schlüssel, ohne npm) | `scripts/places-upload.ts` (`npm run places:upload`) |
 | Bausteine (reine Funktionen, mit Tests) | `scripts/lib/places/` |
 | Unterarten, Kindertauglichkeit, Kacheln, Prüfung einer Zeile (auch für die App ab M10b) | `src/features/places/` |
+| Abruf, Zwischenspeicher und Provider der App (M10b) | `src/features/places/fetchPlaces.ts`, `placesCache.ts`, `placesStorage.ts`, `placesRefresh.ts`, `PlacesContext.tsx` |
+| Ausgedachte Testorte in echter Zeilenform | `scripts/fixtures/` |
 | Lizenz (ODbL) und Datenschutz | `docs/supabase.md`, Abschnitte „OpenStreetMap und ODbL“ und „Datenschutz, vor M12“ |
 | Machbarkeitstest mit den Zahlen aus Greiz und Reudnitz | `docs/machbarkeit-orte.md` |
 
@@ -185,7 +188,7 @@ Raster 0,2° Breite × 0,3° Länge, in Deutschland etwa 22 km hoch und 19 bis 2
 Gerechnet in ganzen Zehnmillionstel Grad, damit keine Rundungsfehler an Kachelgrenzen entstehen.
 
 - **Grob genug für den Datenschutz:** Ab M10b fragt die App nur nach ganzen Kacheln. Supabase erfährt damit höchstens die Gegend (etwa ±10 bis 20 km), etwa 20-mal gröber als die 1-km-Rundung beim Wetter.
-- **Wenige Anfragen:** Ein Umkreis von 30 km braucht höchstens 4 × 4 Kacheln, meist 9. Pro Kachel etwa 400 bis 1000 Orte (Großstadt mehr).
+- **Wenige Anfragen:** Ein Umkreis von 30 km braucht meist 12 bis 16 Kacheln, ganz im Norden bis 20 (dort ist eine Kachel schmaler), alle in einer Anfrage. Pro Kachel meist einige hundert Orte, in Großstädten mehrere tausend (dichteste: Berlin-Mitte mit 5 149).
 - **Index** `places_tile_idx` macht die Abfrage nach Kacheln schnell.
 
 ---
@@ -290,10 +293,113 @@ Hochladen von Hand ginge mit `npm run places:upload -- --dry-run` und den beiden
 
 ---
 
+## Orte in der App (M10b)
+
+### Ablauf
+
+```
+Start (nur mit schon erteilter Erlaubnis) oder „Eure Ideen“
+  → Standort (sofort auf 2 Nachkommastellen gerundet, wie beim Wetter) → außerhalb Deutschlands? dann keine Orte
+  → Kacheln im Umkreis von 30 km (meist 12 bis 16, im Norden bis 20), die eigene zuerst, dann nach Entfernung
+  → gespeicherte Kacheln lesen → nur die fehlenden oder alten bei Supabase holen → speichern → nach `id` zusammenfassen
+```
+
+- **Nur ganze Kacheln:** `GET /rest/v1/places?select=<alle Spalten>&tile=in.(253_40,253_41,…)&order=tile.asc,region.asc,id.asc&limit=1000&offset=…` mit dem öffentlichen Schlüssel
+  (derselbe Zugang und derselbe Schutz vor geheimen Schlüsseln wie bei den Aktivitäten, `supabaseConfig.ts`). Der Standort geht **nie** an Supabase, nur die Kachel-Schlüssel (ein Test prüft die Adresse).
+- **Seiten zu 1000 Zeilen**, höchstens 40 Seiten (Schutz vor einer Schleife). **Zeitlimit 10 Sekunden** für den ganzen Abruf.
+- **Import-Kennung:** Vor und nach den Seiten liest die App `places_imports` (Bundesland und Kennung, 16 kleine Zeilen). Ändert sie sich dazwischen (ein Import lief genau während des Abrufs),
+  wird der ganze Abruf verworfen, und der alte Stand bleibt. Jede gespeicherte Kachel merkt sich die Kennung ihrer Bundesländer. Nachbar-Kacheln werden nicht mitgeholt (einfache Variante, Entscheidung von Clemens).
+  **`anon` darf `places_imports` lesen:** Das steht schon in `0003_places.sql` (`grant select on table public.places_imports to anon, authenticated, service_role` und die Regel `places_imports_lesen_fuer_alle`),
+  eine Migration 0004 ist nicht nötig.
+- **Prüfung:** Jede Zeile läuft durch `checkPlaceRow` (dieselbe Prüfung wie im Import). Kaputte Zeilen und Zeilen aus nicht angefragten Kacheln fallen weg, die Anzahl steht in der Konsole.
+- **Doppelte:** Ein Ort am Rand zweier Bundesländer steht zweimal in der Tabelle (gleiche `id`); die App nimmt ihn einmal.
+- **Vorladen:** Der Start lädt die Orte vor, aber nur, wenn die Standort-Erlaubnis schon da ist (wie das Wetter, DESIGN.md Entscheidung 7). Er fragt nie nach der Erlaubnis.
+  Frische Kacheln kosten dabei keinen Abruf, nur einen Blick in den Speicher.
+- **Auf „Eure Ideen“** wartet die App gleichzeitig mit dem Wetter höchstens 4 Sekunden, danach nur Aktivitäten (Details: `docs/suggestions.md`).
+
+### Zwischenspeicher auf dem Gerät
+
+| Regel | Wert |
+| --- | --- |
+| Eintrag je Kachel | `places.v1.tile.<key>` mit `{ version: 1, fetchedAt, importIds, rows }`; dazu das Verzeichnis `places.v1.index` (Größe und letzte Nutzung je Kachel) |
+| Neu holen | Kacheln mit Orten nach 30 Tagen, leere nach 7 Tagen; liegt die Abrufzeit in der Zukunft (Uhr verstellt), sofort |
+| Ohne Netz | gespeicherte Kacheln bis 90 Tage weiter nutzen, ab Tag 31 mit dem Hinweis „Stand: vor n Tagen“ in der Quellenzeile; nach 90 Tagen werden sie gelöscht |
+| Höchstens | 25 Kacheln **und** 2 MB für alle Kacheln zusammen (Entscheidung von Clemens) |
+| Herauswerfen | zuerst Kacheln, die gerade nicht gebraucht werden (die am längsten ungenutzte zuerst), dann die gebrauchten von der entferntesten an. Herausgeworfene gelten bis zum Schließen der App trotzdem, nur nicht offline. |
+| Kompakte Form | kurze Feldnamen, keine leeren Felder, `category` und `tile` werden beim Lesen berechnet: etwa **160 Byte je Ort** statt etwa 335 Byte in der Antwort von Supabase |
+
+Gelesenes wird wie neue Daten geprüft (andere Version oder kaputter Eintrag zählt als „nicht gespeichert“). Schlägt das Speichern fehl (Speicher voll), gelten die Orte bis zum Schließen der App; es gibt nur eine Warnung in der Konsole.
+
+### Speicher-Budget auf Android (6 MB)
+
+AsyncStorage erlaubt auf Android insgesamt etwa **6 MB** (`AsyncStorage_db_size_in_MB`), ein einzelner Eintrag darf höchstens etwa **2 MB** groß sein (CursorWindow, Details: `docs/wochenlauf.md`, „Wachstum“).
+Gemessen bzw. aus den Grenzen gerechnet:
+
+| Eintrag | heute (104 Aktivitäten) | bei 1 500 Aktivitäten |
+| --- | --- | --- |
+| Aktivitäten (`activities.v1`, etwa 1,9 KB je Aktivität) | 0,2 MB | 2,8 MB |
+| Kinderprofile (`profiles.v1`) | unter 0,01 MB | unter 0,01 MB |
+| Verlauf (`history.v1`, höchstens 500 Einträge à etwa 150 Byte) | bis 0,08 MB | bis 0,08 MB |
+| Wetter (`weather.v1`, Vorhersage für einen Ort) | etwa 0,02 MB | etwa 0,02 MB |
+| Auswahl, Standort-Entscheidung | unter 0,01 MB | unter 0,01 MB |
+| **Orte** (alle Kacheln, Obergrenze) | **bis 2,0 MB** | **bis 2,0 MB** |
+| **Zusammen** | **bis etwa 2,3 MB** | **bis etwa 4,9 MB** |
+
+- **Heute passt es mit viel Luft** (etwa 2,3 von 6 MB).
+- **Bei 1 500 Aktivitäten passt es knapp** (etwa 4,9 von 6 MB, gut 1 MB Luft). Ob SQLite beim Überschreiben des Aktivitäten-Eintrags kurz Platz für alten und neuen Inhalt braucht, ist nicht gemessen
+  (`docs/wochenlauf.md` nimmt es an); dann wären es kurz bis zu etwa 7,7 MB, und das Speichern der Aktivitäten würde scheitern (die App läuft weiter, nur ohne neuen Zwischenspeicher).
+  Unabhängig davon ist der Aktivitäten-Eintrag ab etwa 1 000 Aktivitäten **allein** größer als 2 MB und auf Android nicht mehr lesbar. Beides löst das Aufteilen des Aktivitäten-Speichers
+  (CLAUDE.md, „Später“, bei 800 Aktivitäten). **Empfehlung:** Das Aufteilen spätestens bei 800 Aktivitäten bauen; die Orte bleiben mit ihrer eigenen Obergrenze von 2 MB getrennt davon sicher.
+- Die dichteste Kachel (`262_44`, Berlin-Mitte, 5 149 Orte, deine Abfrage) braucht kompakt etwa **0,8 MB** und passt allein gut unter die 2 MB je Eintrag.
+  2 MB reichen für etwa 13 000 Orte: In Berlin oder im Ruhrgebiet werden deshalb nicht alle Kacheln des 30-km-Umkreises gespeichert, sondern die nächsten. Die fernen gelten bis zum Schließen der App
+  und werden beim nächsten Öffnen (frühestens nach 30 Tagen bzw. wenn sie fehlen) neu geholt.
+
+### Datenverkehr pro Gerät und Monat
+
+Rechnung: Ein Gerät holt seine Kacheln höchstens einmal in 30 Tagen (leere Kacheln alle 7 Tage, die sind winzig), dazu zweimal `places_imports` (je etwa 1 KB).
+Bleibt die Familie in ihrer Gegend, ist das **ein voller Abruf des 30-km-Umkreises pro Monat**. Eine Zeile in der Antwort von Supabase hat etwa 335 Byte (gemessen an den Testdaten).
+
+Gepackt (gzip): React Native fragt von sich aus gepackte Antworten an, und PostgREST packt sie. Mit 5 000 ausgedachten Zeilen ergab sich Faktor 14, das ist zu günstig (die Testdaten wiederholen sich).
+Echte Namen und Koordinaten packen schlechter; ich rechne vorsichtig mit **Faktor 6**.
+
+| Gegend (30-km-Umkreis) | Orte (geschätzt) | ungepackt | gepackt (÷ 6) | Geräte im Monat bis 5 GB, gepackt | … ungepackt |
+| --- | --- | --- | --- | --- | --- |
+| Berlin-Mitte (12 Kacheln, darunter 5 149 und 2 289) | etwa 15 000 | etwa 5,0 MB | etwa 0,8 MB | etwa 6 000 | etwa 1 000 |
+| Ruhrgebiet (Essen, 16 Kacheln, darunter 2 543, sonst meist 1 000 bis 2 500) | etwa 25 000 | etwa 8,4 MB | etwa 1,4 MB | etwa 3 600 | etwa 600 |
+| ländlich (Greiz, 16 Kacheln à 150 bis 400) | etwa 4 000 | etwa 1,3 MB | etwa 0,22 MB | etwa 23 000 | etwa 3 800 |
+
+- **Folge für die 5 GB des kostenlosen Tarifs:** Die Orte allein vertragen einige tausend aktive Geräte im Monat (gemischt aus Stadt und Land). Wie Supabase den Datenverkehr zählt
+  (gepackt oder ungepackt), ist nicht dokumentiert, soweit ich es gefunden habe: **bitte nach dem Pilot in der Nutzungsübersicht des Dashboards nachsehen** („Usage“ → „Egress“).
+- **Die Aktivitäten verbrauchen mehr als die Orte:** Jedes Gerät holt sie heute täglich ganz, etwa 65 KB gepackt, also etwa 2 MB im Monat, bei 1 500 Aktivitäten etwa 27 MB im Monat
+  (`docs/wochenlauf.md`, „Wachstum“). Das ist der Grund für M8b (Aktivitäten als Änderungen laden). Die Orte holen sich dagegen schon jetzt nur, was fehlt oder alt ist.
+- Die Zahlen der Orte im Umkreis sind geschätzt. Nachzählen für einen Ort (Kacheln aus `tilesAround`, z. B. Berlin-Mitte):
+  `select count(*) from public.places where tile in ('261_43','261_44','261_45','261_46','262_43','262_44','262_45','262_46','263_43','263_44','263_45','263_46');`
+
+### Fehlerfälle
+
+Alle still: keine Meldung in der App, nur eine Warnung in der Konsole (ohne Schlüssel, ohne Adresse, ohne Standort). Eltern bekommen weiter ihre drei Vorschläge.
+
+| Fall | Folge |
+| --- | --- |
+| Supabase nicht eingerichtet, geheimer Schlüssel in der `.env` (abgelehnt) | kein Abruf; gespeicherte Kacheln oder nur Aktivitäten |
+| keine Erlaubnis, Ortung aus, kein Empfang | keine Orte, kein Abruf |
+| außerhalb Deutschlands | kein Abruf, nur Aktivitäten |
+| Netzfehler, HTTP 401 (Schlüssel), 404 (Migration fehlt), 5xx, pausiertes Projekt, Zeitüberschreitung nach 10 s | gespeicherte Kacheln bis 90 Tage, sonst nur Aktivitäten; ein Fehlschlag wird beim nächsten Öffnen erneut versucht |
+| Antwort kein JSON, keine Liste, mehr als 40 Seiten | wie oben, nichts wird gespeichert |
+| Import lief während des Abrufs | wie oben |
+| einzelne kaputte Zeilen, Zeilen aus fremden Kacheln | verworfen, die anderen bleiben |
+| Speicher kaputt oder andere Version | zählt als nicht gespeichert |
+| Speicher voll, Kachel zu groß | Orte gelten bis zum Schließen der App |
+
+### Testdaten
+
+`scripts/fixtures/` enthält **ausgedachte** Orte in der Form der Antwort von Supabase (keine OSM-Daten): 33 Zeilen in 7 Kacheln rund um einen Standort bei Greiz,
+kaputte Zeilen und eine Antwort von `places_imports` (Beschreibung: `scripts/fixtures/README.md`). Benutzt in `src/features/places/*.test.ts` und `src/features/suggestions/mix.test.ts`.
+
+**Nicht getestet** (kein Zugang aus der Cloud-Umgebung): gegen das echte Supabase-Projekt und auf einem echten Handy. Zum Ausprobieren: Abschnitt „Von Hand“ in `docs/suggestions.md`.
+
 ## Die nächsten Schritte (nicht gebaut)
 
-- **M10b Vorschläge:** Die App lädt die Kacheln rund um den (gerundeten) Standort, speichert sie mit Version auf dem Gerät (bis 30 Tage frisch, ohne Netz bis 90 Tage nutzbar mit dezentem Hinweis),
-  und die Vorschlagslogik mischt höchstens zwei Orte unter die drei Karten. Regeln und Zahlen stehen in der Roadmap der CLAUDE.md (M10b).
 - **M10c Detailansicht** mit „Route öffnen“ (Karten-App des Handys) und Quellenangabe.
 - **M10e Orte im Verlauf** nach M10c.
 - **M10d Kartenansicht „In der Nähe“** (frühestens nach M12). Vorschlag: MapLibre (`@maplibre/maplibre-react-native`) mit **eigenen Vektorkacheln**: eine PMTiles-Datei

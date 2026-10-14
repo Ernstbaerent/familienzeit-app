@@ -12,6 +12,7 @@
 import { useColorScheme, type ViewStyle } from 'react-native';
 
 import type { ActivityCategory } from '@/features/activities/activities';
+import type { PlaceVisualKey } from '@/features/places/placeKinds';
 
 // ---------------------------------------------------------------------------
 // Farben
@@ -95,22 +96,26 @@ type ColorKey = keyof Colors;
 
 // Rezept für einen Ton: Die Fläche ist `paper` mit dem Anteil `tint` der Farbe `hue`.
 // Das Symbol ist `markFrom` mit dem Anteil `ink` Tinte (`text`) darin. 0 heißt: die reine Palettenfarbe.
+// Orte (M10b) brauchen mehr Töne als es Palettenfarben gibt: Dort wird die Fläche zusätzlich mit einer zweiten
+// Palettenfarbe gemischt (`blend`, Anteil `share`). Auch das sind keine neuen Farbtöne, nur Mischungen der Palette.
 type ToneRecipe = {
   field: [paper: ColorKey, hue: ColorKey, tint: number];
+  blend?: [other: ColorKey, share: number];
   mark: [markFrom: ColorKey, ink: number];
 };
 
-type ToneRecipes = {
-  recipes: Record<ActivityCategory, ToneRecipe>;
+type ToneRecipes<Key extends string> = {
+  recipes: Record<Key, ToneRecipe>;
   shape: [lighten: ColorKey, share: number]; // der Kreis: Fläche, mit `lighten` aufgehellt
 };
 
-function buildCategoryTones(
+function buildCategoryTones<Key extends string>(
   colors: Colors,
-  { recipes, shape }: ToneRecipes,
-): Record<ActivityCategory, CategoryTone> {
-  const tone = ({ field: [paper, hue, tint], mark: [markFrom, ink] }: ToneRecipe): CategoryTone => {
-    const field = mixColors(colors[paper], colors[hue], tint);
+  { recipes, shape }: ToneRecipes<Key>,
+): Record<Key, CategoryTone> {
+  const tone = ({ field: [paper, hue, tint], blend, mark: [markFrom, ink] }: ToneRecipe): CategoryTone => {
+    const base = mixColors(colors[paper], colors[hue], tint);
+    const field = blend ? mixColors(base, colors[blend[0]], blend[1]) : base;
     return {
       field,
       mark: mixColors(colors[markFrom], colors.text, ink),
@@ -118,8 +123,8 @@ function buildCategoryTones(
     };
   };
   return Object.fromEntries(
-    Object.entries(recipes).map(([category, recipe]) => [category, tone(recipe)]),
-  ) as Record<ActivityCategory, CategoryTone>;
+    Object.entries<ToneRecipe>(recipes).map(([category, recipe]) => [category, tone(recipe)]),
+  ) as Record<Key, CategoryTone>;
 }
 
 const lightCategoryTones = buildCategoryTones(lightColors, {
@@ -145,6 +150,34 @@ const darkCategoryTones = buildCategoryTones(darkColors, {
     outing: { field: ['background', 'accent', 0.24], mark: ['accent', 0] },
     experiment: { field: ['background', 'accent', 0.42], mark: ['accent', 0.25] },
     cooking: { field: ['surface', 'text', 0.12], mark: ['surface', 0.62] },
+  },
+  shape: ['text', 0.08],
+});
+
+// Orte (M10b): sieben eigene Bildgruppen (Spielplatz, Bad, Museum, Zoo, Burg, Kino, Bibliothek). Die übrigen Unterarten
+// nehmen den Ton einer Aktivitäts-Kategorie (src/features/places/placeKinds.ts, `visual`). Werte in docs/theme.md, Kontraste im Test.
+const lightPlaceTones = buildCategoryTones<PlaceVisualKey>(lightColors, {
+  recipes: {
+    playground: { field: ['background', 'accent', 0.3], blend: ['primary', 0.12], mark: ['primary', 0.25] }, // Honig mit Terrakotta
+    pool: { field: ['background', 'secondary', 0.12], mark: ['secondary', 0.35] }, // Salbei, sehr hell
+    museum: { field: ['surface', 'primary', 0.18], mark: ['primary', 0.35] }, // Sand mit Terrakotta
+    zoo: { field: ['background', 'secondary', 0.26], blend: ['accent', 0.25], mark: ['secondary', 0.45] }, // Salbei mit Honig
+    castle: { field: ['surface', 'text', 0.14], mark: ['surface', 0.7] }, // Sand, kräftiger abgedunkelt als Kochen
+    cinema: { field: ['background', 'primary', 0.26], blend: ['text', 0.06], mark: ['primary', 0.45] }, // Terrakotta, gedeckt
+    library: { field: ['surface', 'accent', 0.22], blend: ['secondary', 0.1], mark: ['accent', 0.6] }, // Sand mit Honig und etwas Salbei
+  },
+  shape: ['card', 0.45],
+});
+
+const darkPlaceTones = buildCategoryTones<PlaceVisualKey>(darkColors, {
+  recipes: {
+    playground: { field: ['background', 'accent', 0.3], blend: ['primary', 0.15], mark: ['accent', 0.1] },
+    pool: { field: ['background', 'secondary', 0.3], mark: ['secondary', 0.4] },
+    museum: { field: ['surface', 'primary', 0.3], mark: ['primary', 0.35] },
+    zoo: { field: ['background', 'secondary', 0.3], blend: ['accent', 0.2], mark: ['secondary', 0.5] },
+    castle: { field: ['surface', 'text', 0.2], mark: ['surface', 0.75] },
+    cinema: { field: ['background', 'primary', 0.32], blend: ['text', 0.06], mark: ['primary', 0.45] },
+    library: { field: ['surface', 'accent', 0.26], blend: ['secondary', 0.15], mark: ['accent', 0.35] },
   },
   shape: ['text', 0.08],
 });
@@ -186,6 +219,7 @@ export type Theme = {
   colors: Colors;
   shadow: Shadows;
   categoryTones: Record<ActivityCategory, CategoryTone>;
+  placeTones: Record<PlaceVisualKey, CategoryTone>; // Orte (M10b)
 };
 
 export const lightTheme: Theme = {
@@ -193,12 +227,14 @@ export const lightTheme: Theme = {
   colors: lightColors,
   shadow: lightShadow,
   categoryTones: lightCategoryTones,
+  placeTones: lightPlaceTones,
 };
 export const darkTheme: Theme = {
   scheme: 'dark',
   colors: darkColors,
   shadow: darkShadow,
   categoryTones: darkCategoryTones,
+  placeTones: darkPlaceTones,
 };
 
 // Schalter für den Dunkelmodus. Bis D5 AUS: Die Bildschirme nutzen noch feste helle Farben,

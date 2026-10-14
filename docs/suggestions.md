@@ -1,6 +1,7 @@
-# Vorschläge (M5, Wetter ab M6)
+# Vorschläge (M5, Wetter ab M6, Orte ab M10b)
 
 Eltern wählen, wer dabei ist und wie viel Zeit sie haben. Die App zeigt genau 3 passende Ideen.
+Seit M10b mischen sich Orte aus der Umgebung (Spielplätze, Bäder, Museen …) unter die Aktivitäten (Abschnitt „Orte in den Vorschlägen (M10b)“ unten).
 Die Auswahl sitzt seit D2 direkt auf dem Start (siehe „Start und Auswahl“ unten).
 
 ## Ablauf in der App
@@ -37,8 +38,15 @@ Eine Karte zeigt Bild, Illustration oder Farbfläche mit Kategorie-Pille, Titel,
 | Wetter und Standort (Abruf, Zwischenspeicher, Anzeige) | `weather/`, siehe `docs/weather.md` |
 | Kategorie → Symbol                         | `activities/CategoryIcon.tsx`         |
 | Dauer als Text, Text in der App-Sprache    | `activities/activityDisplay.ts`, `activities/formatDuration.ts` |
+| Orte: Ausschlüsse, Gewichtung              | `suggestions/placeExclusions.ts`, `suggestions/placeScoring.ts` |
+| Orte: Umkreis und Mischung der Dreiergruppen | `suggestions/mix.ts` (`suggestWithPlaces`) |
+| Orte: Karte, Detailansicht, Quellenzeile   | `suggestions/PlaceCard.tsx`, `places/PlaceDetails.tsx` (`app/place/[id].tsx`), `places/PlacesSourceLine.tsx` |
+| Orte: Entfernung, Anfahrt, Öffnungszeiten, Tageslicht | `places/travel.ts`, `places/openingHours.ts`, `places/sunset.ts` |
+| Orte: Tabelle je Unterart (Mindestbesuch, Kosten, Energie, Themen, Trockenheit, Bild) | `places/placeKinds.ts` |
+| Orte: Abruf, Zwischenspeicher, Provider    | `places/`, siehe `docs/orte.md`, „Orte in der App (M10b)“ |
 
-Alles in `exclusions.ts`, `scoring.ts`, `suggest.ts`, `conditions.ts`, `selection.ts`, `startState.ts`, `startLayout.ts`, `selectedChildren.ts` und `cardImage.ts` sind reine Funktionen ohne UI.
+Alles in `exclusions.ts`, `scoring.ts`, `suggest.ts`, `conditions.ts`, `selection.ts`, `startState.ts`, `startLayout.ts`, `selectedChildren.ts`, `cardImage.ts`,
+`placeExclusions.ts`, `placeScoring.ts` und `mix.ts` sind reine Funktionen ohne UI.
 Die Tests liegen daneben (`*.test.ts`).
 
 ## Start und Auswahl (D2)
@@ -119,7 +127,7 @@ Nur Sicherheit und Machbarkeit. Diese Regeln werden **nie** aufgeweicht.
 | Grund       | Regel |
 | ----------- | ----- |
 | `age`       | Die Aktivität muss für **jedes** ausgewählte Kind passen: `ageMin` ≤ Alter ≤ `ageMax`, Alter in vollen Jahren. |
-| `time`      | `durationMin` ist länger als die verfügbare Zeit. Passt die kürzeste Variante, ist die Aktivität machbar. Anfahrt gibt es erst mit Orten (M10). |
+| `time`      | `durationMin` ist länger als die verfügbare Zeit. Passt die kürzeste Variante, ist die Aktivität machbar. Aktivitäten haben keine Anfahrt (Orte schon, siehe unten). |
 | `dayPart`   | Die Aktivität hat `dayParts` und die Tageszeit ist nicht dabei. Ohne `dayParts` passt sie immer. |
 | `month`     | Die Aktivität hat `months` und der heutige Monat ist nicht dabei. Ohne `months` passt sie das ganze Jahr. Der Monat kommt aus dem Datum (`request.now`), es gibt keine Auswahl dafür. |
 | `danger`    | Gewitter **oder amtliche Warnung** (Gewitter, Sturm, Orkan, andere Unwetterwarnung ab Stufe 3) und `setting: 'outdoor'`. `both` bleibt, weil man es drinnen machen kann. |
@@ -155,7 +163,7 @@ Die Tageszeit kommt automatisch aus der Uhrzeit beim Öffnen von „Eure Ideen�
 Bei Gleichstand bleibt die Reihenfolge aus den Daten.
 Der Verlauf (`request.history`, freiwillig) ändert wie alles hier **nur die Reihenfolge** und schließt nie etwas aus.
 Tage zählen als Kalendertage nach Ortszeit. Alle Regeln und Zahlen: `docs/history.md`.
-Noch nicht dabei: Entfernung (kommt mit M10).
+Die Entfernung gilt nur für Orte (eigene Gewichtung, siehe „Orte in den Vorschlägen (M10b)“).
 
 ## Abwechslung und „Keine passt? Drei neue Ideen“ (`suggest.ts`)
 
@@ -178,6 +186,168 @@ Die Logik selbst bleibt reine Funktionen ohne Internet und Standort.
 - **Wetterlage:** `sunny`, `cloudy`, `rain`, `thunderstorm`, `snow`. Schnee ist nicht trocken (`needsDry` fällt weg), Aktivitäten, die Schnee brauchen, folgen mit M6b.
 - **Temperatur:** nur Gewichtung (siehe oben), nie ein Ausschluss.
 - **Warnung:** schließt draußen aus (`danger`), auch wenn das Wetter gerade ruhig ist.
+
+## Orte in den Vorschlägen (M10b)
+
+Woher die Orte kommen (Kacheln aus Supabase, Zwischenspeicher, Fehlerfälle, Datenschutz): `docs/orte.md`, „Orte in der App (M10b)“.
+Hier stehen die Regeln der Vorschlagslogik. Alle Zahlen stehen in einer Tabelle im Code (`placeWeights`, `travelRules`, `radiusRule`, `placeSlots`, `placeKinds`).
+
+**Orte und Aktivitäten werden getrennt sortiert und erst danach gemischt.** Die Punkte der Orte sind deshalb nicht mit denen der Aktivitäten vergleichbar.
+Ohne passende Orte (kein Standort, keine Daten, alles ausgeschlossen) entsteht **genau dasselbe wie vor M10b** (Test in `mix.test.ts`).
+
+### Entfernung und Anfahrt (`places/travel.ts`)
+
+- **Luftlinie** vom gerundeten Standort (Haversine-Formel). Es gibt keinen Routendienst.
+- **Unter 1 km zu Fuß** mit 5 km/h, ohne Aufschlag. **Ab 1 km mit dem Auto:** Luftlinie × 1,3 bei 45 km/h plus 5 Minuten je Strecke. Minuten werden aufgerundet.
+- **Hin und zurück** zählt zur verfügbaren Zeit (siehe `time` unten). Beispiele: 0,5 km = 2 × 6 Min., 2 km = 2 × 9 Min., 10 km = 2 × 23 Min., 30 km = 2 × 57 Min.
+
+### Entfernung und Rundung
+
+Der Standort wird beim Holen sofort auf **2 Nachkommastellen gerundet** (etwa 1 km, Datenschutz-Regel der CLAUDE.md, `weather/location.ts`). Von diesem gerundeten Punkt aus rechnet die App.
+Der echte Standort liegt irgendwo in einer Zelle von 0,01° × 0,01° (in Deutschland etwa 1,1 km × 0,7 km) um ihn herum, also **höchstens etwa 0,7 km** daneben
+(Ecke der Zelle, im Test nachgerechnet). Folgen:
+
+- Jede Entfernung kann um bis zu etwa 0,7 km zu groß oder zu klein sein. Die Karte zeigt deshalb nur ganze km („ca. 4 km“), unter 1 km „unter 1 km“, und die Detailansicht sagt dazu,
+  dass die Entfernung geschätzt ist.
+- Die Grenze „unter 1 km zu Fuß“ ist unscharf: Ein Spielplatz 1,3 km entfernt kann als „zu Fuß“ gelten und umgekehrt. Bei 5 km/h macht das höchstens etwa 8 Minuten je Strecke aus.
+- Die Umkreis-Stufen (5, 15, 30 km) verschieben sich entsprechend um bis zu 0,7 km. Für die Auswahl ist das unerheblich.
+- Genauer rechnen hieße, den genauen Standort zu benutzen. Das will die Datenschutz-Regel nicht, und für „Was machen wir heute?“ reicht die Schätzung.
+
+### Harte Ausschlüsse für Orte (`placeExclusions.ts`)
+
+Nur Sicherheit und Machbarkeit, nie aufgeweicht (wie bei Aktivitäten).
+
+| Grund | Regel |
+| --- | --- |
+| `time` | Anfahrt hin und zurück plus **Mindestbesuch der Unterart** (`minVisitMinutes` in `placeKinds.ts`) ist länger als die verfügbare Zeit. |
+| `season` | Der Ort hat eine Saison (`months`, z. B. Freibad Mai bis September) und der Monat ist nicht dabei. |
+| `danger` | Gewitter oder amtliche Warnung und der Ort ist draußen (`outdoor`). `both` bleibt (z. B. Burg mit Innenräumen, Kombibad). |
+| `notDry` | Die Unterart braucht Trockenheit (`needsDry`: Spielplatz, Minigolf, Freizeitpark, Aussichtsturm, Aussichtspunkt, Rastplatz) und es regnet, gewittert oder schneit. |
+| `closed` | **Nur mit festem Wochenplan** (`hours_kind = plan`, ohne Feiertagsregel): bei Ankunft geschlossen oder schließt vor dem Ende des Mindestbesuchs. Über Mitternacht wird am nächsten Tag weitergelesen. |
+| `dark` | Draußen (`outdoor`) und das Ende des Mindestbesuchs liegt nach dem Tageslicht laut Tabelle (siehe „Dunkelheit“). |
+
+**Unbekannte Öffnungszeiten schließen nie aus** (`complex`, `invalid`, keine Angabe; Erkenntnis 1 aus M2a). **Ein Plan mit Feiertagsregel (`ph`) schließt ebenfalls nie aus**:
+Die App kennt keine Feiertage, an einem Feiertag könnte der Ort anders offen haben (Entscheidung von Clemens). Beide zeigen „Öffnungszeiten vorher prüfen“.
+Den Wochenplan liest die App mit eigenem kleinem Code (`places/openingHours.ts`), die Bibliothek `opening_hours` läuft nur im Import.
+Ankunft = jetzt plus eine Strecke Anfahrt. Gerechnet wird in der Ortszeit des Handys.
+
+### Dunkelheit (`places/sunset.ts`)
+
+Ohne Bibliothek und ohne Sonnendaten aus dem Netz: eine **feste Tabelle mit einem Wert je Monat** („Tageslicht bis“). Näherung:
+
+1. Für jeden Tag des Monats und 19 Punkte an den Rändern Deutschlands (Sylt, Flensburg, Fehmarn, Rügen, Usedom, Oder, Görlitz, Zittau, Vogtland, Passau, Berchtesgaden, Oberstdorf, Lindau, Lörrach, Aachen, Selfkant, Emden, Borkum …)
+   den Sonnenuntergang mit der Näherungsformel der NOAA berechnen, in Ortszeit (Sommer- und Winterzeit). Der früheste Wert des Monats zählt (im Winter im Nordosten, im Sommer im Südosten).
+2. Auf 5 Minuten abrunden und **15 Minuten Reserve** abziehen.
+
+| Monat | Jan | Feb | Mär | Apr | Mai | Jun | Jul | Aug | Sep | Okt | Nov | Dez |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Tageslicht bis | 15:30 | 16:25 | 17:20 | 19:15 | 20:00 | 20:40 | 20:30 | 19:35 | 18:25 | 16:15 | 15:30 | 15:25 |
+
+- Jeder Monat gilt mit seinem frühesten Tag (März: 1. März, noch Winterzeit; Oktober: 31. Oktober, schon Winterzeit). Am Monatsende ist es deshalb oft länger hell als die Tabelle sagt, Ende März sogar gut 2 Stunden (Sommerzeit).
+- Im Westen ist es im Winter bis zu etwa einer Stunde länger hell als im Nordosten. Das ist gewollt: lieber zu früh als im Dunkeln.
+- Ein Besuch, der erst am nächsten Tag endet, gilt immer als dunkel. Den Morgen (vor Sonnenaufgang) prüft die Tabelle nicht.
+- Der Test `places/sunset.test.ts` rechnet die Formel für 2026 bis 2030 nach: Die Tabelle liegt jeden Tag mindestens 10 Minuten vor dem frühesten Sonnenuntergang und höchstens 35 Minuten davor.
+
+### Gewichtung der Orte (`placeScoring.ts`, `placeWeights`)
+
+Startwerte aus dem Plan zu M10, von Clemens bestätigt.
+
+| Was | Punkte |
+| --- | --- |
+| Kindertauglichkeit (`kid_weight`) 3 / 2 / 1 / 0 | +4 / +2 / 0 / −3 |
+| Entfernung (Luftlinie) | −0,25 je km, doppelt, wenn ein ausgewähltes Kind „lange Fahrten“ nicht mag |
+| Sonne und draußen | +2 |
+| Regen, Schnee oder Gewitter und drinnen | +3 |
+| Regen und draußen | −4 |
+| Hitze (ab 30 °C) und draußen | −4; **Bad und Badestelle stattdessen +3** |
+| Frost (0 °C und kälter) und draußen | −4 |
+| Fester Wochenplan und bei Ankunft offen | +1 |
+| Thema der Unterart, das ein Kind mag / nicht mag | +3 / −4 je Thema |
+| Kosten der Unterart | −1 je Stufe |
+| Energie der Eltern | wie bei Aktivitäten (müde: wenig +2, viel −4; normal: viel −1; fit: viel +1) |
+| Tägliche Streuung | 0 bis unter 1, stabil aus Datum und Ort (gleicher Tag = gleiche Reihenfolge) |
+
+**Kinos** sind neutral (keine Themen, Kindertauglichkeit 1) und zeigen „Programm und Altersfreigabe vorher prüfen“. Die Streuung entfällt, sobald Orte in den Verlauf kommen (M10e).
+
+**Tabelle je Unterart** (`placeKinds.ts`, Startwerte von Clemens bestätigt; Mindestbesuch in Min. · Kosten · Energie der Eltern · Themen · braucht Trockenheit):
+
+| Unterart | Werte |
+| --- | --- |
+| Spielplatz | 30 · 0 · wenig · Bewegung · ja |
+| Park | 30 · 0 · wenig · Natur und Tiere |
+| Freibad, Kombibad, Hallenbad | 90 · 1 · viel · Wasser, Bewegung |
+| Spaßbad | 120 · 2 · viel · Wasser, Bewegung |
+| Badestelle | 60 · 0 · viel · Wasser, Natur und Tiere |
+| Freizeitpark | 180 · 2 · viel · Ausflüge, laute Orte, viele Menschen · ja |
+| Minigolf | 45 · 1 · mittel · Spiele · ja |
+| Zoo | 90 · 2 · mittel · Natur und Tiere |
+| Aquarium | 60 · 2 · mittel · Natur und Tiere |
+| Museum | 60 · 1 · mittel · Ausflüge |
+| Burg | 60 · 1 · mittel · Geschichten, Ausflüge |
+| Aussichtsturm | 30 · 1 · mittel · Ausflüge · ja |
+| Ruine | 30 · 0 · wenig · Ausflüge |
+| Aussichtspunkt | 20 · 0 · wenig · Ausflüge · ja |
+| Sehenswürdigkeit | 20 · 0 · wenig · Ausflüge |
+| Naturschutzgebiet, See | 45 · 0 · mittel · Natur und Tiere |
+| Teich | 20 · 0 · wenig · Natur und Tiere |
+| Rastplatz | 30 · 0 · wenig · Natur und Tiere · ja |
+| Indoorspielplatz | 90 · 2 · wenig · Bewegung, laute Orte, viele Menschen |
+| Trampolinhalle | 60 · 2 · mittel · Bewegung, laute Orte |
+| Kletterhalle | 60 · 2 · viel · Bewegung |
+| Eisbahn | 60 · 1 · viel · Bewegung |
+| Bowling | 60 · 2 · wenig · Spiele, laute Orte |
+| Kino | 100 · 2 · wenig · keine Themen |
+| Bibliothek | 30 · 0 · wenig · Geschichten |
+
+### Umkreis (`mix.ts`, `radiusRule`)
+
+Es gilt die **kleinste Stufe aus 5, 15 und 30 km**, in der mindestens **2 nicht ausgeschlossene Orte mit Kindertauglichkeit 2 oder 3** liegen. Sonst 30 km.
+Orte außerhalb der gewählten Stufe kommen gar nicht in Frage, über 30 km nie. Ist der Umkreis größer als 5 km und steht auf der Seite ein Ort, erscheint über den Karten
+„Umkreis auf 15 km erweitert“ (bzw. 30 km; en „Search radius widened to 15 km“).
+
+### Zusammenstellung der drei Karten (`mix.ts`, `placeSlots`)
+
+| Fall | Orte je Dreiergruppe |
+| --- | --- |
+| bis 1 Std. Zeit | höchstens 1 |
+| ab 2 Std. | bis zu 2 (der zweite nur mit Kindertauglichkeit 2 oder 3) |
+| Regen, Gewitter oder Schnee | höchstens 1 (auch mit viel Zeit) |
+
+- Zwei Orte einer Gruppe sind aus **verschiedenen Kategorien** (nicht zwei Spielplätze). Jeder Ort kommt nur einmal vor.
+- **Immer mindestens 1 Aktivität** je Gruppe. Gruppen gibt es, solange Aktivitäten übrig sind; gehen die Orte aus, bestehen die weiteren Gruppen nur aus Aktivitäten.
+- Reihenfolge in der Gruppe: abwechselnd, die größere Gruppe außen (Ort – Aktivität – Ort oder Aktivität – Ort – Aktivität).
+- Die Aktivitäten werden wie bisher ausgewählt (Abwechslung −5 je gleicher Kategorie, Verlauf, Gewichtung).
+- **Garantie vor Mischregeln** (Entscheidung von Clemens): Fehlen schon für die erste Gruppe Aktivitäten (z. B. Baby und Teenager, nur eine Idee passt), füllen weitere Orte auf 3 auf,
+  auch über die Grenze „bei Nässe höchstens 1“. Passt gar keine Aktivität, aber es gibt Orte, gibt es eine Gruppe mit 3 Orten. Ist die letzte Gruppe nicht voll, wird sie wie bisher aufgefüllt,
+  zuerst mit Aktivitäten aus den anderen Gruppen, dann mit Orten. Die Sicherheit (harte Ausschlüsse) wird dabei nie aufgeweicht.
+- „Keine passt? Drei neue Ideen“, der Durchlauf mit Hinweis „von vorn“ und das Einfrieren beim Öffnen bleiben. `matchCount` zählt Aktivitäten und Orte; der Hinweis bei weniger als 3 erscheint
+  also nur, wenn auch mit Orten weniger als 3 passen. Die Tipps („weniger Kinder“, „mehr Zeit“) zählen weiter nur Aktivitäten.
+
+### Auf „Eure Ideen“
+
+- Die Orte werden besorgt, sobald der Standort erlaubt ist (auch direkt nach „Standort erlauben“ im Wetter-Schritt). Ohne Standort (Handwahl des Wetters) gibt es nur Aktivitäten, ohne Warten.
+- Die App wartet **gleichzeitig mit dem Wetter höchstens 4 Sekunden** auf die Orte (`placesWaitMs` in `app/suggestions/results.tsx`). Ist das Wetter schon da, steht so lange die feste Wetterzeile und darunter
+  ruhig „Orte in der Nähe werden gesucht …“ (für die Sprachausgabe „beschäftigt“). Danach zeigt sie nur Aktivitäten.
+- Danach sind die Orte für diese Ansicht **eingefroren** (wie Aktivitäten und Verlauf): Kommen sie später an, gelten sie erst beim nächsten Öffnen. Eine Handwahl des Wetters mischt dieselben Orte neu.
+- **Ortskarte** (`PlaceCard`): Bildbereich wie bei den Aktivitäten (Farbfläche mit großem Symbol, weiße Pille mit der Unterart, z. B. „Hallenbad“; Farben und Symbole: `docs/theme.md`),
+  Titel (Name, sonst „Spielplatz in Pohlitz“, sonst „Spielplatz, Elsterstraße“, sonst „Spielplatz“), darunter „ca. 4 km · Pohlitz“ (den Ortsteil nur, wenn er nicht schon im Titel steht),
+  bei Bedarf „Öffnungszeiten vorher prüfen“ und bei Kinos „Programm und Altersfreigabe vorher prüfen“. Für die Sprachausgabe ist die Karte ein Knopf mit einer Beschriftung
+  („Stadtbibliothek Musterstadt. Bibliothek, unter 1 km. Öffnungszeiten vorher prüfen“).
+- **Quellenzeile** unter den Karten, nur wenn auf der Seite ein Ort steht: „Orte: © OpenStreetMap-Mitwirkende“ (unterstrichen, Link auf openstreetmap.org/copyright) und darunter
+  „Daten unter der Open Database License (ODbL)“, bei älteren Kacheln ohne Netz zusätzlich „Stand: vor n Tagen“. Tippfläche mindestens 44.
+- **Detailansicht eines Ortes** (`app/place/[id].tsx`): Zurück-Knopf, Bildbereich ohne Pille, Unterart, Titel, Entfernung („ca. 4 km Luftlinie“), Ortsteil, Hinweise, der Satz zur geschätzten Entfernung
+  und die Quellenangabe. Kein Hauptknopf und kein Verlauf (M10e). „Route öffnen“, Website und die Öffnungszeiten im Wortlaut kommen mit M10c.
+
+### Testen
+
+- `mix.test.ts`: Umkreis, Mischung (1 Std., 2 Std., Regen, verschiedene Kategorien, zweiter Ort), Garantie (eine Aktivität, keine Aktivität, nur 2 insgesamt, letzte Gruppe), ohne Orte genau wie bisher,
+  und mit den **echten Aktivitäten und den ausgedachten Testorten** (`scripts/fixtures/places-greiz.json`) für 5 Monate × 3 Tageszeiten × 5 Wetterlagen × 4 Zeiten × mit/ohne Warnung × ohne/leere/volle Orte
+  (1 800 Fälle): immer 3 Karten ohne Doppelte, wenn so viele passen, und bei Gefahr nie ein Ort draußen.
+- `placeRules.test.ts`: jeder Ausschluss einzeln und jede Zeile der Gewichtung. `ResultsScreen.test.tsx`: Karten, Quellenzeile, Umkreis-Hinweis, 4-Sekunden-Frist, Einfrieren, Englisch.
+
+Von Hand (mit Standort, Supabase eingerichtet, Orte importiert): Start öffnen, Kind und „2 Std.“ wählen, „Was machen wir?“. Erwartet: Unter den drei Karten sind bis zu zwei Orte (Ort – Aktivität – Ort),
+darunter die Zeile „Orte: © OpenStreetMap-Mitwirkende“. „Wetter ändern“ auf Regen: höchstens ein Ort, kein Spielplatz. „1 Std.“: höchstens ein Ort. Nach Einbruch der Dunkelheit (Tabelle oben) keine Orte draußen.
+Ortskarte antippen: Detailansicht mit Entfernung. Flugmodus und neu öffnen: Die Orte kommen aus dem Speicher.
 
 ## Kategorie-Symbole
 
