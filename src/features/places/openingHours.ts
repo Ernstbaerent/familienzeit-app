@@ -7,7 +7,7 @@ import type { HoursPlan } from './placeRow';
 const minutesPerDay = 1440;
 
 // Montag = 0 … Sonntag = 6 (wie `hours_plan.days`).
-function weekdayIndex(date: Date): number {
+export function weekdayIndex(date: Date): number {
   return (date.getDay() + 6) % 7;
 }
 

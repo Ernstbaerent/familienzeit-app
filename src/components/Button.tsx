@@ -31,6 +31,8 @@ type ButtonProps = {
   iconFlipsInRTL?: boolean;
   // Wird nur vorgelesen, z. B. warum der Knopf gerade nicht geht.
   accessibilityHint?: string;
+  // Freiwillig: ausführlicher als der sichtbare Text, z. B. „Route öffnen zu Saline Bad und Sauna“. Ohne liest die Sprachausgabe `label`.
+  accessibilityLabel?: string;
 };
 
 export function Button({
@@ -42,6 +44,7 @@ export function Button({
   icon,
   iconFlipsInRTL = false,
   accessibilityHint,
+  accessibilityLabel,
 }: ButtonProps) {
   const { styles, buttonStyles, labelStyles, iconColors, glow } = useThemedStyles(createStyles);
   // Der große Hauptknopf trägt den warmen Schein aus dem PDF. Ein gesperrter Knopf nicht.
@@ -53,6 +56,7 @@ export function Button({
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       accessibilityHint={accessibilityHint}
+      accessibilityLabel={accessibilityLabel}
       style={[
         styles.button,
         size === 'large' && styles.buttonLarge,

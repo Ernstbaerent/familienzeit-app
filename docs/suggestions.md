@@ -41,6 +41,7 @@ Eine Karte zeigt Bild, Illustration oder Farbfläche mit Kategorie-Pille, Titel,
 | Orte: Ausschlüsse, Gewichtung              | `suggestions/placeExclusions.ts`, `suggestions/placeScoring.ts` |
 | Orte: Umkreis und Mischung der Dreiergruppen | `suggestions/mix.ts` (`suggestWithPlaces`) |
 | Orte: Karte, Detailansicht, Quellenzeile   | `suggestions/PlaceCard.tsx`, `places/PlaceDetails.tsx` (`app/place/[id].tsx`), `places/PlacesSourceLine.tsx` |
+| Ortsseite: Route, Website, Öffnungszeiten (M10c) | `places/routeLinks.ts`, `places/website.ts`, `places/hoursDisplay.ts`, `places/PlaceHours.tsx`, `places/PlaceWebsiteLink.tsx` |
 | Orte: Entfernung, Anfahrt, Öffnungszeiten, Tageslicht | `places/travel.ts`, `places/openingHours.ts`, `places/sunset.ts` |
 | Orte: Tabelle je Unterart (Mindestbesuch, Kosten, Energie, Themen, Trockenheit, Bild) | `places/placeKinds.ts` |
 | Orte: Abruf, Zwischenspeicher, Provider    | `places/`, siehe `docs/orte.md`, „Orte in der App (M10b)“ |
@@ -335,8 +336,13 @@ Orte außerhalb der gewählten Stufe kommen gar nicht in Frage, über 30 km nie.
   („Stadtbibliothek Musterstadt. Bibliothek, unter 1 km. Öffnungszeiten vorher prüfen“).
 - **Quellenzeile** unter den Karten, nur wenn auf der Seite ein Ort steht: „Orte: © OpenStreetMap-Mitwirkende“ (unterstrichen, Link auf openstreetmap.org/copyright) und darunter
   „Daten unter der Open Database License (ODbL)“, bei älteren Kacheln ohne Netz zusätzlich „Stand: vor n Tagen“. Tippfläche mindestens 44.
-- **Detailansicht eines Ortes** (`app/place/[id].tsx`): Zurück-Knopf, Bildbereich ohne Pille, Unterart, Titel, Entfernung („ca. 4 km Luftlinie“), Ortsteil, Hinweise, der Satz zur geschätzten Entfernung
-  und die Quellenangabe. Kein Hauptknopf und kein Verlauf (M10e). „Route öffnen“, Website und die Öffnungszeiten im Wortlaut kommen mit M10c.
+- **Detailansicht eines Ortes** (`app/place/[id].tsx`, seit M10c): Zurück-Knopf, Bildbereich ohne Pille, Unterart, Titel, Adresse („Elsterstraße, Pohlitz“, nur mit Straße und Ort),
+  Entfernung („ca. 4 km Luftlinie“), Ortsteil, Abschnitt „Öffnungszeiten“ (fester Wochenplan als Liste mit „heute“, sonst „Öffnungszeiten vorher prüfen“ und der Rohtext; Saison; Kino-Hinweis),
+  „Website öffnen“ (nur mit gültiger Adresse), der Satz zur geschätzten Entfernung und die Quellenangabe. **Fest unten der Hauptknopf „Route öffnen“**, der Inhalt scrollt (wie bei den Ideen).
+  **Keine Fahrzeit:** Die geschätzte Anfahrt zählt nur für die Ausschlüsse; die Karten-App hinter „Route öffnen“ weiß es besser. Kein Verlauf für Orte (M10e).
+  Links, Menü und Quellen: `docs/orte.md`, „Route und Website (M10c)“.
+- **„Route öffnen“:** auf dem iPhone ein Auswahlmenü (Apple Karten, Google Maps, OpenStreetMap (Karte)), auf Android die Auswahl „Öffnen mit …“ des Systems. Unter 1 km zu Fuß, sonst Auto.
+  **Auf Android öffnet sich die Karten-App sofort, wenn sie als Standard gesetzt ist.** Das ist eine Einstellung des Handys, kein Fehler. (Zurücksetzen: Android-Einstellungen → Apps → die Karten-App → „Standardmäßig öffnen“ → Standardeinstellungen löschen; die Bezeichnungen unterscheiden sich je nach Handy.)
 
 ### Testen
 
@@ -344,10 +350,14 @@ Orte außerhalb der gewählten Stufe kommen gar nicht in Frage, über 30 km nie.
   und mit den **echten Aktivitäten und den ausgedachten Testorten** (`scripts/fixtures/places-greiz.json`) für 5 Monate × 3 Tageszeiten × 5 Wetterlagen × 4 Zeiten × mit/ohne Warnung × ohne/leere/volle Orte
   (1 800 Fälle): immer 3 Karten ohne Doppelte, wenn so viele passen, und bei Gefahr nie ein Ort draußen.
 - `placeRules.test.ts`: jeder Ausschluss einzeln und jede Zeile der Gewichtung. `ResultsScreen.test.tsx`: Karten, Quellenzeile, Umkreis-Hinweis, 4-Sekunden-Frist, Einfrieren, Englisch.
+- Seit M10c: `routeLinks.test.ts` (alle Links, Android und iPhone, zu Fuß/Auto, Dezimalstellen, Sonderzeichen), `website.test.ts`, `hoursDisplay.test.ts` (Liste, heute, über Mitternacht, Saison, de/en) und `PlaceScreen.test.tsx` (Knopf, Menü, Website, Öffnungszeiten auf der Seite).
 
 Von Hand (mit Standort, Supabase eingerichtet, Orte importiert): Start öffnen, Kind und „2 Std.“ wählen, „Was machen wir?“. Erwartet: Unter den drei Karten sind bis zu zwei Orte (Ort – Aktivität – Ort),
 darunter die Zeile „Orte: © OpenStreetMap-Mitwirkende“. „Wetter ändern“ auf Regen: höchstens ein Ort, kein Spielplatz. „1 Std.“: höchstens ein Ort. Nach Einbruch der Dunkelheit (Tabelle oben) keine Orte draußen.
 Ortskarte antippen: Detailansicht mit Entfernung. Flugmodus und neu öffnen: Die Orte kommen aus dem Speicher.
+Ortsseite (M10c, alles in Expo Go testbar): „Route öffnen“ antippen. Android: Auswahl „Öffnen mit …“ (oder sofort die Standard-Karten-App), das Ziel ist markiert (mit dem Namen, wenn die Karten-App die Beschriftung zeigt).
+iPhone: Menü mit Apple Karten, Google Maps, OpenStreetMap (Karte) und Abbrechen; Apple Karten und Google Maps zeigen die Route (Google Maps ohne App im Browser), unter 1 km zu Fuß, sonst mit dem Auto; OpenStreetMap zeigt die Karte mit Markierung.
+Ein Ort mit Website: „Website öffnen“ öffnet den Browser. Ein Ort mit festem Wochenplan: Liste Montag bis Sonntag, heute hervorgehoben. Auf Englisch umstellen: Wochentage und Menü auf Englisch.
 
 ## Kategorie-Symbole
 

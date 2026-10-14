@@ -1,27 +1,32 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { CardMedia } from '@/features/suggestions/CardMedia';
-import { fonts, fontSize, iconSize, lineHeight, radius, spacing, type Theme } from '@/lib/theme';
+import { fonts, fontSize, lineHeight, radius, spacing, type Theme } from '@/lib/theme';
 import { useThemedStyles } from '@/lib/useThemedStyles';
 
-import { distanceText, placeNotes, placeTitle } from './placeDisplay';
+import { distanceText, placeAddress, placeTitle } from './placeDisplay';
+import { PlaceHours } from './PlaceHours';
 import { placeKinds } from './placeKinds';
 import type { PlaceRow } from './placeRow';
 import { PlacesSourceLine } from './PlacesSourceLine';
+import { PlaceWebsiteLink } from './PlaceWebsiteLink';
+import { websiteLink } from './website';
 
 type PlaceDetailsProps = {
   place: PlaceRow;
   km: number; // Luftlinie vom gerundeten Standort
+  now: Date; // beim Öffnen eingefroren, bestimmt „heute“ bei den Öffnungszeiten
 };
 
-// Einfache Detailansicht eines Ortes (M10b): Bildbereich wie auf der Karte (ohne Pille), Unterart, Titel, Entfernung, Ortsteil,
-// Hinweise (Öffnungszeiten, Kino) und die Quellenangabe. „Route öffnen“, Website und Öffnungszeiten im Wortlaut kommen mit M10c.
-export function PlaceDetails({ place, km }: PlaceDetailsProps) {
+// Inhalt der Ortsseite (M10b, erweitert in M10c): Bildbereich wie auf der Karte (ohne Pille), Unterart, Titel, Adresse,
+// Entfernung, Ortsteil, Öffnungszeiten (mit Saison und Hinweisen), Website und die Quellenangabe.
+// Keine Fahrzeit: Die Karten-App hinter „Route öffnen“ weiß es besser (der Knopf liegt fest unten, app/place/[id].tsx).
+export function PlaceDetails({ place, km, now }: PlaceDetailsProps) {
   const { t } = useTranslation();
-  const { styles, colors } = useThemedStyles(createStyles);
-  const notes = placeNotes(t, place);
+  const styles = useThemedStyles(createStyles);
+  const address = placeAddress(t, place);
+  const website = websiteLink(place.website);
 
   return (
     <View style={styles.root}>
@@ -33,6 +38,7 @@ export function PlaceDetails({ place, km }: PlaceDetailsProps) {
         <Text style={styles.title} accessibilityRole="header">
           {placeTitle(t, place)}
         </Text>
+        {address && <Text style={styles.address}>{address}</Text>}
       </View>
 
       <View style={styles.facts}>
@@ -48,16 +54,9 @@ export function PlaceDetails({ place, km }: PlaceDetailsProps) {
         )}
       </View>
 
-      {notes.length > 0 && (
-        <View style={styles.notice}>
-          {notes.map((note) => (
-            <View key={note} style={styles.noteRow}>
-              <Ionicons name="information-circle-outline" size={iconSize.md} color={colors.icon} />
-              <Text style={styles.noteText}>{note}</Text>
-            </View>
-          ))}
-        </View>
-      )}
+      <PlaceHours place={place} now={now} />
+
+      {website && <PlaceWebsiteLink link={website} />}
 
       <Text style={styles.small}>{t('places.detail.distanceNote')}</Text>
       <PlacesSourceLine />
@@ -66,9 +65,8 @@ export function PlaceDetails({ place, km }: PlaceDetailsProps) {
 }
 
 // Abstände nur mit Horizontal/Vertical oder Start/End, nie Left/Right (wegen rechts-nach-links). Werte wie ActivityDetails.
-const createStyles = ({ colors }: Theme) => ({
-  colors,
-  styles: StyleSheet.create({
+const createStyles = ({ colors }: Theme) =>
+  StyleSheet.create({
     root: {
       gap: spacing.lg,
     },
@@ -91,6 +89,12 @@ const createStyles = ({ colors }: Theme) => ({
       lineHeight: lineHeight.display,
       color: colors.text,
     },
+    address: {
+      fontFamily: fonts.body,
+      fontSize: fontSize.md,
+      lineHeight: lineHeight.md,
+      color: colors.textMuted,
+    },
     facts: {
       gap: spacing.sm,
     },
@@ -112,29 +116,10 @@ const createStyles = ({ colors }: Theme) => ({
       lineHeight: lineHeight.lg,
       color: colors.text,
     },
-    notice: {
-      gap: spacing.sm,
-      padding: spacing.md,
-      borderRadius: radius.tile,
-      backgroundColor: colors.surface,
-    },
-    noteRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-    },
-    noteText: {
-      flexShrink: 1,
-      fontFamily: fonts.body,
-      fontSize: fontSize.md,
-      lineHeight: lineHeight.md,
-      color: colors.text,
-    },
     small: {
       fontFamily: fonts.body,
       fontSize: fontSize.sm,
       lineHeight: lineHeight.sm,
       color: colors.textMuted,
     },
-  }),
-});
+  });
