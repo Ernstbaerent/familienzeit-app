@@ -79,7 +79,7 @@ Bildschirme
 Start mit Auswahl: Die Auswahl (Kinder, Zeit, Energie) sitzt direkt auf dem Start, ein Tipp bis zu den Vorschlägen. Vorbelegt sind nur die zuletzt gewählten Kinder, Zeit und Energie nicht (Entscheidung 4).
 Ergebnis (volle Scrollhöhe): Das Wetter steht als feste Zeile unter der Navigation. Die dritte Karte hat im PDF kein Foto: gleiche Form, Farbfläche plus großes Liniensymbol.
 Detail (volle Scrollhöhe): Schritte in 20 px mit 28 px Abstand, Abhak-Felder 56 px hoch (beim Material „Das braucht ihr“, Entscheidung 13). Der Hauptknopf bleibt beim Scrollen fest am unteren Rand.
-In der Nähe: Warmer, gedämpfter Kartenstil. Pins rund, mit Kategorie-Farbe. Der gewählte Ort hat eine Beschriftung, die Liste liegt als Blatt darunter. Gehört zu M10 und wird dort gebaut.
+In der Nähe: Warmer, gedämpfter Kartenstil. Pins rund, mit Kategorie-Farbe. Der gewählte Ort hat eine Beschriftung, die Liste liegt als Blatt darunter. Gehört zu M10d (eigener Schritt nach M10a Import, M10b Vorschläge und M10c Detailansicht, Vorschlag in docs/orte.md) und wird erst dort gebaut.
 Abweichungen vom heutigen Stand der App
 
 Heutiger Ablauf: Start mit Hauptknopf „Was machen wir?" → Auswahl (Kinder, Zeit, Energie) → Ergebnis mit drei Karten → Detail → „Das machen wir" → „Fertig" → „Wie war's?" → Verlauf. Folgendes im PDF weicht ab oder ist neu. Alle Punkte sind inzwischen entschieden (Abschnitt „Entscheidungen“ unten). Die Tabelle zeigt den Stand:
@@ -91,7 +91,7 @@ Knopf „Anleitung starten" im PDF	Der Name aus der App bleibt: „Das machen wi
 „Keine passt? Drei neue Ideen"	Ersetzt „Andere Vorschläge“, der Durchlauf mit Hinweis bleibt (Nr. 8).
 Text „Ohne Konto. Ohne Tracking." auf dem Start	Ersetzt durch: de „Kein Konto nötig. Deine Daten bleiben auf deinem Handy.“, en „No account needed. Your data stays on your phone.“ Nicht „Ohne Tracking“ (Nr. 5).
 Stimmungsbild auf dem Start	Platzhalter: Sandfläche mit großem, dünnem Sonnen-Symbol (Nr. 6), bis ein gezeichnetes Bild da ist (Zusatz 45).
-Kartenansicht „In der Nähe"	Erst mit M10. Jetzt nicht bauen.
+Kartenansicht „In der Nähe"	Erst mit M10d (nach M10a Import, M10b Vorschläge, M10c Detailansicht). Jetzt nicht bauen.
 Aktivitäten haben bisher kein Foto	Vorrang auf der Karte: image der Aktivität, dann Illustration, dann Farbfläche mit Symbol (Nr. 21, geändert durch Zusatz 45). Illustrationen kommen schrittweise dazu (M9b).
 Entscheidungen
 Stand: 12. Oktober 2026. Clemens (Technik) hat die Fragenliste von Claude Code beantwortet. Die Entscheidungen gelten ab sofort und gehen widersprechenden Stellen in dieser Datei und im PDF vor. Die Nummern werden in CLAUDE.md, docs/theme.md und im Code als Verweis benutzt.
@@ -110,7 +110,7 @@ Stufe D3 (Ergebnis mit Karten)
 9. Der Kopf hat einen runden Zurück-Knopf, kein Mischen-Symbol.
 10. Jede Kategorie hat eine eigene Farbe, abgetönt aus der Palette, mit Kontrastprüfung im Test.
 11. Karten sind weiß (`card`), Sand ist für Flächen (Farbtabelle oben berichtigt). Gewählter Zustand von Chips: Tinte. Terrakotta nur für den Hauptknopf.
-12. Symbole für Spielplatz, Bad und Termine kommen erst mit M10 und M11.
+12. Symbole für Spielplatz, Bad und Termine kommen erst mit M10 und M11 (Spielplatz und Bad mit M10b, wenn Orte auf den Karten erscheinen).
 
 Stufe D4 (Detailansicht)
 13. Abhak-Felder gibt es beim Material („Das braucht ihr“), nicht bei den Schritten. Sie gelten nur auf dem Bildschirm und werden nicht gespeichert.

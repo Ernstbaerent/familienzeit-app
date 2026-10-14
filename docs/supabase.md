@@ -8,6 +8,9 @@ Du brauchst dafür kein Konto in der App und keinen Code zu schreiben. Die Anlei
 
 Seit M9 schreibt zusätzlich der **KI-Wochenlauf** jeden Sonntag neue Aktivitäten in dieselbe Tabelle (GitHub Action mit dem geheimen Schlüssel, Migration `0002_activity_runs.sql`). Einrichtung, Rückgängig machen und Durchsicht: `docs/wochenlauf.md`.
 
+Seit M10a gibt es zusätzlich die **Orte aus OpenStreetMap** in der Tabelle `places` (monatlicher Import je Bundesland, Migration `0003_places.sql`). Einrichtung und Ablauf: `docs/orte.md`.
+Lizenz (ODbL) und Datenschutz dazu stehen unten in den Abschnitten „OpenStreetMap und ODbL“ und „Was an Supabase geht“. Die App liest die Orte erst ab M10b.
+
 ## Überblick
 
 ```
@@ -226,6 +229,20 @@ Beim Abruf (höchstens einmal pro Tag und Gerät, siehe oben) sieht Supabase tec
 Es gibt kein Konto, keine Cookies und keinen Tracker. Die App schickt nur diesen einen Lese-Abruf und schreibt nie in die Datenbank (die Datenbank würde es auch nicht erlauben).
 Die Aktivitäten selbst sind öffentliche Daten. Datenschutzrechtlich geht es deshalb nur um die **IP-Adresse** (und die Verbindungsdaten) beim Abruf.
 
+**Ab M10b: Orte.** Die App fragt Supabase dann zusätzlich nach Orten, aber **nur nach ganzen Kacheln** (0,2° × 0,3°, in Deutschland etwa 22 × 20 km, Details `docs/orte.md`, „Kacheln“), nie nach ihrem Standort.
+Supabase sieht dabei:
+
+| Was | Wie |
+| --- | --- |
+| **IP-Adresse** | wie beim Abruf der Aktivitäten |
+| Liste der Kachel-Schlüssel (z. B. `253_40,253_41,…`) | höchstens 16 Kacheln für einen Umkreis von 30 km. Daraus lässt sich die **Gegend** auf etwa ±10 bis 20 km ablesen, zusammen mit der IP-Adresse also ungefähr der Wohnort oder Aufenthaltsort. |
+| Zeitpunkt | Abruf nur, wenn eine Kachel noch nicht oder länger als 30 Tage auf dem Gerät liegt |
+
+**Nicht** an Supabase gehen auch dann: GPS-Position, die auf 1 km gerundete Position, Kinderdaten, Verlauf, Gerätekennung. Die Entfernung zu einem Ort rechnet die App selbst.
+Zwei weitere Stellen, an denen Daten das Handy verlassen, aber **nur nach einem Tipp**: „Route öffnen“ gibt die Koordinaten des **Ziels** an die Karten-App des Handys (Apple Karten, Google Maps …),
+ein Website-Link öffnet den Browser (die IP-Adresse geht dann an diese Website). Beides gehört in die Datenschutzerklärung, mit dem Hinweis, dass dort die Bedingungen dieser Anbieter gelten.
+Der Import selbst (GitHub Action) verarbeitet keine Daten von App-Nutzern; die OSM-Dateien von Geofabrik enthalten keine Namen oder IDs der Mitwirkenden.
+
 Kommen später Bilder aus Supabase Storage dazu, geht beim Laden eines Bildes ebenfalls die IP-Adresse dorthin (derselbe Anbieter, deshalb ist die Allowlist auf diesen Speicher beschränkt). Kommen später ein Konto oder eine Sicherung dazu, ist dieser Abschnitt neu zu bewerten.
 
 ### Prüfliste für dich (Clemens)
@@ -253,7 +270,8 @@ Was ich bei Supabase abrufen oder abschließen würde, und was in die Datenschut
 - [ ] **Speicherdauer:** Dauer der Protokolle bei Supabase (siehe oben); in der App wird nichts davon gespeichert, der Zwischenspeicher auf dem Handy enthält nur öffentliche Aktivitäten.
 - [ ] **Übermittlung in Drittländer:** falls zutreffend, die Garantien (Standardvertragsklauseln, Datenschutzrahmen) nennen.
 - [ ] **Hinweis auf Freiwilligkeit / Offline:** Die App funktioniert auch ohne Abruf (mitgelieferte Aktivitäten), es gibt keine Pflicht zur Registrierung.
-- [ ] **Alle weiteren Dienste der App an einem Ort aufführen**, nicht nur Supabase: Bright Sky / Deutscher Wetterdienst (Wetter, siehe `docs/weather.md`, dort auch der Abschnitt zum Standort) und später OpenStreetMap-Daten (M10), Veranstaltungsquellen (M11).
+- [ ] **Alle weiteren Dienste der App an einem Ort aufführen**, nicht nur Supabase: Bright Sky / Deutscher Wetterdienst (Wetter, siehe `docs/weather.md`, dort auch der Abschnitt zum Standort), die Orte aus OpenStreetMap (Abruf in Kacheln, siehe oben „Ab M10b: Orte“; „Route öffnen“ und Website-Links nur nach einem Tipp) und später Veranstaltungsquellen (M11).
+- [ ] **Orte (ab M10b):** in der Datenschutzerklärung die Kacheln erklären (welche Gegend daraus erkennbar ist) und die Quellenangabe „© OpenStreetMap-Mitwirkende“ (Lizenz unten).
 - [ ] Verantwortlicher, Kontakt und Rechte der Betroffenen (Auskunft, Löschung, Beschwerde bei der Aufsichtsbehörde), Impressum (M12).
 
 **Weitere Punkte**
@@ -263,10 +281,51 @@ Was ich bei Supabase abrufen oder abschließen würde, und was in die Datenschut
 - [ ] **Zielgruppe prüfen:** Die App richtet sich an Eltern, spricht aber über Kinder. Ob und welche besonderen Regeln für Kinder greifen, fachkundig klären lassen.
 - [ ] **Prüfung durch eine fachkundige Stelle**, bevor die Datenschutzerklärung veröffentlicht wird.
 
+## OpenStreetMap und ODbL (Prüfliste vor M12)
+
+Die Orte in `places` stammen aus OpenStreetMap (über Geofabrik, `docs/orte.md`). OpenStreetMap steht unter der **Open Database License 1.0 (ODbL)**.
+Das ist **eine Prüfliste, keine Rechtsberatung**: Was ich aus den Texten der OpenStreetMap Foundation (Licence and Legal FAQ, Attribution Guidelines, gelesen am 14.10.2026) und von Geofabrik herausgelesen habe,
+und was vor der Veröffentlichung eine fachkundige Stelle bestätigen sollte.
+
+### Was das für uns bedeutet
+
+- **`places` ist eine abgeleitete Datenbank** (Derivative Database): Wir filtern, ändern und ergänzen die OSM-Daten (Unterart, Ortsteil, Saison, vereinfachte Öffnungszeiten, Kindertauglichkeit).
+  Sie bleibt deshalb unter der ODbL („Share-Alike“).
+- **Die Karten und Detailansichten der App sind „Produced Works“** (aus der Datenbank gemachte Werke). Für sie gilt: Quellenangabe, und auf Anfrage die abgeleitete Datenbank
+  (oder die Mittel, sie herzustellen) unter der ODbL herausgeben. Die App selbst darf eine andere Lizenz haben.
+- **Die Aktivitäten bleiben getrennt.** Sie stehen in einer eigenen Tabelle und werden nicht mit OSM-Daten vermischt. Zusammen in einer App bilden sie eine „Collective Database“ (Sammlung unabhängiger Datenbanken),
+  die nicht als abgeleitete Datenbank gilt. Die Aktivitäten fallen damit nicht unter die Weitergabepflicht. **Regel für später:** OSM-Daten nie in die Tabelle `activities` oder in `data/` kopieren.
+- **„Öffentlich“:** Die Pflichten greifen bei öffentlicher Nutzung. Mit der Beta (Testversionen für Freunde und Familie) und spätestens mit der Veröffentlichung nutzen wir die Daten öffentlich.
+  Die Daten-Schnittstelle von Supabase (mit dem öffentlichen Schlüssel lesbar) gibt die abgeleitete Datenbank ebenfalls öffentlich weiter.
+- **Keine technischen Sperren gegen die Weitergabe**, ohne zusätzlich eine freie Kopie anzubieten (ODbL Abschnitt 4.7). Die Kacheln und der öffentliche Schlüssel sind keine Sperre im Sinne der Lizenz,
+  das sollte aber die fachkundige Stelle bestätigen.
+
+### Quellenangabe (Attribution)
+
+Nach den Attribution Guidelines der OpenStreetMap Foundation:
+
+- Text: **„© OpenStreetMap-Mitwirkende“** (oder „© OpenStreetMap contributors“), das Wort „OpenStreetMap“ als **Link auf https://www.openstreetmap.org/copyright** (dort stehen die Quellen und die ODbL).
+- **Sichtbar ohne Zutun:** Wer die Orte sieht, muss die Angabe sehen, ohne erst etwas antippen zu müssen. Sie muss gut lesbar sein (Kontrast nach WCAG, wie in unserem Theme).
+- **Ort der Angabe:** in der Nähe der Daten. Für M10b/M10c geplant: eine Zeile „Orte: © OpenStreetMap-Mitwirkende“ unter den Karten, wenn ein Ort dabei ist, und in der Detailansicht eines Ortes.
+  Bei einer späteren Kartenansicht (M10d) zusätzlich in einer Ecke der Karte.
+- **In der Datenbank selbst:** Die Tabelle trägt einen Kommentar mit Quelle und Lizenz (`0003_places.sql`), dazu diese Datei und `docs/orte.md` im Repo.
+
+### Prüfliste für dich (Clemens)
+
+- [ ] Quellenangabe in der App wie oben (kommt mit M10b und M10c; vor der Beta in der App ansehen).
+- [ ] Im Impressum oder auf einer Seite „Datenquellen“ der App: „Orte: © OpenStreetMap-Mitwirkende, Daten unter der Open Database License (ODbL)“ mit Link.
+- [ ] **Weitergabe auf Anfrage:** Wie wir die abgeleitete Datenbank herausgeben, wenn jemand fragt. Vorschlag: Hinweis „Die Ortsdaten erhältst du auf Anfrage unter der ODbL“ und ein Export
+  (`copy (select * from public.places) to …` bzw. im Table Editor als CSV) plus der Hinweis auf das Verfahren (dieses Repo: `scripts/places-prepare.ts`). Festlegen, wer die Anfragen beantwortet.
+- [ ] Ist das Repo nicht öffentlich: klären, ob der Hinweis auf das Verfahren reicht oder ob wir den Export anbieten müssen (Vorschlag: Export anbieten, das ist einfach).
+- [ ] Bestätigen lassen, dass Aktivitäten und Orte als „Collective Database“ getrennt bleiben, solange sie in getrennten Tabellen stehen.
+- [ ] Geofabrik: Die Bedingungen einmal selbst lesen (geofabrik.de → Data → Downloads) und mit Datum festhalten (Stand bei mir: 14.10.2026, Lizenz ODbL, keine Benutzerdaten in den öffentlichen Dateien).
+- [ ] Prüfung durch eine fachkundige Stelle vor M12 (zusammen mit der Datenschutzerklärung).
+
 ## Sicherheit in einem Satz
 
 Der öffentliche Schlüssel in der App darf nur freigegebene Aktivitäten **lesen**; alles andere verbieten die Regeln in der Datenbank (`supabase/migrations/0001_activities.sql`, geprüft in `activitySql.test.ts`).
-Geschrieben wird nur im Dashboard, im SQL-Editor oder mit dem geheimen Schlüssel — und der gehört nie in die App oder ins Repo. Den geheimen Schlüssel benutzt nur der KI-Wochenlauf, er steht nur in den GitHub Secrets (`SUPABASE_SECRET_KEY`) und darf lesen, einfügen und ändern, aber nicht löschen (`0002_activity_runs.sql`, geprüft in `scripts/lib/weekly/migration.test.ts`).
+Geschrieben wird nur im Dashboard, im SQL-Editor oder mit dem geheimen Schlüssel — und der gehört nie in die App oder ins Repo. Den geheimen Schlüssel benutzen nur der KI-Wochenlauf und der Orte-Import, er steht nur in den GitHub Secrets (`SUPABASE_SECRET_KEY`). Bei den Aktivitäten darf er lesen, einfügen und ändern, aber nicht löschen (`0002_activity_runs.sql`, geprüft in `scripts/lib/weekly/migration.test.ts`);
+bei den Orten darf er nur lesen, in die Zwischentabelle einfügen und ein Bundesland über die Funktion `publish_places_import` austauschen, nie direkt löschen oder ändern (`0003_places.sql`, geprüft in `scripts/lib/places/migration.test.ts`).
 
 ## Aktivitäten später ändern
 

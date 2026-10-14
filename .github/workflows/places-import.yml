@@ -1,0 +1,156 @@
+# Miki, M10a: Orte aus OpenStreetMap (Geofabrik-Auszüge je Bundesland) monatlich in die Supabase-Tabelle "places".
+# Anleitung, Grenzen, Lizenz (ODbL) und was bei Fehlern zu tun ist: docs/orte.md
+#
+# Zwei Teile:
+#   1. "Vorbereiten" (OHNE Schlüssel): Geofabrik-Dateien laden, mit osmium filtern, Öffnungszeiten auswerten (Paket opening_hours),
+#      je Bundesland eine Datei mit den fertigen Zeilen. Hier laufen npm und apt, deshalb gibt es hier keinen einzigen Schlüssel.
+#   2. "Hochladen" (mit SUPABASE_URL und SUPABASE_SECRET_KEY, OHNE npm): je Bundesland austauschen, alles oder nichts je Land.
+#
+# Welche Länder:
+#   Manueller Lauf (Actions → Orte importieren → Run workflow): Eingabe "regions", Standard "TH,SN" (Pilot). "all" = alle 16.
+#   Geplanter Lauf (am 3. jedes Monats): Repo-Variable PLACES_REGIONS, ohne Variable "TH,SN". Für alle Länder: PLACES_REGIONS=all.
+# Pausieren: Repo-Variable PLACES_PAUSED=true. Obergrenze aller Orte: Repo-Variable MAX_PLACES (Standard 600000).
+# Trockenlauf: manuell "dry_run" (Standard an) lädt und filtert alles, liest bei Supabase nur den Stand und schreibt nichts.
+
+name: Orte importieren
+
+on:
+  schedule:
+    - cron: '23 2 3 * *' # am 3. jedes Monats um 2:23 UTC (nachts, krumme Minute: nicht zur vollen Stunde wie alle anderen)
+  workflow_dispatch:
+    inputs:
+      regions:
+        description: 'Bundesländer: Kürzel mit Komma (z. B. TH,SN) oder all für alle 16'
+        type: string
+        default: 'TH,SN'
+      dry_run:
+        description: 'Trockenlauf: nichts schreiben, nur anzeigen'
+        type: boolean
+        default: true
+
+# Nur lesen: Der Lauf ändert nichts im Repo.
+permissions:
+  contents: read
+
+# Nie zwei Läufe gleichzeitig (auch nicht der Wochenlauf der Aktivitäten, der schreibt aber in eine andere Tabelle).
+concurrency:
+  group: places-import
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Vorbereiten (ohne Schlüssel)
+    runs-on: ubuntu-24.04
+    # Alle 16 Länder nacheinander: geschätzt 15 bis 30 Minuten (docs/orte.md, „Dauer“). 90 Minuten lassen Luft.
+    timeout-minutes: 90
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+      dry_run: ${{ steps.gate.outputs.dry_run }}
+    steps:
+      - name: Zeitplan, Auswahl und Pausen-Schalter prüfen
+        id: gate
+        env:
+          EVENT: ${{ github.event_name }}
+          PAUSED: ${{ vars.PLACES_PAUSED }}
+          VAR_REGIONS: ${{ vars.PLACES_REGIONS }}
+          INPUT_REGIONS: ${{ inputs.regions }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          if [ "${EVENT:-}" = "workflow_dispatch" ]; then
+            # Manueller Lauf: läuft auch, wenn der geplante Lauf pausiert ist.
+            dry_run=false; [ "${INPUT_DRY_RUN:-}" = "true" ] && dry_run=true
+            regions="${INPUT_REGIONS:-TH,SN}"
+          else
+            if [ "${PAUSED:-}" = "true" ]; then
+              echo "run=false" >> "$GITHUB_OUTPUT"
+              echo "**Orte-Import pausiert** (Repo-Variable PLACES_PAUSED=true). Fortsetzen: Variable löschen oder auf false setzen." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            dry_run=false
+            regions="${VAR_REGIONS:-TH,SN}"
+          fi
+          # Nur Buchstaben, Komma und Leerzeichen (die genaue Prüfung macht das Skript).
+          if ! printf '%s' "$regions" | grep -Eq '^[A-Za-z, ]{1,80}$'; then
+            echo "::error title=Orte importieren::Ungültige Auswahl der Bundesländer"
+            exit 1
+          fi
+          { echo "run=true"; echo "dry_run=$dry_run"; echo "regions=$regions"; } >> "$GITHUB_OUTPUT"
+
+      - name: Code holen
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Node 22 einrichten
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # --ignore-scripts: keine Installationsskripte fremder Pakete. In diesem Teil gibt es ohnehin keinen Schlüssel.
+      - name: Pakete installieren (für opening_hours)
+        if: steps.gate.outputs.run == 'true'
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: osmium-tool installieren
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq osmium-tool
+          osmium --version | head -n 1
+          df -h . | tail -n 1
+
+      - name: Orte vorbereiten
+        if: steps.gate.outputs.run == 'true'
+        env:
+          TZ: Europe/Berlin
+          PLACES_REGIONS: ${{ steps.gate.outputs.regions }}
+          PLACES_WORK_DIR: ${{ runner.temp }}/places-work
+          PLACES_OUT_DIR: places-out
+        run: npm run -s places:prepare
+
+      - name: Ergebnis weitergeben
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: places-out
+          path: places-out/
+          retention-days: 3
+          if-no-files-found: error
+
+  upload:
+    name: Hochladen (mit Schlüssel)
+    needs: prepare
+    if: needs.prepare.outputs.run == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Code holen
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Node 22 einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Ergebnis aus „Vorbereiten“ holen
+        uses: actions/download-artifact@v4
+        with:
+          name: places-out
+          path: places-out
+
+      # Kein "npm ci": Das Skript braucht keine Pakete, nur Node. So läuft kein fremder Code neben dem Schlüssel.
+      # Der Schlüssel steht nur in diesem Schritt und nur als Umgebungsvariable.
+      - name: Orte hochladen
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          MAX_PLACES: ${{ vars.MAX_PLACES }}
+          DRY_RUN: ${{ needs.prepare.outputs.dry_run }}
+          PLACES_OUT_DIR: places-out
+        run: npm run -s places:upload

@@ -247,6 +247,9 @@ Von Clemens am 10.10.2026 aus diesem Test festgehalten (auch in der `CLAUDE.md` 
 Zusätzlich offen (aus der Einschätzung, noch nicht entschieden): ob die Orte in M10 live bei Overpass oder vorab
 geladen werden, und ob für „jetzt geöffnet?" eine Bibliothek für `opening_hours` ins Projekt kommt (vorher Rückfrage).
 
+**Entschieden (M10a, Oktober 2026):** Die Orte werden vorab geladen, monatlich aus den Geofabrik-Auszügen je Bundesland, und liegen in Supabase (`docs/orte.md`).
+Für die Öffnungszeiten läuft die Bibliothek `opening_hours` nur im Import; die App prüft ab M10b einen vereinfachten Wochenplan.
+
 ## Verlauf der Messung
 
 Die Messung war ein längerer Weg, die Einzelheiten sind für M10 und M9 nützlich (öffentliche Overpass-Server):
