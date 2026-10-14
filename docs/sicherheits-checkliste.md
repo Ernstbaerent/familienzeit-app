@@ -3,7 +3,7 @@
 Diese Checkliste gilt für **jede** neue Aktivität:
 
 - die Pakete des Startbestands (M5b, Claude Code schreibt sie),
-- den späteren KI-Wochenlauf (M9),
+- den KI-Wochenlauf (M9, `docs/wochenlauf.md`),
 - Aktivitäten, die jemand von Hand ergänzt.
 
 Eine Aktivität wird erst `approved` (und damit in der App sichtbar), wenn sie alle Punkte besteht.
@@ -34,10 +34,12 @@ Es gibt zwei Stufen. Beide sind nötig, keine ersetzt die andere.
    Es findet fehlende Hinweise und unmögliche Altersangaben, versteht aber keine Texte.
 2. **Inhaltlich, beim Schreiben.** Claude Code geht jede Aktivität einmal gedanklich durch: Stimmen die Schritte,
    ist der Hinweis wirklich passend, ist das Alter ehrlich? Der KI-Wochenlauf (M9) wendet dieselbe Checkliste
-   automatisch an, bevor eine Aktivität `approved` wird. Wie genau, klärt M9.
+   automatisch an (derselbe Code, `checkSafety`), dazu die Form, Dubletten und Auffälligkeiten (Marken- und Personennamen,
+   Websites, unplausible Mengen und Zeiten). Durchgefallene werden verworfen, Auffällige bleiben `draft`, freigegeben wird nur ohne Auffälligkeit
+   und nur, wenn mindestens die Hälfte des Laufs bestanden hat (Qualitätsbremse). Details: `docs/wochenlauf.md`.
 
 Im Zweifel fällt eine Aktivität durch und bleibt `draft`. Nie umgekehrt.
-Dazu kommt: **Vor der Beta liest ein Mensch alle Aktivitäten einmal durch** (Roadmap M12).
+Dazu kommt: **Vor der Beta liest ein Mensch alle Aktivitäten einmal durch** (Roadmap M12), auch alle aus dem KI-Wochenlauf.
 
 ## Material, Gefahren und Allergene
 
@@ -70,7 +72,9 @@ sonst fehlen die abgeleiteten Hinweise. Braucht eine Aktivität ein Material, da
 wird es mit seinen Merkmalen ergänzt (Anleitung oben in `materials.ts`).
 Die Detailansicht (M7) zeigt die Allergene zusätzlich automatisch aus dem Material an (`getAllergens`) und das Schild „Mit Erwachsenen“ genau bei den Gefahren aus Punkt 2 (`needsAdults`).
 
-## Ablauf pro Paket (M5b) oder Wochenlauf (M9)
+## Ablauf pro Paket (M5b)
+
+Der Wochenlauf (M9) macht die Schritte 2 und 3 automatisch, siehe `docs/wochenlauf.md`.
 
 1. Aktivitäten schreiben (Deutsch und Englisch, in eigenen Worten, nie von Websites kopiert), zuerst als `draft`.
 2. `npm run activities:check` ausführen.

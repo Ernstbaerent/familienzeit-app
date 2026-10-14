@@ -96,6 +96,7 @@ Ausflüge sind bewusst allgemein (Bücherei, Spielplatz-Tour, Bahnhof), konkrete
 sonst würden sie im Januar auch ohne Schnee vorgeschlagen.
 
 Seit M8 kommen die Aktivitäten aus Supabase (`docs/supabase.md`). Die Dateien in `data/` sind der Startbestand für die Datenbank (`npm run db:seed-sql`) und der Rückfall in der App.
+Seit M9 kommen jede Woche KI-Aktivitäten dazu (`docs/wochenlauf.md`). Sie stehen nur in der Datenbank (`source = 'ai'`, `batch_id`), nicht in `data/`; die Zählung oben gilt nur für `data/`.
 
 ## Neue Datei mit Aktivitäten ergänzen
 
