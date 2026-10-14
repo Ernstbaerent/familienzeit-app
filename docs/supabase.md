@@ -6,6 +6,8 @@ nutzt die App die mitgelieferten Aktivitäten aus `data/` und hat damit immer Vo
 
 Du brauchst dafür kein Konto in der App und keinen Code zu schreiben. Die Anleitung unten führt dich Schritt für Schritt durch (auf dem Chromebook).
 
+Seit M9 schreibt zusätzlich der **KI-Wochenlauf** jeden Sonntag neue Aktivitäten in dieselbe Tabelle (GitHub Action mit dem geheimen Schlüssel, Migration `0002_activity_runs.sql`). Einrichtung, Rückgängig machen und Durchsicht: `docs/wochenlauf.md`.
+
 ## Überblick
 
 ```
@@ -264,11 +266,12 @@ Was ich bei Supabase abrufen oder abschließen würde, und was in die Datenschut
 ## Sicherheit in einem Satz
 
 Der öffentliche Schlüssel in der App darf nur freigegebene Aktivitäten **lesen**; alles andere verbieten die Regeln in der Datenbank (`supabase/migrations/0001_activities.sql`, geprüft in `activitySql.test.ts`).
-Geschrieben wird nur im Dashboard, im SQL-Editor oder mit dem geheimen Schlüssel — und der gehört nie in die App oder ins Repo.
+Geschrieben wird nur im Dashboard, im SQL-Editor oder mit dem geheimen Schlüssel — und der gehört nie in die App oder ins Repo. Den geheimen Schlüssel benutzt nur der KI-Wochenlauf, er steht nur in den GitHub Secrets (`SUPABASE_SECRET_KEY`) und darf lesen, einfügen und ändern, aber nicht löschen (`0002_activity_runs.sql`, geprüft in `scripts/lib/weekly/migration.test.ts`).
 
 ## Aktivitäten später ändern
 
-Bis zum KI-Wochenlauf (M9) ist `data/` die Quelle: Datei ändern → `npm run activities:check` → `npm run db:seed-sql` → die geänderten Teile erneut im SQL-Editor ausführen (vorhandene Aktivitäten werden aktualisiert).
+Seit dem KI-Wochenlauf (M9) gibt es zwei Quellen: Die Aktivitäten von Hand stehen in `data/` (Datei ändern → `npm run activities:check` → `npm run db:seed-sql` → die geänderten Teile erneut im SQL-Editor ausführen, vorhandene Aktivitäten werden aktualisiert).
+Die KI-Aktivitäten (`source = 'ai'`, mit `batch_id`) stehen **nur in der Datenbank**, nicht in `data/` und damit nicht im Rückfall der App. Sie ändert man im Table Editor oder per SQL (`docs/wochenlauf.md`).
 Eine Aktivität zurückziehen: im Table Editor `status` auf `rejected` stellen (oder im SQL-Editor), die App nimmt sie beim nächsten Abruf heraus. Danach auch in `data/` den Status ändern, damit sie nicht beim nächsten Einspielen wieder freigegeben wird.
 Der Test `activitySql.test.ts` meldet, wenn die Dateien in `supabase/seed/` nicht mehr zu `data/` passen.
 
