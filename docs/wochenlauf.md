@@ -332,6 +332,12 @@ Ist der Eintrag größer, scheitert das Lesen („Row too big to fit into Cursor
 3. Die Gesamtgrenze von 6 MB im Blick behalten (Profile und Verlauf liegen dort auch). Sie lässt sich in den Build-Einstellungen anheben, aber besser klein bleiben.
 4. Später, wenn es noch mehr werden: Supabase nur die Änderungen seit dem letzten Abruf abfragen (`updated_at`), statt jeden Tag alles.
 
+**Datenverkehr (Egress) im kostenlosen Tarif: deshalb M8b.** Heute holt jedes Gerät die Aktivitäten einmal am Tag **komplett** (heute ca. 65 KB gepackt bzw. 200 KB ungepackt, bei 1500 Aktivitäten ca. 0,9 bzw. 2,8 MB).
+Der kostenlose Tarif von Supabase hat 5 GB Egress im Monat (Preisseite, 14.10.2026). Ob gepackt oder ungepackt gezählt wird, steht dort nicht; im ungünstigen Fall reichen 5 GB heute für etwa 800 Geräte,
+bei 1500 Aktivitäten für etwa 60. Das ist eng, lange bevor die Orte (M10) etwas ausmachen (ca. 0,3 MB pro Gerät und Monat). Deshalb steht in der Roadmap **M8b, vor M12**:
+Aktivitäten nur als Änderungen seit dem letzten Abruf laden (`updated_at` gibt es seit M8). Zurückgezogene Aktivitäten müssen dabei trotzdem verschwinden (z. B. auch Zeilen mit geändertem Status abfragen
+oder ab und zu eine Liste der gültigen IDs). Nicht gebaut, nicht Teil von M10.
+
 ---
 
 ## Datenschutz

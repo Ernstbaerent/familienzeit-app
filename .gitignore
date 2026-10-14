@@ -173,3 +173,7 @@ expo-env.d.ts
 
 # Zwischenspeicher der Machbarkeitstests (scripts/feasibility-*.ts)
 scripts/.cache/
+
+# Orte-Import (M10a): Arbeits- und Ergebnisdateien (OSM-Daten unter ODbL, nicht ins Repo)
+places-out/
+places-work/

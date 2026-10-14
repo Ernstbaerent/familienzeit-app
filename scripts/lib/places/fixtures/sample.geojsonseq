@@ -1,0 +1,26 @@
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.2201,50.6702]},"properties":{"@type":"node","@id":5,"leisure":"playground"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.22,50.67]},"properties":{"@type":"node","@id":6,"place":"suburb","name":"Pohlitz"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.2009,50.6563]},"properties":{"@type":"node","@id":7,"place":"town","name":"Greiz"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.2203,50.6703]},"properties":{"@type":"node","@id":8,"leisure":"playground"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.2,50.659]},"properties":{"@type":"node","@id":9,"tourism":"museum","name":"Sommerpalais","opening_hours":"Tu-Su 10:00-17:00; PH off","website":"www.sommerpalais-beispiel.de"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.23,50.64]},"properties":{"@type":"node","@id":10,"tourism":"zoo","name":"Tiergehege","opening_hours":"Mo-Su 09:00-18:00"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.21,50.662]},"properties":{"@type":"node","@id":11,"leisure":"playground","access":"private"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.211,50.663]},"properties":{"@type":"node","@id":12,"tourism":"viewpoint"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.15,50.62]},"properties":{"@type":"node","@id":13,"leisure":"water_park","name":"Waldbad Beispielberg","opening_hours":"May-Sep: Mo-Su 10:00-20:00"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.215,50.645]},"properties":{"@type":"node","@id":14,"leisure":"sports_centre","sport":"swimming","name":"Bäderkomplex Aubachtal"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.202,50.657]},"properties":{"@type":"node","@id":15,"amenity":"cinema","name":"Kinocenter"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.203,50.658]},"properties":{"@type":"node","@id":17,"amenity":"library","name":"Stadtbibliothek","opening_hours":"kaputt xx"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[13.0,50.66]},"properties":{"@type":"node","@id":18,"leisure":"playground","name":"Spielplatz im Nachbarland"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.4,50.75]},"properties":{"@type":"node","@id":19,"tourism":"museum","name":"Museum in der Exklave"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.29,50.69]},"properties":{"@type":"node","@id":20,"tourism":"attraction","name":"Steintrog"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.205,50.659]},"properties":{"@type":"node","@id":21,"amenity":"library","name":"Alte Bücherei","opening_hours":"off"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.3,50.7]},"properties":{"@type":"node","@id":22,"tourism":"picnic_site","name":"Rastplatz am Wald"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.25,50.65]},"properties":{"@type":"node","@id":35,"leisure":"sports_centre","name":"Sporthalle"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.25,50.68]},"properties":{"@type":"node","@id":36,"man_made":"tower","tower:type":"observation","name":"Aussichtsturm Kuhberg"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.216,50.646]},"properties":{"@type":"node","@id":37,"leisure":"playground","indoor":"yes","name":"Kinderland"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.196,50.6586]},"properties":{"@type":"node","@id":38,"historic":"castle","name":"Oberes Schloss"}}
+{"type":"Feature","geometry":{"type":"Point","coordinates":[12.1975,50.656]},"properties":{"@type":"node","@id":39,"leisure":"park","name":"Stadt-Park"}}
+{"type":"Feature","geometry":{"type":"LineString","coordinates":[[12.15,50.69],[12.152,50.6905]]},"properties":{"@type":"way","@id":104,"leisure":"park"}}
+{"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[[[[12.195,50.655],[12.199,50.655],[12.199,50.658],[12.195,50.658],[12.195,50.655]]]]},"properties":{"@type":"way","@id":100,"leisure":"park","name":"Stadtpark"}}
+{"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[[[[12.3,50.6],[12.32,50.6],[12.32,50.61],[12.3,50.61],[12.3,50.6]]]]},"properties":{"@type":"way","@id":101,"natural":"water","water":"reservoir","name":"Talsperre Beispiel"}}
+{"type":"Feature","geometry":{"type":"MultiPolygon","coordinates":[[[[12.1,50.68],[12.102,50.68],[12.102,50.6815],[12.1,50.6815],[12.1,50.68]]]]},"properties":{"@type":"relation","@id":200,"leisure":"swimming_pool","name":"Freibad Beispieldorf","opening_hours":"Jun-Aug: Mo-Su 10:00-19:00"}}
