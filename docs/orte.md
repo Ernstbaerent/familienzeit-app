@@ -1,4 +1,4 @@
-# Orte aus OpenStreetMap (M10a: Import, M10b: in der App)
+# Orte aus OpenStreetMap (M10a: Import, M10b: in der App, M10c: Ortsseite)
 
 Einmal im Monat lädt eine GitHub Action die OpenStreetMap-Daten je Bundesland bei Geofabrik, filtert daraus familientaugliche Orte
 (Spielplätze, Bäder, Zoos, Museen, Burgen …) und legt sie in die Supabase-Tabelle `places`. **Die App liest ab M10b nur von dort**,
@@ -14,6 +14,7 @@ die Regeln der Vorschläge (Ausschlüsse, Gewichtung, Umkreis, Mischung) in `doc
 | Bausteine (reine Funktionen, mit Tests) | `scripts/lib/places/` |
 | Unterarten, Kindertauglichkeit, Kacheln, Prüfung einer Zeile (auch für die App ab M10b) | `src/features/places/` |
 | Abruf, Zwischenspeicher und Provider der App (M10b) | `src/features/places/fetchPlaces.ts`, `placesCache.ts`, `placesStorage.ts`, `placesRefresh.ts`, `PlacesContext.tsx` |
+| Ortsseite mit „Route öffnen“, Website und Öffnungszeiten (M10c) | `app/place/[id].tsx`, `src/features/places/PlaceDetails.tsx`, `PlaceHours.tsx`, `PlaceWebsiteLink.tsx`, Regeln in `routeLinks.ts`, `website.ts`, `hoursDisplay.ts` |
 | Ausgedachte Testorte in echter Zeilenform | `scripts/fixtures/` |
 | Lizenz (ODbL) und Datenschutz | `docs/supabase.md`, Abschnitte „OpenStreetMap und ODbL“ und „Datenschutz, vor M12“ |
 | Machbarkeitstest mit den Zahlen aus Greiz und Reudnitz | `docs/machbarkeit-orte.md` |
@@ -398,10 +399,66 @@ kaputte Zeilen und eine Antwort von `places_imports` (Beschreibung: `scripts/fix
 
 **Nicht getestet** (kein Zugang aus der Cloud-Umgebung): gegen das echte Supabase-Projekt und auf einem echten Handy. Zum Ausprobieren: Abschnitt „Von Hand“ in `docs/suggestions.md`.
 
+## Route und Website (M10c)
+
+Die Ortsseite (`app/place/[id].tsx`) führt mit einem Tipp zur Route in einer Karten-App und zur Website des Ortes.
+**Die App berechnet keine Route, bindet keine Karte ein, braucht keinen Schlüssel und kein neues Paket:** `Linking` und `ActionSheetIOS` aus React Native reichen,
+die `app.json` ist unverändert (keine Abfrage installierter Apps, keine `LSApplicationQueriesSchemes`, keine `<queries>` für Android).
+
+### „Route öffnen“
+
+Hauptknopf fest unten (wie „Das machen wir“ bei den Ideen), für die Sprachausgabe „Route öffnen zu Saline Bad und Sauna“. Übergeben wird **nur das Ziel**, nie der Standort.
+
+| Handy | Was passiert | Link |
+| --- | --- | --- |
+| Android | Android zeigt „Öffnen mit …“ (die Auswahl der Karten-Apps). Ist eine Karten-App als Standard gesetzt, öffnet sie sich sofort. | `geo:0,0?q=50.659123,12.198765(Saline%20Bad%20und%20Sauna)` |
+| iPhone | kleines Auswahlmenü „Öffnen mit“: Apple Karten, Google Maps, OpenStreetMap (Karte), Abbrechen | siehe unten |
+
+| Eintrag auf dem iPhone | Link | Modus |
+| --- | --- | --- |
+| Apple Karten | `https://maps.apple.com/directions?destination=50.659123,12.198765&mode=driving` | `walking` / `driving` |
+| Google Maps | `https://www.google.com/maps/dir/?api=1&destination=50.659123%2C12.198765&travelmode=driving` | `walking` / `driving` |
+| OpenStreetMap (Karte) | `https://www.openstreetmap.org/?mlat=50.659123&mlon=12.198765#map=17/50.659123/12.198765` | keiner |
+
+- **Zu Fuß oder Auto:** unter 1 km Luftlinie zu Fuß, sonst Auto, dieselbe Regel wie die Anfahrt (`travelFor` in `travel.ts`). Gesetzt wird der Modus nur, wo der Anbieter einen hat (Apple, Google).
+- **Name:** Nur die geo-URI von Android kennt eine Beschriftung. Für Routen haben Apple und Google keinen dokumentierten Parameter für einen Namen; dort gehen nur die Koordinaten mit (genauer als ein Name).
+- **Kodierung:** Koordinaten mit höchstens 6 Nachkommastellen, ohne Exponent. Namen werden ganz kodiert, auch `( ) ! ' *` (in der geo-URI begrenzen die Klammern den Namen). Google verlangt das Komma als `%2C`, Apple zeigt es in seinen Beispielen unkodiert.
+- **Web-Links statt App-Erkennung:** Google Maps öffnet laut Google-Doku die App, wenn sie installiert ist, sonst den Browser. `maps.apple.com` öffnet auf dem iPhone Apple Karten.
+  Das ist einfacher als installierte Apps über Schemata in der `app.json` zu erkennen.
+- **Apple:** Das Format `/directions` ist laut Apple ab iOS 18.4 dokumentiert; das ältere Format (`?daddr=`) steht nicht mehr in der Doku. Was ältere iPhones mit dem Link machen, ist nicht dokumentiert (vermutlich Karte ohne Route).
+- **OpenStreetMap:** Eine Adresse für Routen ist bei OpenStreetMap nicht dokumentiert (`/directions?engine=…&route=…` steht nur in Foren und Fehlerberichten). Deshalb der dokumentierte Link mit Markierung (OSM-Wiki „Browsing“),
+  und der Eintrag heißt „OpenStreetMap (Karte)“ / „OpenStreetMap (map)“, damit er keine Route verspricht (Entscheidung von Clemens).
+- **Kein Dialog vorher**, auf dem iPhone nur das Auswahlmenü. Scheitert das Öffnen (z. B. keine Karten-App auf Android), erscheint danach „Es wurde keine Karten-App gefunden.“
+- **Keine Fahrzeit** auf der Ortsseite: Die Karten-App weiß es besser (Entscheidung von Clemens). Die geschätzte Anfahrt bleibt nur in der Vorschlagslogik.
+- **Datenschutz:** Beim Öffnen einer Route übergibt die App die Koordinaten des Ziels an die von dir gewählte Karten-App (`docs/supabase.md`, „Was an Supabase geht“).
+
+Quellen (gelesen am 14.10.2026): Apple „Adopting unified Maps URLs“ (developer.apple.com/documentation/mapkit/unified-map-urls), Google „Maps URLs, Get Started“ (developers.google.com/maps/documentation/urls/get-started,
+aus der Cloud-Umgebung gesperrt, Inhalt über die Websuche geprüft), Android „Common intents“, Abschnitt „Show a location on a map“ (developer.android.com/guide/components/intents-common), OSM-Wiki „Browsing“ (`mlat`, `mlon`, `#map=`).
+
+### Website
+
+Eine Zeile „Website öffnen“ (Link, mindestens 44 pt hoch), darunter klein die Adresse ohne „www.“ und „Öffnet im Browser“. Sie erscheint nur, wenn der Ort eine gültige Website hat.
+Der Import lässt schon nur `http(s)://` durch (`checkPlaceRow`); die App prüft vor dem Anzeigen noch einmal selbst (`website.ts`): nur `http://` und `https://`, Rechnername mit Punkt, kein Benutzername oder Passwort in der Adresse, keine Leerzeichen.
+Alles andere (`javascript:`, `intent:`, `file:` …) wird nie geöffnet. Erst der Tipp öffnet den Browser.
+
+### Öffnungszeiten, Adresse, Saison
+
+- **Fester Wochenplan** (`hours_kind = plan`): Liste Montag bis Sonntag in der App-Sprache (de/en), Zeiten 24-stündig („9:00–17:00“, „geschlossen“, „rund um die Uhr“). Zeiten über Mitternacht stehen wieder in einer Zeile („18:00–2:00“).
+  **Heute** ist hervorgehoben: Sand-Fläche, fette Schrift und „· heute“ (für die Sprachausgabe „Heute, Mittwoch: 9:00–17:00“). Heute kommt aus der Uhr des Handys beim Öffnen der Seite.
+  Mit Feiertagsregel zusätzlich „An Feiertagen können die Zeiten abweichen.“ und „Öffnungszeiten vorher prüfen“.
+- **Komplex, unlesbar oder unbekannt:** „Öffnungszeiten vorher prüfen“, dazu der Rohtext aus OpenStreetMap („Angabe in OpenStreetMap“), falls es einen gibt.
+- **Kino:** zusätzlich „Programm und Altersfreigabe vorher prüfen“.
+- **Saison** (Entscheidung von Clemens): Hat der Ort Monate, steht „Saison: Mai bis September“ dabei (auch über den Jahreswechsel, „Dezember bis Februar“), damit ein Freibad im Oktober nicht offen aussieht.
+- **Adresse:** Stehen Straße und Ort in den Daten, steht „Elsterstraße, Pohlitz“ unter dem Titel (nur Text aus den Daten, OpenStreetMap hat hier meist keine Hausnummer).
+
+### Was in Expo Go testbar ist
+
+**Alles:** Die App nutzt nur `Linking.openURL` und `ActionSheetIOS` und ändert die `app.json` nicht. „Öffnen mit …“ auf Android, das Menü auf dem iPhone, Apple Karten, Google Maps (App oder Browser), OpenStreetMap und die Website
+verhalten sich in Expo Go wie in der fertigen App. Ein echter Build ist nur die letzte Bestätigung vor der Beta.
+
 ## Die nächsten Schritte (nicht gebaut)
 
-- **M10c Detailansicht** mit „Route öffnen“ (Karten-App des Handys) und Quellenangabe.
-- **M10e Orte im Verlauf** nach M10c.
+- **M10e Orte im Verlauf** (nach M10c).
 - **M10d Kartenansicht „In der Nähe“** (frühestens nach M12). Vorschlag: MapLibre (`@maplibre/maplibre-react-native`) mit **eigenen Vektorkacheln**: eine PMTiles-Datei
   mit den Kartendaten für Deutschland (aus OpenStreetMap erzeugt, z. B. mit dem Werkzeug Planetiler oder als fertiger Auszug von Protomaps), abgelegt in unserem Supabase Storage.
   So gehen keine IP-Adressen an Google oder Apple, und der warme Kartenstil aus der DESIGN.md lässt sich selbst festlegen. Dafür braucht die App einen eigenen Entwicklungs-Build

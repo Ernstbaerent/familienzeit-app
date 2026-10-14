@@ -448,7 +448,61 @@
       },
       "distanceValue": "{{distance}} as the crow flies",
       "distanceNote": "The distance is an estimate: it is measured from your approximate location (rounded to about 1 km).",
-      "openNote": "Whether this place is open today is not certain. Directions and website are coming soon."
+      "address": "{{street}}, {{locality}}",
+      "hoursTitle": "Opening hours",
+      "rawLabel": "As listed in OpenStreetMap",
+      "today": "today",
+      "dayLabel": "{{day}}: {{value}}",
+      "todayLabel": "Today, {{day}}: {{value}}"
+    },
+    "hours": {
+      "days": {
+        "mo": "Monday",
+        "tu": "Tuesday",
+        "we": "Wednesday",
+        "th": "Thursday",
+        "fr": "Friday",
+        "sa": "Saturday",
+        "su": "Sunday"
+      },
+      "months": {
+        "1": "January",
+        "2": "February",
+        "3": "March",
+        "4": "April",
+        "5": "May",
+        "6": "June",
+        "7": "July",
+        "8": "August",
+        "9": "September",
+        "10": "October",
+        "11": "November",
+        "12": "December"
+      },
+      "range": "{{from}}–{{to}}",
+      "closed": "closed",
+      "allDay": "open 24 hours",
+      "monthRange": "{{from}} to {{to}}",
+      "season": "Season: {{months}}",
+      "holidays": "Hours may differ on public holidays."
+    },
+    "route": {
+      "open": "Open directions",
+      "label": "Open directions to {{title}}",
+      "hintIos": "Choose the map app for directions",
+      "hintAndroid": "Opens a map app",
+      "menuTitle": "Open with",
+      "apple": "Apple Maps",
+      "google": "Google Maps",
+      "osm": "OpenStreetMap (map)",
+      "cancel": "Cancel",
+      "error": "No map app was found."
+    },
+    "website": {
+      "open": "Open website",
+      "label": "Open website: {{host}}",
+      "browser": "Opens in the browser",
+      "error": "The website could not be opened."
     }
   }
 }

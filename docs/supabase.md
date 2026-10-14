@@ -248,7 +248,11 @@ Auswahl, Verlauf, Bewertungen, Wetter, **Gerätekennung**, Werbe-ID. Die Adresse
 Weitere Stellen, an denen Daten das Handy verlassen, aber **nur nach einem Tipp**:
 
 - **Seit M10b:** Die Quellenangabe „Orte: © OpenStreetMap-Mitwirkende“ öffnet https://www.openstreetmap.org/copyright im Browser (die IP-Adresse geht dann an die OpenStreetMap Foundation).
-- **Ab M10c:** „Route öffnen“ gibt die Koordinaten des **Ziels** an die Karten-App des Handys (Apple Karten, Google Maps …), ein Website-Link öffnet den Browser (die IP-Adresse geht dann an diese Website).
+- **Seit M10c, „Route öffnen“:** Beim Öffnen einer Route übergibt die App die Koordinaten des Ziels an die von dir gewählte Karten-App.
+  Die App selbst sendet dabei nichts und fragt vorher nicht nach (auf dem iPhone erscheint nur das Auswahlmenü). Der Standort geht nicht mit, die Karten-App bestimmt ihn selbst.
+  Was die Karten-App weiterschickt, regeln deren Anbieter (Apple, Google, OpenStreetMap Foundation); bei Google Maps und OpenStreetMap im Browser geht die IP-Adresse an diesen Anbieter.
+  Auf Android geht zusätzlich der Name des Ortes mit (Beschriftung in der Karte). Details: `docs/orte.md`, „Route und Website (M10c)“.
+- **Seit M10c, Website:** „Website öffnen“ öffnet die Website des Ortes im Browser (die IP-Adresse geht dann an diese Website). Nur Adressen mit `http://` oder `https://`.
 
 Alles gehört in die Datenschutzerklärung, mit dem Hinweis, dass dort die Bedingungen dieser Anbieter gelten.
 Der Import selbst (GitHub Action) verarbeitet keine Daten von App-Nutzern; die OSM-Dateien von Geofabrik enthalten keine Namen oder IDs der Mitwirkenden.

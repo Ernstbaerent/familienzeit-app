@@ -448,7 +448,61 @@
       },
       "distanceValue": "{{distance}} Luftlinie",
       "distanceNote": "Die Entfernung ist geschätzt: Gerechnet wird vom ungefähren Standort aus (auf etwa 1 km gerundet).",
-      "openNote": "Ob der Ort heute geöffnet hat, steht nicht sicher fest. Route und Website kommen bald."
+      "address": "{{street}}, {{locality}}",
+      "hoursTitle": "Öffnungszeiten",
+      "rawLabel": "Angabe in OpenStreetMap",
+      "today": "heute",
+      "dayLabel": "{{day}}: {{value}}",
+      "todayLabel": "Heute, {{day}}: {{value}}"
+    },
+    "hours": {
+      "days": {
+        "mo": "Montag",
+        "tu": "Dienstag",
+        "we": "Mittwoch",
+        "th": "Donnerstag",
+        "fr": "Freitag",
+        "sa": "Samstag",
+        "su": "Sonntag"
+      },
+      "months": {
+        "1": "Januar",
+        "2": "Februar",
+        "3": "März",
+        "4": "April",
+        "5": "Mai",
+        "6": "Juni",
+        "7": "Juli",
+        "8": "August",
+        "9": "September",
+        "10": "Oktober",
+        "11": "November",
+        "12": "Dezember"
+      },
+      "range": "{{from}}–{{to}}",
+      "closed": "geschlossen",
+      "allDay": "rund um die Uhr",
+      "monthRange": "{{from}} bis {{to}}",
+      "season": "Saison: {{months}}",
+      "holidays": "An Feiertagen können die Zeiten abweichen."
+    },
+    "route": {
+      "open": "Route öffnen",
+      "label": "Route öffnen zu {{title}}",
+      "hintIos": "Wählt die Karten-App für die Route",
+      "hintAndroid": "Öffnet eine Karten-App",
+      "menuTitle": "Öffnen mit",
+      "apple": "Apple Karten",
+      "google": "Google Maps",
+      "osm": "OpenStreetMap (Karte)",
+      "cancel": "Abbrechen",
+      "error": "Es wurde keine Karten-App gefunden."
+    },
+    "website": {
+      "open": "Website öffnen",
+      "label": "Website öffnen: {{host}}",
+      "browser": "Öffnet im Browser",
+      "error": "Die Website ließ sich nicht öffnen."
     }
   }
 }

@@ -14,6 +14,13 @@ export function placeTitle(t: TFunction, row: PlaceRow): string {
   return subtype;
 }
 
+// Adresszeile unter dem Titel der Ortsseite (M10c): „Elsterstraße, Pohlitz“, nur wenn Straße und Ort in den Daten stehen.
+// Nur Text aus den Daten, nichts wird ergänzt (OpenStreetMap hat hier oft keine Hausnummer).
+export function placeAddress(t: TFunction, row: PlaceRow): string | null {
+  if (!row.street || !row.locality) return null;
+  return t('places.detail.address', { street: row.street, locality: row.locality });
+}
+
 // „ca. 4 km“, unter 1 km „unter 1 km“. Ganze km reichen: Der Standort ist auf etwa 1 km gerundet.
 export function distanceText(t: TFunction, km: number): string {
   return km < 1 ? t('places.distanceUnder1') : t('places.distance', { km: Math.round(km) });
