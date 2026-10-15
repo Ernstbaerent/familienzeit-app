@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Image as ExpoImage } from 'expo-image';
 import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -16,6 +17,7 @@ import {
   radius,
   size,
   spacing,
+  useTheme,
   type Theme,
 } from '@/lib/theme';
 import { useThemedStyles } from '@/lib/useThemedStyles';
@@ -65,6 +67,12 @@ type StartScreenProps = {
   onOpenHistory: () => void;
 };
 
+// Die Wortmarke: Petrol auf hellem Grund, Leinen auf dunklem (der Dunkelmodus ist bis D5 aus, die Datei ist schon vorbereitet).
+const wordmarkSources = {
+  light: require('../../../assets/logo/wordmark-petrol.png'),
+  dark: require('../../../assets/logo/wordmark-linen.png'),
+};
+
 // Der Start mit Auswahl (DESIGN.md, Bildschirm 01): Kinder, Zeit, Energie und der Hauptknopf auf einem Bildschirm.
 // Nur Anzeige: Der Zustand (Auswahl, Navigation) liegt in app/index.tsx, damit sich das hier ohne Handy testen lässt.
 export function StartScreen({
@@ -82,6 +90,7 @@ export function StartScreen({
   onOpenHistory,
 }: StartScreenProps) {
   const { t } = useTranslation();
+  const { scheme } = useTheme();
   const { styles, colors } = useThemedStyles(createStyles);
   const { width, fontScale } = useWindowDimensions();
 
@@ -109,10 +118,15 @@ export function StartScreen({
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        {/* PLATZHALTER: Die Wortmarke „miki“ ist hier nur Text in Tinte. Sobald die Logo-Datei da ist
-            (assets/, siehe docs/theme.md „Logo und App-Icon“), ersetzt das Logo diesen Text.
-            Der Name kommt aus app.name in de/en; klein geschrieben wie die Wortmarke (DESIGN.md). */}
-        <Text style={styles.wordmark}>{t('app.name').toLowerCase()}</Text>
+        {/* Die Wortmarke „miki“ (assets/logo/, DESIGN.md Entscheidung 55). Für die Sprachausgabe heißt sie wie die App („Miki“, aus app.name in de/en). */}
+        <ExpoImage
+          source={wordmarkSources[scheme]}
+          style={styles.wordmark}
+          contentFit="contain"
+          accessible
+          accessibilityRole="image"
+          accessibilityLabel={t('app.name')}
+        />
         {hasHistory && (
           <Pressable
             onPress={onOpenHistory}
@@ -240,11 +254,10 @@ const createStyles = ({ colors }: Theme) => ({
       justifyContent: 'space-between',
       gap: spacing.md,
     },
+    // Breite und Höhe der Wortmarke (Seitenverhältnis 2398 : 1267 der Datei), nicht im Theme. Wächst nicht mit der Systemschrift: Es ist ein Bild.
     wordmark: {
-      fontFamily: fonts.title,
-      fontSize: fontSize.xxl,
-      lineHeight: lineHeight.xxl,
-      color: colors.text,
+      width: 76,
+      height: 40,
     },
     historyButton: {
       minHeight: size.touch,

@@ -93,7 +93,9 @@ const createStyles = ({ colors }: Theme) => ({
       paddingEnd: spacing.sm,
       minHeight: size.touch,
       borderRadius: radius.tile,
-      backgroundColor: colors.surface, // Sand: Flächen (Entscheidung 11)
+      backgroundColor: colors.surface, // Flächen (Entscheidung 11)
+      borderWidth: 1, // Rosé auf Leinen hat nur 1,5:1: feiner Rand (Entscheidung 55)
+      borderColor: colors.border,
     },
     info: {
       flex: 1,

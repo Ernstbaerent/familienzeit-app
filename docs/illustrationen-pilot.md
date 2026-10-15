@@ -1,5 +1,9 @@
 # Pilot: Illustrationen statt Farbfläche
 
+> **Hinweis (Farb-Umstellung, DESIGN.md Entscheidung 55):** Die Beschreibung unten gilt für die Farben von „Sonntagslicht“ (Terrakotta, Salbei, Honig). Die sechs Zeichnungen sind seither auf die Palette C umgefärbt
+> (gleiche Formen, nichts neu gezeichnet) und entstehen aus Vorlagen mit Farbplätzen, siehe `docs/design/ILLUSTRATIONEN.md`. Vorher und nachher: `docs/farbumstellung/README.md`.
+> Die Bilder unten verweisen auf die erzeugten Dateien und zeigen deshalb schon die neuen Farben; die Beschreibung der Farben im Text ist Stand des Pilots.
+
 Stand: 13. Oktober 2026. **Pilot, nichts davon ist endgültig.** Wir testen an drei Aktivitäten, ob ein selbst gezeichneter Stil
 zu „Sonntagslicht“ passt. Stilregeln: `docs/design/ILLUSTRATIONEN.md`. Gezeichnet von Claude Code als SVG (Code), ohne fremde Bilder als Vorlage.
 Deshalb gibt es für sie keine Quellenliste (fremde Fotos gibt es in der App nicht mehr, DESIGN.md Zusatz 45).

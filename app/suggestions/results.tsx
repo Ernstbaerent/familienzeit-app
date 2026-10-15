@@ -357,6 +357,8 @@ const createStyles = ({ colors }: Theme) =>
       padding: spacing.md,
       borderRadius: radius.tile,
       backgroundColor: colors.surface,
+      borderWidth: 1, // Rosé auf Leinen hat nur 1,5:1: feiner Rand (Entscheidung 55)
+      borderColor: colors.border,
     },
     noticeTitle: {
       fontFamily: fonts.bodyStrong,

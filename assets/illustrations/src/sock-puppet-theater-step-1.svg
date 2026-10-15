@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 400 200">
+<rect width="400" height="200" fill="{{ground}}"/>
+<circle cx="214" cy="104" r="92" fill="{{paper}}"/>
+<g stroke="{{ink}}" stroke-linecap="round" stroke-linejoin="round">
+<path d="M144 150L146 202H176L178 150Z" fill="{{paper}}" stroke-width="4"/>
+<path d="M142 178H180L182 202H140Z" fill="{{rose}}" stroke-width="4"/>
+<path d="M140 150V96C140 66 160 50 186 50C214 50 236 66 236 84L206 92L230 100C228 112 214 118 196 118C186 118 182 128 182 150Z" fill="{{petrol}}" stroke="none" transform="translate(3 3)"/>
+<path d="M140 150V96C140 66 160 50 186 50C214 50 236 66 236 84L206 92L230 100C228 112 214 118 196 118C186 118 182 128 182 150Z" fill="none" stroke-width="4"/>
+<path d="M140 136H182M148 139v9M157 139v9M166 139v9M175 139v9" fill="none" stroke-width="2.5"/>
+<path d="M282 104H314V144C314 150 318 152 326 152H342C350 152 354 158 354 164C354 171 349 176 342 176H294C287 176 282 170 282 162Z" fill="{{rose}}" stroke="none" transform="translate(3 3)"/>
+<path d="M282 154V162C282 170 287 176 294 176H302C300 164 292 156 282 154ZM340 152H342C350 152 354 158 354 164C354 171 349 176 342 176H340C344 168 344 160 340 152Z" fill="{{paper}}" stroke-width="2.5"/>
+<path d="M282 104H314V144C314 150 318 152 326 152H342C350 152 354 158 354 164C354 171 349 176 342 176H294C287 176 282 170 282 162Z" fill="none" stroke-width="4"/>
+<path d="M282 116H314M290 107v6M298 107v6M306 107v6" fill="none" stroke-width="2.5"/>
+<path d="M266 184H366" fill="none" stroke-width="4"/>
+</g>
+</svg>

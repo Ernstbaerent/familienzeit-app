@@ -6,7 +6,7 @@ Ergebnis und Bilder: `docs/illustrationen-pilot.md`. Seit DESIGN.md, Zusatz 45, 
 
 ## Gefühl
 
-Passend zu „Sonntagslicht“: warm, ruhig, wie mit dem Stift auf Papier gezeichnet. Wenige Formen, viel Luft,
+Passend zu „Sonntagslicht“ mit der Palette C (DESIGN.md, Entscheidung 55): warm, ruhig, wie mit dem Stift auf Papier gezeichnet. Wenige Formen, viel Luft,
 ein Gegenstand oder eine Handlung steht im Mittelpunkt. Die Illustration erklärt in einem Blick, **was** man macht,
 nicht **wie gut** es aussehen muss.
 
@@ -18,7 +18,7 @@ nicht **wie gut** es aussehen muss.
 | Zeichenfläche | `viewBox="0 0 400 200"`, alle Maße unten in diesen Einheiten |
 | Eigengröße | `width="1200" height="600"`: Falls ein Handy das SVG in seiner Eigengröße rastert (iOS), bleibt es auf der Karte (ca. 312 pt, also 936 px bei 3×) scharf |
 | Datei | SVG, **unter 10 KB**, keine externen Schriften, Bilder oder Links |
-| Ablage | `assets/illustrations/` |
+| Ablage | Ausgabe in `assets/illustrations/` (**erzeugt**, nicht von Hand ändern), Vorlagen in `assets/illustrations/src/` (siehe „Farbplätze und Erzeugen“) |
 | Name | Titelbild `aktivitaets-id.svg`, Schrittbild `aktivitaets-id-step-N.svg` (N = Schrittnummer, wie sie in der App steht, ab 1) |
 
 **Erlaubter SVG-Code** (damit es auf iOS, Android und im Browser gleich aussieht): nur `svg`, `g`, `path`, `circle`, `ellipse`,
@@ -29,35 +29,56 @@ Der Test `src/features/activities/illustrations.test.ts` prüft das.
 
 ## Linie
 
-- **Tinte** (`#2A211C`), **runde Enden und runde Ecken** (`stroke-linecap="round"`, `stroke-linejoin="round"`).
+- **Tinte** (`{{ink}}`, `#12323D`), **runde Enden und runde Ecken** (`stroke-linecap="round"`, `stroke-linejoin="round"`).
 - **Nur zwei Stärken:** **4** für Umrisse, **2,5** für Details (Naht, Faden, Dampf). Auf der Karte (ca. 312 px breit) sind das etwa 3 px und 2 px.
   In einer verkleinerten Gruppe (`scale`) zählt die sichtbare Stärke (bei `scale(.5)` also 8 und 5 eintragen).
-  Ausnahme: eine Abdecklinie in Papier, die zwei Flächen verbindet (z. B. Schaum, der in den Becher übergeht), darf breiter sein.
+  Ausnahme: eine Abdecklinie in `{{paper}}`, die zwei Flächen verbindet (z. B. Schaum, der in den Becher übergeht), darf breiter sein.
 - Linien dürfen leicht schwingen, nichts muss perfekt symmetrisch sein. Keine Schraffuren, keine Schatten.
 
-## Farben
+## Farben: die Zeichnungs-Palette
 
-Nur die sechs Farben der Palette, flach, ohne Verläufe und ohne Transparenz:
+Zeichnungen haben eine **feste eigene Palette** (`illustrationPalette` in `src/lib/palette.ts`): die vier Farben der App und zwei **warme Gegenstandsfarben**, flach, ohne Verläufe und ohne Transparenz.
+Jede Farbe in einer Zeichnung ist ein **Platzhalter** `{{name}}` (Rolle), nie ein fester Hexwert (siehe „Farbplätze und Erzeugen“).
 
-| Farbe | Wert | Einsatz im Bild |
-| --- | --- | --- |
-| Papier | `#FAF6F0` | Köpfe, Hände, helle Gegenstände, Schaum |
-| Sand | `#F0E6D8` | Grund des Bildes |
-| Tinte | `#2A211C` | alle Linien, kleine dunkle Punkte (Knopfaugen) |
-| Terrakotta | `#B4532F` | **sparsam**, nur kleine Flächen (Tomatensauce, ein Vorhang), damit das Bild nicht mit dem Hauptknopf wetteifert |
-| Salbei | `#5F7A5A` | Kleidung, Pflanzen, Gemüse |
-| Honig | `#E8A94F` | Kleidung, Karton, Teig, Käse, Licht |
+| Platzhalter | Wert | Einsatz im Bild | Tinte darauf | Leinen darauf |
+| --- | --- | --- | --- | --- |
+| `{{paper}}` | Leinen `#FCF8F2` | Köpfe, Hände, helle Gegenstände, Schaum, großer Kreis hinter dem Motiv | 12,8:1 | – |
+| `{{ground}}` | Rosé-Leinen `#FAE7E2` (gleich `surface`) | Grund des Bildes | 11,4:1 | 1,1:1 |
+| `{{ink}}` | Tinte `#12323D` | alle Linien, kleine dunkle Punkte (Knopfaugen) | – | 12,8:1 |
+| `{{rose}}` | Rosé `#F4BEBB` | Kleidung (Kinder), Sauce, Vorhänge, Socken: **sparsam**, kleine Flächen | 8,3:1 | 1,5:1 |
+| `{{petrol}}` | Petrol `#1A5D74` | Kleidung (Erwachsene), Socken, Puppen | 1,8:1 | 6,9:1 |
+| `{{honey}}` | Honig `#E8A94F` (warm) | Teig, Käse, Handschuh, Kleber: nur Gegenstände | 6,6:1 | 1,9:1 |
+| `{{brown}}` | Braun `#B07A45` (warm) | Pappe, Holz: nur Gegenstände | 3,7:1 | 3,5:1 |
 
+- **Die warmen Töne gelten nur für Gegenstände** (Essen, Pappe, Holz, Klebstoff), **nie für Kleidung oder Flächen der App.** Sie stammen aus derselben Familie wie die Warnfarben (`warning`, `warningSurface`)
+  und sind **keine** Farbrollen des Themes (Test). Kleidung ist Petrol, Rosé oder Leinen.
+- **Kontraste:** Tinte-Linien auf Rosé, Honig, Braun und Leinen sind klar sichtbar (mindestens 3,7:1). **Auf Petrol nur 1,8:1:** Der Umriss verschwindet im Petrol und die Fläche trägt die Form.
+  Deshalb bleiben Petrol-Flächen groß und einfach (Kleidung, Puppen), Details darauf sind in Leinen. Rosé auf Leinen hat nur 1,5:1, Rosé-Flächen stehen deshalb immer mit Tinten-Umriss.
+- Der Test `src/features/activities/illustrations.test.ts` prüft: nur diese sieben Werte, keine festen Farben in den Vorlagen, jeder Platzhalter ist bekannt.
 - **Versetzte Flächen:** Farbflächen sitzen 3 bis 4 Einheiten neben ihrem Umriss, wie beim Druck mit leicht verrutschter Farbe.
   Das macht den handgemachten Eindruck und kostet keine Bytes.
-- **Grund:** Sand mit einem großen, weichen Kreis in Papier hinter dem Motiv (das Echo der Farbfläche mit dem Kreis).
+- **Grund:** `{{ground}}` mit einem großen, weichen Kreis in `{{paper}}` hinter dem Motiv (das Echo der Farbfläche mit dem Kreis).
 - **Dunkelmodus (D5):** Die Bilder bleiben hell (wie Fotos es wären). Sie sind auf der Karte gerahmt und stehen für sich.
+
+## Farbplätze und Erzeugen
+
+**Jede künftige Zeichnung entsteht mit den Platzhaltern.** So lässt sich die Palette später ändern, ohne Zeichnungen neu zu zeichnen (SVG-Dateien kennen keine Laufzeit-Variablen, und `expo-image` kann sie nicht umfärben;
+`tintColor` färbt nur einfarbig).
+
+1. **Vorlage schreiben:** `assets/illustrations/src/<name>.svg` mit Platzhaltern wie `fill="{{petrol}}"` statt `#1A5D74`. Namen nach „Format“ oben (Titelbild `aktivitaets-id.svg`, Schrittbild `aktivitaets-id-step-N.svg`).
+   Feste Farbwerte sind in Vorlagen verboten (Test).
+2. **Erzeugen:** `npm run illustrations:build` liest alle Vorlagen, setzt die Werte aus `illustrationPalette` (`src/lib/palette.ts`) ein und schreibt die fertigen SVGs nach `assets/illustrations/`.
+   **Die erzeugten Dateien werden eingecheckt** (Metro lädt sie wie bisher mit `require`), von Hand ändert man sie nie.
+3. **Palette ändert sich?** Wert in `src/lib/palette.ts` ändern und **`npm run illustrations:build` neu ausführen**, die Ausgabedateien mitchecken. Der Test meldet jede erzeugte Datei, die nicht zu Vorlage und Palette passt
+   (`npm run illustrations:build -- --check` prüft dasselbe ohne zu schreiben).
+4. **Neue Rolle** (z. B. eine siebte Farbe): in `illustrationPalette` ergänzen, hier in die Tabelle, Kontraste angeben, dann die Vorlagen anpassen.
+5. Eintragen in `src/features/activities/illustrations.ts` wie bisher.
 
 ## Figuren
 
 - **Einfache Strichfiguren ohne Gesichtszüge:** Kreis als Kopf, Arme und Beine als Linien (Stärke 4), der Oberkörper als
-  gerundete Farbfläche (Kleidung). Keine Augen, kein Mund, keine Haare, keine Nase.
-- **Köpfe und Hände sind Papier** mit Tinten-Umriss. So legt das Bild keine Hautfarbe fest.
+  gerundete Farbfläche (Kleidung in Petrol oder Rosé). Keine Augen, kein Mund, keine Haare, keine Nase.
+- **Köpfe und Hände sind `{{paper}}`** mit Tinten-Umriss. So legt das Bild keine Hautfarbe fest.
 - **Erwachsene sind deutlich größer als Kinder** (Erwachsene etwa 150, Kinder etwa 95 Einheiten hoch, Kopf gleich groß).
   Wer was tut, ist so ohne Gesicht erkennbar.
 - **Hände und Gegenstände sind gut erkennbar:** Sie sind groß, haben eine klare Form (Fäustling mit Daumen) und stehen
@@ -74,6 +95,7 @@ Nur die sechs Farben der Palette, flach, ohne Verläufe und ohne Transparenz:
 - **Nahaufnahme vor Szene** (Erfahrung aus dem Pilot): Hände und Gegenstände in Nahaufnahme bleiben im Daumennagel lesbar,
   Szenen mit ganzen Figuren verlieren dort ihre Einzelheiten. Ganze Figuren nur, wenn es darauf ankommt, **wer** etwas tut
   (Erwachsener am Ofen, Erwachsener mit Schere).
+- **Auch in Palette C gilt:** Ein Becher mit Schaumkrone darf nicht nach Bierglas aussehen, eine Tube nicht nach Kerze. Eine rosa Tomatensauce bleibt Sauce, wenn Teig (Honig) und Käse (Leinen) dazu stehen.
 - **Keine Form, die an etwas anderes erinnert** (Erfahrung aus dem Pilot): Ein Becher mit Schaumkrone wirkte wie ein Bierglas,
   eine Flasche mit spitzer Kappe wie eine Kerze. Jedes Bild einmal mit der Frage „Was könnte man noch darin sehen?“ ansehen.
 
@@ -125,6 +147,6 @@ schiebt die Illustration dazwischen, sobald die Kette kein geladenes `image` hat
 
 1. Im Browser rendern: Karte, Schrittbild, Daumennagel 96 × 48 und 64 × 32.
 2. Fragen: Erkennt man das Motiv im Daumennagel? Ist jede Hand und jeder Gegenstand eindeutig? Stimmt das Bild mit Text und Sicherheitshinweis überein?
-3. `npm test` (prüft Größe, Format, Farben, erlaubten SVG-Code und die Zuordnung, Test `src/features/activities/illustrations.test.ts`).
+3. `npm run illustrations:build`, dann `npm test` (prüft Größe, Format, Farben, Vorlagen, erlaubten SVG-Code und die Zuordnung, Test `src/features/activities/illustrations.test.ts`).
    Linienstärken, Lesbarkeit und Sicherheit prüft der Test nicht.
 4. Vor der Beta schaut ein Mensch alle Illustrationen durch (wie die Aktivitäten).

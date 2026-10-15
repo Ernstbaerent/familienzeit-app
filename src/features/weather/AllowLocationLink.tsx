@@ -57,7 +57,7 @@ const createStyles = ({ colors }: Theme) => ({
       fontFamily: fonts.bodyStrong,
       fontSize: fontSize.md,
       lineHeight: lineHeight.md,
-      color: colors.text,
+      color: colors.primary,
       textDecorationLine: 'underline',
     },
   }),

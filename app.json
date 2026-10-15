@@ -8,6 +8,15 @@
     "userInterfaceStyle": "light",
     "plugins": [
       "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/logo/logo-petrol.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#FCF8F2"
+        }
+      ],
       "expo-status-bar",
       [
         "expo-localization",
@@ -36,6 +45,14 @@
     },
     "locales": {
       "de": "./src/locales/native/de.json"
+    },
+    "icon": "./assets/logo/app-icon.png",
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo/android-foreground.png",
+        "monochromeImage": "./assets/logo/android-monochrome.png",
+        "backgroundColor": "#1A5D74"
+      }
     }
   }
 }

@@ -291,8 +291,12 @@ describe('Verlauf, Datenschutz-Text und Platzhalter', () => {
     expect(band.findByProps({ name: 'sunny-outline' })).toBeDefined();
   });
 
-  it('die Wortmarke ist als Platzhalter ein kleingeschriebener Text', () => {
-    expect(allTexts(renderStart().root)).toContain('miki');
+  it('die Wortmarke ist das Logo (Bild) und heißt für die Sprachausgabe „Miki“, nicht mehr ein Platzhalter-Text', () => {
+    const { root } = renderStart();
+    const logo = root.findByProps({ accessibilityLabel: 'Miki' });
+    expect(logo.props.accessibilityRole).toBe('image');
+    expect(logo.props.accessible).toBe(true);
+    expect(allTexts(root)).not.toContain('miki');
   });
 
   it('die Überschrift ist eine Überschrift für die Sprachausgabe', () => {

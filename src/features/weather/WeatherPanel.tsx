@@ -114,6 +114,8 @@ const createStyles = ({ colors }: Theme) => ({
       gap: spacing.sm,
       padding: spacing.md,
       borderRadius: radius.tile,
+      borderWidth: 1, // warme Fläche auf Leinen nur 1,1:1: Rand in der Textfarbe (Entscheidung 55)
+      borderColor: colors.warning,
       backgroundColor: colors.warningSurface,
     },
     warningTexts: {
