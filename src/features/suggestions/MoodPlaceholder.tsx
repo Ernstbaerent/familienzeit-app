@@ -19,7 +19,7 @@ export function MoodPlaceholder() {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      <Ionicons name="sunny-outline" size={iconSize.hero / scale} color={colors.border} style={styles.sun} />
+      <Ionicons name="sunny-outline" size={iconSize.hero / scale} color={colors.secondary} style={styles.sun} />
     </View>
   );
 }
@@ -32,6 +32,8 @@ const createStyles = ({ colors }: Theme) => ({
       overflow: 'hidden', // schneidet die Sonne an
       borderRadius: radius.card,
       backgroundColor: colors.surface,
+      borderWidth: 1, // Rosé auf Leinen hat nur 1,5:1: feiner Rand (Entscheidung 55)
+      borderColor: colors.border,
     },
     // Die Sonne geht am unteren Rand auf: Ein Drittel ragt über die Fläche hinaus und ist abgeschnitten.
     sun: {

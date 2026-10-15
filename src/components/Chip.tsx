@@ -36,7 +36,7 @@ type ChipProps = {
 };
 
 // Auswählbare Kachel in Pillenform. Nicht gewählt = weiß mit feinem Rand, gewählt = Tinte (Entscheidung 11:
-// Terrakotta ist nur dem Hauptknopf vorbehalten).
+// Der Hauptknopf ist als einziger Petrol).
 export function Chip({
   label,
   selected,

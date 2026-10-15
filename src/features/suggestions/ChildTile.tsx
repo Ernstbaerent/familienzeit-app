@@ -35,7 +35,7 @@ type ChildTileProps = {
 };
 
 // Kachel eines Kindes auf dem Start. Ein Tipp wählt aus oder ab, das Stift-Symbol bearbeitet das Kind
-// (Entscheidung 2). Gewählt = Tinte statt Terrakotta (Entscheidung 11 und 23).
+// (Entscheidung 2). Gewählt = Tinte statt Petrol (Entscheidung 11 und 23).
 // Zwei getrennte Tippflächen nebeneinander, nicht ineinander: So erreicht die Sprachausgabe beide.
 export function ChildTile({
   name,

@@ -2,6 +2,8 @@ Miki – Design
 
 Stand: Oktober 2026. Quelle: PDF „Runde 1 · Drei Richtungen und Logo für Miki" aus Claude Design (liegt im selben Ordner). Die Werte sind aus dem PDF übernommen, nichts ist dazuerfunden.
 
+**Farben seit Entscheidung 55: Palette C (Leinen, Rosé, Petrol, Tinte). Die Farbtabellen weiter unten (Papier, Sand, Terrakotta, Salbei, Honig und die Dunkelwerte) sind abgelöst und nur noch Geschichte; die aktuellen Werte stehen in docs/theme.md. Layout, Schriften, Radien und Abstände bleiben.**
+
 Gewählte Richtung: A „Sonntagslicht" (warm; das PDF zeigt Fotos, in der App ersetzen gezeichnete Bilder sie, Zusatz 45) Gewähltes Logo: A1 „Zwei Bögen" Name: Miki steht für „Mit Kindern". Wortmarke kleingeschrieben: miki, darunter optional die Zeile „mit Kindern".
 
 Richtung B „Stille Wiese" und Richtung C wurden nicht gewählt. Ihre Werte stehen nur noch im PDF.
@@ -24,7 +26,7 @@ Layouts mit logischen Abständen (Anfang/Ende statt links/rechts), damit Rechts-
 Symbole: gleicher Linienstil, 1,75 px Linie auf 24er-Raster, runde Enden (umgesetzt mit Ionicons, nur Outline, kein eigener Symbolsatz, siehe Entscheidung 20). Kategorien: Basteln, Spiele, Bewegung, Experimente, Natur, Kochen, Ausflüge, Spielplatz, Bad, Termine.
 Hell als Standard, Dunkelmodus als Variante (folgt der Handy-Einstellung).
 Beispielsituation im PDF: Samstag 13:10, zwei Kinder (4 und 13 Jahre), 1 Std, Energie „normal", Regen ab 15 Uhr. Orte und Veranstaltungen im PDF sind erfunden.
-Farben (hell)
+Farben (hell) – abgelöst durch Entscheidung 55 (Palette C), siehe docs/theme.md
 Rolle	Name	Wert	Hinweis
 Hintergrund	Papier	
 #FAF6F0	Grund
@@ -40,7 +42,7 @@ Zweitfarbe	Salbei
 #5F7A5A	mit weißem Text 4,8:1
 Akzent	Honig	
 #E8A94F	nur Akzent, nie für Text
-Farben (Dunkelmodus)
+Farben (Dunkelmodus) – abgelöst durch Entscheidung 55, siehe docs/theme.md
 Rolle	Wert	Hinweis
 Hintergrund	
 #1C1714	
@@ -172,8 +174,17 @@ Zusätze beim Umsetzen von M10c (Ortsseite mit Route und Website, 14. Oktober 20
 53. Abschnitt „Öffnungszeiten“: Ein fester Wochenplan steht als Liste Montag bis Sonntag in einer weißen Kachel, der heutige Tag mit Sand-Fläche, fetter Schrift und „· heute“ (die Farbe ist nie das einzige Merkmal). Sonst „Öffnungszeiten vorher prüfen“ und der Rohtext aus OpenStreetMap in einer weißen Kachel. Hinweise (Feiertage, vorher prüfen, Kino) stehen wie bisher in der Sand-Fläche mit Info-Symbol, die Saison als eigene Zeile. Die Adresse steht als Zeile in Nebentext-Farbe unter dem Titel.
 54. „Website öffnen“ ist eine weiße Zeile (mindestens 44 pt) mit Globus-Symbol, Text in Tinte unterstrichen (Links wie Zusatz 31), darunter klein die Adresse und „Öffnet im Browser“, am Ende das Symbol „öffnet woanders“ (bei rechts-nach-links gespiegelt). Kein Terrakotta.
 
+Farb-Umstellung auf Palette C (15. Oktober 2026, von Clemens festgelegt; Details und alle Werte: docs/theme.md, Zeichnungen: docs/design/ILLUSTRATIONEN.md, Bilder: docs/farbumstellung/README.md)
+55. Die Palette C ersetzt die Farben von „Sonntagslicht“ (Terrakotta, Salbei, Honig, Papier, Sand): Leinen #FCF8F2 (Grund), Rosé #F4BEBB (Pastellflächen), Petrol #1A5D74 (Hauptfarbe, Knöpfe, Logo, Links) und Tinte #12323D (Text). Layout, Schriften, Radien, Abstände, Mindestgrößen und die Namen der Theme-Rollen bleiben. Folgen:
+  a) Rollen: gewählter Zustand von Chips bleibt Tinte, der Hauptknopf ist Petrol mit weißer Schrift, Links sind Petrol mit Unterstreichung (ändert die Links in Zusatz 31, 49 und 54: nicht mehr Tinte). Auf Rosé steht immer Tinte (nie gedämpfter Text oder Weiß). Rosé auf Leinen hat nur 1,5:1, deshalb brauchen Rosé-Flächen (`surface`) und die warmen Warnboxen einen feinen Rand. Karten bleiben weiß und setzen sich mit dem bestehenden Schatten ab; wirkt er auf Android zu schwach, darf ein hauchfeiner Rand in einem hellen Petrol-Ton dazukommen (Entscheidung nach der Sichtprüfung).
+  b) Warm gibt es nur als Funktionsfarbe für Allergen-, Sicherheits- und Wetterwarn-Boxen (`warning`, `danger`, beide aus der Familie Honig/Braun, `danger` dunkler; die Unterscheidung läuft über Symbol und Titel, nie über die Farbe allein). Ändert Entscheidung 40 nur in der Farbe.
+  c) Dunkelmodus: Grund sehr dunkles Petrol (#0C2630), Text Leinen, Hauptknopf Rosé mit dunkler Schrift, alles abgeleitet und im Test geprüft; eingeschaltet wird er weiter erst in D5.
+  d) Kategorie-Farben (Entscheidung 10): drei Farbtöne reichen nicht für sieben klar verschiedene Flächen. Alternative A: Symbol und Name in der weißen Pille tragen den Unterschied, die Farbe ist nie das einzige Merkmal. Kochen ist die klare Petrol-Fläche mit Leinen-Symbol. Die Orte (Zusatz 47) haben keine eigenen Farben mehr und nehmen den Ton einer Kategorie.
+  e) Zeichnungen (Zusatz 45): eigene feste Zeichnungs-Palette (Leinen, Rosé, Petrol, Tinte plus zwei warme Gegenstandsfarben Honig und Braun, nur für Essen, Pappe und Holz, nie für Flächen der App). Jede Farbe ist ein Platzhalter in einer Vorlage, die Dateien in assets/illustrations/ werden mit `npm run illustrations:build` erzeugt. Die sechs Pilot-Zeichnungen sind nur umgefärbt, nicht neu gezeichnet.
+  f) Logo A1 liegt als Dateien unter assets/logo/ (Wortmarke, Logo „mit Kindern“ in Petrol und Leinen, App-Icon ohne Alpha-Kanal, Android-Vordergrund und Monochrom). Auf dem Start steht die Wortmarke statt des Textes (löst Zusatz 25 ab), das Logo „mit Kindern“ ist das Startbild; adaptives Android-Icon mit Petrol als Hintergrund. In Expo Go sind nur Wortmarke und Farben zu sehen, Icon und Startbild erst im Build.
+
 Offene Punkte
- Logo und App-Icon als Dateien exportieren und unter assets/ ablegen
+ Logo und App-Icon: Dateien liegen unter assets/logo/ (Entscheidung 55), das Aussehen im echten Build ist noch zu prüfen
  Name „Miki": Markenregister (DPMA) und App Store / Play Store prüfen
  Bundle-ID und Paketname festlegen (nach der Store-Veröffentlichung nicht mehr änderbar)
  Illustrationen für alle Aktivitäten zeichnen (M9b)

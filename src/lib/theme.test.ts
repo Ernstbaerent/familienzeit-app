@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { categoryKeys } from '@/features/activities/activities';
 import { placeVisualKeys } from '@/features/places/placeKinds';
 import { contrastRatio as contrast } from './contrast';
+import { palette } from './palette';
 
 import {
   darkColors,
@@ -22,8 +23,8 @@ import {
   type Colors,
 } from './theme';
 
-// Text muss auf dem Grund WCAG AA (4,5:1) schaffen. Honig (`accent`) steht bewusst nicht in der Liste:
-// nur Akzent, nie für Text. Salbei (`secondary`) ist nur als Fläche mit `onSecondary` erlaubt.
+// Text muss auf dem Grund WCAG AA (4,5:1) schaffen. Rosé (`accent`) steht bewusst nicht in der Liste:
+// nur Akzent, nie für Text. Rosé (`secondary`) ist nur als Fläche mit `onSecondary` (Tinte) erlaubt.
 const textPairs: [keyof Colors, keyof Colors][] = [
   ['text', 'background'],
   ['text', 'surface'],
@@ -34,9 +35,12 @@ const textPairs: [keyof Colors, keyof Colors][] = [
   ['onSelected', 'selected'], // gewählter Chip: Text auf Tinte
   ['onPrimary', 'primary'],
   ['onSecondary', 'secondary'],
-  ['primary', 'background'], // Terrakotta als Textfarbe, z. B. „Ändern“: nur auf `background`
+  ['primary', 'background'], // Petrol als Textfarbe und Link (unterstrichen), z. B. „Ändern“
+  ['primary', 'card'],
+  ['primary', 'surface'],
   ['danger', 'background'],
   ['danger', 'surface'],
+  ['danger', 'card'],
   ['danger', 'dangerSurface'],
   ['text', 'dangerSurface'],
   ['warning', 'background'],
@@ -93,40 +97,73 @@ describe.each([
   });
 });
 
-describe('Farben: Werte aus der DESIGN.md', () => {
-  it('hell: Papier, Sand, Tinte, Terrakotta, Salbei, Honig', () => {
+describe('Farben: Palette C (Entscheidung 55)', () => {
+  it('hell: Leinen, Rosé, Petrol, Tinte', () => {
     expect(lightColors).toMatchObject({
-      background: '#FAF6F0',
-      surface: '#F0E6D8',
-      text: '#2A211C',
-      primary: '#B4532F',
-      secondary: '#5F7A5A',
-      accent: '#E8A94F',
+      background: '#FCF8F2',
+      secondary: '#F4BEBB',
+      primary: '#1A5D74',
+      text: '#12323D',
     });
   });
 
-  it('hell: Karten weiß, gewählt ist Tinte (Entscheidung 11)', () => {
-    expect(lightColors).toMatchObject({ card: '#FFFFFF', selected: '#2A211C', onSelected: '#FAF6F0' });
+  it('hell: Karten weiß, gewählt ist Tinte, Weiß auf Petrol, Tinte auf Rosé', () => {
+    expect(lightColors).toMatchObject({
+      card: '#FFFFFF',
+      selected: '#12323D',
+      onSelected: '#FCF8F2',
+      onPrimary: '#FFFFFF',
+      onSecondary: '#12323D',
+    });
   });
 
-  it('gewählt ist nicht Terrakotta und Karten sind nicht Sand (Entscheidung 11)', () => {
+  it('die von Clemens gemessenen Kontraste stimmen (Rundung auf eine Stelle)', () => {
+    const round = (value: number) => Math.round(value * 10) / 10;
+    expect(round(contrast(palette.petrol, palette.linen))).toBe(6.9);
+    expect(round(contrast(palette.white, palette.petrol))).toBe(7.3);
+    expect(round(contrast(palette.ink, palette.linen))).toBe(12.8);
+    expect(round(contrast(palette.ink, palette.rose))).toBe(8.3); // Clemens maß 8,4:1, die Rechnung nach WCAG ergibt 8,3:1
+    expect(round(contrast(palette.petrol, palette.rose))).toBe(4.5);
+    // Rosé auf Leinen reicht nicht zum Abgrenzen (1,5:1): Rosé-Flächen brauchen Rand oder genug Fläche.
+    expect(round(contrast(palette.rose, palette.linen))).toBe(1.5);
+  });
+
+  it('auf Rosé steht immer Tinte, nie gedämpfter Text (3,6:1) oder Weiß', () => {
+    expect(lightColors.onSecondary).toBe(lightColors.text);
+    expect(contrast(lightColors.textMuted, lightColors.secondary)).toBeLessThan(4.5);
+    expect(contrast(palette.white, lightColors.secondary)).toBeLessThan(4.5);
+  });
+
+  it('gewählt ist nicht der Hauptknopf (Tinte, nicht Petrol) und Karten sind nicht `surface` (Entscheidung 11)', () => {
     for (const palette of [lightColors, darkColors]) {
       expect(palette.selected).not.toBe(palette.primary);
       expect(palette.card).not.toBe(palette.surface);
     }
   });
 
-  it('dunkel: Grund, Text, Hauptfarbe mit dunkler Schrift', () => {
+  it('dunkel: sehr dunkles Petrol als Grund, Leinen als Text, Rosé als Hauptknopf mit dunkler Schrift', () => {
     expect(darkColors).toMatchObject({
-      background: '#1C1714',
-      text: '#F3EBE2',
-      primary: '#E3825C',
-      onPrimary: '#1C1714',
+      background: '#0C2630',
+      text: '#FCF8F2',
+      primary: '#F4BEBB',
+      onPrimary: '#0C2630',
     });
   });
 
   it('hell und dunkel haben dieselben Namen (Typ erzwingt das auch)', () => {
     expect(Object.keys(darkColors).sort()).toEqual(Object.keys(lightColors).sort());
+  });
+
+  it('warme Warnfarben: Gefahr ist dunkler als Hinweis (gleiche Familie), im Dunkeln heller', () => {
+    expect(contrast(lightColors.danger, lightColors.background)).toBeGreaterThan(contrast(lightColors.warning, lightColors.background));
+    expect(lightColors.danger).not.toBe(lightColors.warning);
+  });
+
+  it('die zwei warmen Gegenstandsfarben der Zeichnungen sind nur Zeichnungen, keine Farbrolle der App', () => {
+    for (const colors of [lightColors, darkColors]) {
+      expect(Object.values(colors)).not.toContain(palette.honey);
+      expect(Object.values(colors)).not.toContain(palette.brown);
+    }
   });
 });
 
@@ -147,14 +184,19 @@ describe.each([
     expect(contrast(tones[category].mark, tones[category].field)).toBeGreaterThanOrEqual(3);
   });
 
-  it.each(categoryKeys)('%s: Tinte (`text`) auf der Fläche mindestens 4,5:1', (category) => {
-    expect(contrast(colors.text, tones[category].field)).toBeGreaterThanOrEqual(4.5);
+  // Kochen ist im Hellen die tiefe Petrol-Fläche mit Leinen-Symbol (Entscheidung 55): Dort kann weder Tinte (4,3:1 oder weniger) noch Leinen
+  // Text mit 4,5:1 tragen, und es steht kein Text auf der Fläche (der Name steht in der weißen Pille). Dort gilt für die Fläche 3:1.
+  it.each(categoryKeys)('%s: Tinte (`text`) auf der Fläche mindestens 4,5:1 (tiefe Fläche: 3:1, kein Text darauf)', (category) => {
+    const minimum = theme.scheme === 'light' && category === 'cooking' ? 3 : 4.5;
+    expect(contrast(colors.text, tones[category].field)).toBeGreaterThanOrEqual(minimum);
   });
 
   it('die weiße Pille mit dem Namen der Kategorie ist lesbar (Tinte auf `card`, mindestens 4,5:1)', () => {
     expect(contrast(colors.text, colors.card)).toBeGreaterThanOrEqual(4.5);
   });
 
+  // Drei Farbtöne reichen nicht für sieben klar verschiedene Flächen (Entscheidung 55). Der Test hält fest, dass die Flächen verschieden sind
+  // und die Kreise sich abheben; den Rest tragen Symbol und Name in der Pille.
   it('die sieben Flächen sind verschieden, und der Kreis hebt sich von der Fläche ab', () => {
     const fields = categoryKeys.map((category) => tones[category].field);
     expect(new Set(fields).size).toBe(7);
@@ -176,32 +218,35 @@ describe.each([
   });
 });
 
-// Orte (M10b): sieben Töne für Spielplatz, Bad, Museum, Zoo, Burg, Kino, Bibliothek. Dieselben Prüfungen wie bei den Kategorien.
+// Orte (M10b): Spielplatz, Bad, Museum, Zoo, Burg, Kino, Bibliothek haben seit Entscheidung 55 keine eigenen Farben mehr.
+// Sie nehmen den Ton einer Aktivitäts-Kategorie, Symbol und Name in der Pille unterscheiden sie.
+const placeToneCategories: Record<(typeof placeVisualKeys)[number], (typeof categoryKeys)[number]> = {
+  playground: 'movement',
+  pool: 'nature',
+  museum: 'craft',
+  zoo: 'outing',
+  castle: 'experiment',
+  cinema: 'game',
+  library: 'cooking',
+};
+
 describe.each([
   ['hell', lightTheme],
   ['dunkel', darkTheme],
 ])('Farben der Orte (%s)', (_name, theme) => {
-  const tones = theme.placeTones;
-  const colors = theme.colors;
-
   it('je ein Ton für die sieben Bildgruppen der Orte', () => {
-    expect(Object.keys(tones).sort()).toEqual([...placeVisualKeys].sort());
+    expect(Object.keys(theme.placeTones).sort()).toEqual([...placeVisualKeys].sort());
   });
 
-  it.each(placeVisualKeys)('%s: Symbol auf der Fläche mindestens 3:1, Tinte mindestens 4,5:1', (key) => {
-    expect(contrast(tones[key].mark, tones[key].field)).toBeGreaterThanOrEqual(3);
-    expect(contrast(colors.text, tones[key].field)).toBeGreaterThanOrEqual(4.5);
+  it.each(placeVisualKeys)('%s: derselbe Ton wie die Kategorie aus der Zuordnung, Symbol mindestens 3:1', (key) => {
+    const tone = theme.categoryTones[placeToneCategories[key]];
+    expect(theme.placeTones[key]).toEqual(tone);
+    expect(contrast(tone.mark, tone.field)).toBeGreaterThanOrEqual(3);
   });
 
-  it('alle 14 Flächen (Aktivitäten und Orte) sind verschieden, der Kreis hebt sich ab', () => {
-    const fields = [...Object.values(theme.categoryTones), ...Object.values(tones)].map((tone) => tone.field);
-    expect(new Set(fields).size).toBe(14);
-    for (const key of placeVisualKeys) expect(tones[key].shape).not.toBe(tones[key].field);
-  });
-
-  it('alle Werte stehen in docs/theme.md (Tabelle „Farben der Orte“)', () => {
-    const docs = readFileSync(join(__dirname, '../../docs/theme.md'), 'utf8').toUpperCase();
-    const missing = placeVisualKeys.flatMap((key) => Object.values(tones[key]).filter((value) => !docs.includes(value)));
+  it('alle Zuordnungen stehen in docs/theme.md (Tabelle „Farben und Symbole der Orte“)', () => {
+    const docs = readFileSync(join(__dirname, '../../docs/theme.md'), 'utf8');
+    const missing = placeVisualKeys.filter((key) => !docs.includes(`\`${key}\` → \`${placeToneCategories[key]}\``));
     expect(missing).toEqual([]);
   });
 });

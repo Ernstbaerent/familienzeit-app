@@ -37,7 +37,7 @@ export function PlaceWebsiteLink({ link }: { link: WebsiteLink }) {
   );
 }
 
-// Abstände nur mit Horizontal/Vertical oder Start/End, nie Left/Right (wegen rechts-nach-links). Links sind Tinte mit Unterstreichung (DESIGN.md, Zusatz 31).
+// Abstände nur mit Horizontal/Vertical oder Start/End, nie Left/Right (wegen rechts-nach-links). Links sind Petrol mit Unterstreichung (DESIGN.md, Zusatz 31 und Entscheidung 55).
 const createStyles = ({ colors }: Theme) => ({
   colors,
   styles: StyleSheet.create({
@@ -62,7 +62,7 @@ const createStyles = ({ colors }: Theme) => ({
       fontFamily: fonts.bodyStrong,
       fontSize: fontSize.md,
       lineHeight: lineHeight.md,
-      color: colors.text,
+      color: colors.primary,
       textDecorationLine: 'underline',
     },
     meta: {

@@ -169,6 +169,8 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
+    borderWidth: 1, // Rosé auf Leinen hat nur 1,5:1: feiner Rand (Entscheidung 55)
+    borderColor: colors.border,
   },
   cardText: {
     gap: spacing.xs,

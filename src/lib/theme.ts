@@ -3,10 +3,11 @@
 // `npx expo lint` meldet direkt eingetragene Werte in app/, src/components/ und src/features/.
 //
 // Design „Sonntagslicht“ (Miki), Quelle: docs/design/DESIGN.md und das PDF im selben Ordner.
+// Seit Entscheidung 55 (DESIGN.md) gelten die Farben der Palette „C“ (Leinen, Rosé, Petrol, Tinte, src/lib/palette.ts);
+// Aufbau, Layout und Schriften sind unverändert, die Namen der Farbrollen auch.
 // Herkunft der Werte (Details und offene Fragen: docs/theme.md):
-//   DESIGN.md   = steht so in docs/design/DESIGN.md
-//   PDF         = aus dem PDF gemessen (steht nicht in der DESIGN.md)
-//   abgeleitet  = von uns ergänzt, weil es im Design fehlt (Ani bestätigt noch)
+//   Clemens     = von Clemens festgelegt (Palette C, gemessene Kontraste)
+//   abgeleitet  = aus der Palette gemischt oder von uns ergänzt, Kontraste per Test geprüft (src/lib/theme.test.ts)
 // Ändert sich hier ein Wert, ändert er sich überall in der App.
 
 import { useColorScheme, type ViewStyle } from 'react-native';
@@ -14,112 +15,104 @@ import { useColorScheme, type ViewStyle } from 'react-native';
 import type { ActivityCategory } from '@/features/activities/activities';
 import type { PlaceVisualKey } from '@/features/places/placeKinds';
 
+import { mixColors, palette } from './palette';
+
+export { mixColors };
+
 // ---------------------------------------------------------------------------
 // Farben
 // ---------------------------------------------------------------------------
 
 const light = {
-  background: '#FAF6F0', // Papier: Grund der Bildschirme (DESIGN.md)
-  card: '#FFFFFF', // Karten, Kacheln, nicht gewählte Chips: weiß (PDF gemessen, bestätigt mit Entscheidung 11). Text darauf: `text`
-  surface: '#F0E6D8', // Sand: Flächen und Platzhalter, keine Karten (DESIGN.md, Entscheidung 11)
-  text: '#2A211C', // Tinte: normaler Text, Überschriften (DESIGN.md)
-  textMuted: '#6B5D53', // Nebentext, Hinweise (PDF)
-  primary: '#B4532F', // Terrakotta: nur der Hauptknopf (DESIGN.md, Entscheidung 11). Als Textfarbe nur auf `background`.
-  onPrimary: '#FFFFFF', // Text auf `primary` (DESIGN.md)
-  selected: '#2A211C', // Tinte: gewählter Zustand von Chips und Kacheln (PDF, Entscheidung 11)
-  onSelected: '#FAF6F0', // Text und Häkchen auf `selected` (Papier)
-  secondary: '#5F7A5A', // Salbei: Zweitfarbe (DESIGN.md)
-  onSecondary: '#FFFFFF', // Text auf `secondary` (DESIGN.md)
-  accent: '#E8A94F', // Honig: nur Akzent, NIE für Text (DESIGN.md)
-  border: '#CDBFAE', // Linien, Rahmen zum Gliedern (PDF). Kein Kontrast für Bedienelemente allein.
-  danger: '#9A3B22', // Löschen, Fehlermeldungen, Sicherheit (PDF)
-  dangerSurface: '#F7E4DE', // Hintergrund für Sicherheitsboxen (Text darauf: `text` oder `danger`) (PDF)
-  warning: '#8A5300', // Hinweise zum Aufpassen, z. B. amtliche Wetterwarnung (bisheriger Wert)
-  warningSurface: '#FCEBD0', // Hintergrund für Hinweisboxen, z. B. Allergene (Text darauf: `text` oder `warning`) (PDF)
-  icon: '#7A6656', // Symbole, z. B. Kategorie einer Aktivität (PDF)
+  background: palette.linen, // Leinen: Grund der Bildschirme (Clemens)
+  card: palette.white, // Karten, Kacheln, nicht gewählte Chips: weiß, mit Schatten abgesetzt (Clemens, Entscheidung 55). Text darauf: `text`
+  surface: mixColors(palette.linen, palette.rose, 0.3), // Rosé-Leinen: Flächen und Platzhalter, keine Karten, mit feinem Rand (abgeleitet)
+  text: palette.ink, // Tinte: normaler Text, Überschriften (Clemens)
+  textMuted: '#47636D', // Nebentext, Hinweise: Tinte-Petrol-Ton, 6,1:1 auf Leinen (abgeleitet)
+  primary: palette.petrol, // Petrol: Hauptknopf, Links (Clemens). Als Textfarbe auf `background` und `card`.
+  onPrimary: palette.white, // Text auf `primary` (Clemens, 7,3:1)
+  selected: palette.ink, // Tinte: gewählter Zustand von Chips und Kacheln (Entscheidung 11 und 55)
+  onSelected: palette.linen, // Text und Häkchen auf `selected` (Leinen)
+  secondary: palette.rose, // Rosé: Pastellfläche, nur Fläche mit `onSecondary` (Clemens)
+  onSecondary: palette.ink, // Text auf `secondary`: immer Tinte (8,4:1), Weiß schafft auf Rosé kein AA
+  accent: palette.rose, // Rosé: nur kleine Formen, NIE für Text
+  border: mixColors(palette.linen, palette.ink, 0.2), // Linien, Rahmen zum Gliedern. Kein Kontrast für Bedienelemente allein.
+  danger: '#6B2F12', // Löschen, Fehlermeldungen, Sicherheit: dunkler Ton der warmen Warnfamilie (abgeleitet). Unterscheidung zu `warning` über Symbol und Titel
+  dangerSurface: '#F5E0D3', // Hintergrund für Sicherheitsboxen (Text darauf: `text` oder `danger`), mit Rand in `danger`
+  warning: '#7A4A12', // Hinweise zum Aufpassen, z. B. amtliche Wetterwarnung: warme Funktionsfarbe (Honig/Braun)
+  warningSurface: '#F8E8CC', // Hintergrund für Hinweisboxen, z. B. Allergene (Text darauf: `text` oder `warning`), mit Rand in `warning`
+  icon: mixColors(palette.petrol, palette.linen, 0.25), // Symbole, Rand der Abhak-Felder (4,1:1 auf Karte, abgeleitet)
 };
 
 export type Colors = Record<keyof typeof light, string>;
 
 export const lightColors: Colors = light;
 
-// Dunkelmodus. Nur Hintergrund, Text und Hauptfarbe stehen in der DESIGN.md, der Rest ist abgeleitet:
-// gleicher warmer Braunton, Kontraste per Test geprüft (src/lib/theme.test.ts).
+// Dunkelmodus: Grund sehr dunkles Petrol, Text Leinen, Hauptknopf Rosé mit dunkler Schrift. Alles abgeleitet,
+// Kontraste per Test geprüft (src/lib/theme.test.ts). Eingeschaltet wird er erst in D5.
+const darkBackground = '#0C2630';
+
 export const darkColors: Colors = {
-  background: '#1C1714', // DESIGN.md
-  card: '#332A24', // abgeleitet: heller als `surface`, damit Karten im Dunkeln vom Grund abheben
-  surface: '#2A221D', // abgeleitet
-  text: '#F3EBE2', // DESIGN.md
-  textMuted: '#B8A99B', // abgeleitet
-  primary: '#E3825C', // DESIGN.md
-  onPrimary: '#1C1714', // dunkle Schrift auf dem Knopf (DESIGN.md)
-  selected: '#F3EBE2', // abgeleitet: heller Text-Ton als gewählter Zustand
-  onSelected: '#1C1714', // abgeleitet
-  secondary: '#8FA887', // abgeleitet
-  onSecondary: '#1C1714', // abgeleitet
-  accent: '#E8A94F', // unverändert, nur Akzent
-  border: '#4A3F37', // abgeleitet
-  danger: '#F2A892', // abgeleitet
-  dangerSurface: '#3B2420', // abgeleitet
+  background: darkBackground, // abgeleitet: sehr dunkles Petrol
+  card: '#143642', // abgeleitet: heller als `surface`, damit Karten im Dunkeln vom Grund abheben
+  surface: '#103039', // abgeleitet
+  text: palette.linen, // Leinen (14,9:1 auf dem Grund)
+  textMuted: '#A9BDC2', // abgeleitet
+  primary: palette.rose, // Rosé als Hauptknopf im Dunkeln
+  onPrimary: darkBackground, // dunkle Schrift auf dem Knopf (9,7:1)
+  selected: palette.linen, // abgeleitet: heller Text-Ton als gewählter Zustand
+  onSelected: darkBackground, // abgeleitet
+  secondary: palette.rose, // abgeleitet
+  onSecondary: darkBackground, // abgeleitet
+  accent: palette.rose, // nur Akzent
+  border: '#2E5360', // abgeleitet
+  danger: '#EFA582', // abgeleitet: heller Ton der warmen Warnfamilie
+  dangerSurface: '#3A2418', // abgeleitet
   warning: '#F2C27B', // abgeleitet
   warningSurface: '#3A2C1A', // abgeleitet
-  icon: '#B8A99B', // abgeleitet
+  icon: '#A9BDC2', // abgeleitet
 };
 
 // ---------------------------------------------------------------------------
-// Kategorie-Farben (Karte ohne Bild, DESIGN.md Entscheidung 10)
+// Kategorie-Farben (Karte ohne Bild, DESIGN.md Entscheidung 10 und 55)
 // ---------------------------------------------------------------------------
 
 // Jede Kategorie hat eine eigene Farbe für die Fläche, auf der die Karte ohne Bild ihr großes Symbol zeigt.
-// Es gibt keine neuen Farbtöne: Jeder Ton wird aus den Farben der Palette gemischt (Papier, Sand, Terrakotta, Salbei, Honig, Tinte),
-// im Dunkeln aus den Dunkelwerten. Vier Farbtöne für sieben Kategorien: Terrakotta, Salbei und Honig je zweimal
-// (hell und kräftiger getönt), Sand einmal. Die berechneten Werte stehen in docs/theme.md, die Kontraste prüft src/lib/theme.test.ts.
+// Es gibt keine neuen Farbtöne: Jeder Ton wird aus den Farben der Palette gemischt (Leinen, Rosé, Petrol, Tinte).
+// Drei Farbtöne reichen nicht für sieben klar verschiedene Flächen: Der Unterschied liegt in Symbol und Name (weiße Pille),
+// die Farbe ist nie das einzige Merkmal (Entscheidung 55). Die berechneten Werte stehen in docs/theme.md, die Kontraste prüft src/lib/theme.test.ts.
 //
-// Auf der Fläche liegt nur das Symbol (mindestens 3:1) und, falls je Text darauf stehen soll, `text` (mindestens 4,5:1).
-// Der Name der Kategorie steht in einer weißen Pille (`card`), nicht auf der Fläche.
+// Auf der Fläche liegt nur das Symbol (mindestens 3:1). Der Name der Kategorie steht in einer weißen Pille (`card`), nicht auf der Fläche.
 export type CategoryTone = {
   field: string; // Fläche der Karte (Rückfall ohne Bild)
-  mark: string; // das große, dünne Symbol auf der Fläche: Palettenfarbe, zur Tinte hin abgedunkelt
+  mark: string; // das große, dünne Symbol auf der Fläche
   shape: string; // der weiche große Kreis auf der Fläche, nur Dekoration
 };
 
-// Mischt zwei Farben: `share` ist der Anteil von `other` (0 = nur `base`, 1 = nur `other`).
-export function mixColors(base: string, other: string, share: number): string {
-  const channel = (hex: string, start: number) => parseInt(hex.slice(start, start + 2), 16);
-  const mixed = [1, 3, 5].map((start) =>
-    Math.round(channel(base, start) + (channel(other, start) - channel(base, start)) * share),
-  );
-  return `#${mixed.map((value) => value.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
-}
+// Die vier Farben, aus denen ein Ton gemischt wird, im jeweiligen Modus (im Dunkeln ist `paper` der dunkle Grund und `ink` das helle Leinen).
+type ToneBase = { paper: string; rose: string; petrol: string; ink: string; lighten: string };
+type ColorName = Exclude<keyof ToneBase, 'lighten'>;
 
-type ColorKey = keyof Colors;
-
-// Rezept für einen Ton: Die Fläche ist `paper` mit dem Anteil `tint` der Farbe `hue`.
-// Das Symbol ist `markFrom` mit dem Anteil `ink` Tinte (`text`) darin. 0 heißt: die reine Palettenfarbe.
-// Orte (M10b) brauchen mehr Töne als es Palettenfarben gibt: Dort wird die Fläche zusätzlich mit einer zweiten
-// Palettenfarbe gemischt (`blend`, Anteil `share`). Auch das sind keine neuen Farbtöne, nur Mischungen der Palette.
+// Rezept für einen Ton: Die Fläche ist `from` mit dem Anteil `tint` von `hue` (und optional `blend` einer zweiten Farbe).
+// Das Symbol ist `markFrom` mit dem Anteil `ink` Tinte darin. 0 heißt: die reine Palettenfarbe.
 type ToneRecipe = {
-  field: [paper: ColorKey, hue: ColorKey, tint: number];
-  blend?: [other: ColorKey, share: number];
-  mark: [markFrom: ColorKey, ink: number];
-};
-
-type ToneRecipes<Key extends string> = {
-  recipes: Record<Key, ToneRecipe>;
-  shape: [lighten: ColorKey, share: number]; // der Kreis: Fläche, mit `lighten` aufgehellt
+  field: [from: ColorName, hue: ColorName, tint: number];
+  blend?: [other: ColorName, share: number];
+  mark: [markFrom: ColorName, ink: number];
 };
 
 function buildCategoryTones<Key extends string>(
-  colors: Colors,
-  { recipes, shape }: ToneRecipes<Key>,
+  base: ToneBase,
+  recipes: Record<Key, ToneRecipe>,
+  shape: number, // der Kreis: Fläche, mit `lighten` aufgehellt
 ): Record<Key, CategoryTone> {
-  const tone = ({ field: [paper, hue, tint], blend, mark: [markFrom, ink] }: ToneRecipe): CategoryTone => {
-    const base = mixColors(colors[paper], colors[hue], tint);
-    const field = blend ? mixColors(base, colors[blend[0]], blend[1]) : base;
+  const tone = ({ field: [from, hue, tint], blend, mark: [markFrom, ink] }: ToneRecipe): CategoryTone => {
+    const mixed = mixColors(base[from], base[hue], tint);
+    const field = blend ? mixColors(mixed, base[blend[0]], blend[1]) : mixed;
     return {
       field,
-      mark: mixColors(colors[markFrom], colors.text, ink),
-      shape: mixColors(field, colors[shape[0]], shape[1]),
+      mark: mixColors(base[markFrom], base.ink, ink),
+      shape: mixColors(field, base.lighten, shape),
     };
   };
   return Object.fromEntries(
@@ -127,60 +120,71 @@ function buildCategoryTones<Key extends string>(
   ) as Record<Key, CategoryTone>;
 }
 
-const lightCategoryTones = buildCategoryTones(lightColors, {
-  recipes: {
-    craft: { field: ['background', 'primary', 0.17], mark: ['primary', 0] }, // Terrakotta, hell
-    movement: { field: ['background', 'primary', 0.36], mark: ['primary', 0.3] }, // Terrakotta, kräftiger
-    game: { field: ['background', 'secondary', 0.17], mark: ['secondary', 0] }, // Salbei, hell (wie im PDF)
-    nature: { field: ['background', 'secondary', 0.36], mark: ['secondary', 0.2] }, // Salbei, kräftiger
-    outing: { field: ['background', 'accent', 0.28], mark: ['accent', 0.45] }, // Honig, hell
-    experiment: { field: ['background', 'accent', 0.55], mark: ['accent', 0.55] }, // Honig, kräftiger
-    cooking: { field: ['surface', 'text', 0.07], mark: ['surface', 0.62] }, // Sand, abgedunkelt (wie im PDF)
-  },
-  shape: ['card', 0.45],
-});
+const lightToneBase: ToneBase = {
+  paper: palette.linen,
+  rose: palette.rose,
+  petrol: palette.petrol,
+  ink: palette.ink,
+  lighten: palette.white,
+};
 
-// Dunkelmodus (D5): derselbe Aufbau aus den Dunkelwerten. Die Tinte (`text`) ist hier hell, das Symbol wird also heller.
-const darkCategoryTones = buildCategoryTones(darkColors, {
-  recipes: {
-    craft: { field: ['background', 'primary', 0.24], mark: ['primary', 0] },
-    movement: { field: ['background', 'primary', 0.42], mark: ['primary', 0.25] },
-    game: { field: ['background', 'secondary', 0.22], mark: ['secondary', 0] },
-    nature: { field: ['background', 'secondary', 0.4], mark: ['secondary', 0.25] },
-    outing: { field: ['background', 'accent', 0.24], mark: ['accent', 0] },
-    experiment: { field: ['background', 'accent', 0.42], mark: ['accent', 0.25] },
-    cooking: { field: ['surface', 'text', 0.12], mark: ['surface', 0.62] },
+const lightCategoryTones = buildCategoryTones<ActivityCategory>(
+  lightToneBase,
+  {
+    craft: { field: ['paper', 'rose', 0.55], mark: ['petrol', 0.15] }, // Rosé, hell
+    movement: { field: ['paper', 'rose', 1], mark: ['petrol', 0.35] }, // Rosé, voll
+    game: { field: ['paper', 'petrol', 0.14], mark: ['petrol', 0] }, // Petrol, hell
+    nature: { field: ['paper', 'petrol', 0.3], mark: ['petrol', 0.25] }, // Petrol, kräftiger
+    outing: { field: ['paper', 'rose', 0.5], blend: ['petrol', 0.12], mark: ['petrol', 0] }, // Rosé mit Petrol
+    experiment: { field: ['rose', 'petrol', 0.35], mark: ['petrol', 0.55] }, // Rosé-Petrol, dunkel
+    cooking: { field: ['paper', 'petrol', 0.72], mark: ['paper', 0] }, // klares Petrol mit Leinen-Symbol (Entscheidung 55)
   },
-  shape: ['text', 0.08],
-});
+  0.45,
+);
 
-// Orte (M10b): sieben eigene Bildgruppen (Spielplatz, Bad, Museum, Zoo, Burg, Kino, Bibliothek). Die übrigen Unterarten
-// nehmen den Ton einer Aktivitäts-Kategorie (src/features/places/placeKinds.ts, `visual`). Werte in docs/theme.md, Kontraste im Test.
-const lightPlaceTones = buildCategoryTones<PlaceVisualKey>(lightColors, {
-  recipes: {
-    playground: { field: ['background', 'accent', 0.3], blend: ['primary', 0.12], mark: ['primary', 0.25] }, // Honig mit Terrakotta
-    pool: { field: ['background', 'secondary', 0.12], mark: ['secondary', 0.35] }, // Salbei, sehr hell
-    museum: { field: ['surface', 'primary', 0.18], mark: ['primary', 0.35] }, // Sand mit Terrakotta
-    zoo: { field: ['background', 'secondary', 0.26], blend: ['accent', 0.25], mark: ['secondary', 0.45] }, // Salbei mit Honig
-    castle: { field: ['surface', 'text', 0.14], mark: ['surface', 0.7] }, // Sand, kräftiger abgedunkelt als Kochen
-    cinema: { field: ['background', 'primary', 0.26], blend: ['text', 0.06], mark: ['primary', 0.45] }, // Terrakotta, gedeckt
-    library: { field: ['surface', 'accent', 0.22], blend: ['secondary', 0.1], mark: ['accent', 0.6] }, // Sand mit Honig und etwas Salbei
-  },
-  shape: ['card', 0.45],
-});
+// Dunkelmodus (D5): derselbe Aufbau, der Grund ist das dunkle Petrol, Tinte und Leinen tauschen die Rollen.
+const darkToneBase: ToneBase = {
+  paper: darkColors.background,
+  rose: palette.rose,
+  petrol: palette.petrol,
+  ink: palette.linen,
+  lighten: palette.linen,
+};
 
-const darkPlaceTones = buildCategoryTones<PlaceVisualKey>(darkColors, {
-  recipes: {
-    playground: { field: ['background', 'accent', 0.3], blend: ['primary', 0.15], mark: ['accent', 0.1] },
-    pool: { field: ['background', 'secondary', 0.3], mark: ['secondary', 0.4] },
-    museum: { field: ['surface', 'primary', 0.3], mark: ['primary', 0.35] },
-    zoo: { field: ['background', 'secondary', 0.3], blend: ['accent', 0.2], mark: ['secondary', 0.5] },
-    castle: { field: ['surface', 'text', 0.2], mark: ['surface', 0.75] },
-    cinema: { field: ['background', 'primary', 0.32], blend: ['text', 0.06], mark: ['primary', 0.45] },
-    library: { field: ['surface', 'accent', 0.26], blend: ['secondary', 0.15], mark: ['accent', 0.35] },
+const darkCategoryTones = buildCategoryTones<ActivityCategory>(
+  darkToneBase,
+  {
+    craft: { field: ['paper', 'rose', 0.22], mark: ['rose', 0] },
+    movement: { field: ['paper', 'rose', 0.4], mark: ['rose', 0.2] },
+    game: { field: ['paper', 'petrol', 0.5], mark: ['petrol', 0.55] },
+    nature: { field: ['paper', 'petrol', 0.8], mark: ['petrol', 0.6] },
+    outing: { field: ['paper', 'rose', 0.3], blend: ['petrol', 0.3], mark: ['rose', 0.1] },
+    experiment: { field: ['paper', 'petrol', 0.65], blend: ['rose', 0.15], mark: ['rose', 0] },
+    cooking: { field: ['paper', 'petrol', 1], mark: ['ink', 0] },
   },
-  shape: ['text', 0.08],
-});
+  0.08,
+);
+
+// Orte (M10b): Spielplatz, Bad, Museum, Zoo, Burg, Kino und Bibliothek haben seit Entscheidung 55 keine eigenen Farben mehr.
+// Sie nehmen den Ton einer Aktivitäts-Kategorie; Symbol und Name in der Pille unterscheiden sie (Zuordnung hier, Werte in docs/theme.md).
+const placeToneCategory: Record<PlaceVisualKey, ActivityCategory> = {
+  playground: 'movement',
+  pool: 'nature',
+  museum: 'craft',
+  zoo: 'outing',
+  castle: 'experiment',
+  cinema: 'game',
+  library: 'cooking',
+};
+
+function placeTonesFrom(categoryTones: Record<ActivityCategory, CategoryTone>): Record<PlaceVisualKey, CategoryTone> {
+  return Object.fromEntries(
+    Object.entries(placeToneCategory).map(([key, category]) => [key, categoryTones[category]]),
+  ) as Record<PlaceVisualKey, CategoryTone>;
+}
+
+const lightPlaceTones = placeTonesFrom(lightCategoryTones);
+const darkPlaceTones = placeTonesFrom(darkCategoryTones);
 
 // ---------------------------------------------------------------------------
 // Schatten (boxShadow gilt auf iOS und Android gleich)
@@ -188,15 +192,15 @@ const darkPlaceTones = buildCategoryTones<PlaceVisualKey>(darkColors, {
 
 export type Shadows = {
   card: ViewStyle; // Karten (PDF: weich und kurz, nach Augenmaß gemessen)
-  primaryButton: ViewStyle; // Hauptknopf mit warmem Schein (nach Augenmaß)
+  primaryButton: ViewStyle; // Hauptknopf mit Petrol-Schein (nach Augenmaß)
 };
 
 const lightShadow: Shadows = {
   card: {
-    boxShadow: [{ offsetX: 0, offsetY: 4, blurRadius: 16, color: 'rgba(42, 33, 28, 0.08)' }],
+    boxShadow: [{ offsetX: 0, offsetY: 4, blurRadius: 16, color: 'rgba(18, 50, 61, 0.08)' }],
   },
   primaryButton: {
-    boxShadow: [{ offsetX: 0, offsetY: 6, blurRadius: 16, color: 'rgba(180, 83, 47, 0.25)' }],
+    boxShadow: [{ offsetX: 0, offsetY: 6, blurRadius: 16, color: 'rgba(26, 93, 116, 0.25)' }],
   },
 };
 

@@ -93,7 +93,7 @@ const createStyles = ({ colors, shadow }: Theme) => ({
       gap: spacing.sm,
       paddingHorizontal: spacing.lg,
       paddingVertical: spacing.sm,
-      borderRadius: radius.full, // Pille (Design Sonntagslicht)
+      borderRadius: radius.full, // Pille (Design Sonntagslicht, Farben Palette C)
       borderWidth: 1,
     },
     buttonLarge: {

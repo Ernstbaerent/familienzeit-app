@@ -69,7 +69,7 @@ const createStyles = ({ colors }: Theme) =>
       alignItems: 'flex-start',
       gap: spacing.md,
     },
-    // Sandfarbener Kreis mit der Nummer in Literata (Terrakotta ist nur dem Hauptknopf vorbehalten, Entscheidung 11).
+    // Kreis in `surface` mit der Nummer in Literata (Petrol ist nur dem Hauptknopf und Links vorbehalten, Entscheidung 11 und 55).
     // Mindestgröße statt fester Größe: Bei großer Systemschrift wächst die Zahl mit.
     stepNumber: {
       minWidth: 40,

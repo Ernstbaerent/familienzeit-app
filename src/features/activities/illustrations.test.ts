@@ -5,25 +5,23 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { lightColors } from '@/lib/theme';
+import { lightTheme } from '@/lib/theme';
+import { illustrationPalette } from '@/lib/palette';
+
+import { findPlaceholders, illustrationColorNames, renderTemplate } from '../../../scripts/lib/illustrations';
 
 import { activityIllustrations, getIllustration, getStepIllustrations, illustrationDir } from './illustrations';
 import { getBundledActivities } from './bundledActivities';
 
 const root = join(__dirname, '../../..');
 const dir = join(root, illustrationDir);
-const files = readdirSync(dir).filter((name) => !name.startsWith('.'));
+const files = readdirSync(dir).filter((name) => name.endsWith('.svg'));
+const templateDir = join(dir, 'src');
+const templates = readdirSync(templateDir).filter((name) => name.endsWith('.svg'));
 const read = (file: string) => readFileSync(join(dir, file), 'utf8');
 
-// Die sechs Farben der Palette: Papier, Sand, Tinte, Terrakotta, Salbei, Honig.
-const palette = [
-  lightColors.background,
-  lightColors.surface,
-  lightColors.text,
-  lightColors.primary,
-  lightColors.secondary,
-  lightColors.accent,
-].map((color) => color.toUpperCase());
+// Die Farben der Zeichnungs-Palette (src/lib/palette.ts): Leinen, Rosé, Petrol, Tinte und die zwei warmen Gegenstandsfarben.
+const palette = Object.values(illustrationPalette).map((color) => color.toUpperCase());
 
 const allowedElements = ['svg', 'g', 'path', 'circle', 'ellipse', 'rect', 'line', 'polyline', 'polygon'];
 
@@ -54,7 +52,7 @@ describe('Dateien in assets/illustrations/', () => {
     expect(tag).toContain('height="600"');
   });
 
-  it.each(files)('%s: nur Farben aus der Palette', (file) => {
+  it.each(files)('%s: nur Farben aus der Zeichnungs-Palette', (file) => {
     const svg = read(file);
     const colors = (svg.match(/#[0-9a-fA-F]{3,8}\b/g) ?? []).map((color) => color.toUpperCase());
     expect(colors.length).toBeGreaterThan(0);
@@ -67,6 +65,40 @@ describe('Dateien in assets/illustrations/', () => {
     const svg = read(file);
     for (const [, element] of svg.matchAll(/<([a-zA-Z][\w:-]*)/g)) expect(allowedElements).toContain(element);
     expect(svg).not.toMatch(/href|url\(|opacity|style=|class=|<!\[CDATA\[|@import|font/i);
+  });
+});
+
+// Farbplätze (ILLUSTRATIONEN.md): Jede Zeichnung entsteht aus einer Vorlage mit Platzhaltern. Die Dateien in assets/illustrations/ sind erzeugt.
+describe('Vorlagen in assets/illustrations/src/', () => {
+  it('jede Zeichnung hat genau eine Vorlage und jede Vorlage eine Zeichnung', () => {
+    expect([...templates].sort()).toEqual([...files].sort());
+  });
+
+  it.each(templates)('%s: Farben nur als Platzhalter, nur bekannte Rollen, keine festen Farbwerte', (file) => {
+    const template = readFileSync(join(templateDir, file), 'utf8');
+    expect(template).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
+    const names = findPlaceholders(template);
+    expect(names.length).toBeGreaterThan(0);
+    for (const name of names) expect(illustrationColorNames).toContain(name);
+  });
+
+  it.each(templates)('%s: die erzeugte Datei passt zu Vorlage und Palette (sonst: npm run illustrations:build)', (file) => {
+    const template = readFileSync(join(templateDir, file), 'utf8');
+    expect(read(file)).toBe(renderTemplate(template));
+    expect(read(file)).not.toContain('{{');
+  });
+
+  it('ein unbekannter Farbplatz ist ein Fehler, ein Wechsel der Palette wechselt alle Farben', () => {
+    expect(() => renderTemplate('<path fill="{{tomato}}"/>')).toThrow(/Unbekannter Farbplatz/);
+    expect(renderTemplate('<path fill="{{rose}}" stroke="{{ink}}"/>', { rose: '#111111', ink: '#222222' })).toBe(
+      '<path fill="#111111" stroke="#222222"/>',
+    );
+  });
+
+  it('die warmen Gegenstandsfarben (Honig, Braun) sind keine Farben der App-Oberfläche', () => {
+    const theme = Object.values(lightTheme.colors);
+    expect(theme).not.toContain(illustrationPalette.honey);
+    expect(theme).not.toContain(illustrationPalette.brown);
   });
 });
 
