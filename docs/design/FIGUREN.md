@@ -54,8 +54,10 @@ Alle Figuren bestehen aus **getrennten Teilen mit Ankerpunkten**:
 
 Die Teile werden beim Zeichnen mit absoluten Koordinaten gerechnet (keine verschachtelten Gruppen), die Pose steckt nur in den Zahlen. Gemessen (Näheres und alle Dateien in [VORSCHAU.md](figuren/VORSCHAU.md), „Dateigrößen“):
 
-- Eine Figur kostet etwa **1,5 bis 2,5 KB** (Satz C mit Linien-Gliedern am wenigsten, Satz A und B mit Kapsel-Gliedern am meisten).
-- Szenen mit vier bis fünf Figuren plus Tisch und Tablett liegen bei **6,7 bis 9,5 KB**, ein Triptychon-Bild mit zwei Figuren bei **3 bis 5 KB**. **Alle Bilder bleiben unter 10 KB**; die 14 KB für Schrittbilder (Clemens, 15. Oktober 2026) werden bei den Figuren nicht gebraucht.
+- Eine stehende Figur kostet **1,2 bis 2,2 KB**: Satz A 1,9 bis 2,2 KB, Satz B 2,1 bis 2,2 KB, Satz C (Linien-Glieder) 1,2 bis 1,7 KB; die Haustiere 0,9 bis 1,4 KB.
+- **Szenenbilder** (gemessen, ohne Gesichtszüge; mit Augenpunkten etwa 0,5 KB mehr): Triptychon-Bild 1 und 2 (eine Figur, Tisch, Tablett) **2,1 bis 3,2 KB**, Triptychon-Bild 3 (vier Figuren, Tisch, Tablett) **6,0 bis 9,2 KB**, Gruppenbild (vier Figuren) **5,5 bis 8,7 KB**. Gepackt (gzip) etwa ein Drittel davon.
+  **Alle Szenenbilder bleiben unter 10 KB**, auch mit Augen (das größte: Satz B, Triptychon-Bild 3, mit Augen 9,2 KB). Die 14 KB für Schrittbilder (Clemens, 15. Oktober 2026) werden bei den Figuren nicht gebraucht. Ein **Figurenblatt** (vier Posen einer Figur in einem Bild, kein Titelbild) ist 4 bis 10 KB.
+- Zum Vergleich die Beispielszenen des Baukastens (Stufe 1, in #27): 1,9 bis 3,2 KB.
 - Das Mittel dazu: Die versetzte Farbfläche gibt es nur am Rumpf, nicht an Armen und Beinen (sonst etwa ein Drittel mehr Bytes). Ein Schalter (`limbShadow`) schaltet sie wieder ein.
 
 ## Animation und Video (später, nichts davon ist gebaut)
