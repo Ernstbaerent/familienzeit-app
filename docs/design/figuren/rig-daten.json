@@ -1,0 +1,1581 @@
+{
+ "hinweis": "ERZEUGT von npm run figures:preview. Maße in Einheiten der 400 × 200-Fläche, y nach unten, Standlinie = 0, Posen als Winkel (Grad) oder Zielpunkte für die Hände.",
+ "sets": [
+  {
+   "id": "A",
+   "title": "Satz A: rund und weich",
+   "humans": [
+    {
+     "spec": {
+      "id": "joni",
+      "name": "Joni",
+      "role": "child",
+      "headR": 17.5,
+      "neck": 2.5,
+      "torsoH": 32.5,
+      "torsoW": 47.5,
+      "shoulderW": 32.5,
+      "hipW": 15,
+      "upperArm": 15,
+      "foreArm": 13.8,
+      "upperLeg": 13.8,
+      "lowerLeg": 12.5,
+      "handR": 6.3,
+      "footLen": 16.3,
+      "limb": {
+       "style": "capsule",
+       "w": 5.625
+      },
+      "torso": "bean",
+      "colors": {
+       "top": "rose",
+       "bottom": "petrol",
+       "shoes": "ink",
+       "hair": "ink"
+      },
+      "hair": "curls"
+     },
+     "quirk": null,
+     "poses": {
+      "stand": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "angle": 11,
+        "bend": 6
+       }
+      },
+      "hold": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "to": {
+         "x": 20.15,
+         "y": -38.2
+        },
+        "elbow": "out"
+       }
+      },
+      "tray": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 0,
+       "armL": {
+        "to": {
+         "x": -31,
+         "y": -33.4
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 31,
+         "y": -33.4
+        },
+        "elbow": "out"
+       }
+      },
+      "cheer": {
+       "dy": -9,
+       "tilt": -3,
+       "legL": {
+        "angle": 16,
+        "bend": 30
+       },
+       "legR": {
+        "angle": 16,
+        "bend": 30
+       },
+       "armL": {
+        "angle": 152,
+        "bend": -12
+       },
+       "armR": {
+        "angle": 152,
+        "bend": -12
+       }
+      },
+      "walk": {
+       "lean": 2,
+       "dy": -2,
+       "legL": {
+        "angle": 15,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 3,
+        "bend": 28
+       },
+       "armL": {
+        "angle": 40,
+        "bend": 14
+       },
+       "armR": {
+        "angle": 4,
+        "bend": 40
+       }
+      },
+      "take": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 5,
+       "armL": {
+        "to": {
+         "x": -30,
+         "y": -32.1228
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 30,
+         "y": -32.1228
+        },
+        "elbow": "out"
+       }
+      }
+     }
+    },
+    {
+     "spec": {
+      "id": "fenn",
+      "name": "Fenn",
+      "role": "toddler",
+      "headR": 16.3,
+      "neck": 2.5,
+      "torsoH": 26.3,
+      "torsoW": 41.3,
+      "shoulderW": 27.5,
+      "hipW": 13.8,
+      "upperArm": 12.5,
+      "foreArm": 11.3,
+      "upperLeg": 10,
+      "lowerLeg": 8.8,
+      "handR": 5.8,
+      "footLen": 15,
+      "limb": {
+       "style": "capsule",
+       "w": 5.25
+      },
+      "torso": "bean",
+      "colors": {
+       "top": "petrol",
+       "bottom": "petrol",
+       "shoes": "rose",
+       "hair": "ink",
+       "hat": "rose",
+       "accent": "paper"
+      },
+      "hair": "beanie"
+     },
+     "quirk": null,
+     "poses": {
+      "stand": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "angle": 11,
+        "bend": 6
+       }
+      },
+      "hold": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "to": {
+         "x": 17.05,
+         "y": -27.476
+        },
+        "elbow": "out"
+       }
+      },
+      "tray": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 0,
+       "armL": {
+        "to": {
+         "x": -26.5,
+         "y": -24.163999999999998
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 26.5,
+         "y": -24.163999999999998
+        },
+        "elbow": "out"
+       }
+      },
+      "cheer": {
+       "dy": -9,
+       "tilt": -3,
+       "legL": {
+        "angle": 16,
+        "bend": 30
+       },
+       "legR": {
+        "angle": 16,
+        "bend": 30
+       },
+       "armL": {
+        "angle": 152,
+        "bend": -12
+       },
+       "armR": {
+        "angle": 152,
+        "bend": -12
+       }
+      },
+      "walk": {
+       "lean": 2,
+       "dy": -2,
+       "legL": {
+        "angle": 15,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 3,
+        "bend": 28
+       },
+       "armL": {
+        "angle": 40,
+        "bend": 14
+       },
+       "armR": {
+        "angle": 4,
+        "bend": 40
+       }
+      },
+      "take": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 5,
+       "armL": {
+        "to": {
+         "x": -25,
+         "y": -22.7628
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 25,
+         "y": -22.7628
+        },
+        "elbow": "out"
+       }
+      }
+     }
+    },
+    {
+     "spec": {
+      "id": "sanne",
+      "name": "Sanne",
+      "role": "adult",
+      "headR": 18.8,
+      "neck": 2.5,
+      "torsoH": 42.5,
+      "torsoW": 57.5,
+      "shoulderW": 40,
+      "hipW": 17.5,
+      "upperArm": 18.8,
+      "foreArm": 17.5,
+      "upperLeg": 18.8,
+      "lowerLeg": 17.5,
+      "handR": 6.8,
+      "footLen": 18.8,
+      "limb": {
+       "style": "capsule",
+       "w": 6.25
+      },
+      "torso": "bean",
+      "colors": {
+       "top": "paper",
+       "bottom": "petrol",
+       "shoes": "ink",
+       "hair": "ink"
+      },
+      "hair": "bun"
+     },
+     "quirk": null,
+     "poses": {
+      "stand": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "angle": 11,
+        "bend": 6
+       }
+      },
+      "hold": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "to": {
+         "x": 24.8,
+         "y": -53.4
+        },
+        "elbow": "out"
+       }
+      },
+      "tray": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 0,
+       "armL": {
+        "to": {
+         "x": -38,
+         "y": -46.199999999999996
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 38,
+         "y": -46.199999999999996
+        },
+        "elbow": "out"
+       }
+      },
+      "cheer": {
+       "dy": -9,
+       "tilt": -3,
+       "legL": {
+        "angle": 16,
+        "bend": 30
+       },
+       "legR": {
+        "angle": 16,
+        "bend": 30
+       },
+       "armL": {
+        "angle": 152,
+        "bend": -12
+       },
+       "armR": {
+        "angle": 152,
+        "bend": -12
+       }
+      },
+      "walk": {
+       "lean": 2,
+       "dy": -2,
+       "legL": {
+        "angle": 15,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 3,
+        "bend": 28
+       },
+       "armL": {
+        "angle": 40,
+        "bend": 14
+       },
+       "armR": {
+        "angle": 4,
+        "bend": 40
+       }
+      },
+      "take": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 5,
+       "armL": {
+        "to": {
+         "x": -37,
+         "y": -45.5428
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 37,
+         "y": -45.5428
+        },
+        "elbow": "out"
+       }
+      }
+     }
+    }
+   ],
+   "pet": {
+    "spec": {
+     "id": "stups",
+     "name": "Stups",
+     "kind": "chick",
+     "bodyRx": 21.3,
+     "bodyRy": 18.8,
+     "headR": 13.8,
+     "legLen": 11.3,
+     "legW": 0,
+     "tailLen": 10,
+     "colors": {
+      "body": "honey",
+      "accent": "rose"
+     }
+    },
+    "poses": [
+     "stand",
+     "walk",
+     "jump",
+     "sniff"
+    ]
+   }
+  },
+  {
+   "id": "B",
+   "title": "Satz B: eckig und kräftig",
+   "humans": [
+    {
+     "spec": {
+      "id": "bent",
+      "name": "Bent",
+      "role": "child",
+      "headR": 12.6,
+      "neck": 1.1,
+      "torsoH": 31.5,
+      "torsoW": 39.9,
+      "shoulderW": 35.7,
+      "hipW": 18.9,
+      "upperArm": 14.7,
+      "foreArm": 13.7,
+      "upperLeg": 14.7,
+      "lowerLeg": 13.7,
+      "handR": 5.3,
+      "footLen": 15.8,
+      "limb": {
+       "style": "block",
+       "w": 5.775
+      },
+      "torso": "box",
+      "colors": {
+       "top": "petrol",
+       "bottom": "ink",
+       "shoes": "rose",
+       "hair": "ink",
+       "accent": "paper"
+      },
+      "hair": "bob"
+     },
+     "quirk": null,
+     "poses": {
+      "stand": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "angle": 11,
+        "bend": 6
+       }
+      },
+      "hold": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "to": {
+         "x": 22.134,
+         "y": -39.78
+        },
+        "elbow": "out"
+       }
+      },
+      "tray": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 0,
+       "armL": {
+        "to": {
+         "x": -33,
+         "y": -35.22
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 33,
+         "y": -35.22
+        },
+        "elbow": "out"
+       }
+      },
+      "cheer": {
+       "dy": -9,
+       "tilt": -3,
+       "legL": {
+        "angle": 16,
+        "bend": 30
+       },
+       "legR": {
+        "angle": 16,
+        "bend": 30
+       },
+       "armL": {
+        "angle": 152,
+        "bend": -12
+       },
+       "armR": {
+        "angle": 152,
+        "bend": -12
+       }
+      },
+      "walk": {
+       "lean": 2,
+       "dy": -2,
+       "legL": {
+        "angle": 15,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 3,
+        "bend": 28
+       },
+       "armL": {
+        "angle": 40,
+        "bend": 14
+       },
+       "armR": {
+        "angle": 4,
+        "bend": 40
+       }
+      },
+      "take": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 5,
+       "armL": {
+        "to": {
+         "x": -31.5,
+         "y": -33.620400000000004
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 31.5,
+         "y": -33.620400000000004
+        },
+        "elbow": "out"
+       }
+      }
+     }
+    },
+    {
+     "spec": {
+      "id": "fidi",
+      "name": "Fidi",
+      "role": "toddler",
+      "headR": 11.6,
+      "neck": 1.1,
+      "torsoH": 25.2,
+      "torsoW": 33.6,
+      "shoulderW": 29.4,
+      "hipW": 15.8,
+      "upperArm": 10.5,
+      "foreArm": 9.5,
+      "upperLeg": 10.5,
+      "lowerLeg": 9.5,
+      "handR": 4.8,
+      "footLen": 13.7,
+      "limb": {
+       "style": "block",
+       "w": 5.25
+      },
+      "torso": "box",
+      "colors": {
+       "top": "rose",
+       "bottom": "petrol",
+       "shoes": "ink",
+       "hair": "ink",
+       "hat": "petrol",
+       "accent": "paper"
+      },
+      "hair": "beanie"
+     },
+     "quirk": null,
+     "poses": {
+      "stand": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "angle": 11,
+        "bend": 6
+       }
+      },
+      "hold": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "to": {
+         "x": 18.227999999999998,
+         "y": -28.104
+        },
+        "elbow": "out"
+       }
+      },
+      "tray": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 0,
+       "armL": {
+        "to": {
+         "x": -24,
+         "y": -25.799999999999997
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 24,
+         "y": -25.799999999999997
+        },
+        "elbow": "out"
+       }
+      },
+      "cheer": {
+       "dy": -9,
+       "tilt": -3,
+       "legL": {
+        "angle": 16,
+        "bend": 30
+       },
+       "legR": {
+        "angle": 16,
+        "bend": 30
+       },
+       "armL": {
+        "angle": 152,
+        "bend": -12
+       },
+       "armR": {
+        "angle": 152,
+        "bend": -12
+       }
+      },
+      "walk": {
+       "lean": 2,
+       "dy": -2,
+       "legL": {
+        "angle": 15,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 3,
+        "bend": 28
+       },
+       "armL": {
+        "angle": 40,
+        "bend": 14
+       },
+       "armR": {
+        "angle": 4,
+        "bend": 40
+       }
+      },
+      "take": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 5,
+       "armL": {
+        "to": {
+         "x": -24,
+         "y": -25.799999999999997
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 24,
+         "y": -25.799999999999997
+        },
+        "elbow": "out"
+       }
+      }
+     }
+    },
+    {
+     "spec": {
+      "id": "hanne",
+      "name": "Hanne",
+      "role": "adult",
+      "headR": 13.7,
+      "neck": 1.1,
+      "torsoH": 44.1,
+      "torsoW": 48.3,
+      "shoulderW": 44.1,
+      "hipW": 23.1,
+      "upperArm": 21,
+      "foreArm": 20,
+      "upperLeg": 23.1,
+      "lowerLeg": 22.1,
+      "handR": 5.9,
+      "footLen": 17.9,
+      "limb": {
+       "style": "block",
+       "w": 6.825
+      },
+      "torso": "box",
+      "colors": {
+       "top": "paper",
+       "bottom": "petrol",
+       "shoes": "ink",
+       "hair": "ink",
+       "accent": "ink"
+      },
+      "hair": "cap"
+     },
+     "quirk": null,
+     "poses": {
+      "stand": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "angle": 11,
+        "bend": 6
+       }
+      },
+      "hold": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "to": {
+         "x": 27.342000000000002,
+         "y": -63.132000000000005
+        },
+        "elbow": "out"
+       }
+      },
+      "tray": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 0,
+       "armL": {
+        "to": {
+         "x": -44.5,
+         "y": -55.548000000000016
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 44.5,
+         "y": -55.548000000000016
+        },
+        "elbow": "out"
+       }
+      },
+      "cheer": {
+       "dy": -9,
+       "tilt": -3,
+       "legL": {
+        "angle": 16,
+        "bend": 30
+       },
+       "legR": {
+        "angle": 16,
+        "bend": 30
+       },
+       "armL": {
+        "angle": 152,
+        "bend": -12
+       },
+       "armR": {
+        "angle": 152,
+        "bend": -12
+       }
+      },
+      "walk": {
+       "lean": 2,
+       "dy": -2,
+       "legL": {
+        "angle": 15,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 3,
+        "bend": 28
+       },
+       "armL": {
+        "angle": 40,
+        "bend": 14
+       },
+       "armR": {
+        "angle": 4,
+        "bend": 40
+       }
+      },
+      "take": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 5,
+       "armL": {
+        "to": {
+         "x": -41.5,
+         "y": -52.38600000000001
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 41.5,
+         "y": -52.38600000000001
+        },
+        "elbow": "out"
+       }
+      }
+     }
+    }
+   ],
+   "pet": {
+    "spec": {
+     "id": "mutz",
+     "name": "Mutz",
+     "kind": "dog",
+     "bodyRx": 25.2,
+     "bodyRy": 13.7,
+     "headR": 11.6,
+     "legLen": 15.8,
+     "legW": 4.2,
+     "tailLen": 8.4,
+     "colors": {
+      "body": "paper",
+      "patch": "honey",
+      "accent": "honey"
+     }
+    },
+    "poses": [
+     "stand",
+     "walk",
+     "jump",
+     "sniff"
+    ]
+   }
+  },
+  {
+   "id": "C",
+   "title": "Satz C: schlank und verspielt",
+   "humans": [
+    {
+     "spec": {
+      "id": "jette",
+      "name": "Jette",
+      "role": "child",
+      "headR": 9,
+      "neck": 2.7,
+      "torsoH": 32.4,
+      "torsoW": 25.2,
+      "shoulderW": 18,
+      "hipW": 9,
+      "upperArm": 15.3,
+      "foreArm": 14.4,
+      "upperLeg": 18,
+      "lowerLeg": 17.1,
+      "handR": 3.6,
+      "footLen": 9.9,
+      "limb": {
+       "style": "line",
+       "w": 0
+      },
+      "torso": "dress",
+      "colors": {
+       "top": "rose",
+       "bottom": "ink",
+       "shoes": "petrol",
+       "hair": "ink"
+      },
+      "hair": "tuft"
+     },
+     "quirk": {
+      "tilt": 7
+     },
+     "poses": {
+      "stand": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "tilt": 7,
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "angle": 11,
+        "bend": 6
+       }
+      },
+      "hold": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "to": {
+         "x": 11.16,
+         "y": -46.948
+        },
+        "elbow": "out"
+       }
+      },
+      "tray": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 0,
+       "armL": {
+        "to": {
+         "x": -25,
+         "y": -42.17200000000001
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 25,
+         "y": -42.17200000000001
+        },
+        "elbow": "out"
+       }
+      },
+      "cheer": {
+       "dy": -9,
+       "tilt": -3,
+       "legL": {
+        "angle": 16,
+        "bend": 30
+       },
+       "legR": {
+        "angle": 16,
+        "bend": 30
+       },
+       "armL": {
+        "angle": 152,
+        "bend": -12
+       },
+       "armR": {
+        "angle": 152,
+        "bend": -12
+       }
+      },
+      "walk": {
+       "lean": 2,
+       "dy": -2,
+       "legL": {
+        "angle": 15,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 3,
+        "bend": 28
+       },
+       "armL": {
+        "angle": 40,
+        "bend": 14
+       },
+       "armR": {
+        "angle": 4,
+        "bend": 40
+       }
+      },
+      "take": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 5,
+       "armL": {
+        "to": {
+         "x": -23,
+         "y": -40.1632
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 23,
+         "y": -40.1632
+        },
+        "elbow": "out"
+       }
+      }
+     }
+    },
+    {
+     "spec": {
+      "id": "nolli",
+      "name": "Nolli",
+      "role": "toddler",
+      "headR": 8.6,
+      "neck": 1.8,
+      "torsoH": 23.4,
+      "torsoW": 19.8,
+      "shoulderW": 15.3,
+      "hipW": 8.1,
+      "upperArm": 10.8,
+      "foreArm": 9.9,
+      "upperLeg": 12.6,
+      "lowerLeg": 11.7,
+      "handR": 3.4,
+      "footLen": 9,
+      "limb": {
+       "style": "line",
+       "w": 0
+      },
+      "torso": "dress",
+      "colors": {
+       "top": "petrol",
+       "bottom": "ink",
+       "shoes": "rose",
+       "hair": "ink"
+      },
+      "hair": "bun"
+     },
+     "quirk": {
+      "tilt": -6
+     },
+     "poses": {
+      "stand": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "tilt": -6,
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "angle": 11,
+        "bend": 6
+       }
+      },
+      "hold": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "to": {
+         "x": 9.486,
+         "y": -31.467999999999996
+        },
+        "elbow": "out"
+       }
+      },
+      "tray": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 0,
+       "armL": {
+        "to": {
+         "x": -19,
+         "y": -28.852
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 19,
+         "y": -28.852
+        },
+        "elbow": "out"
+       }
+      },
+      "cheer": {
+       "dy": -9,
+       "tilt": -3,
+       "legL": {
+        "angle": 16,
+        "bend": 30
+       },
+       "legR": {
+        "angle": 16,
+        "bend": 30
+       },
+       "armL": {
+        "angle": 152,
+        "bend": -12
+       },
+       "armR": {
+        "angle": 152,
+        "bend": -12
+       }
+      },
+      "walk": {
+       "lean": 2,
+       "dy": -2,
+       "legL": {
+        "angle": 15,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 3,
+        "bend": 28
+       },
+       "armL": {
+        "angle": 40,
+        "bend": 14
+       },
+       "armR": {
+        "angle": 4,
+        "bend": 40
+       }
+      },
+      "take": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 5,
+       "armL": {
+        "to": {
+         "x": -19,
+         "y": -27.959199999999996
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 19,
+         "y": -27.959199999999996
+        },
+        "elbow": "out"
+       }
+      }
+     }
+    },
+    {
+     "spec": {
+      "id": "ilka",
+      "name": "Ilka",
+      "role": "adult",
+      "headR": 9.9,
+      "neck": 3.6,
+      "torsoH": 46.8,
+      "torsoW": 28.8,
+      "shoulderW": 23.4,
+      "hipW": 10.8,
+      "upperArm": 21.6,
+      "foreArm": 20.7,
+      "upperLeg": 25.2,
+      "lowerLeg": 24.3,
+      "handR": 4,
+      "footLen": 10.8,
+      "limb": {
+       "style": "line",
+       "w": 0
+      },
+      "torso": "dress",
+      "colors": {
+       "top": "petrol",
+       "bottom": "ink",
+       "shoes": "ink",
+       "hair": "ink",
+       "accent": "rose"
+      },
+      "hair": "bob",
+      "scarf": true
+     },
+     "quirk": {
+      "tilt": 6,
+      "handOnHip": "R"
+     },
+     "poses": {
+      "stand": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "tilt": 6,
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "to": {
+         "x": 23.580000000000002,
+         "y": -53.244
+        },
+        "elbow": "out"
+       }
+      },
+      "hold": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "armL": {
+        "angle": 11,
+        "bend": 6
+       },
+       "armR": {
+        "to": {
+         "x": 14.508,
+         "y": -68.836
+        },
+        "elbow": "out"
+       }
+      },
+      "tray": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 0,
+       "armL": {
+        "to": {
+         "x": -34.5,
+         "y": -60.604000000000006
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 34.5,
+         "y": -60.604000000000006
+        },
+        "elbow": "out"
+       }
+      },
+      "cheer": {
+       "dy": -9,
+       "tilt": -3,
+       "legL": {
+        "angle": 16,
+        "bend": 30
+       },
+       "legR": {
+        "angle": 16,
+        "bend": 30
+       },
+       "armL": {
+        "angle": 152,
+        "bend": -12
+       },
+       "armR": {
+        "angle": 152,
+        "bend": -12
+       }
+      },
+      "walk": {
+       "lean": 2,
+       "dy": -2,
+       "legL": {
+        "angle": 15,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 3,
+        "bend": 28
+       },
+       "armL": {
+        "angle": 40,
+        "bend": 14
+       },
+       "armR": {
+        "angle": 4,
+        "bend": 40
+       }
+      },
+      "take": {
+       "legL": {
+        "angle": 4,
+        "bend": 0
+       },
+       "legR": {
+        "angle": 4,
+        "bend": 0
+       },
+       "lean": 5,
+       "armL": {
+        "to": {
+         "x": -32,
+         "y": -58.14880000000001
+        },
+        "elbow": "out"
+       },
+       "armR": {
+        "to": {
+         "x": 32,
+         "y": -58.14880000000001
+        },
+        "elbow": "out"
+       }
+      }
+     }
+    }
+   ],
+   "pet": {
+    "spec": {
+     "id": "tuepfel",
+     "name": "Tüpfel",
+     "kind": "cat",
+     "bodyRx": 19.8,
+     "bodyRy": 7.7,
+     "headR": 8.1,
+     "legLen": 18,
+     "legW": 0,
+     "tailLen": 23.4,
+     "colors": {
+      "body": "paper",
+      "accent": "rose"
+     }
+    },
+    "poses": [
+     "stand",
+     "walk",
+     "jump",
+     "sniff"
+    ]
+   }
+  }
+ ]
+}
