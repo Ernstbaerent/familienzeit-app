@@ -6,6 +6,7 @@ import { join } from 'node:path';
 
 import { parsePoly } from './geometry.ts';
 import { createHoursNormalizer, weekStartOf } from './hours.ts';
+import { renderPrepareReport } from './report.ts';
 import { transformFeatures } from './transform.ts';
 
 const fixture = (name: string) => readFileSync(join(__dirname, 'fixtures', name), 'utf8');
@@ -118,5 +119,65 @@ describe('transformFeatures: kaputte Zeilen', () => {
     const { rows, stats } = await run([line]);
     expect(rows).toHaveLength(0);
     expect(stats.noGeometry).toBe(1);
+  });
+});
+
+describe('transformFeatures: Regeln für Ziele mit Eintritt (quality.ts)', () => {
+  let n = 0;
+  const point = (tags: Record<string, string>) => {
+    n += 1;
+    return JSON.stringify({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [12.15 + n * 0.005, 50.64] },
+      properties: { '@type': 'node', '@id': 900 + n, ...tags },
+    });
+  };
+
+  it('weggelassene Orte landen in held, die Zählung geht in den Bericht', async () => {
+    n = 0;
+    const lines = [
+      point({ tourism: 'museum', name: 'Zoologische Sammlung der Universität' }), // n901: abwertend, keine Infos → weg
+      point({ tourism: 'museum' }), // n902: ohne Namen, keine Infos → weg
+      point({ tourism: 'museum', name: 'Heimatstube' }), // n903: keine Infos → 1
+      point({ tourism: 'museum', name: 'Kindermuseum', website: 'https://kindermuseum.example.org' }), // n904: → 3
+      point({ tourism: 'zoo' }), // n905: Gehege ohne Namen und Infos → bleibt 3
+      point({ leisure: 'playground', name: 'Spielplatz an der Universität' }), // n906: Spielplatz → bleibt 3
+      point({ tourism: 'museum', name: 'Bergbaumuseum (geplant)', opening_hours: 'Sa 10:00-16:00' }), // n907: nicht besuchbar → weg
+    ];
+    const { rows, held, stats } = await run(lines);
+    const weight = (id: string) => rows.find((row) => row.id === id)?.kid_weight;
+    expect(rows.map((row) => row.id).sort()).toEqual(['n903', 'n904', 'n905', 'n906']);
+    expect(weight('n903')).toBe(1);
+    expect(weight('n904')).toBe(3);
+    expect(weight('n905')).toBe(3);
+    expect(weight('n906')).toBe(3);
+    // held: vollständige, gültige Zeilen mit dem Startwert (ein boost setzt beim Hochladen 3)
+    expect(held.map((row) => [row.id, row.kid_weight])).toEqual([
+      ['n901', 2],
+      ['n902', 2],
+      ['n907', 2],
+    ]);
+    expect(stats.quality).toEqual({
+      down: 1,
+      up: 1,
+      dropped: 3,
+      examples: [
+        'Zoologische Sammlung der Universität (n901): abwertend: Universität, Sammlung; keine Website und keine Öffnungszeiten',
+        'ohne Namen (n902): keine Website und keine Öffnungszeiten; Museum ohne Namen',
+        'Bergbaumuseum (geplant) (n907): nicht besuchbar: geplant',
+      ],
+    });
+    expect(stats.rows).toBe(4);
+
+    const report = renderPrepareReport({
+      version: 1,
+      importId: 'orte-2026-10-15-ab',
+      startedAt: '2026-10-15T00:00:00Z',
+      regions: [{ region: 'TH', ok: true, rows: 4, seconds: 3, downloadBytes: 0, sourceTimestamp: null, stats }],
+    });
+    expect(report).toContain('Regeln: abgewertet / aufgewertet / weggelassen');
+    expect(report).toMatch(/\| 1 \/ 1 \/ 3 \|/);
+    expect(report).toContain('**TH:**');
+    expect(report).toContain('- Bergbaumuseum (geplant) (n907): nicht besuchbar: geplant');
   });
 });

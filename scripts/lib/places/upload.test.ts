@@ -1,5 +1,6 @@
 // „Hochladen“ mit einer nachgestellten Daten-Schnittstelle von Supabase: Trockenlauf schreibt nichts, Qualitätsbremse und
-// Obergrenze je Land, Pakete à 1000 Zeilen, ein Land scheitert ohne die anderen aufzuhalten, kein Schlüssel in Meldungen.
+// Obergrenze je Land, Pakete à 1000 Zeilen, ein Land scheitert ohne die anderen aufzuhalten, kein Schlüssel in Meldungen,
+// Ausschlussliste (place_overrides: hide, boost, zurückholen, nicht lesbar = nichts wird angefasst).
 
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -45,11 +46,11 @@ const okResult = (region: RegionKey, rows: number): RegionResult =>
   ({ region, ok: true, rows, seconds: 1, downloadBytes: 1, sourceTimestamp: '2026-10-13T20:21:42Z', stats: {} }) as unknown as RegionResult;
 
 let dir: string;
-function writeOut(files: { region: RegionKey; rows: PlaceRow[] }[], extra: RegionResult[] = []) {
+function writeOut(files: { region: RegionKey; rows: PlaceRow[]; held?: PlaceRow[] }[], extra: RegionResult[] = []) {
   for (const f of files) {
     writeFileSync(
       join(dir, regionFileName(f.region)),
-      encodeRegionFile({ version: 1, region: f.region, importId, sourceTimestamp: '2026-10-13T20:21:42Z', sourceUrl: 'https://download.geofabrik.de/europe/germany/x.osm.pbf', rows: f.rows }),
+      encodeRegionFile({ version: 1, region: f.region, importId, sourceTimestamp: '2026-10-13T20:21:42Z', sourceUrl: 'https://download.geofabrik.de/europe/germany/x.osm.pbf', rows: f.rows, held: f.held ?? [] }),
     );
   }
   const summary: Summary = { version: 1, importId, startedAt: '2026-10-15T00:00:00Z', regions: [...files.map((f) => okResult(f.region, f.rows.length)), ...extra] };
@@ -59,7 +60,8 @@ function writeOut(files: { region: RegionKey; rows: PlaceRow[] }[], extra: Regio
 type Call = { method: string; path: string; body: unknown; headers: Record<string, string> };
 
 // Nachgestellte Daten-Schnittstelle mit dem Stand je Land.
-function fakeSupabase(states: Record<string, number>, options: { failPublish?: string; staging400?: boolean } = {}) {
+type FakeOptions = { failPublish?: string; staging400?: boolean; overrides?: unknown[]; overridesStatus?: number };
+function fakeSupabase(states: Record<string, number>, options: FakeOptions = {}) {
   const calls: Call[] = [];
   const fetch: FetchLike = async (url: string, init: HttpRequest) => {
     const path = url.replace('https://abc.supabase.co/rest/v1/', '');
@@ -72,6 +74,9 @@ function fakeSupabase(states: Record<string, number>, options: { failPublish?: s
       text: async () => (data === undefined ? '' : JSON.stringify(data)),
     });
     if (path.startsWith('places_imports')) return reply(200, Object.entries(states).map(([region, rowCount]) => ({ region, row_count: rowCount, import_id: 'alt', imported_at: '2026-09-03' })));
+    if (path.startsWith('place_overrides')) {
+      return options.overridesStatus ? reply(options.overridesStatus, { code: 'PGRST205', message: 'Could not find the table' }) : reply(200, options.overrides ?? []);
+    }
     if (path === 'rpc/begin_places_import') return reply(204, undefined);
     if (path === 'places_staging') return options.staging400 ? reply(400, { code: '23514', message: `kaputt ${secret}` }) : reply(201, undefined);
     if (path === 'rpc/publish_places_import') {
@@ -92,6 +97,7 @@ const config = (overrides: Partial<UploadConfig> = {}): UploadConfig => ({
 });
 
 const rows = (region: RegionKey, count: number) => Array.from({ length: count }, (_, i) => row(region, i));
+const none = { hidden: 0, boosted: 0, restored: 0 };
 const log = () => {};
 
 beforeEach(() => {
@@ -104,8 +110,8 @@ describe('uploadRegions', () => {
     writeOut([{ region: 'TH', rows: rows('TH', 30) }]);
     const { fetch, calls } = fakeSupabase({ TH: 25 });
     const result = await uploadRegions(config({ dryRun: true }), { fetch, log });
-    expect(result.outcomes).toEqual([{ region: 'TH', status: 'wouldPublish', rows: 30, previous: 25 }]);
-    expect(calls.map((c) => `${c.method} ${c.path.split('?')[0]}`)).toEqual(['GET places_imports']);
+    expect(result.outcomes).toEqual([{ region: 'TH', status: 'wouldPublish', rows: 30, previous: 25, overrides: none }]);
+    expect(calls.map((c) => `${c.method} ${c.path.split('?')[0]}`)).toEqual(['GET places_imports', 'GET place_overrides']);
     expect(result.totalAfter).toBe(30);
   });
 
@@ -113,9 +119,10 @@ describe('uploadRegions', () => {
     writeOut([{ region: 'SN', rows: rows('SN', 2500) }]);
     const { fetch, calls } = fakeSupabase({});
     const result = await uploadRegions(config(), { fetch, log });
-    expect(result.outcomes).toEqual([{ region: 'SN', status: 'published', rows: 2500, previous: 0 }]);
+    expect(result.outcomes).toEqual([{ region: 'SN', status: 'published', rows: 2500, previous: 0, overrides: none }]);
     expect(calls.map((c) => c.path.split('?')[0])).toEqual([
       'places_imports',
+      'place_overrides',
       'rpc/begin_places_import',
       'places_staging',
       'places_staging',
@@ -149,7 +156,7 @@ describe('uploadRegions', () => {
     const result = await uploadRegions(config(), { fetch, log });
     expect(result.outcomes[0]).toMatchObject({ region: 'SN', status: 'failed', previous: 100 });
     expect((result.outcomes[0] as { error: string }).error).toContain('Qualitätsbremse');
-    expect(result.outcomes[1]).toEqual({ region: 'TH', status: 'published', rows: 70, previous: 100 });
+    expect(result.outcomes[1]).toEqual({ region: 'TH', status: 'published', rows: 70, previous: 100, overrides: none });
     expect(calls.filter((c) => c.path === 'rpc/begin_places_import').map((c) => (c.body as { p_region: string }).p_region)).toEqual(['TH']);
   });
 
@@ -158,7 +165,7 @@ describe('uploadRegions', () => {
     const { fetch, calls } = fakeSupabase({ BY: 980, TH: 10 });
     const result = await uploadRegions(config({ maxPlaces: 1000 }), { fetch, log });
     expect((result.outcomes[0] as { error: string }).error).toContain('Obergrenze MAX_PLACES (1000)');
-    expect(calls).toHaveLength(1);
+    expect(calls).toHaveLength(2); // nur lesen: Stand und Ausschlussliste
   });
 
   it('Fehler beim Vorbereiten oder in der Datenbank: dieses Land scheitert, die anderen laufen weiter', async () => {
@@ -176,7 +183,7 @@ describe('uploadRegions', () => {
     const { fetch, calls } = fakeSupabase({});
     const result = await uploadRegions(config(), { fetch, log });
     expect((result.outcomes[0] as { error: string }).error).toContain('1 ungültige Zeilen');
-    expect(calls).toHaveLength(1);
+    expect(calls).toHaveLength(2);
   });
 
   it('Datei eines anderen Laufs wird abgelehnt', async () => {
@@ -197,5 +204,87 @@ describe('uploadRegions', () => {
     expect(result.outcomes[0].status).toBe('failed');
     expect(`${report}\n${lines.join('\n')}`).not.toContain(secret);
     expect(report).toContain('[verborgen]');
+  });
+});
+
+describe('uploadRegions: Ausschlussliste (place_overrides)', () => {
+  const named = (region: RegionKey, n: number, kidWeight: 0 | 1 | 2 | 3): PlaceRow => ({ ...row(region, n), name: `Ort ${n + 1}`, kid_weight: kidWeight });
+
+  it('hide lässt den Ort weg, boost setzt 3 und holt einen weggelassenen Ort zurück; Bericht zählt je Land', async () => {
+    const thRows = [named('TH', 0, 2), named('TH', 1, 1), named('TH', 2, 3)];
+    const thHeld = [named('TH', 10, 2), named('TH', 11, 2)];
+    writeOut([
+      { region: 'TH', rows: thRows, held: thHeld },
+      { region: 'SN', rows: rows('SN', 3) },
+    ]);
+    const { fetch, calls } = fakeSupabase(
+      { TH: 3, SN: 2 },
+      {
+        overrides: [
+          { id: 'n1', action: 'hide' }, // TH Ort 1 (in SN gibt es auch n1: dort auch versteckt, die Kennung gilt für alle Länder)
+          { id: 'n2', action: 'boost' }, // TH Ort 2: 1 → 3 (in SN ebenfalls)
+          { id: 'n11', action: 'boost' }, // von den Regeln weggelassen: zurückgeholt
+          { id: 'n12', action: 'hide' }, // weggelassen und versteckt: bleibt weg, zählt nicht doppelt
+          { id: 'w999', action: 'hide' }, // in keinem Land dieses Laufs
+          { id: 'kaputt', action: 'hide' }, // ungültige Kennung wird übergangen
+        ],
+      },
+    );
+    const result = await uploadRegions(config(), { fetch, log });
+    expect(result.outcomes).toEqual([
+      { region: 'TH', status: 'published', rows: 3, previous: 3, overrides: { hidden: 1, boosted: 1, restored: 1 } },
+      { region: 'SN', status: 'published', rows: 2, previous: 2, overrides: { hidden: 1, boosted: 1, restored: 0 } },
+    ]);
+    const staged = calls.filter((c) => c.path === 'places_staging').flatMap((c) => c.body as PlaceRow[]);
+    const th = staged.filter((r) => r.region === 'TH');
+    expect(th.map((r) => [r.id, r.kid_weight])).toEqual([
+      ['n2', 3],
+      ['n3', 3],
+      ['n11', 3],
+    ]);
+    expect(result.overrides).toEqual({ hide: 3, boost: 2, notFound: ['w999'] });
+
+    const report = renderUploadReport(result, false, 600_000);
+    expect(report).toContain('| TH | übernommen | 3 | 3 | +0 % | 1 / 1 / 1 |');
+    expect(report).toContain('3 × hide, 2 × boost');
+    expect(report).toContain('nicht gefunden (anderes Land oder nicht mehr in OpenStreetMap): w999');
+  });
+
+  it('Trockenlauf wendet die Liste auch an (nur zum Anzeigen)', async () => {
+    writeOut([{ region: 'TH', rows: rows('TH', 5) }]);
+    const { fetch } = fakeSupabase({ TH: 5 }, { overrides: [{ id: 'n1', action: 'hide' }] });
+    const result = await uploadRegions(config({ dryRun: true }), { fetch, log });
+    expect(result.outcomes).toEqual([{ region: 'TH', status: 'wouldPublish', rows: 4, previous: 5, overrides: { hidden: 1, boosted: 0, restored: 0 } }]);
+  });
+
+  it('Liste nicht lesbar (Migration 0004 fehlt): Abbruch, bevor ein Land angefasst wird', async () => {
+    writeOut([{ region: 'TH', rows: rows('TH', 5) }]);
+    const { fetch, calls } = fakeSupabase({}, { overridesStatus: 404 });
+    await expect(uploadRegions(config(), { fetch, log })).rejects.toThrow(/Ausschlussliste lesen\): HTTP 404.*0004_place_overrides\.sql/);
+    expect(calls.map((c) => c.path.split('?')[0])).toEqual(['places_imports', 'place_overrides']);
+  });
+
+  it('mehr Einträge als die Grenze: Abbruch statt still nur einen Teil zu lesen', async () => {
+    writeOut([{ region: 'TH', rows: rows('TH', 5) }]);
+    const many = Array.from({ length: 901 }, (_, i) => ({ id: `n${i + 1}`, action: 'hide' }));
+    const { fetch } = fakeSupabase({}, { overrides: many });
+    await expect(uploadRegions(config(), { fetch, log })).rejects.toThrow('mehr als 900 Einträge');
+  });
+
+  it('ohne Ausschlussliste und ohne Regeln bleibt alles wie bisher, weggelassene Orte werden nie hochgeladen', async () => {
+    writeOut([{ region: 'TH', rows: rows('TH', 4), held: [named('TH', 50, 2)] }]);
+    const { fetch, calls } = fakeSupabase({});
+    await uploadRegions(config(), { fetch, log });
+    const staged = calls.filter((c) => c.path === 'places_staging').flatMap((c) => c.body as PlaceRow[]);
+    expect(staged.map((r) => r.id)).toEqual(['n1', 'n2', 'n3', 'n4']);
+  });
+});
+
+describe('Datei: weggelassene Orte', () => {
+  it('eine ID darf nicht in rows und held zugleich stehen', async () => {
+    writeOut([{ region: 'TH', rows: rows('TH', 3), held: [row('TH', 1)] }]);
+    const { fetch } = fakeSupabase({});
+    const result = await uploadRegions(config(), { fetch, log });
+    expect((result.outcomes[0] as { error: string }).error).toContain('n2: doppelt');
   });
 });

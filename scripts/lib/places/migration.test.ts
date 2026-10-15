@@ -1,4 +1,4 @@
-// Migration 0003 (M10a) als Text geprüft, wie 0001 und 0002: wiederholbar, Row Level Security, Rechte nach allen grant/revoke.
+// Migration 0003 (M10a) und 0004 (Ausschlussliste) als Text geprüft, wie 0001 und 0002: wiederholbar, Row Level Security, Rechte nach allen grant/revoke.
 // Dass das SQL in einem echten PostgreSQL läuft (zweimal hintereinander, Austausch alles oder nichts, Qualitätsbremse,
 // Obergrenze, Rechte von anon und service_role), wurde zusätzlich in einem lokalen Wegwerf-Postgres geprüft (docs/orte.md, „Tests“).
 
@@ -11,7 +11,8 @@ import { regionKeys } from '../../../src/features/places/placeRow.ts';
 const root = join(__dirname, '..', '..', '..');
 const read = (name: string) => readFileSync(join(root, 'supabase', 'migrations', name), 'utf8');
 const sql = read('0003_places.sql');
-const all = [read('0001_activities.sql'), read('0002_activity_runs.sql'), sql];
+const overridesSql = read('0004_place_overrides.sql');
+const all = [read('0001_activities.sql'), read('0002_activity_runs.sql'), sql, overridesSql];
 
 function statements(text: string): string[] {
   const code = text.replace(/--[^\n]*/g, '');
@@ -132,5 +133,50 @@ describe('Die Funktionen', () => {
     expect(sql).toContain('if v_total - v_old + v_new > p_max_total then');
     expect(sql).toContain('delete from public.places where region = p_region;');
     expect(sql).not.toMatch(/delete from public\.places;|delete from public\.places where (?!region = p_region)/);
+  });
+});
+
+describe('Migration 0004: Ausschlussliste place_overrides', () => {
+  it('wiederholbar: legt nur an, was fehlt, löscht nie eine Tabelle oder Einträge', () => {
+    expect(overridesSql).toContain('create table if not exists public.place_overrides (');
+    expect(overridesSql).not.toMatch(/\bdrop table\b|\btruncate\b|\bdelete from\b/i);
+  });
+
+  it('Spalten: Kennung wie places.id, Aktion hide oder boost, Notiz, Datum', () => {
+    expect(overridesSql).toMatch(/id text primary key\s+check \(id ~ '\^\[nwr\]\[1-9\]\[0-9\]\{0,14\}\$'\)/);
+    expect(sql).toContain("check (id ~ '^[nwr][1-9][0-9]{0,14}$')"); // dieselbe Regel wie in places
+    expect(overridesSql).toContain("check (action in ('hide', 'boost'))");
+    expect(overridesSql).toContain('note text');
+    expect(overridesSql).toContain('created_on date not null default current_date');
+  });
+
+  it('Row Level Security an, ohne eine einzige Regel', () => {
+    expect(overridesSql).toContain('alter table public.place_overrides enable row level security;');
+    expect(statements(overridesSql).filter((s) => /^create policy/i.test(s))).toEqual([]);
+  });
+
+  it.each(['anon', 'authenticated'])('%s darf die Liste weder lesen noch schreiben', (role) => {
+    expect(effective(all, 'table public.place_overrides', role)).toEqual([]);
+  });
+
+  it('nur der geheime Schlüssel (service_role) darf lesen, und nur lesen', () => {
+    expect(effective(all, 'table public.place_overrides', 'service_role')).toEqual(['select']);
+  });
+
+  it('ändert keine Rechte an anderen Tabellen', () => {
+    expect(effective(all, 'table public.places', 'anon')).toEqual(['select']);
+    expect(effective(all, 'table public.places', 'service_role')).toEqual(['select']);
+    const targets = statements(overridesSql)
+      .filter((s) => /^(grant|revoke) /i.test(s))
+      .map((s) => / on table (\S+)/i.exec(s)?.[1]);
+    expect(new Set(targets)).toEqual(new Set(['public.place_overrides']));
+  });
+
+  it('endet mit der Kontrollabfrage (zwei erwartete Zeilen stehen im Kommentar)', () => {
+    const last = statements(overridesSql).at(-1) ?? '';
+    expect(last).toMatch(/^select 'Tabelle '/);
+    expect(last).toContain('relrowsecurity');
+    expect(overridesSql).toMatch(/--\s+RLS place_overrides\s+\| -\s+\| an/);
+    expect(overridesSql).toMatch(/--\s+Tabelle place_overrides\s+\| service_role \| SELECT/);
   });
 });

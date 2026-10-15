@@ -8,6 +8,9 @@ die Regeln der Vorschläge (Ausschlüsse, Gewichtung, Umkreis, Mischung) in `doc
 | Was | Wo |
 | --- | --- |
 | Tabelle, Zwischentabelle, Austausch je Land (SQL) | `supabase/migrations/0003_places.sql` |
+| Ausschlussliste: Orte verstecken oder hervorheben (SQL) | `supabase/migrations/0004_place_overrides.sql`, Anleitung unten in „Einen Ort verstecken oder hervorheben“ |
+| Qualitätsregeln für Ziele mit Eintritt und Wortlisten | `scripts/lib/places/quality.ts`, `scripts/lib/places/nameSignals.ts` |
+| Regeln mit echten Daten prüfen | `scripts/places-check-names.ts` (`npm run places:check-names`) |
 | GitHub Action | `.github/workflows/places-import.yml` |
 | Teil „Vorbereiten“ (ohne Schlüssel) | `scripts/places-prepare.ts` (`npm run places:prepare`) |
 | Teil „Hochladen“ (mit Schlüssel, ohne npm) | `scripts/places-upload.ts` (`npm run places:upload`) |
@@ -44,6 +47,14 @@ die Regeln der Vorschläge (Ausschlüsse, Gewichtung, Umkreis, Mischung) in `doc
    | Tabelle places_staging | service_role | INSERT |
 
    Die Datei darf mehrmals laufen; vorhandene Orte bleiben.
+   **Danach genauso** `supabase/migrations/0004_place_overrides.sql` (Ausschlussliste). Erwartet sind diese **zwei Zeilen**:
+
+   | objekt | rolle | rechte |
+   | --- | --- | --- |
+   | RLS place_overrides | - | an |
+   | Tabelle place_overrides | service_role | SELECT |
+
+   Ohne 0004 bricht „Hochladen“ ab, bevor ein Land angefasst wird (siehe „Wenn etwas schiefgeht“).
 2. **Secrets:** Es braucht nur die beiden, die es schon gibt: `SUPABASE_URL` und `SUPABASE_SECRET_KEY` (wie beim Wochenlauf, `docs/wochenlauf.md`).
 3. **Wichtig beim ersten Mal:** Sobald die Action im Hauptzweig (`main`) liegt, läuft sie am **3. jedes Monats** echt (Thüringen und Sachsen).
    Ist die Migration noch nicht eingespielt, wird der Lauf rot (nichts geht kaputt). Willst du erst testen: Repo-Variable `PLACES_PAUSED=true` setzen, **bevor** du den Pull Request zusammenführst.
@@ -109,10 +120,11 @@ Zwischentabelle places_staging (Pakete à 1000) ─▶ publish_places_import: La
 5. **Lage:** Punkt, bei Flächen der Schwerpunkt (bei mehreren Teilen der größte). Liegt der Punkt **außerhalb des Landesumrisses**, gehört er zum Nachbarland und fällt hier weg.
    Brandenburg lässt alles im Umriss von Berlin weg, Niedersachsen alles in Bremen (Geofabrik liefert Niedersachsen mit Bremen; bei Brandenburg/Berlin schadet die Regel nicht, falls die Dateien getrennt sind).
 6. **Doppelte** (`dedupe.ts`): gleicher Name in derselben Kategorie näher als 150 m, ohne Namen gleiche Unterart näher als 40 m (wie im Machbarkeitstest). Es bleibt die Fläche, fehlende Angaben werden übernommen.
-7. **Öffnungszeiten** (siehe unten), **Saison**, **Ortsteil** (siehe unten), **Kindertauglichkeit** (`src/features/places/placeKinds.ts`).
-8. **Prüfen** jeder Zeile (`checkPlaceRow`), Datei schreiben.
+7. **Öffnungszeiten** (siehe unten), **Saison**, **Ortsteil** (siehe unten), **Kindertauglichkeit** (`src/features/places/placeKinds.ts`),
+   danach die **Qualitätsregeln für Ziele mit Eintritt** (siehe unten): Kindertauglichkeit anpassen oder den Ort weglassen.
+8. **Prüfen** jeder Zeile (`checkPlaceRow`), Datei schreiben. Von den Regeln weggelassene Orte stehen getrennt in derselben Datei (`held`), damit ein `boost` sie zurückholen kann.
 
-**Hochladen je Land:** Stand lesen → Qualitätsbremse und Obergrenze vorab prüfen → `begin_places_import` (Reste in der Zwischentabelle löschen) → Zeilen in Paketen à 1000 →
+**Hochladen je Land:** Ausschlussliste `place_overrides` lesen (einmal pro Lauf) → Stand lesen → `hide` und `boost` anwenden → Qualitätsbremse und Obergrenze vorab prüfen → `begin_places_import` (Reste in der Zwischentabelle löschen) → Zeilen in Paketen à 1000 →
 `publish_places_import` tauscht das Land in **einer** Transaktion aus. Scheitert ein Land (Download, osmium, Qualitätsbremse, Datenbank), **behält es seinen bisherigen Stand**,
 die anderen Länder laufen weiter, und der Lauf endet am Schluss **rot** (GitHub schickt eine E-Mail).
 
@@ -143,6 +155,126 @@ die anderen Länder laufen weiter, und der Lauf endet am Schluss **rot** (GitHub
 | 0 | allgemeine „Sehenswürdigkeit“, Teich, Rastplatz |
 
 Ändern: nur in `src/features/places/placeKinds.ts`. Die Werte landen beim Import in `kid_weight`, eine Änderung wirkt also mit dem nächsten Import. Wie viele Punkte das in der Vorschlagslogik gibt, legt M10b fest.
+Die Qualitätsregeln (nächster Abschnitt) und die Ausschlussliste verschieben diese Startwerte bei einzelnen Orten.
+
+### Qualität der Ziele mit Eintritt
+
+**Warum:** In Halle erschienen Universitätssammlungen ohne Website, ohne Öffnungszeiten und ohne Kinderbezug als Vorschläge.
+Für Orte, die man **besuchen muss** (man braucht offene Türen), sagen fehlende Infos und manche Wörter im Namen viel.
+Die Regeln laufen **nur im Import** (`scripts/lib/places/quality.ts`), die App ist unverändert. Sie wirken über `kid_weight`:
+In der App gibt 2 → +2 Punkte, 1 → 0 Punkte, und nur Orte ab 2 zählen für den Umkreis und als zweiter Ort einer Dreiergruppe (`docs/suggestions.md`).
+
+**Besuchspflichtige Unterarten:** Museum, Aquarium, Freizeitpark, Hallenbad, Freibad, Kombibad, Freizeitbad, Kletterhalle, Indoorspielplatz, Trampolinhalle, Eisbahn.
+„Infos da“ heißt: Website **oder** irgendein Text in `opening_hours` (auch komplex oder unlesbar). Telefon oder Wikipedia zählen nicht.
+
+| Namens-Signal | Website oder Öffnungszeiten | keins von beiden |
+| --- | --- | --- |
+| keines | unverändert | **−1** |
+| nur aufwertend | **+1** (höchstens 3) | unverändert (schützt nur) |
+| nur abwertend | **−1** | **weggelassen** |
+| beides | unverändert | **weggelassen** |
+
+Dazu, bei allen besuchspflichtigen Unterarten:
+
+- **Museum ohne Namen** und ohne Website und Öffnungszeiten: **weggelassen** (in der App nicht auffindbar). Mit Website: wie in der Tabelle.
+- **Nicht besuchbar** (Name enthält „geplant“, „in Planung“, „im Bau“, „geschlossen“, „vorübergehend geschlossen“, „wegen Sanierung“, „planned“, „under construction“, „closed“):
+  **immer weggelassen**, auch mit Website und Öffnungszeiten (Machbarkeit: den Ort gibt es nicht oder gerade nicht).
+
+**Zoos, Tierparks und Tiergehege** sind ausgenommen (Wildgehege haben selten eine Website, sind aber gute Ziele):
+
+| Regel | Zoo, Tierpark, Tiergehege |
+| --- | --- |
+| keine Website und keine Öffnungszeiten | wirkt nicht (kein −1, nie weggelassen) |
+| abwertende Wörter (Universität, Institut, Sammlung …) | wirken nicht |
+| aufwertende Wörter (Tier, Natur, Kinder …) | wirken (+1, höchstens 3; Startwert ist schon 3) |
+| nicht besuchbar (geplant, in Planung …) | **weggelassen** |
+
+**Alle anderen Unterarten** (Spielplatz, Park, Badestelle, Naturschutzgebiet, See, Aussichtspunkt, Rastplatz, Burg, Kino, Bibliothek …) bleiben **unverändert**: Dort sind fehlende Öffnungszeiten normal.
+
+**Wortlisten** (`scripts/lib/places/nameSignals.ts`, eine Zeile je Wort, mit Tests in `nameSignals.test.ts`):
+
+| Liste | Wörter (Auszug) |
+| --- | --- |
+| abwertend | Universität, Uni, Hochschule, Institut, Fakultät, Lehrstuhl, Akademie, Sammlung, Archiv, Anatomie, Kabinett, Lapidarium, Herbarium; englisch University, Faculty, Department, Academy, Collection, Anatomy |
+| aufwertend | Kinder, Kind, Familie, Mitmach, Experiment, Entdecker, Forscher, Natur, Technik, Spielzeug, Eisenbahn, Feuerwehr, Planetarium, Sternwarte, Tier, Dino, Saurier, Ritter, Märchen, Abenteuer, Erlebnis, Puppen, Mathematik, Schokolade; englisch Kids, Children, Family, Hands-on, Science, Discover, Explore, Toy, Railway, Train, Animal, Adventure … |
+| nicht besuchbar | siehe oben |
+
+- **Groß- und Kleinschreibung** zählt nicht, Bindestriche trennen Wörter, ä/ö/ü/ß zählen wie ae/oe/ue/ss.
+- Jedes Wort hat eine Art, wo es stehen darf: **ganzes Wort** („Uni“ trifft nicht „Uniform“), **Wortanfang** („Natur“ trifft „Naturkundemuseum“, nicht „Signatur“; „Tier“ nicht „Quartier“; „Ritter“ nicht „Dritter“)
+  oder **irgendwo im Wort** („Sammlung“ trifft „Lehrsammlung“, „Eisenbahn“ trifft „Modelleisenbahn“).
+- **„Erlebnis“** zählt nicht bei Bädern und nicht, wenn Therme, Thermal, Sauna, Spa oder Wellness im Namen stehen (sonst würden Wellness-Landschaften aufgewertet).
+- **Gedenkstätten** und Dokumentationszentren werden bewusst **nicht** abgewertet.
+- Neues Wort: eine Zeile in der Liste, dazu ein Test, was es treffen soll und was nicht. Wirkt mit dem nächsten Import.
+
+**Im Bericht** („Orte vorbereiten“) stehen je Land drei Zahlen „Regeln: abgewertet / aufgewertet / weggelassen“ und aufklappbar bis zu 10 weggelassene Orte mit Grund.
+Ein **`boost`** in der Ausschlussliste holt einen weggelassenen Ort zurück (nächster Abschnitt).
+
+### Einen Ort verstecken oder hervorheben
+
+Die Tabelle `place_overrides` (Migration 0004) ist die Ausschlussliste. Einträge macht nur du im **SQL-Editor** des Dashboards; die App sieht die Tabelle nie, der Import darf sie nur lesen.
+
+| Aktion | Wirkung beim nächsten Import |
+| --- | --- |
+| `hide` | Der Ort wird nicht importiert. |
+| `boost` | Kindertauglichkeit fest **3**. Holt auch einen Ort zurück, den die Qualitätsregeln weggelassen hätten. |
+
+Die **Kennung** (`id`) ist die aus `places.id` (`n…` Punkt, `w…` Linie/Fläche, `r…` Relation). Sie steht in jeder Abfrage auf `places` und in der Ausgabe des Prüfskripts (nächster Abschnitt).
+Eine Kennung gilt in allen Bundesländern.
+
+**Beispiel:** zwei Orte verstecken, einen hervorheben (die Kennungen hier sind ausgedacht, ersetze sie durch deine):
+
+```sql
+insert into public.place_overrides (id, action, note) values
+  ('w123456789', 'hide',  'Halle: Universitätssammlung, nicht öffentlich'),
+  ('n987654321', 'hide',  'Halle: Museum dauerhaft geschlossen'),
+  ('w555666777', 'boost', 'Halle: Kindermuseum, sehr gut für Kinder')
+on conflict (id) do update set action = excluded.action, note = excluded.note, created_on = current_date;
+```
+
+`on conflict …` sorgt dafür, dass du die Zeilen auch mehrmals ausführen oder eine Aktion ändern kannst (z. B. von `hide` auf `boost`).
+
+```sql
+select id, action, note, created_on from public.place_overrides order by created_on desc;   -- ansehen
+delete from public.place_overrides where id = 'w123456789';                                -- Eintrag wieder entfernen
+```
+
+**Sofort statt beim nächsten Import (freiwillig):** Der Import läuft monatlich. Willst du einen Ort gleich loswerden, lösche ihn zusätzlich direkt:
+`delete from public.places where id = 'w123456789';` (im Dashboard darfst du das, der Import nicht). Handys, die die Kachel schon gespeichert haben, zeigen ihn bis zu 30 Tage weiter.
+Ohne den Eintrag in `place_overrides` käme er beim nächsten Import zurück.
+
+**Im Bericht** („Hochladen“) stehen je Land „Ausschlussliste: versteckt / hervorgehoben / zurückgeholt“, darunter die Zahl der Einträge und die Kennungen, die im Lauf in keinem Land vorkamen
+(anderes Land als im Lauf gewählt oder nicht mehr in OpenStreetMap).
+Versteckte Orte zählen bei der Qualitätsbremse (70 %) mit: Ein Land, in dem du sehr viele Orte versteckst, kann an der Bremse scheitern.
+
+### Regeln mit echten Daten prüfen
+
+Das Prüfskript zeigt für eine Liste von Orten, was die Regeln daraus machen, ohne etwas zu ändern (ohne Netz, ohne Schlüssel).
+
+1. Im **SQL-Editor** zum Beispiel alle Museen rund um Halle abfragen (die Zahlen sind ein Rechteck aus Breite und Länge, für andere Städte anpassen):
+   ```sql
+   select id, name, subtype, website is not null as hat_website, opening_hours is not null as hat_zeiten, kid_weight, locality
+   from public.places
+   where category in ('museum', 'animals', 'pool', 'funPark', 'indoor') and lat between 51.40 and 51.56 and lon between 11.85 and 12.10
+   order by subtype, name;
+   ```
+2. Ergebnis als CSV herunterladen (Knopf über der Ergebnistabelle) oder markieren und kopieren.
+3. Auf dem Chromebook im Projektordner:
+   ```bash
+   npm run places:check-names -- ~/Downloads/museen-halle.csv     # aus einer Datei
+   npm run places:check-names                                     # oder: Text einfügen, dann Strg+D
+   ```
+
+Die Ausgabe ist eine Tabelle mit **ID** (zum Kopieren für `place_overrides`), Name, Ort, Unterart, Gewicht bisher, Ergebnis (gleich, ↑ aufgewertet, ↓ abgewertet, **weggelassen**) und Gründen,
+darunter die Summe. Pflicht sind die Spalten `name`, `subtype`, `hat_website`, `hat_zeiten`; `id`, `kid_weight` und `locality` sind freiwillig (statt `hat_website`/`hat_zeiten` gehen auch `website`/`opening_hours`).
+
+**Mit deinen 22 Museen aus Halle** (`scripts/lib/places/fixtures/halle-museen.csv`, als Test festgehalten):
+
+| Ergebnis | Orte |
+| --- | --- |
+| weggelassen (4) | Ausstellungskabinett der Leopoldina (Kabinett, keine Infos), Naturkundliches Museum der Martin-Luther-Universität (geplant), zwei Museen ohne Namen ohne Infos (Holleben, Halle) |
+| abgewertet 2 → 1 (1) | Friedemann-Bach-Haus (keine Website, keine Öffnungszeiten) |
+| aufgewertet 2 → 3 (4) | Experimente-Werkstatt Mathematik, Halloren Schokoladenmuseum, Kunst- und Naturalienkammer, Museum für Haustierkunde |
+| unverändert (13) | u. a. Robertinum und Händel-Haus (Website), Roter Ochse (Öffnungszeiten); Fälle für die Ausschlussliste |
 
 ### Ortsteil für namenlose Orte
 
@@ -267,6 +399,8 @@ Bei jedem roten Lauf gilt: **Länder, die gescheitert sind, haben ihren bisherig
 | Meldung | Bedeutung | Was tun |
 | --- | --- | --- |
 | `HTTP 404` beim Stand lesen, `PGRST…`, „permission denied“ | Migration 0003 fehlt oder lief nur halb. | Migration ganz ausführen, Kontrollzeilen vergleichen. |
+| „Ausschlussliste lesen: HTTP 404 … Ist die Migration 0004_place_overrides.sql eingespielt?“ | Migration 0004 fehlt. Kein Land wurde angefasst. | 0004 ausführen, Kontrollzeilen vergleichen, Lauf neu starten. |
+| „Ausschlussliste hat mehr als 900 Einträge“ | Die Liste ist größer als gedacht. | Einträge aufräumen oder `maxOverrides` in `limits.ts` bewusst anheben (Supabase liefert höchstens 1000 Zeilen je Antwort). |
 | `Geofabrik-Datei: HTTP 503` / Zeitüberschreitung | Geofabrik gerade nicht erreichbar. | Später erneut starten (nur dieses Land: `regions` = Kürzel). |
 | „Prüfsumme stimmt nicht“ | Datei unvollständig oder Geofabrik hat sie gerade erneuert. | Erneut starten. |
 | „Datei ist … MB groß, erlaubt sind 1536 MB“ | Datei größer als die Grenze. | Prüfen, ob die Adresse stimmt; sonst `maxDownloadBytes` in `limits.ts` bewusst anheben. |
@@ -477,6 +611,8 @@ Geprüft werden: Zuordnung jeder Unterart und jeder Ausschluss, Bäder drinnen/d
 Öffnungszeiten (Wochenplan, Feiertage, Saison, über Mitternacht, Zeitumstellung, `off`, Ferien, Sonne, unlesbar), Saison, Website, die ganze Umwandlung mit Testdaten,
 Download (Weiterleitung, Prüfsumme, Größe, fremder Server), „Vorbereiten“ als Ganzes (ein Land scheitert allein, Arbeitsdateien werden gelöscht),
 „Hochladen“ (Trockenlauf schreibt nichts, Pakete, Qualitätsbremse und Obergrenze je Land, kein Schlüssel in Ausgaben), die Rechte der Migration und die beiden Isolationsregeln.
+Dazu die Qualitätsregeln (`quality.test.ts`: die ganze Tabelle, Zoos, „Erlebnis“ und Wellness, die 22 Museen aus Halle, das Prüfskript), die Wortlisten mit Treffern und Nicht-Treffern (`nameSignals.test.ts`),
+die Ausschlussliste beim Hochladen (`hide`, `boost`, Zurückholen, nicht lesbar = Abbruch, zu viele Einträge) und die Rechte von 0004 (`migration.test.ts`).
 
 **Testdaten:** `scripts/lib/places/fixtures/sample.osm` ist von Hand geschrieben (keine echten OSM-Daten, Namen und Lagen nur angelehnt an Greiz).
 `sample.geojsonseq` ist die Ausgabe von osmium dafür; ist osmium installiert, prüft ein Test, dass die Befehle aus `osmium.ts` genau diese Ausgabe erzeugen.
@@ -488,6 +624,9 @@ Zusätzlich einmal von Hand geprüft, nicht Teil des Projekts:
   `anon` liest `places` und `places_imports`, sieht die Zwischentabelle nicht und darf weder schreiben noch die Funktionen aufrufen; `service_role` darf in `places` weder löschen noch ändern.
 - Der ganze Weg mit echtem osmium: Testdaten als Geofabrik-Datei nachgestellt (Weiterleitung, Prüfsumme, Umriss), „Vorbereiten“ für Thüringen und Sachsen (Sachsen mit Fehler 404),
   dann „Hochladen“ gegen eine nachgestellte Daten-Schnittstelle auf PGlite: Thüringen übernommen, Sachsen behält seinen Stand, Lauf rot.
+
+- Migration 0004 (zweimal) im selben Wegwerf-Postgres, mit den Standard-Rechten, die Supabase neuen Tabellen gibt: Kontrollabfrage liefert die zwei Zeilen, Einträge bleiben beim zweiten Lauf,
+  `anon` und `authenticated` dürfen weder lesen noch schreiben, `service_role` darf nur lesen, falsche Kennung oder Aktion wird abgelehnt, das Beispiel oben läuft (auch zweimal).
 
 **Nicht getestet** (kein Zugang aus der Cloud-Umgebung: `download.geofabrik.de` bricht die Verbindung ab, das echte Supabase-Projekt ist nicht erreichbar):
 ein Lauf mit echten Geofabrik-Dateien und gegen das echte Supabase-Projekt. Das ist der Pilot oben (Trockenlauf, dann echter Lauf für Thüringen und Sachsen).

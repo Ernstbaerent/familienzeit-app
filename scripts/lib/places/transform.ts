@@ -1,7 +1,7 @@
 // Orte-Import (M10a): aus den Zeilen von `osmium export` (GeoJSON, eine Zeile je Objekt) die Zeilen für `places` machen.
 // Reine Logik: Die Zeilen kommen als Liste oder Strom herein, die Öffnungszeiten-Auswertung wird hineingegeben.
 
-import { kidWeightFor, placeKinds } from '../../../src/features/places/placeKinds.ts';
+import { placeKinds } from '../../../src/features/places/placeKinds.ts';
 import { checkPlaceRow, placeTextLimits, type PlaceRow, type RegionKey } from '../../../src/features/places/placeRow.ts';
 import { tileKeyOf } from '../../../src/features/places/placeTiles.ts';
 import { classifyTags, localityRadiusMeters, localityTypeOf, type SkipReason, type Tags } from './classify.ts';
@@ -9,6 +9,7 @@ import { cleanText, cleanWebsite } from './clean.ts';
 import { dedupePlaces, type DedupeItem } from './dedupe.ts';
 import { haversineMeters, isAreaGeometry, isInsidePoly, representativePoint, type Poly } from './geometry.ts';
 import type { HoursResult } from './hours.ts';
+import { assessPlace } from './quality.ts';
 import { seasonOf } from './season.ts';
 
 export type TransformInput = {
@@ -38,7 +39,13 @@ export type TransformStats = {
   hours: { plan: number; complex: number; invalid: number; none: number };
   withSeason: number;
   bathSettingGuessed: number; // Bäder, bei denen weder Merkmale noch Name drinnen/draußen verraten (Standard benutzt)
+  // Regeln für Ziele mit Eintritt (quality.ts): Kindertauglichkeit gesenkt, erhöht, Ort weggelassen (liegt dann in `held`).
+  quality: { down: number; up: number; dropped: number; examples: string[] };
 };
+
+// Ein Land: die Zeilen für `places` und die von den Regeln weggelassenen (`held`). Ein `boost` in place_overrides
+// holt einen weggelassenen Ort beim Hochladen zurück (upload.ts), deshalb gehen sie mit in die Datei.
+export type TransformResult = { rows: PlaceRow[]; held: PlaceRow[]; stats: TransformStats };
 
 type Candidate = DedupeItem & {
   subtype: keyof typeof placeKinds;
@@ -95,7 +102,7 @@ function nearestLocality(grid: Map<string, Locality[]>, lat: number, lon: number
 export async function transformFeatures(
   lines: AsyncIterable<string> | Iterable<string>,
   input: TransformInput,
-): Promise<{ rows: PlaceRow[]; stats: TransformStats }> {
+): Promise<TransformResult> {
   const stats: TransformStats = {
     features: 0,
     unreadable: 0,
@@ -116,6 +123,7 @@ export async function transformFeatures(
     hours: { plan: 0, complex: 0, invalid: 0, none: 0 },
     withSeason: 0,
     bathSettingGuessed: 0,
+    quality: { down: 0, up: 0, dropped: 0, examples: [] },
   };
   const candidates: Candidate[] = [];
   const localityGrid = new Map<string, Locality[]>();
@@ -186,6 +194,7 @@ export async function transformFeatures(
   stats.duplicatesMerged = merged;
 
   const rows: PlaceRow[] = [];
+  const held: PlaceRow[] = [];
   for (const candidate of kept) {
     let hours: HoursResult | null = null;
     if (candidate.openingHours) {
@@ -200,6 +209,12 @@ export async function transformFeatures(
       setting: candidate.setting,
       hoursMonths: hours?.months ?? null,
       seasonal: candidate.seasonal,
+    });
+    const quality = assessPlace({
+      subtype: candidate.subtype,
+      name: candidate.name,
+      hasWebsite: candidate.website !== null,
+      hasOpeningHours: candidate.openingHours !== null,
     });
     const row = {
       region: input.region,
@@ -218,7 +233,7 @@ export async function transformFeatures(
       website: candidate.website,
       locality: candidate.suburb ?? nearestLocality(localityGrid, candidate.lat, candidate.lon) ?? candidate.city,
       street: candidate.street,
-      kid_weight: kidWeightFor(candidate.subtype, candidate.name !== null),
+      kid_weight: quality.keep ? quality.kidWeight : quality.base,
     };
     const check = checkPlaceRow(row);
     if (!check.ok) {
@@ -226,6 +241,16 @@ export async function transformFeatures(
       if (stats.invalidExamples.length < 10) stats.invalidExamples.push(check.reason);
       continue;
     }
+    if (!quality.keep) {
+      held.push(check.row);
+      stats.quality.dropped += 1;
+      if (stats.quality.examples.length < 10) {
+        stats.quality.examples.push(`${candidate.name ?? 'ohne Namen'} (${candidate.id}): ${quality.reasons.join('; ')}`);
+      }
+      continue;
+    }
+    if (quality.change === 'up') stats.quality.up += 1;
+    if (quality.change === 'down') stats.quality.down += 1;
     rows.push(check.row);
     stats.bySubtype[candidate.subtype] = (stats.bySubtype[candidate.subtype] ?? 0) + 1;
     if (row.name) stats.withName += 1;
@@ -236,7 +261,7 @@ export async function transformFeatures(
     stats.hours[row.hours_kind ?? 'none'] += 1;
   }
   stats.rows = rows.length;
-  return { rows, stats };
+  return { rows, held, stats };
 }
 
 // Verraten Merkmale oder Name, ob ein Bad drinnen oder draußen ist? (Für den Bericht: Wie oft wurde geraten?)
