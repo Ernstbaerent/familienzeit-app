@@ -2,6 +2,7 @@
 // je Bundesland die Datei aus „Vorbereiten“ prüfen und über Zwischentabelle + publish_places_import austauschen.
 // Qualitätsbremse (70 %) und Obergrenze prüft das Skript vorher (für eine klare Meldung) und die Datenbank selbst noch einmal.
 // Ein Land, das scheitert, behält seinen bisherigen Stand; die anderen laufen weiter.
+// Vorher wird einmal die Ausschlussliste (place_overrides) gelesen und je Land angewendet (overrides.ts).
 
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -11,14 +12,19 @@ import type { FetchLike } from '../weekly/http.ts';
 import type { UploadConfig } from './config.ts';
 import { decodeRegionFile, parseSummary, regionFileName, summaryFileName, type Summary } from './files.ts';
 import { placeLimits } from './limits.ts';
-import { beginImport, fetchImportStates, insertStaging, publishImport } from './placesAdmin.ts';
+import { applyOverrides, type OverrideCounts } from './overrides.ts';
+import { beginImport, fetchImportStates, fetchPlaceOverrides, insertStaging, publishImport, type PlaceOverrideAction } from './placesAdmin.ts';
 
 export type UploadOutcome =
-  | { region: RegionKey; status: 'published'; rows: number; previous: number }
-  | { region: RegionKey; status: 'wouldPublish'; rows: number; previous: number } // Trockenlauf
+  | { region: RegionKey; status: 'published'; rows: number; previous: number; overrides: OverrideCounts }
+  | { region: RegionKey; status: 'wouldPublish'; rows: number; previous: number; overrides: OverrideCounts } // Trockenlauf
   | { region: RegionKey; status: 'failed'; error: string; previous: number | null };
 
-export type UploadResult = { summary: Summary; outcomes: UploadOutcome[]; totalBefore: number; totalAfter: number };
+// Ausschlussliste: Einträge insgesamt und die Kennungen, die in keinem Land dieses Laufs vorkamen
+// (anderes Land oder nicht mehr in OpenStreetMap).
+export type OverridesSummary = { hide: number; boost: number; notFound: string[] };
+
+export type UploadResult = { summary: Summary; outcomes: UploadOutcome[]; totalBefore: number; totalAfter: number; overrides: OverridesSummary };
 
 export async function uploadRegions(
   config: UploadConfig,
@@ -30,6 +36,9 @@ export async function uploadRegions(
   let total = states.reduce((sum, state) => sum + state.rowCount, 0);
   const totalBefore = total;
   const outcomes: UploadOutcome[] = [];
+  const overrideList = await fetchPlaceOverrides(config.supabase, deps.fetch);
+  const overrides = new Map<string, PlaceOverrideAction>(overrideList.map((o) => [o.id, o.action]));
+  const seen = new Set<string>();
 
   for (const prepared of summary.regions) {
     const region = prepared.region;
@@ -41,7 +50,10 @@ export async function uploadRegions(
     try {
       const { file, invalid } = decodeRegionFile(await readFile(join(config.outDir, regionFileName(region))), region, summary.importId);
       if (invalid.length > 0) throw new Error(`${invalid.length} ungültige Zeilen, z. B. ${invalid.slice(0, 3).join('; ')}`);
-      const rows = file.rows;
+      const applied = applyOverrides(file.rows, file.held, overrides);
+      for (const id of applied.seen) seen.add(id);
+      const rows = applied.rows;
+      const counts = applied.counts;
       if (rows.length === 0) throw new Error('keine Orte');
       if (rows.length > placeLimits.maxPlacesPerRegion) throw new Error(`${rows.length} Orte, mehr als ${placeLimits.maxPlacesPerRegion} je Land`);
       if (previous > 0 && rows.length < Math.ceil(previous * placeLimits.minRatio)) {
@@ -55,7 +67,7 @@ export async function uploadRegions(
       if (config.dryRun) {
         total = total - previous + rows.length;
         deps.log(`${region}: Trockenlauf, würde ${rows.length} Orte übernehmen (bisher ${previous})`);
-        outcomes.push({ region, status: 'wouldPublish', rows: rows.length, previous });
+        outcomes.push({ region, status: 'wouldPublish', rows: rows.length, previous, overrides: counts });
         continue;
       }
 
@@ -76,12 +88,17 @@ export async function uploadRegions(
       });
       total = total - previous + inserted;
       deps.log(`${region}: ${inserted} Orte übernommen (bisher ${previous})`);
-      outcomes.push({ region, status: 'published', rows: inserted, previous });
+      outcomes.push({ region, status: 'published', rows: inserted, previous, overrides: counts });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       deps.log(`${region}: FEHLER ${message}`);
       outcomes.push({ region, status: 'failed', error: message.slice(0, 400), previous });
     }
   }
-  return { summary, outcomes, totalBefore, totalAfter: total };
+  const overridesSummary: OverridesSummary = {
+    hide: overrideList.filter((o) => o.action === 'hide').length,
+    boost: overrideList.filter((o) => o.action === 'boost').length,
+    notFound: overrideList.filter((o) => !seen.has(o.id)).map((o) => o.id),
+  };
+  return { summary, outcomes, totalBefore, totalAfter: total, overrides: overridesSummary };
 }

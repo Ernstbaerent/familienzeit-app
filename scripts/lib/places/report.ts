@@ -25,8 +25,8 @@ export function renderPrepareReport(summary: Summary): string {
   for (const r of failed) if (!r.ok) lines.push(`> **${r.region} (${regions[r.region].name}) fehlgeschlagen:** ${cell(r.error)}`, '');
 
   lines.push(
-    '| Land | Orte | mit Name | mit Ortsteil | Öffnungszeiten (Plan / komplex / unlesbar) | Website | Saison | Bad geraten | Doppelte | außerhalb | Download | Zeit | OSM-Stand |',
-    '| --- | --: | --: | --: | --: | --: | --: | --: | --: | --: | --: | --: | --- |',
+    '| Land | Orte | mit Name | mit Ortsteil | Öffnungszeiten (Plan / komplex / unlesbar) | Website | Saison | Bad geraten | Doppelte | außerhalb | Regeln: abgewertet / aufgewertet / weggelassen | Download | Zeit | OSM-Stand |',
+    '| --- | --: | --: | --: | --: | --: | --: | --: | --: | --: | --: | --: | --: | --- |',
   );
   for (const r of ok) {
     if (!r.ok) continue;
@@ -34,8 +34,20 @@ export function renderPrepareReport(summary: Summary): string {
     lines.push(
       `| ${r.region} | ${number(r.rows)} | ${percent(s.withName, s.rows)} | ${percent(s.withLocality, s.rows)} | ` +
         `${number(s.hours.plan)} / ${number(s.hours.complex)} / ${number(s.hours.invalid)} | ${number(s.withWebsite)} | ${number(s.withSeason)} | ` +
-        `${number(s.bathSettingGuessed)} | ${number(s.duplicatesMerged)} | ${number(s.outsideRegion)} | ${mb(r.downloadBytes)} | ${minutes(r.seconds)} | ${r.sourceTimestamp ?? '?'} |`,
+        `${number(s.bathSettingGuessed)} | ${number(s.duplicatesMerged)} | ${number(s.outsideRegion)} | ` +
+        `${number(s.quality.down)} / ${number(s.quality.up)} / ${number(s.quality.dropped)} | ${mb(r.downloadBytes)} | ${minutes(r.seconds)} | ${r.sourceTimestamp ?? '?'} |`,
     );
+  }
+
+  // Regeln für Ziele mit Eintritt (quality.ts): Beispiele der weggelassenen Orte je Land, zum Nachsehen.
+  const withExamples = ok.filter((r) => r.ok && r.stats.quality.examples.length > 0);
+  if (withExamples.length > 0) {
+    lines.push('', '<details><summary>Von den Regeln weggelassen (Beispiele, höchstens 10 je Land)</summary>', '');
+    for (const r of withExamples) {
+      if (!r.ok) continue;
+      lines.push(`**${r.region}:**`, '', ...r.stats.quality.examples.map((example) => `- ${cell(example)}`), '');
+    }
+    lines.push('</details>');
   }
 
   const bySubtype = new Map<string, number>();
@@ -76,14 +88,21 @@ export function renderUploadReport(result: UploadResult, dryRun: boolean, maxPla
   const lines = [
     `**${head} · Datenbank: ${number(result.totalBefore)} → ${number(result.totalAfter)} Orte von höchstens ${number(maxPlaces)}**`,
     '',
-    '| Land | Ergebnis | Orte neu | bisher | Veränderung |',
-    '| --- | --- | --: | --: | --: |',
+    '| Land | Ergebnis | Orte neu | bisher | Veränderung | Ausschlussliste: versteckt / hervorgehoben / zurückgeholt |',
+    '| --- | --- | --: | --: | --: | --: |',
   ];
   for (const o of result.outcomes) {
     const rows = o.status === 'failed' ? '–' : number(o.rows);
     const previous = o.previous === null ? '?' : number(o.previous);
     const change = o.status === 'failed' || !o.previous ? '–' : `${o.rows >= o.previous ? '+' : ''}${Math.round(((o.rows - o.previous) / o.previous) * 100)} %`;
-    lines.push(`| ${o.region} | ${statusText[o.status]} | ${rows} | ${previous} | ${change} |`);
+    const overrides = o.status === 'failed' ? '–' : `${number(o.overrides.hidden)} / ${number(o.overrides.boosted)} / ${number(o.overrides.restored)}`;
+    lines.push(`| ${o.region} | ${statusText[o.status]} | ${rows} | ${previous} | ${change} | ${overrides} |`);
+  }
+  const { hide, boost, notFound } = result.overrides;
+  lines.push('', `Ausschlussliste (place_overrides): ${number(hide)} × hide, ${number(boost)} × boost`);
+  if (notFound.length > 0) {
+    const shown = notFound.slice(0, 20).join(', ');
+    lines.push('', `In diesem Lauf nicht gefunden (anderes Land oder nicht mehr in OpenStreetMap): ${shown}${notFound.length > 20 ? ` und ${notFound.length - 20} weitere` : ''}`);
   }
   for (const o of failed) if (o.status === 'failed') lines.push('', `> **${o.region}:** ${cell(o.error)}`);
   return lines.join('\n');

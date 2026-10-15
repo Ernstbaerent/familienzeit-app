@@ -99,3 +99,32 @@ export async function publishImport(
   if (typeof body !== 'number') throw new SupabaseError(`Supabase (${input.region}: austauschen): unerwartete Antwort`);
   return body;
 }
+
+export type PlaceOverrideAction = 'hide' | 'boost';
+export type PlaceOverride = { id: string; action: PlaceOverrideAction };
+
+// Ausschlussliste (0004_place_overrides.sql): je OSM-Kennung `hide` (nicht importieren) oder `boost` (Kindertauglichkeit 3).
+// Nur der geheime Schlüssel darf sie lesen. Ist sie nicht lesbar (z. B. Migration 0004 fehlt), bricht das Hochladen ab, bevor
+// ein Land angefasst wird: Sonst kämen versteckte Orte still zurück.
+export async function fetchPlaceOverrides(config: SupabaseAdminConfig, fetchImpl: FetchLike): Promise<PlaceOverride[]> {
+  let body: unknown;
+  try {
+    ({ body } = await send(config, fetchImpl, {
+      what: 'Ausschlussliste lesen',
+      path: `place_overrides?select=id,action&order=id.asc&limit=${placeLimits.maxOverrides + 1}`,
+    }));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new SupabaseError(`${message}. Ist die Migration 0004_place_overrides.sql eingespielt? Kein Land wurde angefasst.`);
+  }
+  if (!Array.isArray(body)) throw new SupabaseError('Supabase (Ausschlussliste lesen): Antwort ist keine Liste');
+  if (body.length > placeLimits.maxOverrides) {
+    throw new SupabaseError(`Ausschlussliste hat mehr als ${placeLimits.maxOverrides} Einträge (Grenze in limits.ts)`);
+  }
+  return body.flatMap((row: unknown) => {
+    const r = row as Record<string, unknown> | null;
+    if (!r || typeof r.id !== 'string' || !/^[nwr][1-9][0-9]{0,14}$/.test(r.id)) return [];
+    if (r.action !== 'hide' && r.action !== 'boost') return [];
+    return [{ id: r.id, action: r.action }];
+  });
+}

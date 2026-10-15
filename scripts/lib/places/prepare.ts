@@ -101,7 +101,7 @@ export async function prepareRegions(config: PrepareConfig, deps: PrepareDeps): 
         lat: region.center.lat,
         lon: region.center.lon,
       });
-      const { rows, stats } = await transformFeatures(readLines(paths.output), { region: key, ownPoly, excludePolys, normalizeHours });
+      const { rows, held, stats } = await transformFeatures(readLines(paths.output), { region: key, ownPoly, excludePolys, normalizeHours });
       await rm(paths.output, { force: true });
 
       if (rows.length === 0) throw new Error('keine Orte gefunden (Filter oder Datei kaputt?)');
@@ -110,7 +110,7 @@ export async function prepareRegions(config: PrepareConfig, deps: PrepareDeps): 
       }
       await writeFile(
         join(config.outDir, regionFileName(key)),
-        encodeRegionFile({ version: 1, region: key, importId: config.importId, sourceTimestamp, sourceUrl: download.finalUrl, rows }),
+        encodeRegionFile({ version: 1, region: key, importId: config.importId, sourceTimestamp, sourceUrl: download.finalUrl, rows, held }),
       );
       deps.log(`${key}: ${rows.length} Orte fertig (${seconds()} s)`);
       results.push({ region: key, ok: true, rows: rows.length, seconds: seconds(), downloadBytes: download.bytes, sourceTimestamp, stats });

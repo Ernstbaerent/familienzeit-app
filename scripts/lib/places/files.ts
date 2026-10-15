@@ -17,6 +17,8 @@ export type RegionFile = {
   sourceTimestamp: string | null; // Stand der OSM-Daten laut Geofabrik
   sourceUrl: string | null; // Datei nach der Weiterleitung, z. B. …/thueringen-261013.osm.pbf
   rows: PlaceRow[];
+  // Von den Qualitätsregeln weggelassen (quality.ts). Werden nur hochgeladen, wenn place_overrides sie mit `boost` zurückholt.
+  held: PlaceRow[];
 };
 
 export type RegionResult =
@@ -39,7 +41,8 @@ export function encodeRegionFile(file: RegionFile): Buffer {
 
 export type DecodedRegionFile = { file: RegionFile; invalid: string[] };
 
-// Liest eine Datei und prüft alles: Form, Bundesland, jede Zeile (auch: gehört sie zu diesem Land, ist die ID doppelt).
+// Liest eine Datei und prüft alles: Form, Bundesland, jede Zeile (auch: gehört sie zu diesem Land, ist die ID doppelt),
+// auch die weggelassenen (`held`). Eine ID darf nur einmal vorkommen, in `rows` oder in `held`.
 export function decodeRegionFile(buffer: Buffer, expectedRegion: RegionKey, expectedImportId: string): DecodedRegionFile {
   let data: unknown;
   try {
@@ -48,26 +51,31 @@ export function decodeRegionFile(buffer: Buffer, expectedRegion: RegionKey, expe
     throw new Error(`${expectedRegion}: Datei ist kein gepacktes JSON`);
   }
   const d = data as Partial<RegionFile> | null;
-  if (!d || d.version !== 1 || !Array.isArray(d.rows)) throw new Error(`${expectedRegion}: unbekanntes Dateiformat`);
+  if (!d || d.version !== 1 || !Array.isArray(d.rows) || (d.held !== undefined && !Array.isArray(d.held))) throw new Error(`${expectedRegion}: unbekanntes Dateiformat`);
   if (!isRegionKey(d.region) || d.region !== expectedRegion) throw new Error(`${expectedRegion}: Datei gehört zu einem anderen Land`);
   if (d.importId !== expectedImportId) throw new Error(`${expectedRegion}: Datei gehört zu einem anderen Lauf`);
   const sourceTimestamp = typeof d.sourceTimestamp === 'string' && !Number.isNaN(Date.parse(d.sourceTimestamp)) ? d.sourceTimestamp : null;
   const sourceUrl = typeof d.sourceUrl === 'string' && d.sourceUrl.startsWith('https://download.geofabrik.de/') ? d.sourceUrl : null;
 
-  const rows: PlaceRow[] = [];
   const invalid: string[] = [];
   const seen = new Set<string>();
-  for (const value of d.rows) {
-    const check = checkPlaceRow(value);
-    if (!check.ok) invalid.push(check.reason);
-    else if (check.row.region !== expectedRegion) invalid.push(`${check.row.id}: falsches Bundesland`);
-    else if (seen.has(check.row.id)) invalid.push(`${check.row.id}: doppelt`);
-    else {
-      seen.add(check.row.id);
-      rows.push(check.row);
+  const readRows = (values: readonly unknown[]): PlaceRow[] => {
+    const rows: PlaceRow[] = [];
+    for (const value of values) {
+      const check = checkPlaceRow(value);
+      if (!check.ok) invalid.push(check.reason);
+      else if (check.row.region !== expectedRegion) invalid.push(`${check.row.id}: falsches Bundesland`);
+      else if (seen.has(check.row.id)) invalid.push(`${check.row.id}: doppelt`);
+      else {
+        seen.add(check.row.id);
+        rows.push(check.row);
+      }
     }
-  }
-  return { file: { version: 1, region: expectedRegion, importId: expectedImportId, sourceTimestamp, sourceUrl, rows }, invalid };
+    return rows;
+  };
+  const rows = readRows(d.rows);
+  const held = readRows(d.held ?? []);
+  return { file: { version: 1, region: expectedRegion, importId: expectedImportId, sourceTimestamp, sourceUrl, rows, held }, invalid };
 }
 
 export function parseSummary(text: string): Summary {

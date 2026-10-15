@@ -35,4 +35,8 @@ export const placeLimits = {
   // namenlose Orte derselben Unterart näher als 40 m.
   sameNamedMeters: 150,
   sameUnnamedMeters: 40,
+
+  // Ausschlussliste place_overrides (von Hand gepflegt). Unter der Grenze von 1000 Zeilen je Antwort, die Supabase
+  // standardmäßig setzt: So merkt das Skript sicher, wenn es mehr wären (statt still nur die ersten 1000 zu lesen).
+  maxOverrides: 900,
 } as const;

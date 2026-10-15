@@ -15,7 +15,8 @@
     "db:seed-sql": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/seed-sql.ts",
     "activities:generate": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-activities.ts",
     "places:prepare": "TZ=Europe/Berlin node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/places-prepare.ts",
-    "places:upload": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/places-upload.ts"
+    "places:upload": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/places-upload.ts",
+    "places:check-names": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/places-check-names.ts"
   },
   "dependencies": {
     "@expo-google-fonts/literata": "^0.4.3",
