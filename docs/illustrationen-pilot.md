@@ -70,7 +70,7 @@ Daumennagel (96 × 48 und 64 × 32), jeweils in einfacher und doppelter Pixeldic
 1. **Natron-Vulkan ist das schwächste Bild.** Der erste Entwurf (rotbrauner Becher, weiße Schaumkrone) sah aus wie ein **Bierglas**.
    Der zweite (grüner Becher, hoher Schaum) wie eine Pflanze im Topf. Der dritte (Schaum läuft bis aufs Tablett) liest sich als Ausbruch,
    erinnert aber an eine **Explosionswolke**. Im Daumennagel ist er nur eine weiße Wolke.
-2. **Natron-Vulkan zeigt eine Schutzbrille, die der Text nicht nennt.** Das widerspricht der Regel „Ein Bild zeigt nichts, was der Text nicht sagt“.
+2. **(Erledigt 2026-10-15: Der Sicherheitshinweis nennt die Brille jetzt, de/en.) Natron-Vulkan zeigte eine Schutzbrille, die der Text nicht nannte.** Das widerspricht der Regel „Ein Bild zeigt nichts, was der Text nicht sagt“.
    Es steht als Punkt für die Durchsicht vor der Beta in der CLAUDE.md. Auf dem gesichtslosen Kopf wirkt die Brille eher wie ein Band.
 3. **Schritt 2:** Die erste Klebeflasche (weißer Block, spitze Kappe) sah aus wie eine **Kerze**, also wie offenes Feuer. Sie ist durch eine liegende Tube ersetzt.
    Die Hand mit dem Knopf wirkt eher wie ein Fäustling als wie eine Hand mit Fingern.
