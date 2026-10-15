@@ -1,0 +1,934 @@
+{
+  "blocks": [
+    {
+      "id": "adult",
+      "group": "figuren",
+      "kind": "figure",
+      "label": {
+        "de": "Erwachsener (ruhig)",
+        "en": "adult (resting)"
+      },
+      "box": {
+        "x0": -34,
+        "x1": 34,
+        "h": 118
+      },
+      "tints": [
+        "petrol",
+        "rose"
+      ],
+      "defaultTint": "petrol",
+      "hazards": [],
+      "person": "adult",
+      "materials": [],
+      "terms": {
+        "de": [],
+        "en": []
+      },
+      "neutral": true
+    },
+    {
+      "id": "adult-reach",
+      "group": "figuren",
+      "kind": "figure",
+      "label": {
+        "de": "Erwachsener (greift)",
+        "en": "adult (reaching)"
+      },
+      "box": {
+        "x0": -25,
+        "x1": 54,
+        "h": 118
+      },
+      "tints": [
+        "petrol",
+        "rose"
+      ],
+      "defaultTint": "petrol",
+      "hazards": [],
+      "person": "adult",
+      "materials": [],
+      "terms": {
+        "de": [],
+        "en": []
+      },
+      "neutral": true
+    },
+    {
+      "id": "child",
+      "group": "figuren",
+      "kind": "figure",
+      "label": {
+        "de": "Kind (ruhig)",
+        "en": "child (resting)"
+      },
+      "box": {
+        "x0": -26,
+        "x1": 26,
+        "h": 78
+      },
+      "tints": [
+        "petrol",
+        "rose"
+      ],
+      "defaultTint": "rose",
+      "hazards": [],
+      "person": "child",
+      "materials": [],
+      "terms": {
+        "de": [],
+        "en": []
+      },
+      "neutral": true
+    },
+    {
+      "id": "child-reach",
+      "group": "figuren",
+      "kind": "figure",
+      "label": {
+        "de": "Kind (greift)",
+        "en": "child (reaching)"
+      },
+      "box": {
+        "x0": -17,
+        "x1": 41,
+        "h": 78
+      },
+      "tints": [
+        "petrol",
+        "rose"
+      ],
+      "defaultTint": "rose",
+      "hazards": [],
+      "person": "child",
+      "materials": [],
+      "terms": {
+        "de": [],
+        "en": []
+      },
+      "neutral": true
+    },
+    {
+      "id": "child-cheer",
+      "group": "figuren",
+      "kind": "figure",
+      "label": {
+        "de": "Kind (jubelt)",
+        "en": "child (cheering)"
+      },
+      "box": {
+        "x0": -34,
+        "x1": 34,
+        "h": 78
+      },
+      "tints": [
+        "petrol",
+        "rose"
+      ],
+      "defaultTint": "rose",
+      "hazards": [],
+      "person": "child",
+      "materials": [],
+      "terms": {
+        "de": [],
+        "en": []
+      },
+      "neutral": true
+    },
+    {
+      "id": "toddler-sit",
+      "group": "figuren",
+      "kind": "figure",
+      "label": {
+        "de": "Kleinkind (sitzend)",
+        "en": "toddler (sitting)"
+      },
+      "box": {
+        "x0": -30,
+        "x1": 41,
+        "h": 59
+      },
+      "tints": [
+        "petrol",
+        "rose"
+      ],
+      "defaultTint": "rose",
+      "hazards": [],
+      "person": "toddler",
+      "materials": [],
+      "terms": {
+        "de": [],
+        "en": []
+      },
+      "neutral": true
+    },
+    {
+      "id": "ground-line",
+      "group": "moebel",
+      "kind": "ground",
+      "label": {
+        "de": "Standlinie",
+        "en": "ground line"
+      },
+      "box": {
+        "x0": -146,
+        "x1": 146,
+        "h": 2
+      },
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [],
+        "en": []
+      },
+      "neutral": true
+    },
+    {
+      "id": "table",
+      "group": "moebel",
+      "kind": "furniture",
+      "label": {
+        "de": "Tisch",
+        "en": "table"
+      },
+      "box": {
+        "x0": -102,
+        "x1": 103,
+        "h": 66
+      },
+      "surface": 64,
+      "tints": [
+        "brown",
+        "paper"
+      ],
+      "defaultTint": "brown",
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [],
+        "en": []
+      },
+      "neutral": true
+    },
+    {
+      "id": "tray",
+      "group": "moebel",
+      "kind": "object",
+      "label": {
+        "de": "Tablett",
+        "en": "tray"
+      },
+      "box": {
+        "x0": -46,
+        "x1": 47,
+        "h": 16
+      },
+      "tints": [
+        "paper",
+        "honey"
+      ],
+      "defaultTint": "paper",
+      "hazards": [],
+      "materials": [
+        "tray"
+      ],
+      "terms": {
+        "de": [
+          "tablett"
+        ],
+        "en": [
+          "tray"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "blanket",
+      "group": "moebel",
+      "kind": "furniture",
+      "label": {
+        "de": "Decke",
+        "en": "blanket"
+      },
+      "box": {
+        "x0": -48,
+        "x1": 49,
+        "h": 26
+      },
+      "tints": [
+        "rose",
+        "petrol",
+        "honey"
+      ],
+      "defaultTint": "rose",
+      "hazards": [],
+      "materials": [
+        "blanket",
+        "bedsheet"
+      ],
+      "terms": {
+        "de": [
+          "decke",
+          "laken"
+        ],
+        "en": [
+          "blanket",
+          "sheet"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "chair",
+      "group": "moebel",
+      "kind": "furniture",
+      "label": {
+        "de": "Stuhl",
+        "en": "chair"
+      },
+      "box": {
+        "x0": -22,
+        "x1": 25,
+        "h": 70
+      },
+      "tints": [
+        "brown",
+        "paper"
+      ],
+      "defaultTint": "brown",
+      "hazards": [],
+      "materials": [
+        "chairs"
+      ],
+      "terms": {
+        "de": [
+          "stuhl",
+          "stühl"
+        ],
+        "en": [
+          "chair"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "pillow",
+      "group": "moebel",
+      "kind": "object",
+      "label": {
+        "de": "Kissen",
+        "en": "pillow"
+      },
+      "box": {
+        "x0": -31,
+        "x1": 32,
+        "h": 35
+      },
+      "tints": [
+        "rose",
+        "petrol",
+        "honey",
+        "paper"
+      ],
+      "defaultTint": "rose",
+      "hazards": [],
+      "materials": [
+        "cushions"
+      ],
+      "terms": {
+        "de": [
+          "kissen",
+          "polster"
+        ],
+        "en": [
+          "cushion",
+          "pillow"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "cardboard-box",
+      "group": "moebel",
+      "kind": "object",
+      "label": {
+        "de": "Karton",
+        "en": "cardboard box"
+      },
+      "box": {
+        "x0": -34,
+        "x1": 41,
+        "h": 54
+      },
+      "hazards": [],
+      "materials": [
+        "cardboardBox"
+      ],
+      "terms": {
+        "de": [
+          "karton",
+          "schachtel"
+        ],
+        "en": [
+          "cardboard box",
+          "box"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "radio",
+      "group": "moebel",
+      "kind": "object",
+      "label": {
+        "de": "Radio",
+        "en": "radio"
+      },
+      "box": {
+        "x0": -32,
+        "x1": 33,
+        "h": 54
+      },
+      "tints": [
+        "petrol",
+        "rose",
+        "honey"
+      ],
+      "defaultTint": "honey",
+      "hazards": [],
+      "materials": [
+        "musicPlayer"
+      ],
+      "terms": {
+        "de": [
+          "radio",
+          "musik",
+          "lautsprecher"
+        ],
+        "en": [
+          "radio",
+          "music",
+          "speaker"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "bowl",
+      "group": "kueche",
+      "kind": "object",
+      "label": {
+        "de": "Schüssel",
+        "en": "bowl"
+      },
+      "box": {
+        "x0": -30,
+        "x1": 31,
+        "h": 32
+      },
+      "tints": [
+        "rose",
+        "petrol",
+        "honey",
+        "paper"
+      ],
+      "defaultTint": "honey",
+      "hazards": [],
+      "materials": [
+        "bowl"
+      ],
+      "terms": {
+        "de": [
+          "schüssel"
+        ],
+        "en": [
+          "bowl"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "wooden-spoon",
+      "group": "kueche",
+      "kind": "object",
+      "label": {
+        "de": "Holzlöffel",
+        "en": "wooden spoon"
+      },
+      "box": {
+        "x0": -32,
+        "x1": 40,
+        "h": 17
+      },
+      "hazards": [],
+      "materials": [
+        "woodenSpoon",
+        "spoon"
+      ],
+      "terms": {
+        "de": [
+          "löffel"
+        ],
+        "en": [
+          "spoon"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "baking-tray",
+      "group": "kueche",
+      "kind": "object",
+      "label": {
+        "de": "Backblech",
+        "en": "baking tray"
+      },
+      "box": {
+        "x0": -54,
+        "x1": 54,
+        "h": 18
+      },
+      "hazards": [
+        "heat"
+      ],
+      "materials": [],
+      "terms": {
+        "de": [
+          "backblech",
+          "blech"
+        ],
+        "en": [
+          "baking tray",
+          "baking sheet",
+          "tray"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "pizza",
+      "group": "kueche",
+      "kind": "object",
+      "label": {
+        "de": "Pizza",
+        "en": "pizza"
+      },
+      "box": {
+        "x0": -40,
+        "x1": 41,
+        "h": 24
+      },
+      "hazards": [],
+      "materials": [
+        "tomatoSauce"
+      ],
+      "terms": {
+        "de": [
+          "pizza"
+        ],
+        "en": [
+          "pizza"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "oven-mitt",
+      "group": "kueche",
+      "kind": "object",
+      "label": {
+        "de": "Ofenhandschuh",
+        "en": "oven mitt"
+      },
+      "box": {
+        "x0": -25,
+        "x1": 15,
+        "h": 45
+      },
+      "tints": [
+        "honey",
+        "rose",
+        "petrol"
+      ],
+      "defaultTint": "honey",
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [
+          "ofenhandschuh",
+          "topflappen",
+          "backofen"
+        ],
+        "en": [
+          "oven mitt",
+          "oven glove",
+          "oven"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "scissors",
+      "group": "basteln",
+      "kind": "object",
+      "label": {
+        "de": "Schere",
+        "en": "scissors"
+      },
+      "box": {
+        "x0": -28,
+        "x1": 32,
+        "h": 34
+      },
+      "tints": [
+        "rose",
+        "petrol",
+        "honey"
+      ],
+      "defaultTint": "rose",
+      "hazards": [
+        "sharp"
+      ],
+      "materials": [
+        "scissors"
+      ],
+      "terms": {
+        "de": [
+          "schere",
+          "schneid"
+        ],
+        "en": [
+          "scissors",
+          "cut"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "glue-tube",
+      "group": "basteln",
+      "kind": "object",
+      "label": {
+        "de": "Klebetube",
+        "en": "glue tube"
+      },
+      "box": {
+        "x0": -30,
+        "x1": 36,
+        "h": 16
+      },
+      "hazards": [],
+      "materials": [
+        "glue"
+      ],
+      "terms": {
+        "de": [
+          "kleber",
+          "kleb"
+        ],
+        "en": [
+          "glue",
+          "stick"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "paper",
+      "group": "basteln",
+      "kind": "object",
+      "label": {
+        "de": "Papier",
+        "en": "paper sheet"
+      },
+      "box": {
+        "x0": -34,
+        "x1": 39,
+        "h": 30
+      },
+      "tints": [
+        "paper",
+        "rose",
+        "honey"
+      ],
+      "defaultTint": "paper",
+      "hazards": [],
+      "materials": [
+        "paper"
+      ],
+      "terms": {
+        "de": [
+          "papier",
+          "blatt"
+        ],
+        "en": [
+          "paper",
+          "sheet"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "sock",
+      "group": "basteln",
+      "kind": "object",
+      "label": {
+        "de": "Socke",
+        "en": "sock"
+      },
+      "box": {
+        "x0": -20,
+        "x1": 21,
+        "h": 38
+      },
+      "tints": [
+        "rose",
+        "petrol",
+        "honey",
+        "paper"
+      ],
+      "defaultTint": "rose",
+      "hazards": [],
+      "materials": [
+        "socks"
+      ],
+      "terms": {
+        "de": [
+          "socke",
+          "strumpf"
+        ],
+        "en": [
+          "sock"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "cup",
+      "group": "experiment",
+      "kind": "object",
+      "label": {
+        "de": "Becher",
+        "en": "cup"
+      },
+      "box": {
+        "x0": -20,
+        "x1": 21,
+        "h": 38
+      },
+      "tints": [
+        "petrol",
+        "honey",
+        "rose"
+      ],
+      "defaultTint": "petrol",
+      "hazards": [],
+      "materials": [
+        "plasticCup"
+      ],
+      "terms": {
+        "de": [
+          "becher",
+          "glas"
+        ],
+        "en": [
+          "cup",
+          "glass"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "bottle",
+      "group": "experiment",
+      "kind": "object",
+      "label": {
+        "de": "Flasche",
+        "en": "bottle"
+      },
+      "box": {
+        "x0": -15,
+        "x1": 16,
+        "h": 68
+      },
+      "tints": [
+        "petrol",
+        "honey",
+        "rose"
+      ],
+      "defaultTint": "petrol",
+      "hazards": [],
+      "materials": [
+        "drinkBottle"
+      ],
+      "terms": {
+        "de": [
+          "flasche"
+        ],
+        "en": [
+          "bottle"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "goggles",
+      "group": "experiment",
+      "kind": "object",
+      "label": {
+        "de": "Schutzbrille",
+        "en": "safety goggles"
+      },
+      "box": {
+        "x0": -38,
+        "x1": 38,
+        "h": 30
+      },
+      "hazards": [
+        "goggles"
+      ],
+      "materials": [],
+      "terms": {
+        "de": [
+          "brille"
+        ],
+        "en": [
+          "goggles",
+          "glasses"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "flashlight",
+      "group": "experiment",
+      "kind": "object",
+      "label": {
+        "de": "Taschenlampe",
+        "en": "flashlight"
+      },
+      "box": {
+        "x0": -30,
+        "x1": 28,
+        "h": 24
+      },
+      "tints": [
+        "petrol",
+        "rose",
+        "honey"
+      ],
+      "defaultTint": "petrol",
+      "hazards": [],
+      "materials": [
+        "flashlight"
+      ],
+      "terms": {
+        "de": [
+          "taschenlampe",
+          "lampe"
+        ],
+        "en": [
+          "flashlight",
+          "torch"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "tree",
+      "group": "natur",
+      "kind": "nature",
+      "label": {
+        "de": "Baum",
+        "en": "tree"
+      },
+      "box": {
+        "x0": -36,
+        "x1": 41,
+        "h": 98
+      },
+      "tints": [
+        "petrol",
+        "rose"
+      ],
+      "defaultTint": "petrol",
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [
+          "baum",
+          "bäume",
+          "wald"
+        ],
+        "en": [
+          "tree",
+          "forest"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "flower",
+      "group": "natur",
+      "kind": "nature",
+      "label": {
+        "de": "Blume",
+        "en": "flower"
+      },
+      "box": {
+        "x0": -21,
+        "x1": 21,
+        "h": 59
+      },
+      "tints": [
+        "rose",
+        "honey",
+        "paper"
+      ],
+      "defaultTint": "rose",
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [
+          "blume",
+          "blüte"
+        ],
+        "en": [
+          "flower",
+          "blossom"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "puddle",
+      "group": "natur",
+      "kind": "nature",
+      "label": {
+        "de": "Pfütze",
+        "en": "puddle"
+      },
+      "box": {
+        "x0": -48,
+        "x1": 49,
+        "h": 20
+      },
+      "hazards": [
+        "water"
+      ],
+      "materials": [
+        "puddles"
+      ],
+      "terms": {
+        "de": [
+          "pfütze",
+          "pfuetze"
+        ],
+        "en": [
+          "puddle"
+        ]
+      },
+      "neutral": false
+    }
+  ]
+}

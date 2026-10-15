@@ -1,0 +1,4 @@
+<path d="M-38 -16H38L48 -5H-48Z" fill="{{paper}}" stroke-width="{{line}}"/>
+<path d="M-28 -13H28L35 -7H-35Z" fill="{{ground}}" stroke="none"/>
+<path d="M-48 -5H48V0H-48Z" fill="{{paper}}" stroke-width="{{line}}"/>
+<path d="M-52 -9H-48M48 -9H52" fill="none" stroke-width="{{line}}"/>

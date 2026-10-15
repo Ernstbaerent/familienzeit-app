@@ -1,0 +1,4 @@
+<path d="M-5 -58H5V-44C5 -41 13 -39 13 -30V0H-13V-30C-13 -39 -5 -41 -5 -44Z" fill="{{paper}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-13 -22H13V0H-13Z" fill="{{tint}}" stroke="none"/>
+<path d="M-5 -58H5V-44C5 -41 13 -39 13 -30V0H-13V-30C-13 -39 -5 -41 -5 -44Z" fill="none" stroke-width="{{line}}"/>
+<path d="M-7 -66H7V-58H-7Z" fill="{{honey}}" stroke-width="{{line}}"/>

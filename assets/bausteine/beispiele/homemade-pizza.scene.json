@@ -1,0 +1,34 @@
+{
+  "activity": "homemade-pizza",
+  "layout": "table",
+  "items": [
+    {
+      "slot": "table",
+      "block": "table"
+    },
+    {
+      "slot": "on1",
+      "block": "baking-tray",
+      "size": 0.6
+    },
+    {
+      "slot": "on2",
+      "block": "pizza",
+      "size": 0.6
+    },
+    {
+      "slot": "on3",
+      "block": "oven-mitt"
+    },
+    {
+      "slot": "left",
+      "block": "adult-reach",
+      "tint": "petrol"
+    },
+    {
+      "slot": "right",
+      "block": "child",
+      "tint": "rose"
+    }
+  ]
+}

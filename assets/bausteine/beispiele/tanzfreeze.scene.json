@@ -1,0 +1,8 @@
+{
+  "layout": "pair",
+  "items": [
+    { "slot": "left", "block": "child-cheer", "tint": "rose" },
+    { "slot": "middle", "block": "radio", "tint": "honey" },
+    { "slot": "right", "block": "child-cheer", "tint": "petrol" }
+  ]
+}

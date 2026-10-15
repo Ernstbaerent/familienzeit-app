@@ -1,0 +1,8 @@
+<path d="M0 0V-34" fill="none" stroke-width="{{line}}"/>
+<path d="M0 -12C8 -14 14 -10 16 -4C8 -2 2 -6 0 -12Z" fill="{{petrol}}" stroke-width="{{line}}"/>
+<circle cx="0" cy="-48" r="9" fill="{{tint}}" stroke-width="{{line}}"/>
+<circle cx="-10" cy="-40" r="9" fill="{{tint}}" stroke-width="{{line}}"/>
+<circle cx="10" cy="-40" r="9" fill="{{tint}}" stroke-width="{{line}}"/>
+<circle cx="-6" cy="-30" r="9" fill="{{tint}}" stroke-width="{{line}}"/>
+<circle cx="6" cy="-30" r="9" fill="{{tint}}" stroke-width="{{line}}"/>
+<circle cx="0" cy="-40" r="7" fill="{{honey}}" stroke-width="{{line}}"/>

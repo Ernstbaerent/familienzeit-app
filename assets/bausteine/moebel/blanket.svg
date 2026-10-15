@@ -1,0 +1,5 @@
+<path d="M-42 -24H42V-12H-42Z" fill="{{tint}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-42 -24H42V-12H-42Z" fill="none" stroke-width="{{line}}"/>
+<path d="M-46 -12H46V0H-46Z" fill="{{tint}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-46 -12H46V0H-46Z" fill="none" stroke-width="{{line}}"/>
+<path d="M-30 -18H30M-34 -6H34" fill="none" stroke="{{paper}}" stroke-width="{{fine}}"/>

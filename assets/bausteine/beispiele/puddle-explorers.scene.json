@@ -1,0 +1,20 @@
+{
+  "activity": "puddle-explorers",
+  "layout": "outdoor",
+  "items": [
+    {
+      "slot": "s1",
+      "block": "adult",
+      "tint": "petrol"
+    },
+    {
+      "slot": "s2",
+      "block": "child-reach",
+      "tint": "rose"
+    },
+    {
+      "slot": "s3",
+      "block": "puddle"
+    }
+  ]
+}

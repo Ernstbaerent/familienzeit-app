@@ -88,6 +88,8 @@ npx expo lint          # Code-Stil prüfen
 npm run places:test    # M2a: Machbarkeitstest Orte (Overpass API, braucht Node 22+, Zwischenspeicher in scripts/.cache/)
 npm run activities:check  # M4: prüft alle Aktivitäten in data/ (Form, Sicherheits-Checkliste, Texte), braucht Node 22+
 npm run illustrations:build  # erzeugt die Zeichnungen in assets/illustrations/ aus den Vorlagen und der Palette (src/lib/palette.ts), `-- --check` prüft nur, braucht Node 22+
+npm run kit:check      # M9b: prüft den Baukasten für Zeichnungen (assets/bausteine/) und die Beispielszenen, Anleitung: docs/bausteine/README.md, Plan: docs/bilder-plan.md, braucht Node 22+
+npm run kit:preview    # M9b: erzeugt die Vorschau des Baukastens (docs/bausteine/VORSCHAU.md), `-- --check` prüft nur
 npm run db:seed-sql    # M8: prüft data/ wie activities:check und erzeugt die SQL-Dateien für Supabase in supabase/seed/ (im SQL-Editor einfügen, Anleitung: docs/supabase.md), braucht Node 22+
 npm run activities:generate -- --dry-run  # M9: KI-Wochenlauf von Hand (läuft sonst sonntags als GitHub Action), braucht ANTHROPIC_API_KEY (und für einen echten Lauf SUPABASE_URL, SUPABASE_SECRET_KEY), Anleitung: docs/wochenlauf.md
 PLACES_REGIONS=TH npm run places:prepare  # M10a: Orte-Import „Vorbereiten“ von Hand (läuft sonst monatlich als GitHub Action), braucht osmium-tool, ohne Schlüssel, Anleitung: docs/orte.md

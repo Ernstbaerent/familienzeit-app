@@ -1,0 +1,3 @@
+<path d="M-86 -56L-90 0M86 -56L90 0" fill="none" stroke-width="{{line}}"/>
+<path d="M-100 -64H100V-54H-100Z" fill="{{tint}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-100 -64H100V-54H-100Z" fill="none" stroke-width="{{line}}"/>
