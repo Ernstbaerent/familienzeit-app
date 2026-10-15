@@ -1,14 +1,17 @@
-// Die Aktivitäten der App (M8) mit echtem Provider, echtem Zwischenspeicher (AsyncStorage-Ersatz) und gemocktem fetch:
-// Start sofort mit dem Mitgelieferten, Auffrischen im Hintergrund höchstens einmal pro Tag, stiller Rückfall bei jedem Fehler.
+// Die Aktivitäten der App (M8, M8b) mit echtem Provider, echtem Zwischenspeicher (AsyncStorage-Ersatz) und gemocktem fetch:
+// Start sofort mit dem Mitgelieferten, Abgleich im Hintergrund höchstens einmal pro Tag, stiller Rückfall bei jedem Fehler.
+// Ein Abgleich sind mindestens zwei Anfragen (Zählprobe und Änderungen).
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { act, create } from 'react-test-renderer';
 
 import { makeActivity } from '../suggestions/testHelpers';
 import { ActivitiesProvider, useActivities } from './ActivitiesContext';
-import { toStoredActivities } from './activitiesCache';
+import { legacyStorageVersion, type ActivitiesRecord } from './activitiesCache';
+import { loadStoredActivities, saveStoredActivities } from './activitiesStorage';
 import { activityToRow } from './activityRow';
 import { getBundledActivities } from './bundledActivities';
+import { FakeActivitiesServer } from './fakeActivitiesServer';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
   jest.requireActual('@react-native-async-storage/async-storage/jest/async-storage-mock'),
@@ -25,7 +28,9 @@ const key = 'sb_publishable_test';
 const day = 24 * 60 * 60 * 1000;
 
 const remote = (count: number, prefix = 'remote') => Array.from({ length: count }, (_, i) => makeActivity({ id: `${prefix}-${i}` }));
-const rowsOf = (activities: ReturnType<typeof remote>) => activities.map(activityToRow);
+// Zeilen, wie Supabase sie liefert (mit updated_at).
+const rowsOf = (activities: ReturnType<typeof remote>) =>
+  activities.map((activity) => ({ ...activityToRow(activity), updated_at: '2026-10-18T16:00:00+00:00' }));
 
 function configure(minutes?: string) {
   process.env.EXPO_PUBLIC_SUPABASE_URL = url;
@@ -35,16 +40,21 @@ function configure(minutes?: string) {
 }
 
 const mockFetch = jest.fn();
+// Jede Anfrage bekommt dieselbe Antwort (die Zählprobe findet darin keine Anzahl und vergleicht dann nicht).
 function answer(rows: unknown, ok = true, status = 200) {
   mockFetch.mockResolvedValue({ ok, status, json: async () => rows });
 }
 
+// Zwischenspeicher im alten Format v1 (so liegt er nach M8 auf den Geräten) oder im neuen Format v2.
 async function storeCache(activities: ReturnType<typeof remote>, ageMs: number) {
-  await AsyncStorage.setItem('activities.v1', JSON.stringify(toStoredActivities({ fetchedAt: Date.now() - ageMs, activities })));
+  await AsyncStorage.setItem('activities.v1', JSON.stringify({ version: legacyStorageVersion, fetchedAt: Date.now() - ageMs, activities }));
+}
+async function storeCacheV2(record: ActivitiesRecord) {
+  await saveStoredActivities(record);
 }
 async function storedIds(): Promise<string[] | null> {
-  const raw = await AsyncStorage.getItem('activities.v1');
-  return raw === null ? null : (JSON.parse(raw) as { activities: { id: string }[] }).activities.map((activity) => activity.id);
+  const record = await loadStoredActivities(null);
+  return record === null ? null : record.activities.map((activity) => activity.id);
 }
 
 type Captured = ReturnType<typeof useActivities>;
@@ -143,25 +153,27 @@ describe('Erster Start mit Netz', () => {
     expect(current().source).toBe('remote');
     expect(current().activities.map((activity) => activity.id)).toEqual(remote(6).map((activity) => activity.id));
     expect(await storedIds()).toEqual(remote(6).map((activity) => activity.id));
-    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(2); // Zählprobe und alle Aktivitäten
   });
 
-  it('die Anfrage ist ein GET mit status=eq.approved und dem öffentlichen Schlüssel, sonst nichts', async () => {
+  it('die Anfragen sind GETs mit status=eq.approved und dem öffentlichen Schlüssel, sonst nichts', async () => {
     configure();
     answer(rowsOf(remote(4)));
     await mount();
     await settle();
-    const [requestUrl, init] = mockFetch.mock.calls[0];
-    expect(requestUrl).toContain('https://abc.supabase.co/rest/v1/activities?');
-    expect(requestUrl).toContain('status=eq.approved');
-    expect(init.method).toBe('GET');
-    expect(init.headers).toEqual({ apikey: key, Accept: 'application/json' });
-    expect(init.body).toBeUndefined();
+    expect(mockFetch.mock.calls.length).toBeGreaterThan(0);
+    for (const [requestUrl, init] of mockFetch.mock.calls) {
+      expect(requestUrl).toContain('https://abc.supabase.co/rest/v1/activities?');
+      expect(requestUrl).toContain('status=eq.approved');
+      expect(init.method).toBe('GET');
+      expect({ ...init.headers, Prefer: undefined }).toEqual({ apikey: key, Accept: 'application/json', Prefer: undefined });
+      expect(init.body).toBeUndefined();
+    }
   });
 
   it('liefert der Server Entwürfe mit, zeigt die App sie nicht', async () => {
     configure();
-    answer([...rowsOf(remote(4)), activityToRow(makeActivity({ id: 'geheimer-entwurf', status: 'draft' }))]);
+    answer(rowsOf([...remote(4), makeActivity({ id: 'geheimer-entwurf', status: 'draft' })]));
     const { current } = await mount();
     await settle();
     expect(current().activities.map((activity) => activity.id)).not.toContain('geheimer-entwurf');
@@ -204,7 +216,7 @@ describe('Höchstens einmal pro Tag', () => {
     expect(old.current().source).toBe('remote');
     expect(old.current().activities).toHaveLength(7);
     expect(await storedIds()).toEqual(remote(7, 'neu').map((activity) => activity.id));
-    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
   it('nur zum Testen: EXPO_PUBLIC_ACTIVITIES_REFRESH_MINUTES verkürzt den Abstand', async () => {
@@ -213,7 +225,7 @@ describe('Höchstens einmal pro Tag', () => {
     answer(rowsOf(remote(4, 'neu')));
     const { current } = await mount();
     await settle();
-    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
     expect(current().source).toBe('remote');
   });
 
@@ -225,13 +237,13 @@ describe('Höchstens einmal pro Tag', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('pro Start höchstens ein Abruf', async () => {
+  it('pro Start höchstens ein Abgleich', async () => {
     configure();
     answer(rowsOf(remote(4)));
     await mount();
     await settle();
     await settle();
-    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -266,6 +278,7 @@ describe('Rückfall: still, ohne Fehler in der Oberfläche', () => {
     ['eine leere Liste (leere Datenbank)', () => answer([])],
     ['nur zwei Aktivitäten (halb eingespielt)', () => answer(rowsOf(remote(2)))],
     ['lauter kaputte Zeilen', () => answer([{ id: 'x' }, { id: 'y' }, { id: 'z' }, {}])],
+    ['lauter kaputte Zeilen mit Zeitstempel', () => answer(['x', 'y', 'z', 'w'].map((id) => ({ id, updated_at: '2026-10-18T16:00:00+00:00' })))],
   ])('%s: bleibt beim Mitgelieferten', async (_name, setUp) => {
     configure();
     setUp();
@@ -322,6 +335,82 @@ describe('Rückfall: still, ohne Fehler in der Oberfläche', () => {
     const { current } = await mount();
     await settle();
     expect(current().activities.length).toBeGreaterThan(100);
+  });
+});
+
+describe('Nur Änderungen (M8b)', () => {
+  // Der Testserver beantwortet alle Anfragen wie Supabase (Zählprobe, Änderungen, ID-Liste).
+  // Die Uhr des Servers läuft eine Stunde weiter, damit die Zeilen älter sind als die Überlappung von 15 Minuten.
+  function serve(server: FakeActivitiesServer) {
+    server.advance(60 * 60 * 1000);
+    mockFetch.mockImplementation((requestUrl: string, init: Parameters<FakeActivitiesServer['fetch']>[1]) => server.fetch(requestUrl, init));
+  }
+  async function makeOld() {
+    const record = (await loadStoredActivities(null)) as ActivitiesRecord;
+    await storeCacheV2({ ...record, fetchedAt: Date.now() - 2 * day });
+  }
+
+  it('Umstieg von v1: zeigt den alten Zwischenspeicher, lädt einmal alles, schreibt v2 und löscht v1', async () => {
+    configure();
+    await storeCache(remote(5, 'cache'), 2 * day);
+    const server = new FakeActivitiesServer();
+    server.upsert(remote(6).map(activityToRow));
+    serve(server);
+    const { current } = await mount();
+    await settle();
+    expect(current().source).toBe('remote');
+    expect(server.log.map((entry) => entry.kind)).toEqual(['count', 'changes']);
+    expect(await AsyncStorage.getItem('activities.v1')).toBeNull();
+    expect(await AsyncStorage.getItem('activities.v2.meta')).not.toBeNull();
+    expect((await loadStoredActivities(null))?.cursor).toBe('2026-10-18T16:00:00.000000Z');
+  });
+
+  it('Datenbank mit weniger Aktivitäten als data/: die Zählprobe vergleicht nur Supabase, an den Folgetagen keine ID-Liste', async () => {
+    configure();
+    const server = new FakeActivitiesServer();
+    server.upsert(remote(20).map(activityToRow));
+    serve(server);
+    const first = await mount();
+    await settle();
+    expect(first.current().source).toBe('remote');
+    expect(first.current().activities).toHaveLength(20);
+    expect(getBundledActivities().length).toBeGreaterThan(20);
+    await first.unmount();
+
+    for (let round = 0; round < 2; round += 1) {
+      await makeOld();
+      server.clearLog();
+      const next = await mount();
+      await settle();
+      expect(server.log.map((entry) => entry.kind)).toEqual(['count', 'changes']);
+      expect(server.log.map((entry) => entry.body)).toEqual(['[]', '[]']);
+      expect(next.current().activities).toHaveLength(20);
+      await next.unmount();
+    }
+  });
+
+  it('am nächsten Tag: nur die neuen werden geholt, Zurückgezogenes verschwindet', async () => {
+    configure();
+    const server = new FakeActivitiesServer();
+    server.upsert(remote(10).map(activityToRow));
+    serve(server);
+    const first = await mount();
+    await settle();
+    await first.unmount();
+
+    server.advance(day);
+    server.upsert(remote(3, 'neu').map(activityToRow));
+    server.setStatus(['remote-4'], 'draft');
+    server.advance(60 * 60 * 1000);
+    await makeOld();
+    server.clearLog();
+    const next = await mount();
+    await settle();
+    const shown = next.current().activities.map((activity) => activity.id);
+    expect(shown).toHaveLength(12);
+    expect(shown).toContain('neu-0');
+    expect(shown).not.toContain('remote-4');
+    expect(JSON.parse(server.log[1].body)).toHaveLength(3);
   });
 });
 

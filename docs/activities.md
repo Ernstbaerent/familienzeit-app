@@ -17,7 +17,7 @@ M5b den Startbestand geschrieben. Wie die App daraus auswählt, steht in `docs/s
 | Checkliste (Regeln)                  | `docs/sicherheits-checkliste.md`               |
 
 In der App: `useActivities()` (Bildschirme) gibt alle Aktivitäten mit Status `approved` zurück. Sie kommen seit M8 aus Supabase
-(einmal pro Tag im Hintergrund geholt, lokal zwischengespeichert); sind keine Daten ladbar, nutzt die App die mitgelieferten aus `data/`
+(einmal pro Tag im Hintergrund abgeglichen, seit M8b nur die Änderungen, lokal zwischengespeichert); sind keine Daten ladbar, nutzt die App die mitgelieferten aus `data/`
 (`getBundledActivities()`). Kaputte Einträge werden in jedem Fall übersprungen und in der Konsole gemeldet.
 
 ## Die Felder

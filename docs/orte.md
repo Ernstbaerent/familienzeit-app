@@ -380,7 +380,7 @@ Overpass aus der Action wäre langsam und schwankend (M2a). Für einen Wechsel n
 
 Kostenloser Tarif bei Supabase (Preisseite, gelesen am 14.10.2026): **500 MB Datenbank** (darüber nur noch lesen), **5 GB Egress** plus 5 GB zwischengespeicherter Egress im Monat,
 Pause nach einer Woche ohne Aktivität. Ein neues Projekt belegt schon 40 bis 60 MB. Für ganz Deutschland reicht der Platz, auch mit den Aktivitäten.
-Pro (25 $ im Monat, etwa 23 €) ist eine **Entscheidung vor M12** (CLAUDE.md, Punkt 7). Der übertragene Datenverkehr der **Aktivitäten** wird früher eng als die Orte, deshalb M8b (CLAUDE.md, Roadmap).
+Pro (25 $ im Monat, etwa 23 €) ist eine **Entscheidung vor M12** (CLAUDE.md, Punkt 7). Bis M8 wurde der Datenverkehr der **Aktivitäten** früher eng als die Orte; seit M8b (nur Änderungen) ist es umgekehrt (`docs/supabase.md`, „Datenverkehr (Egress)“).
 
 Nach dem ersten Import für alle Länder die echte Größe ansehen:
 
@@ -472,7 +472,7 @@ Gemessen bzw. aus den Grenzen gerechnet:
 
 | Eintrag | heute (104 Aktivitäten) | bei 1 500 Aktivitäten |
 | --- | --- | --- |
-| Aktivitäten (`activities.v1`, etwa 1,9 KB je Aktivität) | 0,2 MB | 2,8 MB |
+| Aktivitäten (seit M8b `activities.v2.*` in Teilen zu höchstens 200, etwa 1,9 KB je Aktivität) | 0,2 MB | 2,8 MB |
 | Kinderprofile (`profiles.v1`) | unter 0,01 MB | unter 0,01 MB |
 | Verlauf (`history.v1`, höchstens 500 Einträge à etwa 150 Byte) | bis 0,08 MB | bis 0,08 MB |
 | Wetter (`weather.v1`, Vorhersage für einen Ort) | etwa 0,02 MB | etwa 0,02 MB |
@@ -483,8 +483,8 @@ Gemessen bzw. aus den Grenzen gerechnet:
 - **Heute passt es mit viel Luft** (etwa 2,3 von 6 MB).
 - **Bei 1 500 Aktivitäten passt es knapp** (etwa 4,9 von 6 MB, gut 1 MB Luft). Ob SQLite beim Überschreiben des Aktivitäten-Eintrags kurz Platz für alten und neuen Inhalt braucht, ist nicht gemessen
   (`docs/wochenlauf.md` nimmt es an); dann wären es kurz bis zu etwa 7,7 MB, und das Speichern der Aktivitäten würde scheitern (die App läuft weiter, nur ohne neuen Zwischenspeicher).
-  Unabhängig davon ist der Aktivitäten-Eintrag ab etwa 1 000 Aktivitäten **allein** größer als 2 MB und auf Android nicht mehr lesbar. Beides löst das Aufteilen des Aktivitäten-Speichers
-  (CLAUDE.md, „Später“, bei 800 Aktivitäten). **Empfehlung:** Das Aufteilen spätestens bei 800 Aktivitäten bauen; die Orte bleiben mit ihrer eigenen Obergrenze von 2 MB getrennt davon sicher.
+  Seit M8b ist der Aktivitäten-Speicher in Teile zu höchstens 200 Aktivitäten (etwa 400 KB) aufgeteilt: Kein Eintrag wird größer als 2 MB, und beim Überschreiben braucht es kurz nur Platz für die neuen Teile.
+  Die Gesamtgrenze von 6 MB bleibt bei 1 500 Aktivitäten knapp (etwa 4,9 MB); die Orte bleiben mit ihrer eigenen Obergrenze von 2 MB getrennt davon sicher.
 - Die dichteste Kachel (`262_44`, Berlin-Mitte, 5 149 Orte, deine Abfrage) braucht kompakt etwa **0,8 MB** und passt allein gut unter die 2 MB je Eintrag.
   2 MB reichen für etwa 13 000 Orte: In Berlin oder im Ruhrgebiet werden deshalb nicht alle Kacheln des 30-km-Umkreises gespeichert, sondern die nächsten. Die fernen gelten bis zum Schließen der App
   und werden beim nächsten Öffnen (frühestens nach 30 Tagen bzw. wenn sie fehlen) neu geholt.
@@ -505,8 +505,8 @@ Echte Namen und Koordinaten packen schlechter; ich rechne vorsichtig mit **Fakto
 
 - **Folge für die 5 GB des kostenlosen Tarifs:** Die Orte allein vertragen einige tausend aktive Geräte im Monat (gemischt aus Stadt und Land). Wie Supabase den Datenverkehr zählt
   (gepackt oder ungepackt), ist nicht dokumentiert, soweit ich es gefunden habe: **bitte nach dem Pilot in der Nutzungsübersicht des Dashboards nachsehen** („Usage“ → „Egress“).
-- **Die Aktivitäten verbrauchen mehr als die Orte:** Jedes Gerät holt sie heute täglich ganz, etwa 65 KB gepackt, also etwa 2 MB im Monat, bei 1 500 Aktivitäten etwa 27 MB im Monat
-  (`docs/wochenlauf.md`, „Wachstum“). Das ist der Grund für M8b (Aktivitäten als Änderungen laden). Die Orte holen sich dagegen schon jetzt nur, was fehlt oder alt ist.
+- **Seit M8b verbrauchen die Orte mehr als die Aktivitäten:** Bis M8 holte jedes Gerät die Aktivitäten täglich ganz (etwa 2 MB gepackt im Monat, bei 1 500 Aktivitäten etwa 27 MB).
+  Seit M8b holt es nur die Änderungen, gemessen etwa 165 KB ungepackt im Monat (`docs/supabase.md`, „Datenverkehr (Egress)“). Ideen, wie die Orte sparsamer werden, stehen in der CLAUDE.md unter „Später“ (nicht gebaut).
 - Die Zahlen der Orte im Umkreis sind geschätzt. Nachzählen für einen Ort (Kacheln aus `tilesAround`, z. B. Berlin-Mitte):
   `select count(*) from public.places where tile in ('261_43','261_44','261_45','261_46','262_43','262_44','262_45','262_46','263_43','263_44','263_45','263_46');`
 

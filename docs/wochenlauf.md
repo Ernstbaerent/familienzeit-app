@@ -142,7 +142,7 @@ Wie in der „Wöchentlichen Durchsicht“ oben, Punkt 2 und 3. Die vollständig
 1. **Run workflow** mit `dry_run` **aus** und `auto_approve` **aus**.
 2. Danach im SQL-Editor „Alle Entwürfe des letzten Laufs ansehen“ (oben). Alle haben `draft`, die App zeigt sie noch nicht.
 3. Gute freigeben (einzeln oder: `update public.activities set status = 'approved' where batch_id = '…' and status = 'draft';`).
-4. In der App: Nach dem nächsten täglichen Abruf (oder mit `EXPO_PUBLIC_ACTIVITIES_REFRESH_MINUTES=1` zum Testen, `docs/supabase.md` Schritt 6d) steht im Terminal eine höhere Zahl bei „von Supabase geladen“.
+4. In der App: Nach dem nächsten täglichen Abruf (oder mit `EXPO_PUBLIC_ACTIVITIES_REFRESH_MINUTES=1` zum Testen, `docs/supabase.md` Schritt 6d) steht im Terminal z. B. „15 Änderung(en), jetzt 134 von Supabase“ (seit M8b; beim allerersten Abruf „… von Supabase geladen“).
 
 ### 6. Den Wochenlauf laufen lassen
 
@@ -305,9 +305,9 @@ Das Skript liest keine `.env`. Geheime Schlüssel gehören nie in die `.env` der
 
 ---
 
-## Wachstum: Größe der Daten in der App (gemessen, nicht gebaut)
+## Wachstum: Größe der Daten in der App (gemessen; seit M8b gebaut)
 
-Gemessen mit den 104 Aktivitäten (`activityToRow` für die Antwort von Supabase, das Format von `activities.v1` für den Zwischenspeicher):
+Gemessen mit den 104 Aktivitäten (`activityToRow` für die Antwort von Supabase, das Format von `activities.v1` für den Zwischenspeicher, vor M8b):
 
 | | 104 (heute) | je Aktivität | 1000 | 1500 |
 | --- | --- | --- | --- | --- |
@@ -323,20 +323,17 @@ Ist der Eintrag größer, scheitert das Lesen („Row too big to fit into Cursor
 - iOS hat diese Grenze so nicht (dort sind es Dateien), betroffen wäre nur Android.
 - Beim Wachstum von etwa 15 Aktivitäten pro Woche ist die Grenze in gut einem Jahr erreicht; die Obergrenze 1500 liegt **darüber**.
 
-**Vorschlag, wenn es so weit ist (vor 900 Aktivitäten):**
+**Umgesetzt in M8b** (Details, Messung und Anleitung: `docs/supabase.md`, „Nur Änderungen (M8b)“ und „Datenverkehr (Egress)“):
 
-1. Den Zwischenspeicher in **Teile** aufteilen: `activities.v2.meta` (Version, Zeitpunkt, Anzahl und Schlüssel der Teile) und `activities.v2.part.0`, `.part.1`, … mit je höchstens 200 Aktivitäten (etwa 400 KB, weit unter 2 MB).
-   Schreiben mit `multiSet` (alle Teile in einem Aufruf), danach alte, überzählige Teile mit `multiRemove` löschen; lesen mit `multiGet`. Ein Teil, das fehlt oder kaputt ist, macht den ganzen Zwischenspeicher ungültig (wie heute: dann Mitgeliefertes).
-   Den alten Schlüssel `activities.v1` beim ersten Schreiben von v2 löschen.
-2. Zusätzlich kleiner werden: nur die Sprachen speichern, die die App gerade anzeigt, plus Englisch als Rückfall.
-3. Die Gesamtgrenze von 6 MB im Blick behalten (Profile und Verlauf liegen dort auch). Sie lässt sich in den Build-Einstellungen anheben, aber besser klein bleiben.
-4. Später, wenn es noch mehr werden: Supabase nur die Änderungen seit dem letzten Abruf abfragen (`updated_at`), statt jeden Tag alles.
+1. Der Zwischenspeicher ist **in Teilen**: `activities.v2.meta` und `activities.v2.part.<Fassung>.<n>` mit je höchstens 200 Aktivitäten (etwa 400 KB, weit unter 2 MB). Erst die neuen Teile, dann die Angaben, dann die alten Teile löschen; `activities.v1` wird nach dem ersten Schreiben von v2 gelöscht.
+   Damit ist die Grenze von 2 MB je Eintrag für die Aktivitäten erledigt. Die Gesamtgrenze von 6 MB (bei 1 500 Aktivitäten zusammen mit den Orten etwa 4,9 MB) bleibt im Blick.
+2. Die App holt bei Supabase **nur die Änderungen** seit dem letzten Abgleich (`updated_at`), dazu eine Zählprobe und bei Abweichung die ID-Liste, damit Zurückgezogenes verschwindet.
+3. Nicht gebaut: nur die angezeigten Sprachen speichern (erst nötig, wenn weitere Sprachen dazukommen).
 
-**Datenverkehr (Egress) im kostenlosen Tarif: deshalb M8b.** Heute holt jedes Gerät die Aktivitäten einmal am Tag **komplett** (heute ca. 65 KB gepackt bzw. 200 KB ungepackt, bei 1500 Aktivitäten ca. 0,9 bzw. 2,8 MB).
-Der kostenlose Tarif von Supabase hat 5 GB Egress im Monat (Preisseite, 14.10.2026). Ob gepackt oder ungepackt gezählt wird, steht dort nicht; im ungünstigen Fall reichen 5 GB heute für etwa 800 Geräte,
-bei 1500 Aktivitäten für etwa 60. Das ist eng, lange bevor die Orte (M10) etwas ausmachen (ca. 0,3 MB pro Gerät und Monat). Deshalb steht in der Roadmap **M8b, vor M12**:
-Aktivitäten nur als Änderungen seit dem letzten Abruf laden (`updated_at` gibt es seit M8). Zurückgezogene Aktivitäten müssen dabei trotzdem verschwinden (z. B. auch Zeilen mit geändertem Status abfragen
-oder ab und zu eine Liste der gültigen IDs). Nicht gebaut, nicht Teil von M10.
+**Datenverkehr (Egress) im kostenlosen Tarif.** Bis M8 holte jedes Gerät die Aktivitäten einmal am Tag **komplett** (ca. 65 KB gepackt bzw. 200 KB ungepackt, bei 1500 Aktivitäten ca. 0,9 bzw. 2,8 MB);
+5 GB reichten im ungünstigen Fall für etwa 800 Geräte, bei 1500 Aktivitäten für etwa 60. **Seit M8b** sind es im Monat etwa 165 KB ungepackt pro Gerät (204 KB bei 1500 Aktivitäten), gemessen mit `activityTraffic.test.ts`;
+5 GB reichen dann für etwa 25 000 bis 30 000 Geräte. Nach M8b verbrauchen die Orte mehr als die Aktivitäten (`docs/orte.md`). Für den Wochenlauf heißt das: Ein Lauf kostet jedes Gerät einmal die neuen Zeilen (15 Aktivitäten etwa 29 KB ungepackt), mehr nicht.
+Einen Lauf zurückziehen (`batch_id` → `rejected`) kostet jedes Gerät einmal die ID-Liste (bei 1500 Aktivitäten etwa 40 KB).
 
 ---
 
