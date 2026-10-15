@@ -5,7 +5,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { createInstance } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 import { act, create, type ReactTestInstance } from 'react-test-renderer';
-import { Image, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 
 import type { Activity } from '@/features/activities/activities';
 import { categoryIcons } from '@/features/activities/CategoryIcon';
@@ -161,23 +161,24 @@ describe('Form der Karte', () => {
 describe('Bild der Karte (Web-Adresse oder Farbfläche)', () => {
   it('1. Web-Adresse der Aktivität: ein Bild mit dieser Adresse, kein großes Symbol', () => {
     const root = renderCard(chains.web);
-    const [image] = root.findAllByType(Image);
+    const [image] = root.findAllByType(ExpoImage);
     expect(image.props.source).toEqual({ uri: 'https://example.org/wald.jpg' });
-    expect(image.props.resizeMode).toBe('cover');
+    expect(image.props.contentFit).toBe('cover');
+    expect(image.props.cachePolicy).toBe('disk'); // Bild bleibt im Gerätespeicher (Adressen mit Prüfsumme ändern sich nie)
     expect(bigIcon(root)).toHaveLength(0);
   });
 
   it('das Bild füllt den Bereich ausdrücklich (nicht seine eigene Größe)', () => {
     // Ein Bild bringt seine eigene Größe mit; ohne Breite und Höhe 100 % wäre es so groß wie die Datei statt so breit wie die Karte.
     const root = renderCard(chains.web);
-    const [image] = root.findAllByType(Image);
+    const [image] = root.findAllByType(ExpoImage);
     expect(flat(image)).toMatchObject({ position: 'absolute', width: '100%', height: '100%' });
     expect(flat(media(root)).backgroundColor).toBe(lightTheme.colors.surface); // Sand, solange das Bild lädt
   });
 
   it('2. Farbfläche: kein Bild, die Fläche der Kategorie, das große Symbol in der Farbe der Kategorie', () => {
     const root = renderCard(chains.placeholder);
-    expect(root.findAllByType(Image)).toHaveLength(0);
+    expect(root.findAllByType(ExpoImage)).toHaveLength(0);
     const tone = lightTheme.categoryTones.nature;
     expect(flat(media(root)).backgroundColor).toBe(tone.field);
     const [icon] = bigIcon(root);
@@ -203,8 +204,8 @@ describe('Bild der Karte (Web-Adresse oder Farbfläche)', () => {
   it('Web-Bild lädt nicht: die Farbfläche (Karte behält Form und Texte)', () => {
     const root = renderCard(chains.web);
     const before = allTexts(root);
-    act(() => root.findAllByType(Image)[0].props.onError());
-    expect(root.findAllByType(Image)).toHaveLength(0);
+    act(() => root.findAllByType(ExpoImage)[0].props.onError());
+    expect(root.findAllByType(ExpoImage)).toHaveLength(0);
     expect(bigIcon(root)).toHaveLength(1);
     expect(flat(media(root)).backgroundColor).toBe(lightTheme.categoryTones.nature.field);
     expect(allTexts(root).filter((text) => !text.endsWith('-outline'))).toEqual(
@@ -231,10 +232,10 @@ describe('Illustration (Pilot)', () => {
 
   it('das `image` der Aktivität gewinnt vor der Illustration; lädt es nicht, kommt die Illustration', () => {
     const root = renderCard(chains.web, pizza);
-    expect(root.findAllByType(Image)[0].props.source).toEqual({ uri: 'https://example.org/wald.jpg' });
-    expect(root.findAllByType(ExpoImage)).toHaveLength(0);
-    act(() => root.findAllByType(Image)[0].props.onError());
-    expect(root.findAllByType(Image)).toHaveLength(0);
+    expect(root.findAllByType(ExpoImage)).toHaveLength(1);
+    expect(root.findAllByType(ExpoImage)[0].props.source).toEqual({ uri: 'https://example.org/wald.jpg' });
+    act(() => root.findAllByType(ExpoImage)[0].props.onError());
+    expect(root.findAllByType(ExpoImage)).toHaveLength(1);
     expect(root.findAllByType(ExpoImage)[0].props.source).toBe(illustration?.source);
   });
 

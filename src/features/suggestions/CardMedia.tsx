@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image as ExpoImage } from 'expo-image';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import type { ActivityCategory } from '@/features/activities/activities';
 import { cardVisualIcon, isPlaceVisualKey, type CardVisual } from '@/features/activities/CategoryIcon';
@@ -74,10 +74,13 @@ export function CardMedia({ category, pillLabel, chain, showPill = true, illustr
           />
         </>
       ) : (
-        <Image
+        // expo-image statt React-Native-`Image`: Es zeigt auch SVG-Bilder aus dem Netz (die Zeichnungen aus M9b) und behält sie im Gerätespeicher.
+        <ExpoImage
           source={{ uri: step.uri }}
           style={styles.image}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="disk"
+          transition={200}
           onError={() => setFailed((current) => [...current, stepKey(step)])}
         />
       )}
