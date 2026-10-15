@@ -18,6 +18,7 @@ Lizenz (ODbL) und Datenschutz dazu stehen unten in den Abschnitten „OpenStreet
 data/*.json  ──(npm run db:seed-sql)──▶  supabase/seed/*.sql  ──(von Hand im SQL-Editor)──▶  Tabelle "activities" bei Supabase
                                                                                                          │  nur status = 'approved'
 App beim Start:  mitgelieferte Aktivitäten (sofort) ─▶ Zwischenspeicher vom Gerät ─▶ einmal pro Tag Supabase  ◀┘
+                                                                                     (seit M8b nur die Änderungen)
 ```
 
 | Was | Datei |
@@ -26,11 +27,13 @@ App beim Start:  mitgelieferte Aktivitäten (sofort) ─▶ Zwischenspeicher vom
 | Einspiel-Dateien für den SQL-Editor (erzeugt, eingecheckt) | `supabase/seed/activities-part-N-of-M.sql` |
 | Skript, das sie erzeugt (prüft vorher die Daten) | `scripts/seed-sql.ts` (`npm run db:seed-sql`) |
 | Zugang aus der `.env` (mit Schutz vor geheimen Schlüsseln) | `src/features/activities/supabaseConfig.ts` |
-| Abruf (einfacher GET, ohne `supabase-js`) | `src/features/activities/fetchActivities.ts` |
+| Abruf (einfacher GET, ohne `supabase-js`): Zählprobe, Änderungen, ID-Liste | `src/features/activities/fetchActivities.ts` |
+| Abgleich (M8b): Stand, Zusammenführen, ID-Abgleich (reine Funktionen) | `activitySync.ts` |
 | Zeile ↔ Aktivität | `src/features/activities/activityRow.ts` |
-| Zwischenspeicher (Regeln, Format) und Speicher auf dem Gerät | `activitiesCache.ts`, `activitiesStorage.ts` |
+| Zwischenspeicher (Regeln, Format in Teilen) und Speicher auf dem Gerät | `activitiesCache.ts`, `activitiesStorage.ts` |
 | Prüfen und aussortieren (kaputt, nicht freigegeben, fremdes Bild) | `activityLibrary.ts` |
-| Neu holen und speichern, Fehler fangen | `activityRefresh.ts` |
+| Ablauf eines Abgleichs, speichern, Fehler fangen | `activityRefresh.ts` |
+| Ersatz für Supabase in den Tests, Messung des Datenverkehrs | `fakeActivitiesServer.ts`, `activityTraffic.test.ts` |
 | Die Aktivitäten für die ganze App (`useActivities()`) | `ActivitiesContext.tsx` |
 | Mitgelieferte Aktivitäten (Rückfall) | `bundledActivities.ts` (liest `data/`) |
 | Erlaubte Adresse für Bilder (Allowlist) | `imageAllowlist.ts` |
@@ -123,6 +126,7 @@ Erwartet: eine Liste wie `[{"id":"animal-yoga"},{"id":"autumn-bingo"},{"id":"bak
 
 **c) In der App.** `npx expo start -c`, mit Expo Go öffnen. Im Terminal (wo Expo läuft) steht nach ein paar Sekunden:
 `Aktivitäten: 104 von Supabase geladen.` Die App sieht aus wie vorher. Das ist richtig: Es ändert sich für Eltern nichts, nur die Quelle der Daten.
+Ab dem zweiten Abruf holt die App nur noch die Änderungen (M8b), dann steht dort z. B. `Aktivitäten: 0 Änderung(en), jetzt 104 von Supabase.`
 
 **d) Das tägliche Auffrischen ausprobieren.** Die App fragt höchstens einmal in 24 Stunden nach. Zum Testen trägst du in der `.env` die Zeile ein (ohne `#`):
 
@@ -131,7 +135,8 @@ EXPO_PUBLIC_ACTIVITIES_REFRESH_MINUTES=1
 ```
 
 Dann ändern: Im Table Editor bei einer Aktivität `status` auf `draft` stellen, mindestens eine Minute warten, `npx expo start -c` neu starten und Expo Go neu laden.
-Im Terminal steht jetzt „103 von Supabase geladen“, und die Aktivität kommt nicht mehr vor. **Die Zeile danach wieder entfernen** (sie ist nur zum Testen gedacht, der Standard von 24 Stunden ist richtig).
+Im Terminal steht jetzt „0 Änderung(en), 1 zurückgezogen, jetzt 103 von Supabase“, und die Aktivität kommt nicht mehr vor. Stellst du sie wieder auf `approved`, steht beim nächsten Mal „1 Änderung(en), jetzt 104 von Supabase“.
+**Die Zeile danach wieder entfernen** (sie ist nur zum Testen gedacht, der Standard von 24 Stunden ist richtig).
 
 **e) Der Rückfall.** (1) Flugmodus an, App neu laden: Sie läuft wie immer, im Terminal steht eine Warnung „Abruf bei Supabase fehlgeschlagen“. (2) Falscher Schlüssel in der `.env`: Warnung mit „HTTP 401“, die App läuft weiter.
 (3) `.env` umbenennen: Die App nutzt nur das Mitgelieferte und meldet nichts. In Expo Go erscheint bei Warnungen unten ein gelber Balken, das gibt es nur in der Entwicklung, nicht in der fertigen App.
@@ -179,17 +184,49 @@ sie schreibt eine Warnung in die Konsole („Abruf bei Supabase fehlgeschlagen (
 ## Was die App genau macht
 
 - **Start:** Sofort sind die mitgelieferten Aktivitäten da (nichts wartet auf Speicher oder Netz). Dann, im Hintergrund:
-  1. Der Zwischenspeicher vom Gerät (`activities.v1`, versioniert wie die Profile) wird gelesen. Ist er brauchbar, ersetzt er das Mitgelieferte.
-  2. Ist Supabase eingerichtet und der letzte erfolgreiche Abruf mindestens 24 Stunden her (oder gab es noch nie einen), fragt die App einmal nach. Klappt das, ersetzt der neue Bestand den bisherigen und wird gespeichert.
-- **Höchstens ein Abruf pro Start und pro Tag.** Ein Fehlschlag erneuert den Zeitpunkt nicht, der nächste Start versucht es also wieder.
-- **Alles oder nichts:** Der neue Bestand ersetzt den alten komplett (so verschwindet eine zurückgezogene Aktivität auch aus der App). Er gilt aber nur, wenn mindestens **3 gültige** Aktivitäten ankommen; sonst bleibt der Zwischenspeicher oder das Mitgelieferte.
-- **Nur `approved`:** Die Abfrage verlangt `status=eq.approved`, die Datenbank erlaubt dem öffentlichen Schlüssel nichts anderes (Row Level Security), und die App sortiert beim Laden noch einmal selbst alles Nicht-Freigegebene aus. Drei Schlösser hintereinander.
+  1. Der Zwischenspeicher vom Gerät wird gelesen (seit M8b `activities.v2.*`, vorher `activities.v1`). Ist er brauchbar, ersetzt er das Mitgelieferte.
+  2. Ist Supabase eingerichtet und der letzte erfolgreiche Abruf mindestens 24 Stunden her (oder gab es noch nie einen), gleicht die App einmal ab (siehe „Nur Änderungen“). Klappt das, ersetzt der abgeglichene Bestand den bisherigen und wird gespeichert.
+- **Höchstens ein Abgleich pro Start und pro Tag.** Ein Fehlschlag erneuert den Zeitpunkt nicht, der nächste Start versucht es also wieder.
+- **Nur `approved`:** Jede Abfrage verlangt `status=eq.approved`, die Datenbank erlaubt dem öffentlichen Schlüssel nichts anderes (Row Level Security), und die App sortiert beim Laden noch einmal selbst alles Nicht-Freigegebene aus. Drei Schlösser hintereinander.
 - **Kaputte Einträge** (fehlende oder falsche Felder, doppelte IDs) werden wie bisher verworfen und mit Grund in der Konsole gemeldet. Das gilt für Supabase, den Zwischenspeicher und das Mitgelieferte gleichermaßen.
-- **Still bei Fehlern:** Kein Netz, Fehlermeldung vom Server, falscher Schlüssel, pausiertes Projekt, Zeitüberschreitung nach 10 Sekunden, kaputte Antwort: Die App zeigt **nichts** an, es gibt nur eine Warnung in der Konsole. Eltern bekommen weiter ihre drei Vorschläge.
+  Ist eine **geänderte** Zeile kaputt, verschwindet die Aktivität vom Gerät (eine veraltete Fassung zu behalten wäre bei einer Sicherheitskorrektur falsch).
+- **Still bei Fehlern:** Kein Netz, Fehlermeldung vom Server, falscher Schlüssel, pausiertes Projekt, Zeitüberschreitung nach 10 Sekunden (für den ganzen Abgleich), kaputte Antwort: Die App zeigt **nichts** an, es gibt nur eine Warnung in der Konsole. Eltern bekommen weiter ihre drei Vorschläge.
 - **Nichts springt:** „Eure Ideen“ und die Detailansicht frieren die Aktivitäten beim Öffnen ein. Kommt im Hintergrund ein neuer Bestand an, sehen sie ihn erst beim nächsten Öffnen. (Kommt der Bestand genau zwischen „Eure Ideen“ und dem Tipp auf eine Karte, kann eine Idee, die inzwischen zurückgezogen wurde, zum Start zurückführen. Das ist selten und harmlos.)
 - **Nur zum Testen:** `EXPO_PUBLIC_ACTIVITIES_REFRESH_MINUTES` in der `.env` ändert den Abstand von 24 Stunden. Der Standard bleibt 24 Stunden; die Variable steht auskommentiert in der `.env.example` und gehört nie in eine fertige App-Version.
-- **Größe:** Alle 104 Aktivitäten sind etwa 200 KB als JSON (gepackt übertragen etwa 65 KB). Ein Abruf pro Tag und Gerät ist damit unkritisch. Bei mehr als 500 Aktivitäten holt die App sie in Seiten à 500.
 - **Bilder (`image`):** Wird nur angezeigt, wenn die Adresse mit `<Projekt-URL>/storage/v1/object/public/` beginnt (Allowlist, DESIGN.md Zusatz 35). Ein Bild von einem fremden Server wird weggelassen, die Aktivität bleibt. Das prüfen auch `npm run activities:check` (Fehler) und die Karte.
+
+### Nur Änderungen (M8b)
+
+Bis M8 holte jedes Gerät jeden Tag **alle** Aktivitäten (104 Aktivitäten: etwa 200 KB, bei 1 500 etwa 2,8 MB). Seit M8b holt es nur, was sich geändert hat. Ein Abgleich (`activityRefresh.ts`) hat diese Schritte, alle zusammen höchstens 10 Sekunden, **alles oder nichts**:
+
+1. **Zählprobe:** eine Anfrage ohne Zeilen (`limit=0`, Kopfzeile `Prefer: count=exact`). Die Antwort ist `[]`, die Anzahl der freigegebenen Aktivitäten steht in der Kopfzeile `content-range` (z. B. `*/119`), die Uhrzeit des Servers in `Date`.
+   Meldet der Server weniger als 3, bleibt alles beim Alten.
+2. **Änderungen:** alle freigegebenen Zeilen mit `updated_at` nach dem gespeicherten **Stand**, sortiert nach (`updated_at`, `id`), in Seiten zu 500. Ohne brauchbaren Stand (erster Start, Umstieg von M8) sind das alle.
+   - Die Seiten hängen über das letzte Paar (Zeitstempel, ID) zusammen, nicht über `offset`. So geht nichts verloren, auch wenn viele Zeilen denselben Zeitstempel haben (ein Seed-Teil oder ein Wochenlauf wird in **einem** Schreibvorgang geschrieben, alle Zeilen bekommen dessen Startzeit) oder sich während des Abrufs eine Zeile ändert.
+   - Neue und geänderte Aktivitäten ersetzen die alte Fassung (nach ID).
+3. **Zurückgezogenes:** Eine Aktivität, die auf `draft` oder `rejected` gesetzt (oder gelöscht) wird, kommt bei den Änderungen nicht vor, denn die Datenbank zeigt dem öffentlichen Schlüssel nur `approved`.
+   Deshalb vergleicht die App die Anzahl auf dem Gerät mit der Zählprobe. Verglichen wird nur, was aus Supabase stammt: Der Zwischenspeicher enthält nie die mitgelieferten Aktivitäten aus `data/`.
+   **Weicht die Anzahl ab** oder ist der letzte Abgleich **30 Tage** her (Sicherheitsnetz), holt die App die **ID-Liste** (nur die Spalte `id`, etwa 26 Byte je Aktivität): Was dort fehlt, wird gelöscht; was auf dem Gerät fehlt, wird einzeln nachgeladen (mehr als 100: einmal alles).
+   Zurückgezogenes verschwindet damit wie bisher nach höchstens einem Tag. Wird es wieder freigegeben, ändert sich `updated_at`, und es kommt mit den Änderungen zurück.
+4. **Mindestens 3 gültige Aktivitäten** nach dem Zusammenführen, sonst bleibt der bisherige Bestand. Dann speichern, mit neuem Stand.
+
+**Der Stand** ist ein Zeitstempel der Datenbank (Mikrosekunden, UTC), nie die Uhr des Handys: der größte gesehene `updated_at`, aber höchstens die Uhrzeit des Servers minus **15 Minuten**.
+Grund: Ein Schreibvorgang bekommt als `updated_at` seine Startzeit, sichtbar wird er erst an seinem Ende. Lief er gerade, als das Handy abgerufen hat, liegt seine Startzeit trotzdem nach dem Stand, und der nächste Abgleich holt ihn.
+Fertige Stapel (der Wochenlauf vom Sonntag) werden dagegen nicht jeden Tag neu geladen. Fehlt die Kopfzeile `Date`, gilt größter Zeitstempel minus 15 Minuten (sicher, der letzte Stapel kommt dann einmal doppelt).
+
+**Wenn etwas schiefgeht:**
+
+- **Stand kaputt** (nicht lesbar) oder **in der Zukunft** (mehr als 15 Minuten nach der Uhrzeit des Servers, z. B. nachdem du die Datenbank aus einer Sicherung wiederhergestellt hast): Warnung in der Konsole, die App lädt einmal alles. Bis das klappt, bleibt der bisherige Bestand.
+- **Uhr des Handys falsch:** Sie steuert nur „einmal pro Tag“ (steht sie zurück, wird abgeglichen) und die 30 Tage für die ID-Liste (liegt der gespeicherte Zeitpunkt in der Zukunft, gilt die ID-Liste als fällig). Den Stand beeinflusst sie nicht. Schlimmstenfalls gibt es ein paar Abgleiche mehr, jeder ohne Änderung kostet etwa 1,6 KB.
+- **Content-range fehlt** (die Anzahl ist unbekannt): Die App vergleicht dann nicht, Zurückgezogenes verschwindet erst mit der ID-Liste nach 30 Tagen. Bei Supabase sollte die Kopfzeile immer kommen.
+- **Eine kaputte Zeile in der Datenbank** (z. B. von Hand falsch eingetragen) fehlt auf dem Gerät, die Anzahl weicht also jeden Tag ab, und die App holt jeden Tag die ID-Liste (bei 1 500 Aktivitäten etwa 40 KB). In der Konsole steht dazu jeden Tag „übersprungen“ mit dem Grund. Die Zeile reparieren oder auf `rejected` setzen.
+
+**Zwischenspeicher in Teilen:** `activities.v2.meta` (Zeitpunkt, Stand, letzter ID-Abgleich, Anzahl, Kennung der Fassung) und `activities.v2.part.<Fassung>.<n>` mit je höchstens **200 Aktivitäten** (etwa 400 KB; Android liest Einträge über etwa 2 MB nicht, `docs/wochenlauf.md`, „Wachstum“).
+Geschrieben werden erst die neuen Teile, dann `activities.v2.meta`, erst danach werden die alten Teile gelöscht. Bricht das ab, gilt die alte Fassung weiter. Fehlt ein Teil oder ist einer kaputt, ist der ganze Zwischenspeicher ungültig (Mitgeliefertes, der nächste Abgleich lädt alles).
+**Umstieg von M8:** Gibt es noch kein v2, liest die App den alten Eintrag `activities.v1` und zeigt ihn sofort. Er hat keinen Stand, deshalb lädt der nächste Abgleich einmal alles (so groß wie früher ein Tag); danach steht v2 auf dem Gerät, und erst dann wird `activities.v1` gelöscht. Niemand verliert etwas.
+
+**Seed-Dateien:** Sie schreiben eine vorhandene Aktivität nur noch, wenn sich wirklich etwas geändert hat (`… do update set … where (…) is distinct from (excluded.…)`). Erneutes Einspielen lässt `updated_at` stehen, und kein Gerät lädt deshalb etwas neu.
+Eine Änderung im Table Editor oder per `update` setzt `updated_at` dagegen immer neu (Trigger), auch wenn der Wert gleich bleibt: Das kostet nur die eine Zeile.
 
 ## Wenn das Projekt pausiert ist
 
@@ -209,6 +246,66 @@ Eltern merken nichts, außer dass neue Aktivitäten nicht ankommen. Ist das Proj
 4. Prüfen, ob Supabase vor einer Pausierung per E-Mail warnt, und die Adresse des Kontos im Blick behalten (nicht im Spam).
 5. Die mitgelieferten Aktivitäten (`data/`) sind der Rückfall und in jeder App-Version eingefroren: In jedem Release auf dem aktuellen Stand halten. Sie sind auch die Sicherung: Aus `data/` lässt sich die Datenbank jederzeit in Minuten neu aufbauen (Schritt 2 und 3).
 
+## Datenverkehr (Egress): messen und wenn es knapp wird
+
+Der kostenlose Tarif hat **5 GB Egress im Monat** (Preisseite, gelesen am 14.10.2026; bitte aktuell nachlesen). Ob Supabase gepackt oder ungepackt zählt, ist nicht dokumentiert, soweit ich es gefunden habe.
+Die App packt nichts selbst: React Native fordert gepackte Antworten von sich aus an (Android über OkHttp mit `Accept-Encoding: gzip`, iOS über NSURLSession) und entpackt sie selbst.
+Die App setzt `Accept-Encoding` deshalb bewusst **nicht** (auf Android würde sie damit das automatische Entpacken abschalten; ein Test prüft das).
+
+**Gemessen** (`TRAFFIC_REPORT=1 npx jest activityTraffic`, echte Aktivitäten aus `data/`, Testserver, Inhalt der Antworten; Kopfzeilen geschätzt mit 0,8 KB je Antwort):
+
+| Abruf | 104 Aktivitäten | 1 500 Aktivitäten |
+| --- | --- | --- |
+| erster Abruf (alles, wie früher jeden Tag) | 204 KB ungepackt / 65 KB gepackt | 2,9 MB ungepackt |
+| Folgetag ohne Änderung (2 Anfragen, Inhalt `[]`) | **1,6 KB** (fast nur Kopfzeilen) | **1,6 KB** |
+| nach dem Wochenlauf (15 neu) | 29 KB / 11 KB | 29 KB / 11 KB |
+| eine zurückgezogen (mit ID-Liste) | 5 KB / 3 KB | 44 KB |
+| **ein Monat** (30 Abgleiche, 60 neu, eine Änderung, ein Zurückziehen) | **165 KB / 90 KB** | **204 KB** |
+
+(Die gepackten Werte bei 1 500 sind im Test zu günstig, weil die vervielfältigten Texte sich wiederholen; realistisch ist etwa ein Drittel des ungepackten Werts.)
+
+Gerechnet für den Monat (jedes Gerät gleicht jeden Tag ab, der ungünstige Fall):
+
+| Geräte | 119 Aktivitäten: bis M8 → seit M8b | 500 | 1 500 |
+| --- | --- | --- | --- |
+| 200 | 1,3 GB → 34 MB (gepackt 0,4 GB → 19 MB) | 5,4 GB → 36 MB (1,7 GB → 19 MB) | 16 GB → 41 MB (5,2 GB → 21 MB) |
+| 1 000 | 6,5 GB → 171 MB (2,1 GB → 93 MB) | 27 GB → 181 MB (8,6 GB → 96 MB) | 82 GB → 205 MB (26 GB → 105 MB) |
+| 5 000 | 33 GB → 0,86 GB (10 GB → 0,47 GB) | 136 GB → 0,90 GB (43 GB → 0,48 GB) | 408 GB → 1,0 GB (129 GB → 0,52 GB) |
+
+Dazu einmal pro **neuem Gerät** (und einmal pro Gerät beim Umstieg von M8) der erste volle Abruf: 226 KB, 950 KB bzw. 2,8 MB ungepackt. Seit M8b verbrauchen die **Orte** mehr als die Aktivitäten
+(bis etwa 8,4 MB ungepackt pro Gerät und Monat im Ruhrgebiet, `docs/orte.md`, „Datenverkehr pro Gerät und Monat“).
+
+### So siehst du den echten Datenverkehr (nach dem Test)
+
+Die Menüs bei Supabase heißen je nach Stand etwas anders; gesucht ist die **Nutzung (Usage)**.
+
+1. Im Dashboard links unten oder über den Namen der Organisation oben: **Organization Settings → Usage** (manchmal auch „Billing → Usage“).
+2. Den Abschnitt **Egress** suchen. Dort steht der Verbrauch des laufenden Abrechnungszeitraums und die Grenze (5 GB), oft mit einer Aufteilung nach Tagen und nach Art (Datenbank-Schnittstelle, Storage, …). „Cached Egress“ ist ein eigener Topf.
+3. **Ein Gerät messen:** Notiere den Stand von „Egress“. Starte die App mit `EXPO_PUBLIC_ACTIVITIES_REFRESH_MINUTES=1` (Schritt 6d) und lade sie zehnmal neu, jeweils mit mindestens einer Minute Abstand. Die Nutzung wird mit Verzögerung aktualisiert (bis zu einigen Stunden): am nächsten Tag noch einmal hinsehen.
+   Erwartet: etwa 10 × 1,6 KB, also deutlich unter 1 MB. Steht dort viel mehr, mir Bescheid geben.
+4. **Gepackt oder nicht?** Im Terminal (Werte wie in Schritt 6a):
+
+   ```bash
+   curl -s -o /dev/null -D - --compressed "$URL/rest/v1/activities?select=*&status=eq.approved" -H "apikey: $KEY" | grep -i -E "content-encoding|content-length"
+   curl -s -o /dev/null -w "gepackt: %{size_download} Byte\n" -H "Accept-Encoding: gzip" "$URL/rest/v1/activities?select=*&status=eq.approved" -H "apikey: $KEY"
+   curl -s -o /dev/null -w "ungepackt: %{size_download} Byte\n" "$URL/rest/v1/activities?select=*&status=eq.approved" -H "apikey: $KEY"
+   ```
+
+   Steht in der ersten Ausgabe `content-encoding: gzip` und ist die zweite Zahl etwa ein Drittel der dritten, packt Supabase. Ob die Nutzung dann den gepackten Wert zählt, siehst du nur am Verbrauch (Punkt 3 mit dem vollen Abruf vergleichen: nach dem Löschen der App-Daten lädt der erste Abgleich alles, etwa 200 KB ungepackt oder 65 KB gepackt).
+
+### Wenn der kostenlose Tarif knapp wird
+
+Supabase schickt nach meinem Stand eine E-Mail, wenn ein Projekt die Grenzen überschreitet; im kostenlosen Tarif können Anfragen danach eingeschränkt werden. **Was genau passiert, bitte bei Supabase nachlesen** („Usage limits“, „Fair use“).
+Für die App wäre das harmlos (sie nutzt dann still den Zwischenspeicher oder das Mitgelieferte), aber neue Aktivitäten und Orte kämen nicht mehr an.
+
+Der Reihe nach:
+
+1. **Nachsehen, wer verbraucht.** Seit M8b sind das vor allem die Orte, nicht die Aktivitäten. Sind es doch die Aktivitäten: Wurde etwas sehr oft geändert (z. B. viele Zeilen im Table Editor einzeln gespeichert oder ein großes `update` über alle)? Jede Änderung lädt jedes Gerät einmal.
+2. **Große Änderungen bündeln:** lieber einmal in der Woche viele Änderungen als jeden Tag ein paar. Keine `update`-Befehle über die ganze Tabelle, wenn sich nichts ändert (der Trigger setzt `updated_at` trotzdem).
+3. **Abstand vergrößern:** Die Aktivitäten fragen höchstens einmal pro Tag nach. Ein Abstand von zwei Tagen halbiert die Kopfzeilen (die Hälfte des Verbrauchs ohne Änderungen); das ist eine Code-Änderung (`defaultRefreshMinutes` in `activitiesCache.ts`), mit mir absprechen.
+4. **Orte:** Die Hebel dort (seltener abrufen, kleinere Kacheln oder Umkreis, gepackt) stehen in der CLAUDE.md unter „Später“ und in `docs/orte.md`.
+5. **Erst danach** über den bezahlten Plan nachdenken (Pro kostet nach meinem Stand 25 $ im Monat, etwa 23 €, über dem Budget von 20 €; **Preis aktuell prüfen**). Das ist die Entscheidung vor M12, Punkt 7, in der CLAUDE.md.
+
 ## Datenschutz, vor M12
 
 Vorarbeit für die Datenschutzerklärung (M12). Das ist **eine Prüfliste, keine Rechtsberatung**: Die Punkte sind das, was ich vor der Veröffentlichung klären und von einer fachkundigen Stelle
@@ -221,7 +318,7 @@ Beim Abruf (höchstens einmal pro Tag und Gerät, siehe oben) sieht Supabase tec
 | Was | Wie |
 | --- | --- |
 | **IP-Adresse** des Handys | fällt bei jeder Internetverbindung an, kann in Server- und API-Protokollen von Supabase stehen |
-| Zeitpunkt des Abrufs, abgefragte Tabelle und Parameter | `activities`, `status=approved`, Seite, Sortierung (für alle Geräte gleich) |
+| Zeitpunkt des Abrufs, abgefragte Tabelle und Parameter | `activities`, `status=approved`, Sortierung, Seite; seit M8b dazu der **Stand** (ein Zeitstempel der Datenbank, z. B. der des letzten Wochenlaufs) und bei Bedarf IDs von Aktivitäten. Der Stand sagt nur, wann das Gerät zuletzt abgeglichen hat, nichts über die Familie. |
 | öffentlicher Projekt-Schlüssel | derselbe in jeder App, kein Bezug zu einer Person |
 | übliche Angaben der Verbindung | z. B. Programm/Betriebssystem-Kennung der Netzwerkbibliothek (User-Agent) |
 | Region des Servers | EU, Frankfurt (eu-central-1) |
@@ -354,6 +451,9 @@ Heute liegen die Illustrationen gebündelt in der App (`assets/illustrations/`),
 
 - Die Bilder kommen in einen öffentlichen Speicherbereich (Bucket) von Supabase Storage. Die Allowlist (`imageAllowlist.ts`) erlaubt genau diesen Speicher schon.
 - Die Tabelle bekommt zwei freiwillige Spalten: `image` (gibt es schon: Titelbild) und `step_images` (JSON: Schrittnummer → Pfad). Die App zeigt sie mit `expo-image` (das `Image` von React Native kann keine SVG-Dateien aus dem Netz).
+- **Zusammenspiel mit M8b (nur Entwurf, nicht gebaut):** `step_images` kommt in `activityColumns` (`activityRow.ts`) und damit in die Abfrage der Änderungen. Ändert sich `image` oder `step_images`, setzt der Trigger `updated_at` neu, und jedes Gerät bekommt die neue Zeile beim nächsten Abgleich.
+  **Regel: Dateien in Storage nie überschreiben.** Eine neue Fassung bekommt einen neuen Namen mit Prüfsumme (z. B. `activities/<id>/cover-<hash>.svg`), danach wird die Zeile geändert. Würde die Datei unter demselben Namen ersetzt, änderte sich die Zeile nicht, und die Geräte behielten das alte Bild im Cache von `expo-image`.
+  Alte Dateien erst nach etwa 60 Tagen löschen (ein Gerät, das lange nicht abgeglichen hat, zeigt bis dahin das alte Bild; danach fällt es auf Illustration bzw. Farbfläche zurück). Bilder laden erst beim Anzeigen und bleiben im Cache, ihr Datenverkehr zählt bei Storage, nicht bei der Datenbank.
 - Die gebündelten Illustrationen bleiben als Offline-Rückfall. Die Reihenfolge bleibt `image` → gebündelte Illustration → Farbfläche.
 - Bis M9b viele Bilder liefert, genügt der heutige Weg (gebündelt). Entscheiden, sobald mehr als eine Handvoll Aktivitäten Bilder haben.
 
@@ -366,6 +466,11 @@ npm run db:seed-sql    # erzeugt supabase/seed/ neu (der Test meldet, wenn sie v
 ```
 
 Die Tests laufen ohne Netz und ohne Supabase: Der Abruf wird mit gemockten Antworten geprüft (`fetchActivities.test.ts`, `activityRefresh.test.ts`, `ActivitiesContext.test.tsx`).
+Seit M8b beantwortet ein Testserver (`fakeActivitiesServer.ts`) die Anfragen wie die Datenbank (nur `approved`, gleicher Zeitstempel je Schreibvorgang, Schreibvorgänge erst am Ende sichtbar, Kopfzeilen `Date` und `content-range`).
+Geprüft werden u. a.: erster Abruf, Folgetag ohne Änderung, Wochenlauf, mehr als 500 Zeilen mit gleichem Zeitstempel, eine Zeile ändert sich mitten im Abruf, ein Schreibvorgang läuft beim Abruf noch, Zurückziehen (auch ganzer Lauf, Löschen, wieder freigeben),
+Datenbank mit weniger Aktivitäten als `data/` (keine tägliche ID-Liste), ID-Liste nach 30 Tagen, mehr als 100 fehlende, weniger als 3 gültige, Fehler in jedem Schritt, kaputter Stand, Stand in der Zukunft, falsche Handy-Uhr, fehlende Kopfzeilen,
+Zwischenspeicher in Teilen (Umstieg von v1, abgebrochenes Schreiben, fehlender Teil, 1 500 Aktivitäten unter 1 MB je Eintrag) und der Datenverkehr (`activityTraffic.test.ts`).
+Die Seed-Dateien (nur bei echter Änderung schreiben) wurden zusätzlich in einem Wegwerf-Postgres (PGlite) eingespielt: Erneutes Einspielen lässt `updated_at` stehen.
 Das SQL wurde zusätzlich einmal in einem lokalen Wegwerf-Postgres (PGlite, nicht Teil des Projekts) ausgeführt: Tabelle, Einspielen (auch wiederholt), Lesen als `anon`, Schreiben als `anon`/`authenticated` verboten, Entwürfe unsichtbar.
 Der Test der Migration (`activitySql.test.ts`) rechnet auch die Rechte nach: `anon` und `authenticated` haben am Ende genau `SELECT`, kein Schreibrecht, Row Level Security ist an. Zusätzlich wurde die Migration in dem Wegwerf-Postgres so geprüft, wie Supabase neue Tabellen jetzt behandelt (keine automatisch vergebenen Rechte): Mit der ganzen Datei hat `anon` genau `SELECT`; fehlt das Ende der Datei, hat `anon` kein Recht und bekommt „permission denied“.
 **Ich selbst konnte nichts gegen das echte Supabase-Projekt testen** (kein Zugriff): Das übernimmt Schritt 6 oben.

@@ -21,7 +21,8 @@ const ActivitiesContext = createContext<ActivitiesContextValue | null>(null);
 // Die Aktivitäten für die ganze App (M8, docs/supabase.md).
 // Beim Start sind sofort die mitgelieferten Aktivitäten da. Danach, im Hintergrund und ohne etwas zu blockieren:
 //  1. den Zwischenspeicher vom Gerät lesen (wenn brauchbar, ersetzt er das Mitgelieferte),
-//  2. höchstens einmal pro Tag bei Supabase nachfragen (wenn eingerichtet); klappt das, ersetzt der neue Bestand den bisherigen und wird gespeichert.
+//  2. höchstens einmal pro Tag bei Supabase nachfragen (wenn eingerichtet), seit M8b nur nach den Änderungen seit dem gespeicherten Stand;
+//     klappt das, ersetzt der abgeglichene Bestand den bisherigen und wird gespeichert.
 // Jeder Fehler (offline, pausiertes Projekt, Zeitüberschreitung, kaputte Daten) bleibt still: Die App bleibt beim bisherigen Bestand.
 // Bildschirme, deren Karten sich nicht umsortieren sollen, frieren die Liste beim Öffnen ein (z. B. „Eure Ideen“).
 export function ActivitiesProvider({ children }: { children: ReactNode }) {
@@ -44,7 +45,7 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
       if (!config) return; // Supabase nicht eingerichtet: es bleibt beim Zwischenspeicher oder Mitgelieferten
       if (!shouldRefresh(stored?.fetchedAt ?? null, Date.now(), getRefreshMinutes(env.refreshMinutes))) return;
 
-      const fresh = await refreshActivities({ config, imagePrefix });
+      const fresh = await refreshActivities({ config, imagePrefix, previous: stored });
       if (cancelled || !fresh) return;
       setValue({ activities: fresh.activities, source: 'remote' });
     }

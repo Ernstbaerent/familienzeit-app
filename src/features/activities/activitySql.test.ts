@@ -97,6 +97,18 @@ describe('Aufbau eines Teils', () => {
     expect(sql).not.toContain('id = excluded.id');
   });
 
+  it('schreibt nur bei echter Änderung (M8b): alle Spalten außer id verglichen, updated_at zählt nicht', () => {
+    const where = sql.slice(sql.indexOf('\nwhere '));
+    expect(where).toMatch(/^\nwhere \(activities\.status, /);
+    expect(where).toContain('is distinct from (excluded.status, ');
+    for (const column of activityColumns.filter((name) => name !== 'id')) {
+      expect(where).toContain(`activities.${column}`);
+      expect(where).toContain(`excluded.${column}`);
+    }
+    expect(where).not.toContain('updated_at');
+    expect(where).not.toContain('activities.id');
+  });
+
   it('endet mit der Kontrollabfrage und hat eine Kopfzeile, die den Weg erklärt', () => {
     expect(sql.startsWith('-- Miki: Aktivitäten einspielen, Teil 1 von 1 (2 Aktivitäten)')).toBe(true);
     expect(sql.trimEnd().endsWith('select count(*) as aktivitaeten_insgesamt from public.activities;')).toBe(true);

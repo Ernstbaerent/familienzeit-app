@@ -1,7 +1,8 @@
 -- Miki: Aktivitäten einspielen, Teil 1 von 5 (21 Aktivitäten)
 -- ERZEUGT von `npm run db:seed-sql` aus den Dateien in data/. Nicht von Hand ändern.
 -- Einfügen im SQL-Editor von Supabase (Anleitung: docs/supabase.md). Zuerst supabase/migrations/0001_activities.sql ausführen,
--- danach alle 5 Teile (die Reihenfolge ist egal). Jeden Teil gefahrlos wiederholbar: Vorhandene Aktivitäten werden aktualisiert.
+-- danach alle 5 Teile (die Reihenfolge ist egal). Jeden Teil gefahrlos wiederholbar: Vorhandene Aktivitäten werden aktualisiert,
+-- aber nur, wenn sich etwas geändert hat (sonst bliebe updated_at nicht stehen, und jedes Handy lüde sie neu).
 
 insert into public.activities (id, status, category, topics, translations, age_min, age_max, duration_min, duration_max, setting, needs_dry, better_in_sun, day_parts, months, energy, cost, materials, sibling_friendly, source, image, created_at)
 values
@@ -46,7 +47,9 @@ on conflict (id) do update set
   sibling_friendly = excluded.sibling_friendly,
   source = excluded.source,
   image = excluded.image,
-  created_at = excluded.created_at;
+  created_at = excluded.created_at
+where (activities.status, activities.category, activities.topics, activities.translations, activities.age_min, activities.age_max, activities.duration_min, activities.duration_max, activities.setting, activities.needs_dry, activities.better_in_sun, activities.day_parts, activities.months, activities.energy, activities.cost, activities.materials, activities.sibling_friendly, activities.source, activities.image, activities.created_at)
+  is distinct from (excluded.status, excluded.category, excluded.topics, excluded.translations, excluded.age_min, excluded.age_max, excluded.duration_min, excluded.duration_max, excluded.setting, excluded.needs_dry, excluded.better_in_sun, excluded.day_parts, excluded.months, excluded.energy, excluded.cost, excluded.materials, excluded.sibling_friendly, excluded.source, excluded.image, excluded.created_at);
 
 -- Zur Kontrolle: Nach dem letzten Teil steht hier die Gesamtzahl.
 select count(*) as aktivitaeten_insgesamt from public.activities;

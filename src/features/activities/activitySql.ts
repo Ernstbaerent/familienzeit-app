@@ -73,20 +73,23 @@ function sqlRow(activity: Activity): string {
 
 // Ein Teil: einfügen oder, wenn es die Aktivität schon gibt, aktualisieren (so lässt sich jede Datei gefahrlos wiederholen).
 export function renderSeedPart(activities: readonly Activity[], part: number, parts: number): string {
-  const update = activityColumns
-    .filter((column) => column !== 'id')
-    .map((column) => `${column} = excluded.${column}`)
-    .join(',\n  ');
+  const columns = activityColumns.filter((column) => column !== 'id');
+  const update = columns.map((column) => `${column} = excluded.${column}`).join(',\n  ');
+  // Nur bei echter Änderung schreiben (M8b): Sonst setzt jedes erneute Einspielen `updated_at` neu, und jedes Gerät lädt alles noch einmal.
+  // `updated_at` selbst steht nicht in der Liste (setzt die Datenbank), zählt also nicht als Änderung.
+  const changed = `(${columns.map((column) => `activities.${column}`).join(', ')})\n  is distinct from (${columns.map((column) => `excluded.${column}`).join(', ')})`;
   return `-- Miki: Aktivitäten einspielen, Teil ${part} von ${parts} (${activities.length} Aktivitäten)
 -- ERZEUGT von \`npm run db:seed-sql\` aus den Dateien in data/. Nicht von Hand ändern.
 -- Einfügen im SQL-Editor von Supabase (Anleitung: docs/supabase.md). Zuerst supabase/migrations/0001_activities.sql ausführen,
--- danach alle ${parts} Teile (die Reihenfolge ist egal). Jeden Teil gefahrlos wiederholbar: Vorhandene Aktivitäten werden aktualisiert.
+-- danach alle ${parts} Teile (die Reihenfolge ist egal). Jeden Teil gefahrlos wiederholbar: Vorhandene Aktivitäten werden aktualisiert,
+-- aber nur, wenn sich etwas geändert hat (sonst bliebe updated_at nicht stehen, und jedes Handy lüde sie neu).
 
 insert into public.activities (${activityColumns.join(', ')})
 values
 ${activities.map(sqlRow).join(',\n')}
 on conflict (id) do update set
-  ${update};
+  ${update}
+where ${changed};
 
 -- Zur Kontrolle: Nach dem letzten Teil steht hier die Gesamtzahl.
 select count(*) as aktivitaeten_insgesamt from public.activities;
