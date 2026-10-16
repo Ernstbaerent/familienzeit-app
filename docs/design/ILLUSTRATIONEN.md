@@ -126,8 +126,7 @@ widerspricht. **Ein Bild darf nichts zeigen, was der Text nicht sagt.** Für jed
 | Spritzer, Augen | Schutzbrille nur, wenn der Text sie nennt (sonst Bild oder Text anpassen) |
 | Alter | Größe der Figuren passt zur Altersgruppe der Aktivität |
 
-**Bekannte Ausnahme im Pilot:** Der Natron-Vulkan zeigt eine Schutzbrille, sein Sicherheitshinweis nennt sie noch nicht.
-Das steht als Punkt für die Durchsicht vor der Beta in der CLAUDE.md (Text ergänzen oder Bild anpassen).
+**Natron-Vulkan (erledigt 2026-10-15):** Sein Sicherheitshinweis nennt jetzt „Schutzbrille oder normale Brille“ (de/en), die Schutzbrille im Bild ist damit gedeckt. Die Regel bleibt: Eine Schutzbrille zeigt ein Bild nur, wenn der Text sie nennt.
 
 ## Vorrang im Bildbereich
 

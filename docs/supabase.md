@@ -445,7 +445,102 @@ Die KI-Aktivitäten (`source = 'ai'`, mit `batch_id`) stehen **nur in der Datenb
 Eine Aktivität zurückziehen: im Table Editor `status` auf `rejected` stellen (oder im SQL-Editor), die App nimmt sie beim nächsten Abruf heraus. Danach auch in `data/` den Status ändern, damit sie nicht beim nächsten Einspielen wieder freigegeben wird.
 Der Test `activitySql.test.ts` meldet, wenn die Dateien in `supabase/seed/` nicht mehr zu `data/` passen.
 
-## Ausblick: Bilder und Supabase (Vorschlag, nicht gebaut)
+## Bilder: erster Test der Lieferung (M9b)
+
+**Ziel:** Du legst **eine** SVG-Datei von Hand in einen Speicherbereich (Bucket) von Supabase, trägst ihre Adresse bei Aktivitäten ein und siehst auf dem iPhone, ob die App sie zeigt.
+Erst wenn das klappt, wird mehr gebaut (Bilder-Lauf, Baukasten, Paketen). Die App zeigt das Feld `image` schon lange; neu ist nur: Sie zeigt es jetzt mit `expo-image`, und **das kann SVG** (das `Image` von React Native konnte es nicht).
+Dein Supabase-Zugang ist nötig, ich selbst habe keinen: Das SQL wurde nur in einem Wegwerf-Postgres mit nachgebautem Speicherbereich geprüft, nicht gegen dein Projekt.
+
+**Der Weg der Bilder (Überblick):** Datei im Bucket `activity-images` → Adresse in der Spalte `image` der Aktivität → die App holt die Änderung beim täglichen Abgleich (M8b) → zeigt das Bild auf der Karte und in der Detailansicht.
+Fehlt die Datei oder lädt sie nicht, zeigt die Karte still die Farbfläche (wie ohne Bild). Eine fremde Adresse (nicht aus deinem Projekt) wird nie geladen (Allowlist, `imageAllowlist.ts`).
+
+### Schritt 1: Bucket anlegen (Migration 0005)
+
+1. Supabase-Dashboard → **SQL Editor** → **New query**.
+2. `supabase/migrations/0005_activity_images_bucket.sql` öffnen (GitHub: Datei → „Raw“, oder im Editor), **alles** kopieren, einfügen, **Run**.
+3. Erwartet: unten **genau eine Zeile**: `Bucket | activity-images | öffentlich: true, höchstens 20480 Byte, image/svg+xml`. Eine Zeile „Schreib-Policy (soll fehlen)“ darf **nicht** da sein.
+   Kommt eine, schick sie mir, bevor du weitermachst (dann darf jemand außer dem geheimen Schlüssel auf den Speicher schreiben).
+4. Kontrolle: **Storage** (linke Leiste) zeigt den Bucket `activity-images` mit dem Hinweis „Public“.
+
+Klappt das Einfügen mit einer Fehlermeldung zu `storage.buckets`: **Storage → New bucket**, Name `activity-images`, **Public bucket** an, bei „Restrict file size“ 20 KB und bei „Allowed MIME types“ `image/svg+xml`.
+
+### Schritt 2: Testbild hochladen
+
+Als Testbild nehmen wir die vorhandene Zeichnung `assets/illustrations/homemade-pizza.svg` (Pizza). Sie ist als Testbild gut, weil sie in der App nur beim Pizza-Rezept selbst vorkommt: Taucht sie bei einer **anderen** Aktivität auf, kommt sie sicher aus dem Speicher.
+
+1. Datei von GitHub holen: im Repo `assets/illustrations/homemade-pizza.svg` öffnen → **Raw** → Rechtsklick → „Speichern unter“ (oder **Download raw file**). Dateiname dabei auf **`test-pizza-1.svg`** ändern.
+2. Dashboard → **Storage → activity-images → Upload file** → `test-pizza-1.svg` auswählen.
+3. Auf die Datei klicken → **Get URL** (bzw. „Copy URL“). Die Adresse sieht so aus:
+   `https://DEIN-PROJEKT.supabase.co/storage/v1/object/public/activity-images/test-pizza-1.svg`
+4. **Adresse im Browser öffnen**: Du siehst die Pizza-Zeichnung. Das zeigt, dass der Bucket öffentlich ist und die Datei richtig ausgeliefert wird. Sieht man stattdessen Quelltext oder einen Fehler, melde dich, bevor du weitermachst.
+
+### Schritt 3: Adresse bei Aktivitäten eintragen
+
+Im **SQL Editor** (Adresse einsetzen). Wir nehmen alle Koch-Aktivitäten, damit sicher eine unter den drei Vorschlägen auftaucht (die Pizza selbst lassen wir aus, sie hat ihre eigene Zeichnung):
+
+```sql
+update public.activities
+set image = 'https://DEIN-PROJEKT.supabase.co/storage/v1/object/public/activity-images/test-pizza-1.svg'
+where category = 'cooking' and id <> 'homemade-pizza';
+```
+
+Erwartet: „Success. 13 rows affected“ (oder mehr, wenn der Wochenlauf schon Koch-Aktivitäten ergänzt hat). Das Feld `updated_at` setzt die Datenbank von selbst neu (M8b), die App holt die Zeilen beim nächsten Abgleich.
+
+### Schritt 4: Im iPhone prüfen (Expo Go)
+
+1. In der `.env` auf dem Chromebook `EXPO_PUBLIC_ACTIVITIES_REFRESH_MINUTES=1` eintragen (ohne `#`), mindestens eine Minute seit dem letzten Abgleich warten.
+2. `npx expo start -c`, mit Expo Go auf dem iPhone öffnen (die App ganz schließen und neu starten, nicht nur wischen).
+3. Im Terminal steht nach ein paar Sekunden z. B. `Aktivitäten: 13 Änderung(en), jetzt 104 von Supabase.` (die Zahlen können bei dir höher sein)
+4. Auf dem Start ein Kind und **30 Minuten oder 1 Std.** wählen, Hauptknopf. Auf „Eure Ideen“ muss mindestens eine **Koch-Karte** (Kategorie „Kochen“) die Pizza-Zeichnung zeigen. Kommt keine, **„Keine passt? Drei neue Ideen“** tippen.
+
+**Das prüfst du:**
+
+| | So soll es sein |
+| --- | --- |
+| Karte | Die Zeichnung füllt den Bildbereich (2:1), scharf, ohne Rand, die Pille „Kochen“ liegt oben links darauf |
+| Detailansicht (Karte antippen) | dasselbe Bild oben, 2:1, ohne Pille |
+| Zweiter Start | Das Bild steht sofort da (es bleibt im Gerätespeicher) |
+| Flugmodus, App neu starten | Das schon gesehene Bild steht weiter da (aus dem Speicher) |
+| Dunkelmodus | Das Bild bleibt hell (so geplant, D5) |
+
+### Schritt 5: Zwei Fehlerfälle prüfen
+
+Im SQL Editor, danach in der App neu laden (wie oben, eine Minute Abstand):
+
+```sql
+-- a) Datei gibt es nicht: die Karte soll still die Farbfläche zeigen, keine Meldung, kein Loch
+update public.activities set image = 'https://DEIN-PROJEKT.supabase.co/storage/v1/object/public/activity-images/gibt-es-nicht.svg'
+where category = 'cooking' and id <> 'homemade-pizza';
+
+-- b) Fremde Adresse: wird nie geladen (keine IP-Adresse an Fremde), Farbfläche
+update public.activities set image = 'https://example.org/test.svg'
+where category = 'cooking' and id <> 'homemade-pizza';
+```
+
+Erwartet: In beiden Fällen sieht die Karte aus wie ohne Bild (Farbfläche mit Symbol).
+
+### Schritt 6: Aufräumen
+
+```sql
+update public.activities set image = null where category = 'cooking' and id <> 'homemade-pizza';
+select count(*) from public.activities where image is not null;   -- erwartet: 0
+```
+
+Dann die Datei im Dashboard löschen (Storage → Datei → Delete) und die Zeile `EXPO_PUBLIC_ACTIVITIES_REFRESH_MINUTES` in der `.env` wieder entfernen.
+
+### Was ich von dir brauche
+
+Kurze Rückmeldung zu diesen Punkten, am besten mit einem Screenshot der Karte und der Detailansicht:
+
+1. Schritt 1: Kam genau eine Bucket-Zeile und keine Schreib-Policy?
+2. Schritt 2, Punkt 4: Zeigt der Browser die Zeichnung?
+3. Schritt 4: Zeigt das iPhone das Bild auf Karte und Detailansicht, scharf und richtig zugeschnitten?
+4. Schritt 5: Bleiben beide Fehlerfälle bei der Farbfläche?
+5. Wenn du ein Android-Handy hast: dasselbe dort (Android rastert SVG anders).
+
+**Der Seed überschreibt `image` nicht mehr** (seit M9b): `npm run db:seed-sql` schreibt `image` nur beim ersten Einfügen einer Aktivität, beim Aktualisieren bleibt die Spalte stehen. Du kannst die Seed-Dateien also gefahrlos erneut einspielen, auch wenn schon Bilder eingetragen sind.
+
+## Ausblick: Bilder und Supabase (Vorschlag, im Aufbau: erster Test oben, M9b)
 
 Heute liegen die Illustrationen gebündelt in der App (`assets/illustrations/`), die Zuordnung steht in `src/features/activities/illustrations.ts`. Ein neues Bild braucht damit ein App-Update. Für laufend neue Aktivitäten (M9) schlage ich später vor:
 
