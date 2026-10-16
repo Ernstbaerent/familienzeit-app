@@ -1,0 +1,3 @@
+<ellipse cx="0" cy="-8" rx="46" ry="10" fill="{{petrol}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<ellipse cx="0" cy="-8" rx="46" ry="10" fill="{{petrol}}" stroke-width="{{line}}"/>
+<path d="M-24 -10H-10M8 -6H26" fill="none" stroke="{{paper}}" stroke-width="{{fine}}"/>

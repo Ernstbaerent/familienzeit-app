@@ -1,0 +1,3 @@
+<path d="M-18 -36H-2V-16C-2 -13 0 -12 4 -12H12C16 -12 18 -9 18 -6C18 -2.5 15.5 0 12 0H-12C-15.5 0 -18 -3 -18 -7Z" fill="{{tint}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-18 -36H-2V-16C-2 -13 0 -12 4 -12H12C16 -12 18 -9 18 -6C18 -2.5 15.5 0 12 0H-12C-15.5 0 -18 -3 -18 -7Z" fill="none" stroke-width="{{line}}"/>
+<path d="M-18 -27H-2M-14 -34V-30M-10 -34V-30M-6 -34V-30" fill="none" stroke="{{paper}}" stroke-width="{{fine}}"/>

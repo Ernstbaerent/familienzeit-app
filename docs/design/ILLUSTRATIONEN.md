@@ -60,6 +60,12 @@ Jede Farbe in einer Zeichnung ist ein **Platzhalter** `{{name}}` (Rolle), nie ei
 - **Grund:** `{{ground}}` mit einem großen, weichen Kreis in `{{paper}}` hinter dem Motiv (das Echo der Farbfläche mit dem Kreis).
 - **Dunkelmodus (D5):** Die Bilder bleiben hell (wie Fotos es wären). Sie sind auf der Karte gerahmt und stehen für sich.
 
+## Baukasten (M9b)
+
+Ab M9b entstehen Titelbilder nicht mehr frei von Hand, sondern aus **Bausteinen** mit Farbplätzen, die ein fester Zeichner in feste Plätze eines Layouts setzt (`docs/bausteine/README.md`, Plan: `docs/bilder-plan.md`).
+Alle Regeln dieser Datei gelten weiter (Format, Linien, Palette, Figuren, Sicherheit); der Baukasten setzt die mechanisch prüfbaren davon um (Linienstärken 4 und 2,5, nur Palette, erlaubter Code, Ecken der Pille, Rand) und ergänzt die **Petrol-Regel:**
+Petrol ist nie Bildgrund; in Bausteinen mit Petrol sind feine Linien Leinen, nicht Tinte (Tinte auf Petrol nur 1,8:1).
+
 ## Farbplätze und Erzeugen
 
 **Jede künftige Zeichnung entsteht mit den Platzhaltern.** So lässt sich die Palette später ändern, ohne Zeichnungen neu zu zeichnen (SVG-Dateien kennen keine Laufzeit-Variablen, und `expo-image` kann sie nicht umfärben;

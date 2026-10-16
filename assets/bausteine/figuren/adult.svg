@@ -1,0 +1,7 @@
+<path d="M-8 -46L-10 0M8 -46L10 0" fill="none" stroke-width="{{line}}"/>
+<path d="M-18 -84L-27 -56M18 -84L27 -56" fill="none" stroke-width="{{line}}"/>
+<path d="M-19 -88C-11 -93 11 -93 19 -88L23 -46H-23Z" fill="{{tint}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-19 -88C-11 -93 11 -93 19 -88L23 -46H-23Z" fill="none" stroke-width="{{line}}"/>
+<circle cx="-27" cy="-53" r="4.5" fill="{{paper}}" stroke-width="{{line}}"/>
+<circle cx="27" cy="-53" r="4.5" fill="{{paper}}" stroke-width="{{line}}"/>
+<circle cx="0" cy="-104" r="12" fill="{{paper}}" stroke-width="{{line}}"/>

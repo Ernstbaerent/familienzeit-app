@@ -1,0 +1,9 @@
+{
+  "activity": "sock-puppet-theater",
+  "layout": "hero",
+  "items": [
+    { "slot": "main", "block": "cardboard-box" },
+    { "slot": "left", "block": "child-reach", "tint": "rose" },
+    { "slot": "right", "block": "sock", "tint": "petrol" }
+  ]
+}

@@ -1,0 +1,4 @@
+<path d="M-28 -18H8V0H-28Z" fill="{{tint}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-28 -18H8V0H-28Z" fill="none" stroke-width="{{line}}"/>
+<path d="M8 -22H26V4H8Z" fill="{{paper}}" stroke-width="{{line}}"/>
+<path d="M-18 -9H-8" fill="none" stroke="{{paper}}" stroke-width="{{fine}}"/>

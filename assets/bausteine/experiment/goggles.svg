@@ -1,0 +1,4 @@
+<path d="M-14 -16H14" fill="none" stroke-width="{{line}}"/>
+<path d="M-26 -16H-36M26 -16H36" fill="none" stroke-width="{{line}}"/>
+<circle cx="-14" cy="-16" r="12" fill="{{paper}}" stroke-width="{{line}}"/>
+<circle cx="14" cy="-16" r="12" fill="{{paper}}" stroke-width="{{line}}"/>
