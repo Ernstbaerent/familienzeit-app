@@ -5,6 +5,8 @@
 
 import { backdrop, baseY, cornerZone, frame, layouts, margin, maxItems, maxOverlap, type Slot } from './layouts.ts';
 import { renderTemplate } from '../illustrations.ts';
+import { animalBannedHazards } from '../figures/castRules.ts';
+import { getMaterialInfo, isMaterialKey } from '../../../src/features/activities/materials.ts';
 import type { Block, Catalog, LoadedBlock, Person, Scene, SceneItem, TintName } from './types.ts';
 
 // Maße der Linien in der fertigen Zeichnung (ILLUSTRATIONEN.md): 4 für Umrisse, 2,5 für Details, 3 Einheiten Versatz der Farbflächen.
@@ -108,6 +110,19 @@ export function checkAgainstActivity(placements: readonly Placement[], activity:
   const present = persons(placements);
   const adultPresent = present.some((entry) => entry.person === 'adult');
   const blockIds = new Set(placements.map((placement) => placement.block.id));
+
+  // Tiere nie bei Backofen, Herd, heißen Gegenständen, Messer oder Schere in Benutzung (und nie bei Feuer): weder im Bild noch im Material der Aktivität.
+  if (placements.some((placement) => placement.block.animal === true)) {
+    for (const placement of placements) {
+      const bad = placement.block.hazards.filter((hazard) => (animalBannedHazards as readonly string[]).includes(hazard));
+      if (bad.length > 0) problems.push(`Ein Tier im Bild, aber „${placement.block.id}“ (${bad.join(', ')}): Tiere nie bei Hitze, Feuer, Messer oder Schere.`);
+    }
+    for (const key of activity.materials) {
+      if (!isMaterialKey(key)) continue;
+      const bad = (getMaterialInfo(key).hazards ?? []).filter((hazard) => (animalBannedHazards as readonly string[]).includes(hazard));
+      if (bad.length > 0) problems.push(`Ein Tier im Bild, aber die Aktivität nutzt „${key}“ (${bad.join(', ')}): Tiere nie bei Hitze, Feuer, Messer oder Schere.`);
+    }
+  }
 
   for (const placement of placements) {
     const { block } = placement;

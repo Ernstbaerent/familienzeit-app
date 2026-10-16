@@ -5,12 +5,10 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync
 import { dirname, join } from 'node:path';
 
 import { buildFigurePreview, figuresDir } from './lib/figures/preview.ts';
-import { nameChecks } from './lib/figures/names.ts';
-import { figureSets } from './lib/figures/sets.ts';
 
 const root = join(import.meta.dirname, '..');
 const check = process.argv.includes('--check');
-const files = buildFigurePreview(figureSets, nameChecks);
+const files = buildFigurePreview();
 const wanted = new Set(files.map((file) => file.path));
 let outdated = 0;
 

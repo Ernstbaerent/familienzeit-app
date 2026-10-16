@@ -5,6 +5,8 @@
 import { add, capsule, fmt, fromAngles, Path, rotate, solveArm, sub, vec, type ElbowSide, type Vec } from './math.ts';
 
 export type Tint = 'ink' | 'paper' | 'rose' | 'petrol' | 'honey' | 'brown';
+// Hautton-Platz einer Figur: `{{skin1}}` bis `{{skin5}}` für Kopf und Hände, `{{eye1}}` bis `{{eye5}}` für die Augenpunkte (siehe skin.ts).
+export type SkinSlot = 1 | 2 | 3 | 4 | 5;
 export type LimbStyle = 'line' | 'capsule' | 'block';
 export type TorsoStyle = 'bean' | 'box' | 'slim' | 'dress';
 export type HairKind = 'none' | 'cap' | 'bob' | 'tuft' | 'bun' | 'beanie' | 'curls';
@@ -12,7 +14,8 @@ export type HairKind = 'none' | 'cap' | 'bob' | 'tuft' | 'bun' | 'beanie' | 'cur
 export type HumanSpec = {
   id: string;
   name: string;
-  role: 'adult' | 'child' | 'toddler';
+  role: 'adult' | 'teen' | 'child' | 'toddler';
+  skin: SkinSlot;
   // Maße in Einheiten der 400 × 200-Fläche (wie die Bausteine); Standhöhe = Beine + Rumpf + Hals + Kopf.
   headR: number;
   neck: number;
@@ -52,6 +55,7 @@ export type RenderOptions = {
   eyes?: boolean; // zwei Punkte als Augen, sonst nichts
   mitts?: boolean; // Ofenhandschuhe an beiden Händen
   flip?: boolean; // spiegelt die Figur an ihrer Mitte
+  line?: number; // Linienstärke der Figur statt 4 (nur für die Lesbarkeitsprobe, siehe docs/design/FIGUREN.md); feine Linien bleiben 2,5
   limbShadow?: boolean; // versetzte Farbfläche auch an Armen und Beinen (kostet etwa ein Drittel mehr Bytes)
 };
 
@@ -194,8 +198,8 @@ function hairPaths(s: HumanSpec, head: Vec, rot: number): { back: string; front:
   return { back, front, extra };
 }
 
-function hand(c: Vec, r: number, mitt: boolean): string {
-  if (!mitt) return `<circle cx="${fmt(c.x)}" cy="${fmt(c.y)}" r="${fmt(r)}" fill="{{paper}}" stroke-width="4"/>`;
+function hand(c: Vec, r: number, mitt: boolean, skin: SkinSlot): string {
+  if (!mitt) return `<circle cx="${fmt(c.x)}" cy="${fmt(c.y)}" r="${fmt(r)}" fill="{{skin${skin}}}" stroke-width="4"/>`;
   const big = r * 2;
   return `<circle cx="${fmt(c.x)}" cy="${fmt(c.y)}" r="${fmt(big)}" fill="{{honey}}" stroke-width="4"/><circle cx="${fmt(c.x + big * 0.55)}" cy="${fmt(c.y - big * 0.5)}" r="${fmt(big * 0.45)}" fill="{{honey}}" stroke-width="4"/>`;
 }
@@ -278,19 +282,19 @@ export function buildHuman(spec: HumanSpec, pose: Pose, opts: RenderOptions): Re
 
   const bodyEnd = out.length;
   // Hände (über den Armen, damit sie an Gegenständen sitzen)
-  for (const arm of arms) out.push(hand(world(arm.end), spec.handR, opts.mitts === true));
+  for (const arm of arms) out.push(hand(world(arm.end), spec.handR, opts.mitts === true, spec.skin));
   const handsEnd = out.length;
 
   // Kopf, Gesicht, Haare vorn
   const hw = world(headC);
-  out.push(`<circle cx="${fmt(hw.x)}" cy="${fmt(hw.y)}" r="${fmt(spec.headR)}" fill="{{paper}}" stroke-width="4"/>`);
+  out.push(`<circle cx="${fmt(hw.x)}" cy="${fmt(hw.y)}" r="${fmt(spec.headR)}" fill="{{skin${spec.skin}}}" stroke-width="4"/>`);
   out.push(hair.front);
   if (opts.eyes) {
     const er = Math.max(1.7, spec.headR * 0.14);
     for (const side of [-1, 1]) {
       const e = add(headC, rotate(vec(side * spec.headR * 0.38, spec.headR * 0.08), lean + tilt));
       const we = world(e);
-      out.push(`<circle cx="${fmt(we.x)}" cy="${fmt(we.y)}" r="${fmt(er)}" fill="{{ink}}" stroke="none"/>`);
+      out.push(`<circle cx="${fmt(we.x)}" cy="${fmt(we.y)}" r="${fmt(er)}" fill="{{eye${spec.skin}}}" stroke="none"/>`);
     }
   }
   out.push(hair.extra);
@@ -306,6 +310,8 @@ export function buildHuman(spec: HumanSpec, pose: Pose, opts: RenderOptions): Re
     footL: world(legs[0].end),
     footR: world(legs[1].end),
   };
-  return { svg: out.join(''), body: out.slice(0, bodyEnd).join(''), hands: out.slice(bodyEnd, handsEnd).join(''), head: out.slice(handsEnd).join(''), anchors };
+  const lw = opts.line;
+  const thick = (text: string): string => (lw === undefined ? text : text.replaceAll('stroke-width="4"', `stroke-width="${lw}"`));
+  return { svg: thick(out.join('')), body: thick(out.slice(0, bodyEnd).join('')), hands: thick(out.slice(bodyEnd, handsEnd).join('')), head: thick(out.slice(handsEnd).join('')), anchors };
 }
 
