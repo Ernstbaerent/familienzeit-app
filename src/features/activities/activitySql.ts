@@ -73,7 +73,9 @@ function sqlRow(activity: Activity): string {
 
 // Ein Teil: einfügen oder, wenn es die Aktivität schon gibt, aktualisieren (so lässt sich jede Datei gefahrlos wiederholen).
 export function renderSeedPart(activities: readonly Activity[], part: number, parts: number): string {
-  const columns = activityColumns.filter((column) => column !== 'id');
+  // `image` bleibt beim Aktualisieren stehen (M9b): Die Bild-Adressen setzt der Bilder-Lauf bzw. man von Hand in der Datenbank,
+  // die Dateien in data/ kennen sie nicht. Ein erneutes Einspielen darf sie nie auf `null` zurücksetzen. Beim ersten Einfügen steht `image` weiter in der Liste.
+  const columns = activityColumns.filter((column) => column !== 'id' && column !== 'image');
   const update = columns.map((column) => `${column} = excluded.${column}`).join(',\n  ');
   // Nur bei echter Änderung schreiben (M8b): Sonst setzt jedes erneute Einspielen `updated_at` neu, und jedes Gerät lädt alles noch einmal.
   // `updated_at` selbst steht nicht in der Liste (setzt die Datenbank), zählt also nicht als Änderung.

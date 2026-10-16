@@ -34,6 +34,16 @@ export const illustrationPalette = {
   petrol: palette.petrol, // Kleidung, Socken
   honey: palette.honey, // Teig, Käse, Handschuh, Tube
   brown: palette.brown, // Pappe, Holz
+  // Hauttöne der Figuren (docs/design/FIGUREN.md, Variante A, von Clemens gewählt): Kopf und Hände, von hell bis tief, Farbton 21° bis 26°.
+  // Der Tinten-Umriss trägt auf den hellen, die Haut selbst auf den tiefen Tönen (Regel und Kontraste: FIGUREN.md).
+  skin1: '#F1CDB3',
+  skin2: '#DDAA85',
+  skin3: '#C48A62',
+  skin4: '#B07A52',
+  skin5: '#A56B45',
+  skin6: '#8C5C3E',
+  skin7: '#76492F',
+  skin8: '#613A25',
 } as const;
 
 export type IllustrationColorName = keyof typeof illustrationPalette;

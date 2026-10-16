@@ -5,6 +5,9 @@
 
 import { backdrop, baseY, cornerZone, frame, layouts, margin, maxItems, maxOverlap, type Slot } from './layouts.ts';
 import { renderTemplate } from '../illustrations.ts';
+import { animalBannedHazards } from '../figures/castRules.ts';
+import { backgrounds, skinCarriesOn } from '../figures/skin.ts';
+import { getMaterialInfo, isMaterialKey } from '../../../src/features/activities/materials.ts';
 import type { Block, Catalog, LoadedBlock, Person, Scene, SceneItem, TintName } from './types.ts';
 
 // Maße der Linien in der fertigen Zeichnung (ILLUSTRATIONEN.md): 4 für Umrisse, 2,5 für Details, 3 Einheiten Versatz der Farbflächen.
@@ -12,7 +15,7 @@ const lineWidth = 4;
 const fineWidth = 2.5;
 const shiftWidth = 3;
 
-export const maxSceneBytes = 10 * 1024; // wie jede Zeichnung (ILLUSTRATIONEN.md, „Format“)
+export const maxSceneBytes = 14 * 1024; // wie jede Zeichnung (ILLUSTRATIONEN.md, „Format“); das Bucket erlaubt 20 KB (Migration 0005)
 
 function round(value: number): string {
   return String(Math.round(value * 100) / 100);
@@ -108,6 +111,31 @@ export function checkAgainstActivity(placements: readonly Placement[], activity:
   const present = persons(placements);
   const adultPresent = present.some((entry) => entry.person === 'adult');
   const blockIds = new Set(placements.map((placement) => placement.block.id));
+
+  // Hautton und Hintergrund: Trägt ein Hautton auf Petrol nicht (Haut gegen Petrol unter 3:1 und Umriss gegen Haut unter 3:1),
+  // darf hinter dem Kopf der Figur keine Petrol-Fläche liegen. Der Kopf ist das obere Drittel der Figur.
+  for (const figure of placements) {
+    const tone = figure.block.skin;
+    if (tone === undefined || skinCarriesOn(tone, backgrounds.petrol)) continue;
+    const head = { minX: figure.box.minX, maxX: figure.box.maxX, minY: figure.box.minY, maxY: figure.box.minY + (figure.box.maxY - figure.box.minY) / 3 };
+    for (const other of placements) {
+      if (other === figure || other.block.person !== undefined || other.tint !== 'petrol') continue;
+      if (overlap(head, other.box) > 0) problems.push(`Der Hautton von „${figure.block.id}“ (${tone}) trägt auf Petrol nicht, aber „${other.block.id}“ (Petrol) liegt am Kopf.`);
+    }
+  }
+
+  // Tiere nie bei Backofen, Herd, heißen Gegenständen, Messer oder Schere in Benutzung (und nie bei Feuer): weder im Bild noch im Material der Aktivität.
+  if (placements.some((placement) => placement.block.animal === true)) {
+    for (const placement of placements) {
+      const bad = placement.block.hazards.filter((hazard) => (animalBannedHazards as readonly string[]).includes(hazard));
+      if (bad.length > 0) problems.push(`Ein Tier im Bild, aber „${placement.block.id}“ (${bad.join(', ')}): Tiere nie bei Hitze, Feuer, Messer oder Schere.`);
+    }
+    for (const key of activity.materials) {
+      if (!isMaterialKey(key)) continue;
+      const bad = (getMaterialInfo(key).hazards ?? []).filter((hazard) => (animalBannedHazards as readonly string[]).includes(hazard));
+      if (bad.length > 0) problems.push(`Ein Tier im Bild, aber die Aktivität nutzt „${key}“ (${bad.join(', ')}): Tiere nie bei Hitze, Feuer, Messer oder Schere.`);
+    }
+  }
 
   for (const placement of placements) {
     const { block } = placement;

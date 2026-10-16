@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image as ExpoImage } from 'expo-image';
 import { createInstance } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
-import { Alert, BackHandler, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { act, create, type ReactTestInstance } from 'react-test-renderer';
 
 import type { Activity } from '@/features/activities/activities';
@@ -326,7 +326,7 @@ describe('Bildbereich wie auf den Karten', () => {
 
   it('ohne Bild der Aktivität: die Farbfläche der Kategorie mit großem Symbol, 2:1, mit der Rundung der Karten', () => {
     const { root } = renderScreen();
-    expect(root.findAllByType(Image)).toHaveLength(0);
+    expect(root.findAllByType(ExpoImage)).toHaveLength(0);
     const tone = lightTheme.categoryTones.nature;
     const [mark] = bigIcons(root);
     expect(mark.props.name).toBe(categoryIcons.nature);
@@ -344,7 +344,7 @@ describe('Bildbereich wie auf den Karten', () => {
     for (const category of ['cooking', 'nature'] as const) {
       setup(makeIdea({ category }));
       const { root } = renderScreen();
-      expect(root.findAllByType(Image)).toHaveLength(0);
+      expect(root.findAllByType(ExpoImage)).toHaveLength(0);
       expect(bigIcons(root)).toHaveLength(1);
     }
   });
@@ -363,18 +363,18 @@ describe('Bildbereich wie auf den Karten', () => {
       const uri = 'https://abc.supabase.co/storage/v1/object/public/bilder/wald.svg';
       setup(makeIdea({ image: uri }));
       const { root } = renderScreen();
-      const [image] = root.findAllByType(Image);
+      const [image] = root.findAllByType(ExpoImage);
       expect(image.props.source).toEqual({ uri });
       expect(bigIcons(root)).toHaveLength(0);
       act(() => image.props.onError());
-      expect(root.findAllByType(Image)).toHaveLength(0);
+      expect(root.findAllByType(ExpoImage)).toHaveLength(0);
       expect(bigIcons(root)).toHaveLength(1);
     });
 
     it('mit Bild von einem fremden Server: wird nicht geladen, die Farbfläche (keine IP-Adresse an Fremde)', () => {
       setup(makeIdea({ image: 'https://example.org/wald.jpg' }));
       const { root } = renderScreen();
-      expect(root.findAllByType(Image)).toHaveLength(0);
+      expect(root.findAllByType(ExpoImage)).toHaveLength(0);
       expect(bigIcons(root)).toHaveLength(1);
     });
   });

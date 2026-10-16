@@ -17,7 +17,7 @@ nicht **wie gut** es aussehen muss.
 | Seitenverhältnis | **2:1** wie der Bildbereich der Karten (`CardMedia`) |
 | Zeichenfläche | `viewBox="0 0 400 200"`, alle Maße unten in diesen Einheiten |
 | Eigengröße | `width="1200" height="600"`: Falls ein Handy das SVG in seiner Eigengröße rastert (iOS), bleibt es auf der Karte (ca. 312 pt, also 936 px bei 3×) scharf |
-| Datei | SVG, **unter 10 KB**, keine externen Schriften, Bilder oder Links |
+| Datei | SVG, **unter 14 KB** (Titel- und Schrittbilder; das Bucket in Supabase erlaubt 20 KB), keine externen Schriften, Bilder oder Links |
 | Ablage | Ausgabe in `assets/illustrations/` (**erzeugt**, nicht von Hand ändern), Vorlagen in `assets/illustrations/src/` (siehe „Farbplätze und Erzeugen“) |
 | Name | Titelbild `aktivitaets-id.svg`, Schrittbild `aktivitaets-id-step-N.svg` (N = Schrittnummer, wie sie in der App steht, ab 1) |
 
@@ -30,7 +30,7 @@ Der Test `src/features/activities/illustrations.test.ts` prüft das.
 ## Linie
 
 - **Tinte** (`{{ink}}`, `#12323D`), **runde Enden und runde Ecken** (`stroke-linecap="round"`, `stroke-linejoin="round"`).
-- **Nur zwei Stärken:** **4** für Umrisse, **2,5** für Details (Naht, Faden, Dampf). Auf der Karte (ca. 312 px breit) sind das etwa 3 px und 2 px.
+- **Nur drei Stärken:** **5** für die Umrisse der **Figuren** (Menschen und Tiere, `docs/design/FIGUREN.md`), **4** für die Umrisse der Gegenstände, **2,5** für Details (Naht, Faden, Dampf). Auf der Karte (ca. 312 px breit) sind das etwa 3,9 px, 3,1 px und 2 px. Bilder ohne Figuren haben nur 4 und 2,5.
   In einer verkleinerten Gruppe (`scale`) zählt die sichtbare Stärke (bei `scale(.5)` also 8 und 5 eintragen).
   Ausnahme: eine Abdecklinie in `{{paper}}`, die zwei Flächen verbindet (z. B. Schaum, der in den Becher übergeht), darf breiter sein.
 - Linien dürfen leicht schwingen, nichts muss perfekt symmetrisch sein. Keine Schraffuren, keine Schatten.
@@ -49,12 +49,14 @@ Jede Farbe in einer Zeichnung ist ein **Platzhalter** `{{name}}` (Rolle), nie ei
 | `{{petrol}}` | Petrol `#1A5D74` | Kleidung (Erwachsene), Socken, Puppen | 1,8:1 | 6,9:1 |
 | `{{honey}}` | Honig `#E8A94F` (warm) | Teig, Käse, Handschuh, Kleber: nur Gegenstände | 6,6:1 | 1,9:1 |
 | `{{brown}}` | Braun `#B07A45` (warm) | Pappe, Holz: nur Gegenstände | 3,7:1 | 3,5:1 |
+| `{{skin1}}` bis `{{skin8}}` | `#F1CDB3`, `#DDAA85`, `#C48A62`, `#B07A52`, `#A56B45`, `#8C5C3E`, `#76492F`, `#613A25` | Haut (Kopf und Hände) der Figuren, nie für Gegenstände. Zuordnung und Regel „trägt“: `docs/design/FIGUREN.md` | 9,1:1 bis 1,4:1 | 1,4:1 bis 9,3:1 |
 
 - **Die warmen Töne gelten nur für Gegenstände** (Essen, Pappe, Holz, Klebstoff), **nie für Kleidung oder Flächen der App.** Sie stammen aus derselben Familie wie die Warnfarben (`warning`, `warningSurface`)
   und sind **keine** Farbrollen des Themes (Test). Kleidung ist Petrol, Rosé oder Leinen.
 - **Kontraste:** Tinte-Linien auf Rosé, Honig, Braun und Leinen sind klar sichtbar (mindestens 3,7:1). **Auf Petrol nur 1,8:1:** Der Umriss verschwindet im Petrol und die Fläche trägt die Form.
   Deshalb bleiben Petrol-Flächen groß und einfach (Kleidung, Puppen), Details darauf sind in Leinen. Rosé auf Leinen hat nur 1,5:1, Rosé-Flächen stehen deshalb immer mit Tinten-Umriss.
-- Der Test `src/features/activities/illustrations.test.ts` prüft: nur diese sieben Werte, keine festen Farben in den Vorlagen, jeder Platzhalter ist bekannt.
+- **Hauttöne:** Auf Petrol tragen die Plätze 6 bis 8 nicht (Haut gegen Petrol unter 1,4:1, Tinte gegen Haut unter 2,5:1): Hinter dem Kopf einer Figur mit so einem Ton liegt nie eine Petrol-Fläche (Szenenprüfer, FIGUREN.md).
+- Der Test `src/features/activities/illustrations.test.ts` prüft: nur diese 15 Werte (sieben Gegenstands- und Flächenfarben, acht Hauttöne), keine festen Farben in den Vorlagen, jeder Platzhalter ist bekannt.
 - **Versetzte Flächen:** Farbflächen sitzen 3 bis 4 Einheiten neben ihrem Umriss, wie beim Druck mit leicht verrutschter Farbe.
   Das macht den handgemachten Eindruck und kostet keine Bytes.
 - **Grund:** `{{ground}}` mit einem großen, weichen Kreis in `{{paper}}` hinter dem Motiv (das Echo der Farbfläche mit dem Kreis).
@@ -126,8 +128,7 @@ widerspricht. **Ein Bild darf nichts zeigen, was der Text nicht sagt.** Für jed
 | Spritzer, Augen | Schutzbrille nur, wenn der Text sie nennt (sonst Bild oder Text anpassen) |
 | Alter | Größe der Figuren passt zur Altersgruppe der Aktivität |
 
-**Bekannte Ausnahme im Pilot:** Der Natron-Vulkan zeigt eine Schutzbrille, sein Sicherheitshinweis nennt sie noch nicht.
-Das steht als Punkt für die Durchsicht vor der Beta in der CLAUDE.md (Text ergänzen oder Bild anpassen).
+**Natron-Vulkan (erledigt 2026-10-15):** Sein Sicherheitshinweis nennt jetzt „Schutzbrille oder normale Brille“ (de/en), die Schutzbrille im Bild ist damit gedeckt. Die Regel bleibt: Eine Schutzbrille zeigt ein Bild nur, wenn der Text sie nennt.
 
 ## Vorrang im Bildbereich
 

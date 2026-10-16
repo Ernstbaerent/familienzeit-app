@@ -38,9 +38,9 @@ describe('Dateien in assets/illustrations/', () => {
     expect([...mapped].sort()).toEqual([...files].sort());
   });
 
-  it.each(files)('%s: SVG, unter 10 KB', (file) => {
+  it.each(files)('%s: SVG, unter 14 KB', (file) => {
     expect(file).toMatch(/\.svg$/);
-    expect(statSync(join(dir, file)).size).toBeLessThan(10 * 1024);
+    expect(statSync(join(dir, file)).size).toBeLessThan(14 * 1024);
   });
 
   it.each(files)('%s: Zeichenfläche 400 × 200 (2:1), Eigengröße 1200 × 600', (file) => {

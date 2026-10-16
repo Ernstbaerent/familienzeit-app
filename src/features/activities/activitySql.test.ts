@@ -93,15 +93,22 @@ describe('Aufbau eines Teils', () => {
 
   it('ist wiederholbar: vorhandene Aktivitäten werden aktualisiert statt doppelt angelegt', () => {
     expect(sql).toContain('on conflict (id) do update set');
-    for (const column of activityColumns.filter((name) => name !== 'id')) expect(sql).toContain(`${column} = excluded.${column}`);
+    for (const column of activityColumns.filter((name) => name !== 'id' && name !== 'image')) expect(sql).toContain(`${column} = excluded.${column}`);
     expect(sql).not.toContain('id = excluded.id');
+  });
+
+  it('M9b: `image` wird beim Einfügen gesetzt, beim Aktualisieren aber nie überschrieben (Bild-Adressen kommen aus der Datenbank)', () => {
+    expect(sql).toContain(`insert into public.activities (${activityColumns.join(', ')})`);
+    expect(activityColumns).toContain('image');
+    const update = sql.slice(sql.indexOf('do update set'));
+    expect(update).not.toContain('image');
   });
 
   it('schreibt nur bei echter Änderung (M8b): alle Spalten außer id verglichen, updated_at zählt nicht', () => {
     const where = sql.slice(sql.indexOf('\nwhere '));
     expect(where).toMatch(/^\nwhere \(activities\.status, /);
     expect(where).toContain('is distinct from (excluded.status, ');
-    for (const column of activityColumns.filter((name) => name !== 'id')) {
+    for (const column of activityColumns.filter((name) => name !== 'id' && name !== 'image')) {
       expect(where).toContain(`activities.${column}`);
       expect(where).toContain(`excluded.${column}`);
     }

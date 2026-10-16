@@ -46,10 +46,9 @@ on conflict (id) do update set
   materials = excluded.materials,
   sibling_friendly = excluded.sibling_friendly,
   source = excluded.source,
-  image = excluded.image,
   created_at = excluded.created_at
-where (activities.status, activities.category, activities.topics, activities.translations, activities.age_min, activities.age_max, activities.duration_min, activities.duration_max, activities.setting, activities.needs_dry, activities.better_in_sun, activities.day_parts, activities.months, activities.energy, activities.cost, activities.materials, activities.sibling_friendly, activities.source, activities.image, activities.created_at)
-  is distinct from (excluded.status, excluded.category, excluded.topics, excluded.translations, excluded.age_min, excluded.age_max, excluded.duration_min, excluded.duration_max, excluded.setting, excluded.needs_dry, excluded.better_in_sun, excluded.day_parts, excluded.months, excluded.energy, excluded.cost, excluded.materials, excluded.sibling_friendly, excluded.source, excluded.image, excluded.created_at);
+where (activities.status, activities.category, activities.topics, activities.translations, activities.age_min, activities.age_max, activities.duration_min, activities.duration_max, activities.setting, activities.needs_dry, activities.better_in_sun, activities.day_parts, activities.months, activities.energy, activities.cost, activities.materials, activities.sibling_friendly, activities.source, activities.created_at)
+  is distinct from (excluded.status, excluded.category, excluded.topics, excluded.translations, excluded.age_min, excluded.age_max, excluded.duration_min, excluded.duration_max, excluded.setting, excluded.needs_dry, excluded.better_in_sun, excluded.day_parts, excluded.months, excluded.energy, excluded.cost, excluded.materials, excluded.sibling_friendly, excluded.source, excluded.created_at);
 
 -- Zur Kontrolle: Nach dem letzten Teil steht hier die Gesamtzahl.
 select count(*) as aktivitaeten_insgesamt from public.activities;
