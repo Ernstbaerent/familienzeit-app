@@ -32,7 +32,7 @@ const humans: CastHuman[] = [
     ageYears: 3,
     blurb: 'das kleinste Kind (≈3): Dutt, Petrol-Kleidchen',
     spec: {
-      id: 'nolli', name: 'Nolli', role: 'toddler', skin: 1, headR: 9.5, neck: 2, torsoH: 26, torsoW: 22, shoulderW: 17, hipW: 9,
+      id: 'nolli', name: 'Nolli', role: 'toddler', skin: 2, headR: 9.5, neck: 2, torsoH: 26, torsoW: 22, shoulderW: 17, hipW: 9,
       upperArm: 12, foreArm: 11, upperLeg: 14, lowerLeg: 13, handR: 3.8, footLen: 10, limb: line, torso: 'dress',
       colors: { top: 'petrol', bottom: 'ink', shoes: 'rose', hair: 'ink' }, hair: 'bun',
     },
@@ -42,7 +42,7 @@ const humans: CastHuman[] = [
     ageYears: 7,
     blurb: 'das größere Kind (≈7): Haarbüschel, Rosé-Kleid',
     spec: {
-      id: 'jette', name: 'Jette', role: 'child', skin: 2, headR: 10, neck: 3, torsoH: 36, torsoW: 28, shoulderW: 20, hipW: 10,
+      id: 'jette', name: 'Jette', role: 'child', skin: 7, headR: 10, neck: 3, torsoH: 36, torsoW: 28, shoulderW: 20, hipW: 10,
       upperArm: 17, foreArm: 16, upperLeg: 20, lowerLeg: 19, handR: 4, footLen: 11, limb: line, torso: 'dress',
       colors: { top: 'rose', bottom: 'ink', shoes: 'petrol', hair: 'ink' }, hair: 'tuft',
     },
@@ -52,7 +52,7 @@ const humans: CastHuman[] = [
     ageYears: 11,
     blurb: 'der ältere Junge (≈11): Mütze, Rosé-Shirt, die Hand in der Hüfte',
     spec: {
-      id: 'mats', name: 'Mats', role: 'teen', skin: 5, headR: 10.5, neck: 3, torsoH: 44, torsoW: 25, shoulderW: 22, hipW: 11,
+      id: 'mats', name: 'Mats', role: 'teen', skin: 1, headR: 10.5, neck: 3, torsoH: 44, torsoW: 25, shoulderW: 22, hipW: 11,
       upperArm: 21, foreArm: 20, upperLeg: 25, lowerLeg: 24, handR: 4.2, footLen: 12, limb: line, torso: 'slim',
       colors: { top: 'rose', bottom: 'ink', shoes: 'petrol', hair: 'ink', hat: 'petrol', accent: 'paper' }, hair: 'beanie',
     },
@@ -72,7 +72,7 @@ const humans: CastHuman[] = [
     ageYears: 40,
     blurb: 'der Papa: noch etwas größer, Leinen-Pullover, kurze Haare',
     spec: {
-      id: 'arne', name: 'Arne', role: 'adult', skin: 4, headR: 11, neck: 4, torsoH: 54, torsoW: 30, shoulderW: 28, hipW: 13,
+      id: 'arne', name: 'Arne', role: 'adult', skin: 5, headR: 11, neck: 4, torsoH: 54, torsoW: 30, shoulderW: 28, hipW: 13,
       upperArm: 25, foreArm: 24, upperLeg: 29, lowerLeg: 28, handR: 4.6, footLen: 13, limb: line, torso: 'slim',
       colors: { top: 'paper', bottom: 'petrol', shoes: 'ink', hair: 'ink' }, hair: 'cap',
     },
@@ -82,12 +82,12 @@ const humans: CastHuman[] = [
 
 const pets: CastPet[] = [
   {
-    blurb: 'die Katze: schlank, langer Schwanz, spitze Ohren',
+    blurb: 'die Katze (Cameo): schlank, langer Schwanz, spitze Ohren',
     spec: { id: 'tuepfel', name: 'Tüpfel', kind: 'cat', bodyRx: 26, bodyRy: 10, headR: 10.5, legLen: 24, tailLen: 30, colors: { body: 'paper', accent: 'rose' } },
   },
   {
-    blurb: 'der Vogel: klein, dünne Beine, langer Schwanz, Haarschopf',
-    spec: { id: 'stups', name: 'Stups', kind: 'bird', bodyRx: 20, bodyRy: 13, headR: 10, legLen: 17, tailLen: 19, colors: { body: 'honey', accent: 'rose' } },
+    blurb: 'der Vogel (Hauptfigur, Begleiter): dünne Beine, langer Schwanz, Haarschopf',
+    spec: { id: 'stups', name: 'Stups', kind: 'bird', bodyRx: 18.1, bodyRy: 11.9, headR: 9.1, legLen: 15.3, tailLen: 17.4, colors: { body: 'honey', accent: 'rose' } },
   },
 ];
 

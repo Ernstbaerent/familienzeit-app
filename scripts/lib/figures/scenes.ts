@@ -5,17 +5,17 @@ import { renderTemplate } from '../illustrations.ts';
 import { vec } from './math.ts';
 import { cast, human, pet, type CastHuman, type CastPet } from './cast.ts';
 import { buildPet, type PetPoseName, type PetSpec } from './pets.ts';
-import { plateCenter, poseOf, trayCenter, trayWidth, type PoseName, type Quirk } from './poses.ts';
+import { expressionNames, plateCenter, poseOf, trayCenter, trayWidth, type PoseName, type Quirk } from './poses.ts';
 import { fmt } from './math.ts';
 import { plate, table, tray, type TrayContent } from './props.ts';
 import { buildHuman, legLength, type HumanSpec, type Pose } from './rig.ts';
-import { skinPalette, type SkinVariant } from './skin.ts';
+import { skinPalette } from './skin.ts';
 
 export const baseY = 176;
 const frame = { w: 400, h: 200 };
 
 // Rahmen mit Grund, Standlinie und gemeinsamer Linienart.
-export function frameSvg(inner: string, skin: SkinVariant, opts: { backdrop?: boolean } = {}): string {
+export function frameSvg(inner: string, opts: { backdrop?: boolean } = {}): string {
   const circle = opts.backdrop ? `<circle cx="200" cy="108" r="90" fill="{{paper}}"/>` : '';
   const svg = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${frame.w * 3}" height="${frame.h * 3}" viewBox="0 0 ${frame.w} ${frame.h}">`,
@@ -27,7 +27,7 @@ export function frameSvg(inner: string, skin: SkinVariant, opts: { backdrop?: bo
     '</g>',
     '</svg>',
   ].join('');
-  return renderTemplate(svg, skinPalette(skin));
+  return renderTemplate(svg, skinPalette());
 }
 
 type Held = { kind: 'plate' } | { kind: 'tray'; content: TrayContent; mitts: boolean; onTable?: boolean } | undefined;
@@ -57,7 +57,7 @@ export function petInPose(spec: PetSpec, pose: PetPoseName, x: number, eyes: boo
 const cold = (spec: HumanSpec): TrayContent => (spec.role === 'adult' ? 'apples' : 'cookies');
 
 // Figurenblatt eines Menschen: stehen, hält etwas, trägt Tablett, jubelt. Erwachsene tragen heiße Äpfel mit Ofenhandschuhen, Kinder kalte Kekse.
-export function humanSheet(fig: CastHuman, eyes: boolean, skin: SkinVariant): string {
+export function humanSheet(fig: CastHuman, eyes = false): string {
   const { spec, quirk } = fig;
   const mitts = spec.role === 'adult';
   const cells = [
@@ -66,50 +66,58 @@ export function humanSheet(fig: CastHuman, eyes: boolean, skin: SkinVariant): st
     humanInPose(spec, quirk, 'tray', 246, { eyes, held: { kind: 'tray', content: cold(spec), mitts } }),
     humanInPose(spec, quirk, 'cheer', 346, { eyes }),
   ];
-  return frameSvg(cells.join(''), skin);
+  return frameSvg(cells.join(''));
 }
 
-// Tierblatt: drei Posen pro Bild, zwei Bilder je Tier (Hälfte 0: steht, sitzt, hüpft; Hälfte 1: auf der Schulter, zeigt, schaut zu).
-export function petSheet(p: CastPet, eyes: boolean, skin: SkinVariant, half: 0 | 1): string {
+// Tierblatt. Vogel: zwei Bilder (Hälfte 0: steht, sitzt, hüpft; Hälfte 1: auf der Schulter, zeigt, schaut zu). Katze (Cameo): ein Bild mit drei Posen.
+export function petSheet(p: CastPet, half: 0 | 1, eyes = false): string {
   const xs = [75, 205, 330];
-  if (half === 0) return frameSvg((['stand', 'sit', 'hop'] as const).map((pose, i) => petInPose(p.spec, pose, xs[i], eyes)).join(''), skin);
+  if (p.spec.kind === 'cat') return frameSvg((['stand', 'sit', 'watch'] as const).map((pose, i) => petInPose(p.spec, pose, xs[i], eyes)).join(''));
+  if (half === 0) return frameSvg((['stand', 'sit', 'hop'] as const).map((pose, i) => petInPose(p.spec, pose, xs[i], eyes)).join(''));
   // Auf der Schulter: ein Mensch (Jette) steht, das Tier sitzt auf der rechten Schulter; daneben zeigt und schaut es vom Boden aus.
   const host = human('jette');
   const r = buildHuman(host.spec, poseOf(host.spec, 'stand', host.quirk), { x: xs[0], y: baseY, eyes });
   const s = r.anchors.shoulderR;
   const onShoulder = petInPose(p.spec, 'shoulder', s.x + 7, eyes, { y: s.y - 1 });
-  return frameSvg(r.body + onShoulder + r.hands + r.head + petInPose(p.spec, 'point', xs[1], eyes) + petInPose(p.spec, 'watch', xs[2], eyes), skin);
+  return frameSvg(r.body + onShoulder + r.hands + r.head + petInPose(p.spec, 'point', xs[1], eyes) + petInPose(p.spec, 'watch', xs[2], eyes));
+}
+
+// Ausdrucksposen: fünf Posen einer Figur in einem Bild (staunt, freut sich, enttäuscht, nachdenklich, neugierig).
+export function expressionSheet(fig: CastHuman, eyes = false): string {
+  const xs = [48, 124, 200, 276, 352];
+  return frameSvg(expressionNames.map((name, i) => humanInPose(fig.spec, fig.quirk, name, xs[i], { eyes })).join(''));
 }
 
 // Die ganze Besetzung nebeneinander, stehend (nach Größe sortiert), mit den Tieren.
-export function lineup(eyes: boolean, skin: SkinVariant, opts: { line?: number } = {}): string {
+export function lineup(opts: { line?: number; eyes?: boolean } = {}): string {
+  const eyes = opts.eyes ?? false;
   const order = ['nolli', 'jette', 'mats', 'ilka', 'arne'].map((id) => human(id));
-  const xs = [36, 94, 150, 208, 266];
+  const xs = [30, 84, 136, 190, 244];
   const parts = order.map((h, i) => humanInPose(h.spec, h.quirk, 'stand', xs[i], { eyes, line: opts.line }));
-  parts.push(petInPose(pet('tuepfel').spec, 'sit', 330, eyes, { line: opts.line }), petInPose(pet('stups').spec, 'stand', 366, eyes, { line: opts.line }));
-  return frameSvg(parts.join(''), skin);
+  parts.push(petInPose(pet('tuepfel').spec, 'sit', 300, eyes, { line: opts.line }), petInPose(pet('stups').spec, 'stand', 356, eyes, { line: opts.line }));
+  return frameSvg(parts.join(''));
 }
 
 // „Familie am Tisch“: Mats, Jette, Nolli, Ilka und Arne stehen hinter dem gedeckten Tisch, Tüpfel sitzt davor auf dem Boden.
 // Zum Prüfen von Größenverhältnissen und Wiedererkennung. Auf dem Tisch nur ein Teller mit Apfel, keine heißen Dinge.
-export function familyAtTable(eyes: boolean, skin: SkinVariant): string {
+export function familyAtTable(eyes = false, line?: number): string {
   const order = ['mats', 'jette', 'nolli', 'ilka', 'arne'].map((id) => human(id));
   const xs = [58, 112, 163, 222, 280];
-  const people = order.map((h, i) => humanInPose(h.spec, h.quirk, 'stand', xs[i], { eyes })).join('');
+  const people = order.map((h, i) => humanInPose(h.spec, h.quirk, 'stand', xs[i], { eyes, line })).join('');
   const topY = baseY - 50;
   // Tisch mit Decke (Leinen) vor den Beinen der Figuren
   const cloth = `<path d="M26 ${topY}H318V${baseY + 5}H26Z" fill="{{paper}}" stroke-width="4"/>`;
   const slab = `<path d="M20 ${topY - 7}H324V${topY}H20Z" fill="{{brown}}" stroke-width="4"/>`;
   const dish = plate(vec(172, topY - 11), 15, true);
-  const cat = petInPose(pet('tuepfel').spec, 'sit', 346, eyes);
+  const cat = petInPose(pet('tuepfel').spec, 'sit', 346, eyes, { line });
   const floor = `<path d="M24 ${baseY}H376" fill="none" stroke-width="4"/>`;
-  return frameSvg(people + cloth + floor + slab + dish + cat, skin);
+  return frameSvg(people + cloth + floor + slab + dish + cat);
 }
 
 export type TriptychPanel = { title: string; svg: string };
 
 // Standbild-Triptychon für ein Kind: läuft herein, nimmt das Tablett (kalte Kekse), jubelt.
-export function childTriptych(id: 'jette' | 'mats', eyes: boolean, skin: SkinVariant): TriptychPanel[] {
+export function childTriptych(id: 'jette' | 'mats', eyes = false): TriptychPanel[] {
   const fig = human(id);
   const { spec, quirk } = fig;
   const content: TrayContent = 'cookies';
@@ -124,14 +132,14 @@ export function childTriptych(id: 'jette' | 'mats', eyes: boolean, skin: SkinVar
   const topC = baseY - 50;
   const p3 = humanInPose(spec, quirk, 'cheer', 150, { eyes }) + table(300, topC, 80, 50) + tray(vec(300, topC), 56, content);
   return [
-    { title: 'läuft herein', svg: frameSvg(p1, skin) },
-    { title: 'nimmt das Tablett', svg: frameSvg(p2, skin) },
-    { title: 'jubelt', svg: frameSvg(p3, skin) },
+    { title: 'läuft herein', svg: frameSvg(p1) },
+    { title: 'nimmt das Tablett', svg: frameSvg(p2) },
+    { title: 'jubelt', svg: frameSvg(p3) },
   ];
 }
 
 // Standbild-Triptychon für Stups: hüpft herein, zeigt auf das Tablett (Tiere fassen nichts an), jubelt. Auf dem Tisch nur kalte Kekse.
-export function birdTriptych(eyes: boolean, skin: SkinVariant): TriptychPanel[] {
+export function birdTriptych(eyes = false): TriptychPanel[] {
   const stups = pet('stups').spec;
   const topA = baseY - 58;
   const tbl = (x: number, top: number, w: number): string => table(x, top, w, baseY - top) + tray(vec(x, top), w - 20, 'cookies');
@@ -139,9 +147,9 @@ export function birdTriptych(eyes: boolean, skin: SkinVariant): TriptychPanel[] 
   const p2 = petInPose(stups, 'point', 150, eyes) + tbl(290, topA, 96);
   const p3 = petInPose(stups, 'hop', 200, eyes) + tbl(320, baseY - 50, 80);
   return [
-    { title: 'hüpft herein', svg: frameSvg(p1, skin) },
-    { title: 'zeigt auf das Tablett', svg: frameSvg(p2, skin) },
-    { title: 'jubelt', svg: frameSvg(p3, skin) },
+    { title: 'hüpft herein', svg: frameSvg(p1) },
+    { title: 'zeigt auf das Tablett', svg: frameSvg(p2) },
+    { title: 'jubelt', svg: frameSvg(p3) },
   ];
 }
 

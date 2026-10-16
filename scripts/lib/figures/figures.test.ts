@@ -1,4 +1,4 @@
-// Figuren-Rig (M9b): Maße, Rechnung (Arm mit zwei Gliedern), Posen, die zwei Fassungen (ohne und mit Augen), die Zeichnungen und die Vorschau.
+// Figuren-Rig (M9b): Maße, Rechnung (Arm mit zwei Gliedern), Posen, Hauttöne, Tier-Regel, Zeichnungen und Vorschau.
 // Ob die Figuren als Charaktere funktionieren (Wiedererkennung, Anmutung), sieht ein Mensch auf der Vorschau (docs/design/figuren/VORSCHAU.md).
 
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -11,17 +11,18 @@ import type { LoadedBlock } from '../kit/types';
 import { cast } from './cast';
 import { animalBannedHazards, figureAges, figureFitsActivity } from './castRules';
 import { capsule, fmt, fromAngles, length, rotate, solveArm, sub, vec } from './math';
-import { nameChecks, nameProposals, rejectedNames } from './names';
-import { buildPet, petPoseNames } from './pets';
-import { buildFigurePreview, figuresDir, legibilityLines, rigData, sizeLimit, sizeLimitSteps } from './preview';
-import { plateCenter, poseNames, poseOf, trayCenter, trayWidth } from './poses';
-import { buildHuman, legLength, standHeight, type HumanSpec, type Pose } from './rig';
-import { childTriptych, familyAtTable, humanInPose, humanSheet, lineup, petSheet } from './scenes';
-import { eyeColorOn, skinContrast, skinPalette, skinVariants } from './skin';
+import { nameChecks, rejectedNames } from './names';
+import { buildPet, petPosesOf } from './pets';
+import { buildFigurePreview, figuresDir, legibilityLines, rigData, sizeLimit } from './preview';
+import { expressionNames, plateCenter, poseNames, poseOf, trayCenter, trayWidth } from './poses';
+import { buildHuman, figureLine, legLength, standHeight, type HumanSpec, type Pose } from './rig';
+import { childTriptych, expressionSheet, familyAtTable, humanInPose, humanSheet, lineup, petSheet } from './scenes';
+import { backgrounds, eyeColorOn, skinCarriesOn, skinContrast, skinPalette, skinTones, toneCarries, toneOf, type SkinSlot } from './skin';
 
 const root = join(__dirname, '../../..');
 const humans = cast.humans;
 const pets = cast.pets;
+const by = Object.fromEntries(humans.map((h) => [h.spec.id, h]));
 
 describe('Besetzung', () => {
   it('fünf Menschen (Nolli, Jette, Mats, Ilka, Arne) und zwei Tiere (Tüpfel die Katze, Stups der Vogel)', () => {
@@ -39,11 +40,9 @@ describe('Besetzung', () => {
       expect(nameChecks.has(name)).toBe(true);
       expect(rejectedNames.map((r) => r.name)).not.toContain(name);
     }
-    for (const name of [...nameProposals.papa, ...nameProposals.boy]) expect(nameChecks.has(name)).toBe(true);
   });
 
   it('Alter und Größe: Nolli ≈3, Jette ≈7, Mats ≈11, deutlich gestaffelt; Erwachsene bleiben unter den oberen Ecken der Karte', () => {
-    const by = Object.fromEntries(humans.map((h) => [h.spec.id, h]));
     expect([by.nolli.ageYears, by.jette.ageYears, by.mats.ageYears]).toEqual([3, 7, 11]);
     const h = (id: string) => standHeight(by[id].spec);
     expect(h('jette')).toBeGreaterThan(h('nolli') * 1.25);
@@ -64,6 +63,8 @@ describe('Besetzung', () => {
     expect(figureFitsActivity('mats', 6, 12)).toBe(true);
     expect(figureFitsActivity('ilka', 0, 2)).toBe(true);
     expect(figureFitsActivity('stups', 0, 2)).toBe(true);
+    expect(humans.filter((h) => figureFitsActivity(h.spec.id, 10, 16)).map((h) => h.spec.name)).toEqual(['Mats', 'Ilka', 'Arne']);
+    expect(humans.filter((h) => figureFitsActivity(h.spec.id, 0, 2)).map((h) => h.spec.name)).toEqual(['Nolli', 'Ilka', 'Arne']);
   });
 
   it('Satz C: Linien-Glieder, Kleid oder schlanker Rumpf, Kleidung und Haare nur in Farben der Palette', () => {
@@ -75,59 +76,87 @@ describe('Besetzung', () => {
       expect(spec.colors.hair).toBe('ink');
     }
   });
+
+  it('Stups ist etwa 50 Einheiten hoch (steht, sitzt; beim Hüpfen kommt der Sprung dazu), Tüpfel kleiner Cameo mit drei Posen', () => {
+    expect(petPosesOf('bird')).toEqual(['stand', 'sit', 'hop', 'shoulder', 'point', 'watch']);
+    expect(petPosesOf('cat')).toEqual(['stand', 'sit', 'watch']);
+    const stups = pets.find((p) => p.spec.id === 'stups')!.spec;
+    // Höhe aus den Koordinaten der Pfade (oberster Punkt über der Standlinie 176; Steuerpunkte können etwas überstehen)
+    for (const pose of ['stand', 'sit'] as const) {
+      const svg = buildPet(stups, pose, { x: 100, y: 176 }).svg;
+      const ys: number[] = [];
+      for (const d of svg.matchAll(/ d="([^"]+)"/g)) for (const m of d[1].matchAll(/(-?[\d.]+) (-?[\d.]+)/g)) ys.push(Number(m[2]));
+      for (const c of svg.matchAll(/cy="([\d.]+)" r="([\d.]+)"/g)) ys.push(Number(c[1]) - Number(c[2]));
+      const height = 176 - Math.min(...ys);
+      expect(height).toBeGreaterThan(44);
+      expect(height).toBeLessThan(60);
+    }
+  });
 });
 
-describe('Hautton', () => {
+describe('Hauttöne', () => {
   const hue = (hex: string): number => {
     const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
     const max = Math.max(r, g, b);
     const d = max - Math.min(r, g, b);
-    if (d === 0) return 0;
     const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
     return (h * 60 + 360) % 360;
   };
 
-  it('drei Varianten A, B, C mit fünf Plätzen; jede Figur hat einen Platz, in A hat jede einen eigenen', () => {
-    expect(skinVariants.map((v) => v.id)).toEqual(['A', 'B', 'C']);
-    for (const v of skinVariants) expect(v.tones).toHaveLength(5);
+  it('acht Töne von hell nach dunkel, Teil der Zeichnungs-Palette (skin1 bis skin8)', () => {
+    expect(skinTones).toHaveLength(8);
+    for (let i = 1; i < skinTones.length; i++) expect(contrastRatio(skinTones[i], '#FFFFFF')).toBeGreaterThan(contrastRatio(skinTones[i - 1], '#FFFFFF'));
+    skinTones.forEach((tone, i) => expect(illustrationPalette[`skin${i + 1}` as keyof typeof illustrationPalette]).toBe(tone));
+  });
+
+  it('ohne Gelb- und ohne Rotstich: Farbton 18° bis 28° (Haut warm, nicht rot, nicht gelb)', () => {
+    for (const tone of skinTones) {
+      expect(hue(tone)).toBeGreaterThanOrEqual(18);
+      expect(hue(tone)).toBeLessThanOrEqual(28);
+    }
+  });
+
+  it('Regel: trägt, wenn Haut gegen Hintergrund oder Tinte gegen Haut mindestens 3:1 hat', () => {
+    expect(skinCarriesOn('#12323D', '#12323D')).toBe(false);
+    expect(skinCarriesOn('#613A25', backgrounds.leinen)).toBe(true); // Haut gegen Leinen
+    expect(skinCarriesOn('#F1CDB3', backgrounds.leinen)).toBe(true); // Tinte gegen Haut
+    expect(skinCarriesOn('#613A25', backgrounds.petrol)).toBe(false);
+  });
+
+  it('jeder Ton trägt auf Leinen, Rosé und dem Bildgrund; auf Petrol tragen genau die tiefsten drei nicht', () => {
+    for (let slot = 1; slot <= 8; slot++) {
+      for (const bg of ['leinen', 'rose', 'ground'] as const) expect(toneCarries(slot as SkinSlot, bg)).toBe(true);
+    }
+    const notOnPetrol = [1, 2, 3, 4, 5, 6, 7, 8].filter((slot) => !toneCarries(slot as SkinSlot, 'petrol'));
+    expect(notOnPetrol).toEqual([6, 7, 8]);
+  });
+
+  it('Zuordnung: Hauptfiguren Jette und Mats haben verschiedene Töne und nicht beide den hellsten; kein Ton gehört zu einer Rolle', () => {
+    const tone = (id: string) => by[id].spec.skin;
+    expect(tone('jette')).not.toBe(tone('mats'));
+    expect(Math.min(tone('jette'), tone('mats'))).toBeLessThanOrEqual(2); // ein heller
+    expect(Math.max(tone('jette'), tone('mats'))).toBeGreaterThanOrEqual(6); // ein tiefer
     expect(new Set(humans.map((h) => h.spec.skin)).size).toBe(5);
-    expect(new Set(skinVariants[0].tones).size).toBe(5);
-    expect(new Set(skinVariants[1].tones).size).toBe(1);
-    expect(new Set(skinVariants[2].tones).size).toBe(1);
-  });
-
-  it('kein Gelb: kein Ton hat einen Farbton zwischen 45° und 75°; A und B sind warm (10° bis 35°), C blaugrau (190° bis 230°)', () => {
-    for (const v of skinVariants) for (const tone of v.tones) expect(hue(tone) < 45 || hue(tone) > 75).toBe(true);
-    for (const tone of [...skinVariants[0].tones, ...skinVariants[1].tones]) {
-      expect(hue(tone)).toBeGreaterThanOrEqual(10);
-      expect(hue(tone)).toBeLessThanOrEqual(35);
-    }
-    expect(hue(skinVariants[2].tones[0])).toBeGreaterThanOrEqual(190);
-    expect(hue(skinVariants[2].tones[0])).toBeLessThanOrEqual(230);
-  });
-
-  it('A geht von hell nach dunkel; jeder Ton trägt den Tinten-Umriss (mindestens 3:1) und den Augenpunkt (mindestens 3:1)', () => {
-    const tones = skinVariants[0].tones;
-    for (let i = 1; i < tones.length; i++) expect(contrastRatio(tones[i], '#FFFFFF')).toBeGreaterThan(contrastRatio(tones[i - 1], '#FFFFFF'));
-    for (const v of skinVariants) {
-      for (const tone of v.tones) {
-        const c = skinContrast(tone);
-        expect(c.ink).toBeGreaterThanOrEqual(3);
-        expect(c.eyeContrast).toBeGreaterThanOrEqual(3);
-        expect(c.eye).toBe(eyeColorOn(tone));
-      }
+    // die Hauptfiguren (Jette, Mats) tragen den hellsten und den tiefsten genutzten Ton; die Nebenfiguren liegen dazwischen
+    const used = humans.map((h) => h.spec.skin);
+    expect([Math.min(...used), Math.max(...used)].sort()).toEqual([tone('jette'), tone('mats')].sort());
+    for (const id of ['ilka', 'arne', 'nolli']) {
+      expect(tone(id)).toBeGreaterThan(Math.min(...used));
+      expect(tone(id)).toBeLessThan(Math.max(...used));
     }
   });
 
-  it('die Palette einer Variante hat alle Zeichnungsfarben plus skin1 bis skin5 und eye1 bis eye5', () => {
-    for (const v of skinVariants) {
-      const p = skinPalette(v);
-      for (const key of Object.keys(illustrationPalette)) expect(p[key]).toBe(illustrationPalette[key as keyof typeof illustrationPalette]);
-      for (let i = 1; i <= 5; i++) {
-        expect(p[`skin${i}`]).toBe(v.tones[i - 1]);
-        expect([illustrationPalette.ink, illustrationPalette.paper]).toContain(p[`eye${i}`]);
-      }
+  it('Kontrast-Hilfen: Werte stimmen, die Palette hat skin1 bis skin8', () => {
+    const c = skinContrast('#613A25');
+    expect(c.leinen).toBeGreaterThan(8);
+    expect(c.petrol).toBeLessThan(3);
+    expect(c.carries.petrol).toBe(false);
+    const p = skinPalette();
+    for (let i = 1; i <= 8; i++) {
+      expect(p[`skin${i}`]).toBe(toneOf(i as SkinSlot));
+      expect([illustrationPalette.ink, illustrationPalette.paper]).toContain(p[`eye${i}`]);
     }
+    expect(eyeColorOn('#613A25')).toBe(illustrationPalette.paper);
   });
 });
 
@@ -237,10 +266,28 @@ describe('Posen', () => {
     });
   });
 
-  it('Tiere: alle sechs Posen (steht, sitzt, hüpft, Schulter, zeigt, schaut zu) rechnen sauber', () => {
-    expect(petPoseNames).toEqual(['stand', 'sit', 'hop', 'shoulder', 'point', 'watch']);
+  it('fünf Ausdrucksposen (staunt, freut sich, enttäuscht, nachdenklich, neugierig), alle verschieden und als Daten im Rig', () => {
+    expect(expressionNames).toEqual(['amazed', 'happy', 'disappointed', 'thoughtful', 'curious']);
+    for (const h of [by.jette, by.mats]) {
+      const images = expressionNames.map((n) => buildHuman(h.spec, poseOf(h.spec, n, h.quirk), { x: 100, y: 176 }).svg);
+      expect(new Set(images).size).toBe(5);
+      const data = (rigData() as { humans: { spec: { id: string }; poses: Record<string, unknown> }[] }).humans.find((x) => x.spec.id === h.spec.id)!;
+      for (const n of expressionNames) expect(data.poses[n]).toBeDefined();
+    }
+  });
+
+  it('nachdenklich: die Hand liegt am Kinn (unter dem Kopf, nahe der Kopfmitte)', () => {
+    for (const h of [by.jette, by.mats]) {
+      const r = buildHuman(h.spec, poseOf(h.spec, 'thoughtful', h.quirk), { x: 100, y: 176 });
+      expect(Math.abs(r.anchors.handR.x - r.anchors.head.x)).toBeLessThan(h.spec.headR * 1.6);
+      expect(r.anchors.handR.y).toBeGreaterThan(r.anchors.head.y);
+      expect(r.anchors.handR.y).toBeLessThan(r.anchors.head.y + h.spec.headR * 2.4);
+    }
+  });
+
+  it('Tiere: alle Posen je Art rechnen sauber', () => {
     for (const p of pets) {
-      for (const pose of petPoseNames) {
+      for (const pose of petPosesOf(p.spec.kind)) {
         const svg = buildPet(p.spec, pose, { x: 100, y: 176, eyes: true }).svg;
         expect(svg).not.toMatch(/NaN|Infinity|undefined/);
         expect(svg.length).toBeGreaterThan(300);
@@ -249,44 +296,21 @@ describe('Posen', () => {
   });
 });
 
-describe('Zwei Fassungen aus demselben Rig', () => {
-  const humanEye = /<circle cx="[\d.\-]+" cy="[\d.\-]+" r="[\d.]+" fill="\{\{eye\d\}\}" stroke="none"\/>/g;
-  const petEye = /<circle cx="[\d.\-]+" cy="[\d.\-]+" r="[\d.]+" fill="\{\{ink\}\}" stroke="none"\/>/g;
-
-  it('mit Augen ist genau „ohne“ plus zwei Punkte (Menschen)', () => {
-    for (const h of humans) {
-      for (const name of poseNames) {
-        const pose = poseOf(h.spec, name, h.quirk);
-        const without = buildHuman(h.spec, pose, { x: 100, y: 176, eyes: false }).svg;
-        const withEyes = buildHuman(h.spec, pose, { x: 100, y: 176, eyes: true }).svg;
-        expect(withEyes.match(humanEye)?.length).toBe(2);
-        expect(without.match(humanEye)).toBeNull();
-        expect(withEyes.replace(humanEye, '')).toBe(without);
-      }
-    }
-  });
-
-  it('mit Augen ist genau „ohne“ plus zwei Punkte (Tiere)', () => {
-    for (const p of pets) {
-      for (const pose of petPoseNames) {
-        const without = buildPet(p.spec, pose, { x: 100, y: 176, eyes: false }).svg;
-        const withEyes = buildPet(p.spec, pose, { x: 100, y: 176, eyes: true }).svg;
-        expect(withEyes.match(petEye)?.length).toBe(2);
-        expect(withEyes.replace(petEye, '')).toBe(without);
-      }
-    }
-  });
-
-  it('die Augen sind nur Punkte: sonst kein Gesichtszug', () => {
-    const svg = humanInPose(humans[0].spec, humans[0].quirk, 'stand', 100, { eyes: true });
-    expect(svg.match(humanEye)?.length).toBe(2);
+describe('Linien', () => {
+  it('Figuren haben Linie 5, Gegenstände 4, feine Linien 2,5', () => {
+    expect(figureLine).toBe(5);
+    const svg = humanInPose(by.ilka.spec, by.ilka.quirk, 'tray', 100, { eyes: false, held: { kind: 'tray', content: 'apples', mitts: true } });
+    const widths = new Set([...svg.matchAll(/stroke-width="([\d.]+)"/g)].map((m) => m[1]));
+    expect([...widths].sort()).toEqual(['2.5', '4', '5']);
+    expect(buildHuman(by.ilka.spec, poseOf(by.ilka.spec, 'stand'), { x: 100, y: 176 }).svg).not.toMatch(/stroke-width="4"/);
+    expect(buildHuman(by.ilka.spec, poseOf(by.ilka.spec, 'stand'), { x: 100, y: 176, line: 4 }).svg).toMatch(/stroke-width="4"/);
   });
 });
 
 describe('Tier-Regel', () => {
   // Ein Baustein und eine Platzierung mit den Feldern, die die Regel liest.
-  const block = (id: string, extra: Partial<LoadedBlock>): Placement =>
-    ({ item: { slot: 's', block: id }, slot: {}, x: 100, y: 176, size: 1, flip: false, tint: undefined, block: { id, group: 'x', kind: 'object', hazards: [], materials: [], terms: { de: [], en: [] }, neutral: true, svg: '', box: { x0: -10, x1: 10, h: 10 }, label: { de: id, en: id }, ...extra } }) as unknown as Placement;
+  const block = (id: string, extra: Partial<LoadedBlock>, tint?: string): Placement =>
+    ({ item: { slot: 's', block: id }, slot: {}, x: 100, y: 176, size: 1, flip: false, tint, box: { minX: 80, maxX: 120, minY: 100, maxY: 176 }, block: { id, group: 'x', kind: 'object', hazards: [], materials: [], terms: { de: [], en: [] }, neutral: true, svg: '', label: { de: id, en: id }, box: { x0: -20, x1: 20, h: 76 }, ...extra } }) as unknown as Placement;
   const activity = (materials: string[]) => ({ materials, ageMin: 4, ageMax: 9, text: { de: '', en: '' }, safety: { de: 'nur mit Erwachsenen', en: '' } });
   const cat = block('cat', { kind: 'figure', animal: true });
 
@@ -295,11 +319,10 @@ describe('Tier-Regel', () => {
   });
 
   it('Tier und Schere (scharf) im selben Bild: Verstoß', () => {
-    const problems = checkAgainstActivity([cat, block('scissors', { hazards: ['sharp'] })], activity([])).join('\n');
-    expect(problems).toMatch(/Ein Tier im Bild/);
+    expect(checkAgainstActivity([cat, block('scissors', { hazards: ['sharp'] })], activity([])).join('\n')).toMatch(/Ein Tier im Bild/);
   });
 
-  it('Tier und Material mit Hitze (Backofen, Herd), Messer oder Kerze in der Aktivität: Verstoß', () => {
+  it('Tier und Material mit Hitze (Backofen, Herd), Messer oder Schere in der Aktivität: Verstoß', () => {
     for (const material of ['oven', 'stove', 'knife', 'scissors']) expect(checkAgainstActivity([cat], activity([material])).join('\n')).toMatch(/Ein Tier im Bild.*Tiere nie bei Hitze/);
   });
 
@@ -309,39 +332,61 @@ describe('Tier-Regel', () => {
   });
 });
 
+describe('Hautton und Petrol im Szenenprüfer', () => {
+  const place = (id: string, extra: Partial<LoadedBlock>, box: Placement['box'], tint?: string): Placement =>
+    ({ item: { slot: 's', block: id }, slot: {}, x: (box.minX + box.maxX) / 2, y: box.maxY, size: 1, flip: false, tint, box, block: { id, group: 'x', kind: 'object', hazards: [], materials: [], terms: { de: [], en: [] }, neutral: true, svg: '', label: { de: id, en: id }, box: { x0: -20, x1: 20, h: 76 }, ...extra } }) as unknown as Placement;
+  const activity = { materials: [], ageMin: 4, ageMax: 9, text: { de: '', en: '' }, safety: { de: '', en: '' } };
+  const figure = (tone: string) => place('jette', { kind: 'figure', person: 'child', skin: tone }, { minX: 80, maxX: 120, minY: 100, maxY: 176 });
+  const curtain = (box: Placement['box']) => place('curtain', {}, box, 'petrol');
+
+  it('tiefer Ton (trägt auf Petrol nicht) mit Petrol-Fläche am Kopf: Verstoß', () => {
+    const problems = checkAgainstActivity([figure('#76492F'), curtain({ minX: 60, maxX: 140, minY: 90, maxY: 176 })], activity).join('\n');
+    expect(problems).toMatch(/trägt auf Petrol nicht/);
+  });
+
+  it('tiefer Ton mit Petrol-Fläche nur unten (am Körper, nicht am Kopf): kein Verstoß', () => {
+    expect(checkAgainstActivity([figure('#76492F'), curtain({ minX: 60, maxX: 140, minY: 150, maxY: 176 })], activity)).toEqual([]);
+  });
+
+  it('heller Ton (trägt auf Petrol) mit Petrol am Kopf: kein Verstoß', () => {
+    expect(checkAgainstActivity([figure('#DDAA85'), curtain({ minX: 60, maxX: 140, minY: 90, maxY: 176 })], activity)).toEqual([]);
+  });
+});
+
 describe('Zeichnungen und Vorschau', () => {
   const preview = buildFigurePreview();
   const svgs = preview.filter((file) => file.path.endsWith('.svg'));
-  const tones = new Set(skinVariants.flatMap((v) => v.tones).map((c) => c.toUpperCase()));
-  const palette = new Set([...Object.values(illustrationPalette).map((c) => c.toUpperCase()), ...tones]);
+  const palette = new Set(Object.values(illustrationPalette).map((c) => c.toUpperCase()));
 
-  it('erzeugt je Variante und Fassung Besetzung, Blätter, Tiere, Familie und Triptychen, dazu die Lesbarkeitsprobe', () => {
-    // je Variante und Fassung: 1 Besetzung + 5 Figurenblätter + 4 Tierblätter + 1 Familie + 9 Triptychon-Bilder = 20; × 3 × 2 + 3 Lesbarkeit
-    expect(svgs).toHaveLength(3 * 2 * 20 + legibilityLines.length);
+  it('erzeugt Besetzung, fünf Figurenblätter, zwei Ausdrucksblätter, drei Tierblätter, Familie, drei Triptychen und die Linienprobe', () => {
+    expect(svgs).toHaveLength(1 + 5 + 2 + 3 + 1 + 9 + legibilityLines.length);
   });
 
-  it.each(svgs.map((file) => [file.path.replace(`${figuresDir}/`, ''), file.content] as const))('%s: nur erlaubter SVG-Code, nur Palette (plus Hautton), nur die vorgesehenen Linienstärken, Größe unter der Grenze', (path, svg) => {
+  it.each(svgs.map((file) => [file.path.replace(`${figuresDir}/`, ''), file.content] as const))('%s: nur erlaubter SVG-Code, nur Palette, nur die vorgesehenen Linienstärken, unter der Grenze von 14 KB', (path, svg) => {
     expect(svg).not.toMatch(/\{\{|\}\}/);
     expect(svg).not.toMatch(/<(text|image|style|script|use|defs|filter|mask|clipPath|linearGradient|radialGradient)\b|href=|url\(|opacity=|NaN/);
     for (const tag of svg.match(/<([a-zA-Z]+)/g) ?? []) expect(['<svg', '<rect', '<circle', '<g', '<path', '<ellipse']).toContain(tag);
     for (const color of svg.match(/#[0-9A-Fa-f]{6}\b/g) ?? []) expect(palette).toContain(color.toUpperCase());
-    const lesbar = path.match(/lesbar-(\d)\.svg$/);
-    const allowed = lesbar ? [lesbar[1], '2.5', '4'] : ['4', '2.5'];
+    const line = path.match(/linie-([\d-]+)\.svg$/);
+    const allowed = line ? [line[1].replace('-', '.'), '2.5', '4'] : ['4', '5', '2.5'];
     for (const m of svg.matchAll(/stroke-width="([\d.]+)"/g)) expect(allowed).toContain(m[1]);
     expect(svg.match(/<g\b/g)?.length).toBe(svg.match(/<\/g>/g)?.length);
-    // Titelbild-Grenze 10 KB für einzelne Szenen; Blätter (mehrere Posen) und „Familie am Tisch“ (fünf Menschen) bis 14 KB wie Schrittbilder
-    const isScene = /-(besetzung|[a-z]+-tri\d)\.svg$|lesbar-/.test(path);
-    expect(Buffer.byteLength(svg)).toBeLessThan(isScene ? sizeLimit : sizeLimitSteps);
+    expect(Buffer.byteLength(svg)).toBeLessThan(sizeLimit);
+  });
+
+  it('Szenen mit Linie 5 (Besetzung, Familie, Triptychen) bleiben unter 14 KB, ohne die Grenze auszureizen', () => {
+    expect(Buffer.byteLength(lineup())).toBeLessThan(sizeLimit);
+    expect(Buffer.byteLength(familyAtTable())).toBeLessThan(sizeLimit);
   });
 
   it('Blätter, Besetzung, Familie und Triptychen entstehen aus denselben Funktionen wie die Vorschau', () => {
-    const [a, b] = [skinVariants[0], skinVariants[2]];
     const find = (name: string) => preview.find((f) => f.path.endsWith(`vorschau/${name}`))?.content;
-    expect(humanSheet(humans[1], false, a)).toBe(find('A-ohne-jette.svg'));
-    expect(petSheet(pets[1], true, b, 1)).toBe(find('C-augen-stups-2.svg'));
-    expect(lineup(true, a)).toBe(find('A-augen-besetzung.svg'));
-    expect(familyAtTable(false, b)).toBe(find('C-ohne-familie.svg'));
-    expect(childTriptych('mats', false, a).map((p) => p.svg)).toEqual([1, 2, 3].map((i) => find(`A-ohne-mats-tri${i}.svg`)));
+    expect(humanSheet(by.jette)).toBe(find('jette.svg'));
+    expect(expressionSheet(by.mats)).toBe(find('mats-ausdruck.svg'));
+    expect(petSheet(pets[1], 1)).toBe(find('stups-2.svg'));
+    expect(lineup()).toBe(find('besetzung.svg'));
+    expect(familyAtTable()).toBe(find('familie.svg'));
+    expect(childTriptych('mats').map((p) => p.svg)).toEqual([1, 2, 3].map((i) => find(`mats-tri${i}.svg`)));
   });
 
   it('die eingecheckten Dateien passen zum Code (npm run figures:preview)', () => {
@@ -356,18 +401,11 @@ describe('Zeichnungen und Vorschau', () => {
     }
   });
 
-  it('FIGUREN.md nennt jeden Namen, jeden abgelehnten Namen, die Tier-Regel und die Namensvorschläge', () => {
+  it('FIGUREN.md nennt jeden Namen, jeden abgelehnten Namen und die Tier-Regel', () => {
     const text = readFileSync(join(root, 'docs/design/FIGUREN.md'), 'utf8');
     for (const h of humans) expect(text).toContain(h.spec.name);
     for (const p of pets) expect(text).toContain(p.spec.name);
     for (const r of rejectedNames) expect(text).toContain(r.name);
-    for (const name of [...nameProposals.papa, ...nameProposals.boy]) expect(text).toContain(name);
     expect(text).toMatch(/nie in Szenen mit Backofen, Herd, heißen Gegenständen, Messer oder Schere in Benutzung/);
-  });
-
-  it('eine Szene mit Kindern bekommt nur die Figuren, die zur Altersspanne passen (Beispiel Familie und Triptychon)', () => {
-    expect(humans.filter((h) => figureFitsActivity(h.spec.id, 4, 9)).map((h) => h.spec.name)).toEqual(['Nolli', 'Jette', 'Mats', 'Ilka', 'Arne']);
-    expect(humans.filter((h) => figureFitsActivity(h.spec.id, 10, 16)).map((h) => h.spec.name)).toEqual(['Mats', 'Ilka', 'Arne']);
-    expect(humans.filter((h) => figureFitsActivity(h.spec.id, 0, 2)).map((h) => h.spec.name)).toEqual(['Nolli', 'Ilka', 'Arne']);
   });
 });

@@ -54,7 +54,7 @@ Jede Regel prüft `npm run kit:check` bzw. der Test, außer wo „Mensch“ steh
 5. **Petrol-Regel (Tinte auf Petrol hat nur 1,8:1):** Petrol ist nie Bildgrund. Hat ein Baustein Petrol-Flächen (fest oder als wählbarer Ton), sind seine **feinen** Linien Leinen (`stroke="{{paper}}"`, 6,9:1), nicht Tinte. Nur der Umriss (`{{line}}`) bleibt Tinte: Er hält die Silhouette gegen das helle Umfeld.
    Petrol-Flächen bleiben groß und einfach. Dass ein Detail auf Petrol auch wirklich lesbar ist, sieht der **Mensch** auf der Vorschau.
 6. **Erlaubter SVG-Code:** nur `path`, `circle`, `ellipse`, `rect`, `line`, `polyline`, `polygon`; kein `<g>`, kein `<svg>`, kein Kommentar, kein `text`, `image`, `use`, `style`, kein `opacity`, keine Verläufe. **Pfade nur mit absoluten Befehlen** (`M L H V C S Q T Z`, keine Bögen `A`, keine kleinen Buchstaben), damit die Maße ohne Browser stimmen. Jedes Element hat `fill` (sonst wäre es schwarz) und entweder `stroke="none"` oder eine der zwei Linienstärken.
-7. **Größe:** höchstens 2 000 Byte je Baustein; eine fertige Szene bleibt unter 10 KB.
+7. **Größe:** höchstens 2 000 Byte je Baustein; eine fertige Szene bleibt unter 14 KB (Clemens, 16. Oktober 2026; das Bucket erlaubt 20 KB).
 8. **Kein Gesicht, kein Text, keine Zahlen** im Baustein (Mensch). Figuren sind Strichfiguren, Köpfe und Hände Leinen. Erwachsene sind deutlich größer als Kinder, der Kopf ist bei allen gleich groß (Test).
 9. **Eine Form, die an etwas anderes erinnert** (Bierglas, Kerze), meldet nur der Mensch: Jeden Baustein auf der Vorschau fragen „Was könnte man noch darin sehen?“.
 

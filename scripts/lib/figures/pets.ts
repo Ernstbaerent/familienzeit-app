@@ -3,7 +3,7 @@
 // Regel: Tiere erscheinen nie in Szenen mit Backofen, Herd, heißen Gegenständen, Messer oder Schere in Benutzung (castRules.ts, Szenenprüfer).
 
 import { add, fmt, Path, rotate, vec, type Vec } from './math.ts';
-import type { Tint } from './rig.ts';
+import { figureLine, type Tint } from './rig.ts';
 
 export type PetSpec = {
   id: string;
@@ -19,6 +19,8 @@ export type PetSpec = {
 
 export type PetPoseName = 'stand' | 'sit' | 'hop' | 'shoulder' | 'point' | 'watch';
 export const petPoseNames: readonly PetPoseName[] = ['stand', 'sit', 'hop', 'shoulder', 'point', 'watch'];
+// Stups (Vogel) hat alle sechs Posen, Tüpfel (Katze, Cameo-Figur) nur drei.
+export const petPosesOf = (kind: PetSpec['kind']): readonly PetPoseName[] => (kind === 'bird' ? petPoseNames : ['stand', 'sit', 'watch']);
 export const petPoseLabels: Record<PetPoseName, { de: string; en: string }> = {
   stand: { de: 'steht', en: 'standing' },
   sit: { de: 'sitzt', en: 'sitting' },
@@ -52,8 +54,9 @@ function layoutOf(s: PetSpec, pose: PetPoseName): Layout {
   switch (pose) {
     case 'stand':
       return base;
-    case 'sit':
     case 'shoulder':
+      return { ...base, tilt: -28, bodyY: -(s.legLen * 0.35 + s.bodyRy * 0.9 + s.bodyRx * 0.25), sit: true };
+    case 'sit':
     case 'watch': {
       const bird = s.kind === 'bird';
       const tilt = bird ? -32 : -55;
@@ -67,7 +70,55 @@ function layoutOf(s: PetSpec, pose: PetPoseName): Layout {
   }
 }
 
+// Katze sitzt: rund, aufrecht, der Schwanz liegt um die Vorderpfoten. Blick nach rechts; beim „schaut zu“ ist der Kopf nach oben gedreht.
+function catSitting(spec: PetSpec, pose: PetPoseName, opts: { x: number; y: number; eyes?: boolean; flip?: boolean; line?: number }): { svg: string } {
+  const f = opts.flip ? -1 : 1;
+  const S = spec.bodyRx;
+  const hr = spec.headR;
+  const w = (x: number, y: number): Vec => vec(opts.x + x * f, opts.y + y);
+  const out: string[] = [];
+  const rx = S * 0.58;
+  const ry = S * 0.62;
+  const by = -ry; // Rumpfmitte
+  // Rumpf: rund, mit versetzter Farbfläche
+  const ell = (c: Vec, a: number, b: number, shift = 0): string => `M${fmt(c.x - a + shift)} ${fmt(c.y + shift)}a${fmt(a)} ${fmt(b)} 0 1 0 ${fmt(2 * a)} 0a${fmt(a)} ${fmt(b)} 0 1 0 ${fmt(-2 * a)} 0Z`;
+  const c0 = w(0, by);
+  out.push(`<path d="${ell(c0, rx, ry, 3)}" fill="${fill(spec.colors.body)}" stroke="none"/><path d="${ell(c0, rx, ry)}" fill="none" stroke-width="4"/>`);
+  // Vorderpfoten
+  for (const dx of [0.52, 0.8]) {
+    const c = w(S * dx * 0.62 + 2, -3.5);
+    out.push(`<ellipse cx="${fmt(c.x)}" cy="${fmt(c.y)}" rx="5.5" ry="3.6" fill="${fill(spec.colors.body)}" stroke-width="4"/>`);
+  }
+  // Schwanz um die Pfoten: vom Rücken hinten über den Boden bis vor die Pfoten
+  const a = w(-rx * 0.95, -4);
+  const tail = `M${fmt(a.x)} ${fmt(a.y)}C${fmt(w(-rx - 5, 3).x)} ${fmt(w(-rx - 5, 3).y)} ${fmt(w(S * 0.5, 4).x)} ${fmt(w(S * 0.5, 4).y)} ${fmt(w(S * 1.0, -4).x)} ${fmt(w(S * 1.0, -4).y)}`;
+  out.push(`<path d="${tail}" fill="none" stroke-width="4"/>`);
+  // Kopf
+  const rot = pose === 'watch' ? -14 : 0;
+  const hc = w(S * 0.2, by - ry - hr * 0.55);
+  const hxf = (p: Vec): Vec => {
+    const r = rotate(p, rot);
+    return vec(hc.x + r.x * f, hc.y + r.y);
+  };
+  for (const dx of [-0.5, 0.45]) {
+    const e = new Path(hxf).M(dx * hr - 4, -hr * 0.7).L(dx * hr + 1, -hr * 1.65).L(dx * hr + 7, -hr * 0.65).Z().toString();
+    out.push(`<path d="${e}" fill="${fill(spec.colors.body)}" stroke-width="4"/>`);
+  }
+  out.push(`<circle cx="${fmt(hc.x)}" cy="${fmt(hc.y)}" r="${fmt(hr)}" fill="${fill(spec.colors.body)}" stroke-width="4"/>`);
+  const nose = hxf(vec(hr * 1.02, hr * 0.15));
+  out.push(`<circle cx="${fmt(nose.x)}" cy="${fmt(nose.y)}" r="2.2" fill="{{${spec.colors.accent}}}" stroke="none"/>`);
+  if (opts.eyes) {
+    const er = Math.max(1.7, hr * 0.15);
+    for (const [ex, ey] of [[0.12, -0.1], [0.62, -0.1]] as const) {
+      const e = hxf(vec(hr * ex, hr * ey));
+      out.push(`<circle cx="${fmt(e.x)}" cy="${fmt(e.y)}" r="${fmt(er)}" fill="{{ink}}" stroke="none"/>`);
+    }
+  }
+  return { svg: out.join('').replaceAll('stroke-width="4"', `stroke-width="${opts.line ?? figureLine}"`) };
+}
+
 export function buildPet(spec: PetSpec, pose: PetPoseName, opts: { x: number; y: number; eyes?: boolean; flip?: boolean; line?: number }): { svg: string } {
+  if (spec.kind === 'cat' && (pose === 'sit' || pose === 'watch')) return catSitting(spec, pose, opts);
   const f = opts.flip ? -1 : 1;
   const L = layoutOf(spec, pose);
   const w = (p: Vec): Vec => vec(opts.x + p.x * f, opts.y + L.dy + p.y);
@@ -172,5 +223,5 @@ export function buildPet(spec: PetSpec, pose: PetPoseName, opts: { x: number; y:
     }
   }
   const svg = out.join('');
-  return { svg: opts.line === undefined ? svg : svg.replaceAll('stroke-width="4"', `stroke-width="${opts.line}"`) };
+  return { svg: svg.replaceAll('stroke-width="4"', `stroke-width="${opts.line ?? figureLine}"`) };
 }

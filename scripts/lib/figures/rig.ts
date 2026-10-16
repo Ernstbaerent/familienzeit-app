@@ -5,8 +5,9 @@
 import { add, capsule, fmt, fromAngles, Path, rotate, solveArm, sub, vec, type ElbowSide, type Vec } from './math.ts';
 
 export type Tint = 'ink' | 'paper' | 'rose' | 'petrol' | 'honey' | 'brown';
-// Hautton-Platz einer Figur: `{{skin1}}` bis `{{skin5}}` für Kopf und Hände, `{{eye1}}` bis `{{eye5}}` für die Augenpunkte (siehe skin.ts).
-export type SkinSlot = 1 | 2 | 3 | 4 | 5;
+// Hautton-Platz einer Figur: `{{skin1}}` bis `{{skin8}}` für Kopf und Hände, `{{eye1}}` bis `{{eye8}}` für die Augenpunkte (siehe skin.ts).
+export type { SkinSlot } from './skin.ts';
+import type { SkinSlot } from './skin.ts';
 export type LimbStyle = 'line' | 'capsule' | 'block';
 export type TorsoStyle = 'bean' | 'box' | 'slim' | 'dress';
 export type HairKind = 'none' | 'cap' | 'bob' | 'tuft' | 'bun' | 'beanie' | 'curls';
@@ -55,7 +56,7 @@ export type RenderOptions = {
   eyes?: boolean; // zwei Punkte als Augen, sonst nichts
   mitts?: boolean; // Ofenhandschuhe an beiden Händen
   flip?: boolean; // spiegelt die Figur an ihrer Mitte
-  line?: number; // Linienstärke der Figur statt 4 (nur für die Lesbarkeitsprobe, siehe docs/design/FIGUREN.md); feine Linien bleiben 2,5
+  line?: number; // Linienstärke der Figur (Standard `figureLine` = 5, Gegenstände bleiben 4); feine Linien bleiben 2,5
   limbShadow?: boolean; // versetzte Farbfläche auch an Armen und Beinen (kostet etwa ein Drittel mehr Bytes)
 };
 
@@ -73,6 +74,9 @@ export type Anchors = {
 
 // `body` (hinter Gegenständen), `hands` (über Gegenständen, damit sie am Rand sitzen), `head`; `svg` ist alles in der richtigen Reihenfolge.
 export type Rendered = { svg: string; body: string; hands: string; head: string; anchors: Anchors };
+
+// Umrisslinie der Figuren (Clemens, 2026-10-16): 5, Gegenstände 4, feine Linien 2,5 (docs/design/ILLUSTRATIONEN.md).
+export const figureLine = 5;
 
 export const legLength = (s: HumanSpec): number => s.upperLeg + s.lowerLeg;
 export const standHeight = (s: HumanSpec): number => legLength(s) + s.torsoH + s.neck + 2 * s.headR;
@@ -310,8 +314,8 @@ export function buildHuman(spec: HumanSpec, pose: Pose, opts: RenderOptions): Re
     footL: world(legs[0].end),
     footR: world(legs[1].end),
   };
-  const lw = opts.line;
-  const thick = (text: string): string => (lw === undefined ? text : text.replaceAll('stroke-width="4"', `stroke-width="${lw}"`));
+  const lw = opts.line ?? figureLine;
+  const thick = (text: string): string => text.replaceAll('stroke-width="4"', `stroke-width="${lw}"`);
   return { svg: thick(out.join('')), body: thick(out.slice(0, bodyEnd).join('')), hands: thick(out.slice(bodyEnd, handsEnd).join('')), head: thick(out.slice(handsEnd).join('')), anchors };
 }
 

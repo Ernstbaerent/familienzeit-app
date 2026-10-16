@@ -4,8 +4,11 @@
 import { vec, type Vec } from './math.ts';
 import { legLength, type HumanSpec, type Pose } from './rig.ts';
 
-export type PoseName = 'stand' | 'hold' | 'tray' | 'cheer' | 'walk' | 'take';
-export const poseNames: readonly PoseName[] = ['stand', 'hold', 'tray', 'cheer', 'walk', 'take'];
+export type PoseName = 'stand' | 'hold' | 'tray' | 'cheer' | 'walk' | 'take' | ExpressionName;
+// Ausdrucksposen (Entscheidung von Clemens, 2026-10-16): Emotionen über Haltung statt über Gesichtszüge. Nur Daten, nichts wird animiert.
+export type ExpressionName = 'amazed' | 'happy' | 'disappointed' | 'thoughtful' | 'curious';
+export const expressionNames: readonly ExpressionName[] = ['amazed', 'happy', 'disappointed', 'thoughtful', 'curious'];
+export const poseNames: readonly PoseName[] = ['stand', 'hold', 'tray', 'cheer', 'walk', 'take', ...expressionNames];
 
 // Besonderheiten einer Figur, die in „stand“ auffallen (spielerisch geneigter Kopf, Hand in die Hüfte).
 export type Quirk = { tilt?: number; handOnHip?: 'L' | 'R' };
@@ -17,6 +20,11 @@ export const poseLabels: Record<PoseName, { de: string; en: string }> = {
   cheer: { de: 'jubelt', en: 'cheering' },
   walk: { de: 'läuft', en: 'walking' },
   take: { de: 'nimmt Tablett', en: 'taking the tray' },
+  amazed: { de: 'staunt', en: 'amazed' },
+  happy: { de: 'freut sich', en: 'happy' },
+  disappointed: { de: 'enttäuscht', en: 'disappointed' },
+  thoughtful: { de: 'nachdenklich', en: 'thoughtful' },
+  curious: { de: 'neugierig', en: 'curious' },
 };
 
 const restLegs = { legL: { angle: 4, bend: 0 }, legR: { angle: 4, bend: 0 } };
@@ -82,6 +90,36 @@ export function poseOf(s: HumanSpec, name: PoseName, quirk: Quirk = {}): Pose {
         armL: { angle: 152, bend: -12 },
         armR: { angle: 152, bend: -12 },
       };
+    case 'amazed':
+      // zurückgelehnt, Kopf in den Nacken, Hände neben den Kopf gehoben, Beine etwas auseinander
+      return { lean: -4, tilt: -8, legL: { angle: 9, bend: 0 }, legR: { angle: 9, bend: 0 }, armL: { angle: 42, bend: 105 }, armR: { angle: 42, bend: 105 } };
+    case 'happy':
+      // kleiner Hüpfer, Arme locker nach oben außen, Kopf zur Seite
+      return { dy: -5, tilt: 7, legL: { angle: 10, bend: 14 }, legR: { angle: 10, bend: 14 }, armL: { angle: 128, bend: 14 }, armR: { angle: 128, bend: 14 } };
+    case 'disappointed':
+      // nach vorn gesunken, Kopf hängt, Arme hängen schlaff
+      return { lean: 7, tilt: 16, ...restLegs, armL: { angle: 3, bend: 0 }, armR: { angle: 3, bend: 0 } };
+    case 'thoughtful': {
+      // eine Hand am Kinn, der andere Arm quer vor dem Bauch, Kopf leicht geneigt
+      const headY = pelvisY - s.torsoH - s.neck - s.headR;
+      return {
+        tilt: 8,
+        ...restLegs,
+        armR: { to: vec(s.headR * 0.45, headY + s.headR * 1.3), elbow: 'out' },
+        armL: { to: vec(s.shoulderW * 0.15, pelvisY - s.torsoH * 0.4), elbow: 'down' },
+      };
+    }
+    case 'curious': {
+      // nach vorn gebeugt, Kopf gestreckt, eine Hand streckt sich nach vorn
+      const sh = pelvisY - s.torsoH * 0.9;
+      return {
+        lean: 10,
+        tilt: -9,
+        ...restLegs,
+        armL: { angle: 12, bend: 6 },
+        armR: { to: vec(s.shoulderW * 0.5 + s.upperArm * 0.95, sh + 4), elbow: 'down' },
+      };
+    }
     case 'walk':
       return {
         lean: 2,

@@ -20,7 +20,7 @@ Alle Zahlen zu Kosten und Datenverkehr sind **Rechnungen aus Token-Mengen und Da
 
 - **Baukasten** (`docs/bausteine/README.md`): Bausteine mit Farbplätzen, Layouts mit festen Plätzen, ein fester Zeichner. Das Modell wählt nur Layout und Bausteine (Szene als JSON), nie SVG-Code und nie Koordinaten.
 - **Lieferung:** öffentlicher Bucket `activity-images` (Migration `0005_activity_images_bucket.sql`), Dateien nie überschreiben (Name mit Prüfsumme), Adresse in `image` (später `step_images`), die App zeigt sie mit `expo-image`, bei Fehler die Farbfläche. `updated_at` zieht die Änderung über die Abfrage aus M8b auf die Geräte. Entwurf: `docs/supabase.md`, „Ausblick: Bilder und Supabase“.
-- **Prüfungen vor dem Anhängen:** (1) Szene gegen Layout, Rand, Ecken, Überdeckung; (2) Sicherheit und Textabgleich gegen die Aktivität (`docs/bausteine/README.md`); (3) Endprüfung des SVG (nur Farbplätze, nur erlaubter Code, unter 10 KB, gültig); (4) Rückfrage an Claude mit dem gerenderten PNG und dem Text der Aktivität (Urteil `ok`, `widerspricht_dem_text`, `unsicher`, `unlesbar`). Nur wenn alles besteht, wird ein Bild angehängt.
+- **Prüfungen vor dem Anhängen:** (1) Szene gegen Layout, Rand, Ecken, Überdeckung; (2) Sicherheit und Textabgleich gegen die Aktivität (`docs/bausteine/README.md`); (3) Endprüfung des SVG (nur Farbplätze, nur erlaubter Code, unter 14 KB, gültig); (4) Rückfrage an Claude mit dem gerenderten PNG und dem Text der Aktivität (Urteil `ok`, `widerspricht_dem_text`, `unsicher`, `unlesbar`). Nur wenn alles besteht, wird ein Bild angehängt.
 
 ## Die Job-Kette des Bilder-Laufs (Entwurf, noch nicht gebaut)
 
@@ -66,7 +66,7 @@ Szenen für den Startbestand liegen dann im Repo (`data/scenes/`), die für KI-A
 
 Haiku 5.5: 0,10 $ pro Million Token Anfrage, 0,50 $ Antwort. Sonnet 5.5: etwa 20-mal so viel.
 Je Bild mit durchschnittlich 1,5 Runden: etwa **0,002 $ (Haiku)** bzw. **0,04 $ (Sonnet)**. Einmal 119 Titelbilder: etwa 0,25 $ bzw. 4,50 $. Laufend 15 Bilder pro Woche: etwa 0,03 $ bzw. 0,60 $.
-Speicher bei 1 500 Aktivitäten: Titelbilder 6 bis 15 MB (bei 4 bis 10 KB je Bild), mit unveränderlichen Dateien und 60 Tagen Aufbewahrung unter 50 MB (kostenloser Tarif: 1 GB).
+Speicher bei 1 500 Aktivitäten: Titelbilder 6 bis 15 MB (bei 4 bis 14 KB je Bild), mit unveränderlichen Dateien und 60 Tagen Aufbewahrung unter 50 MB (kostenloser Tarif: 1 GB).
 Datenverkehr je Gerät und Monat geschätzt 100 bis 250 KB; ein einmaliges Neuzeichnen aller Bilder kostet jedes Gerät einmal alle Zeilen (bei 1 500 Aktivitäten etwa 2,8 MB ungepackt).
 
 ## Stand

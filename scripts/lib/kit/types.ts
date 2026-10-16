@@ -25,6 +25,7 @@ export type Block = {
   defaultTint?: TintName;
   hazards: KitHazard[];
   person?: Person; // nur Figuren
+  skin?: string; // nur Figuren: Hautton als Farbe (Kopf und Hände), für die Prüfung gegen Petrol-Flächen im Bild (figures/skin.ts)
   animal?: boolean; // Haustier (Stups, Tüpfel): erscheint nie bei Hitze, Feuer, Messer oder Schere (checkAgainstActivity, docs/design/FIGUREN.md)
   materials: string[]; // Material-Schlüssel (src/features/activities/materials.ts), die dieses Bild „deckt“
   terms: { de: string[]; en: string[] }; // Wörter im Text der Aktivität, die dieses Bild „decken“ (ohne Beachtung der Groß-/Kleinschreibung)
