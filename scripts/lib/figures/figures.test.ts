@@ -6,8 +6,9 @@ import { join } from 'node:path';
 
 import { contrastRatio } from '../../../src/lib/contrast';
 import { illustrationPalette } from '../../../src/lib/palette';
-import { checkAgainstActivity, type Placement } from '../kit/scene';
-import type { LoadedBlock } from '../kit/types';
+import { loadCatalog } from '../kit/catalog';
+import { checkAgainstActivity, checkScene, placeItems } from '../kit/scene';
+import type { Scene } from '../kit/types';
 import { cast } from './cast';
 import { animalBannedHazards, figureAges, figureFitsActivity } from './castRules';
 import { capsule, fmt, fromAngles, length, rotate, solveArm, sub, vec } from './math';
@@ -308,48 +309,62 @@ describe('Linien', () => {
 });
 
 describe('Tier-Regel', () => {
-  // Ein Baustein und eine Platzierung mit den Feldern, die die Regel liest.
-  const block = (id: string, extra: Partial<LoadedBlock>, tint?: string): Placement =>
-    ({ item: { slot: 's', block: id }, slot: {}, x: 100, y: 176, size: 1, flip: false, tint, box: { minX: 80, maxX: 120, minY: 100, maxY: 176 }, block: { id, group: 'x', kind: 'object', hazards: [], materials: [], terms: { de: [], en: [] }, neutral: true, svg: '', label: { de: id, en: id }, box: { x0: -20, x1: 20, h: 76 }, ...extra } }) as unknown as Placement;
-  const activity = (materials: string[]) => ({ materials, ageMin: 4, ageMax: 9, text: { de: '', en: '' }, safety: { de: 'nur mit Erwachsenen', en: '' } });
-  const cat = block('cat', { kind: 'figure', animal: true });
+  // Echte Szenen aus dem Baukasten mit Tieren der Besetzung (scripts/lib/kit/scene.ts).
+  const catalog = loadCatalog(root);
+  const activity = (materials: string[]) => ({ materials, ageMin: 4, ageMax: 9, text: { de: 'schere messer teller bratapfel backofen', en: '' }, safety: { de: 'nur mit Erwachsenen', en: '' } });
+  const withPet = (items: Scene['items']): Scene => ({ layout: 'pair', items: [{ slot: 'right', figure: 'stups', pose: 'watch' }, ...items] });
 
   it('Szenenprüfer und Regel nennen genau Hitze, Feuer, Messer und Schere', () => {
     expect([...animalBannedHazards]).toEqual(['sharp', 'heat', 'fire']);
   });
 
-  it('Tier und Schere (scharf) im selben Bild: Verstoß', () => {
-    expect(checkAgainstActivity([cat, block('scissors', { hazards: ['sharp'] })], activity([])).join('\n')).toMatch(/Ein Tier im Bild/);
+  it('Tier und Messer (scharf) im selben Bild: Verstoß', () => {
+    const scene = withPet([{ slot: 'middle', figure: 'arne', pose: 'cut-supervised', holds: { right: { block: 'knife', size: 0.75 } } }]);
+    expect(checkScene(scene, catalog, activity([])).join('\n')).toMatch(/Ein Tier im Bild/);
+  });
+
+  it('Tier und etwas Heißes in der Hand (Dampf): Verstoß, auch mit Ofenhandschuhen', () => {
+    const scene = withPet([{ slot: 'middle', figure: 'arne', pose: 'carry-tray', mitts: true, holds: { both: { block: 'tray', content: 'baked-apples', hot: true } } }]);
+    expect(checkScene(scene, catalog, activity([])).join('\n')).toMatch(/Ein Tier im Bild.*Tiere nie bei Hitze/);
   });
 
   it('Tier und Material mit Hitze (Backofen, Herd), Messer oder Schere in der Aktivität: Verstoß', () => {
-    for (const material of ['oven', 'stove', 'knife', 'scissors']) expect(checkAgainstActivity([cat], activity([material])).join('\n')).toMatch(/Ein Tier im Bild.*Tiere nie bei Hitze/);
+    for (const material of ['oven', 'stove', 'knife', 'scissors']) expect(checkScene(withPet([]), catalog, activity([material])).join('\n')).toMatch(/Ein Tier im Bild.*Tiere nie bei Hitze/);
   });
 
-  it('Tier mit harmlosem Material: kein Verstoß; ohne Tier verhindert die Regel nichts', () => {
-    expect(checkAgainstActivity([cat], activity(['paper']))).toEqual([]);
-    expect(checkAgainstActivity([block('oven', { hazards: ['heat'] })], activity(['oven'])).join('\n')).not.toMatch(/Ein Tier/);
+  it('Tier mit harmlosem Material: kein Verstoß; Tiere halten nichts', () => {
+    expect(checkScene(withPet([{ slot: 'left', figure: 'jette', pose: 'stand' }]), catalog, activity(['paper']))).toEqual([]);
+    const holding = { layout: 'pair', items: [{ slot: 'middle', figure: 'stups', pose: 'stand', holds: { right: { block: 'plate' } } }] } as Scene;
+    expect(checkScene(holding, catalog).join('\n')).toMatch(/Tiere fassen nichts an/);
   });
 });
 
 describe('Hautton und Petrol im Szenenprüfer', () => {
-  const place = (id: string, extra: Partial<LoadedBlock>, box: Placement['box'], tint?: string): Placement =>
-    ({ item: { slot: 's', block: id }, slot: {}, x: (box.minX + box.maxX) / 2, y: box.maxY, size: 1, flip: false, tint, box, block: { id, group: 'x', kind: 'object', hazards: [], materials: [], terms: { de: [], en: [] }, neutral: true, svg: '', label: { de: id, en: id }, box: { x0: -20, x1: 20, h: 76 }, ...extra } }) as unknown as Placement;
-  const activity = { materials: [], ageMin: 4, ageMax: 9, text: { de: '', en: '' }, safety: { de: '', en: '' } };
-  const figure = (tone: string) => place('jette', { kind: 'figure', person: 'child', skin: tone }, { minX: 80, maxX: 120, minY: 100, maxY: 176 });
-  const curtain = (box: Placement['box']) => place('curtain', {}, box, 'petrol');
+  const catalog = loadCatalog(root);
+  const activity = { materials: ['bowl', 'water', 'blanket', 'rainJacket'], ageMin: 4, ageMax: 9, text: { de: 'schüssel wasser decke regenjacke', en: '' }, safety: { de: '', en: '' } };
 
-  it('tiefer Ton (trägt auf Petrol nicht) mit Petrol-Fläche am Kopf: Verstoß', () => {
-    const problems = checkAgainstActivity([figure('#76492F'), curtain({ minX: 60, maxX: 140, minY: 90, maxY: 176 })], activity).join('\n');
-    expect(problems).toMatch(/trägt auf Petrol nicht/);
+  it('Jette (Platz 7, trägt auf Petrol nicht) mit Petrol-Kapuze: Verstoß; mit Rosé-Kapuze nicht', () => {
+    const scene = (tint: 'petrol' | 'rose'): Scene => ({ layout: 'pair', items: [{ slot: 'left', figure: 'jette', pose: 'stand', outfit: { kind: 'rain', tint } }] });
+    expect(checkScene(scene('petrol'), catalog, activity).join('\n')).toMatch(/trägt auf Petrol nicht.*Kapuze/);
+    expect(checkScene(scene('rose'), catalog, activity)).toEqual([]);
   });
 
-  it('tiefer Ton mit Petrol-Fläche nur unten (am Körper, nicht am Kopf): kein Verstoß', () => {
-    expect(checkAgainstActivity([figure('#76492F'), curtain({ minX: 60, maxX: 140, minY: 150, maxY: 176 })], activity)).toEqual([]);
+  it('Jette hält eine Schüssel mit Wasser (Petrol an der Hand): Verstoß; Mats (Platz 1) darf das', () => {
+    const scene = (figure: string, slot: string): Scene => ({ layout: 'pair', items: [{ slot, figure, pose: 'hold-plate', holds: { right: { block: 'bowl', content: 'water', tint: 'paper', size: 0.6 } } }] });
+    expect(checkScene(scene('jette', 'left'), catalog, activity).join('\n')).toMatch(/Inhalt „water“ \(Petrol\) liegt an Kopf oder Händen/);
+    expect(checkScene(scene('mats', 'left'), catalog, { ...activity, ageMin: 8, ageMax: 12 })).toEqual([]);
   });
 
-  it('heller Ton (trägt auf Petrol) mit Petrol am Kopf: kein Verstoß', () => {
-    expect(checkAgainstActivity([figure('#DDAA85'), curtain({ minX: 60, maxX: 140, minY: 90, maxY: 176 })], activity)).toEqual([]);
+  it('Petrol nur am Körper (Decke auf dem Boden, nicht am Kopf): kein Verstoß', () => {
+    const scene: Scene = { layout: 'outdoor', items: [{ slot: 's1', figure: 'jette', pose: 'stand' }, { slot: 's3', block: 'blanket', tint: 'petrol' }] };
+    expect(checkScene(scene, catalog, activity)).toEqual([]);
+  });
+
+  it('die Petrol-Kleidung einer anderen Figur hinter Jettes Kopf: Verstoß', () => {
+    // Jette hält die Hand an Ilkas Petrol-Mantel (reicht ihr einen Teller): Hand und Mantel überdecken sich
+    const scene: Scene = { layout: 'outdoor', items: [{ slot: 'mid', figure: 'ilka', pose: 'stand' }, { slot: 's2', figure: 'jette', pose: 'hand-over', holds: { right: { block: 'plate', size: 0.6 } } }] };
+    const problems = checkAgainstActivity(placeItems(scene, catalog) ?? [], { ...activity, materials: ['plate'] }, catalog);
+    expect(problems.join('\n')).toMatch(/Petrol-Kleidung von „ilka“/);
   });
 });
 

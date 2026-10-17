@@ -1,168 +1,6 @@
 {
   "blocks": [
     {
-      "id": "adult",
-      "group": "figuren",
-      "kind": "figure",
-      "label": {
-        "de": "Erwachsener (ruhig)",
-        "en": "adult (resting)"
-      },
-      "box": {
-        "x0": -34,
-        "x1": 34,
-        "h": 118
-      },
-      "tints": [
-        "petrol",
-        "rose"
-      ],
-      "defaultTint": "petrol",
-      "hazards": [],
-      "person": "adult",
-      "materials": [],
-      "terms": {
-        "de": [],
-        "en": []
-      },
-      "neutral": true
-    },
-    {
-      "id": "adult-reach",
-      "group": "figuren",
-      "kind": "figure",
-      "label": {
-        "de": "Erwachsener (greift)",
-        "en": "adult (reaching)"
-      },
-      "box": {
-        "x0": -25,
-        "x1": 54,
-        "h": 118
-      },
-      "tints": [
-        "petrol",
-        "rose"
-      ],
-      "defaultTint": "petrol",
-      "hazards": [],
-      "person": "adult",
-      "materials": [],
-      "terms": {
-        "de": [],
-        "en": []
-      },
-      "neutral": true
-    },
-    {
-      "id": "child",
-      "group": "figuren",
-      "kind": "figure",
-      "label": {
-        "de": "Kind (ruhig)",
-        "en": "child (resting)"
-      },
-      "box": {
-        "x0": -26,
-        "x1": 26,
-        "h": 78
-      },
-      "tints": [
-        "petrol",
-        "rose"
-      ],
-      "defaultTint": "rose",
-      "hazards": [],
-      "person": "child",
-      "materials": [],
-      "terms": {
-        "de": [],
-        "en": []
-      },
-      "neutral": true
-    },
-    {
-      "id": "child-reach",
-      "group": "figuren",
-      "kind": "figure",
-      "label": {
-        "de": "Kind (greift)",
-        "en": "child (reaching)"
-      },
-      "box": {
-        "x0": -17,
-        "x1": 41,
-        "h": 78
-      },
-      "tints": [
-        "petrol",
-        "rose"
-      ],
-      "defaultTint": "rose",
-      "hazards": [],
-      "person": "child",
-      "materials": [],
-      "terms": {
-        "de": [],
-        "en": []
-      },
-      "neutral": true
-    },
-    {
-      "id": "child-cheer",
-      "group": "figuren",
-      "kind": "figure",
-      "label": {
-        "de": "Kind (jubelt)",
-        "en": "child (cheering)"
-      },
-      "box": {
-        "x0": -34,
-        "x1": 34,
-        "h": 78
-      },
-      "tints": [
-        "petrol",
-        "rose"
-      ],
-      "defaultTint": "rose",
-      "hazards": [],
-      "person": "child",
-      "materials": [],
-      "terms": {
-        "de": [],
-        "en": []
-      },
-      "neutral": true
-    },
-    {
-      "id": "toddler-sit",
-      "group": "figuren",
-      "kind": "figure",
-      "label": {
-        "de": "Kleinkind (sitzend)",
-        "en": "toddler (sitting)"
-      },
-      "box": {
-        "x0": -30,
-        "x1": 41,
-        "h": 59
-      },
-      "tints": [
-        "petrol",
-        "rose"
-      ],
-      "defaultTint": "rose",
-      "hazards": [],
-      "person": "toddler",
-      "materials": [],
-      "terms": {
-        "de": [],
-        "en": []
-      },
-      "neutral": true
-    },
-    {
       "id": "ground-line",
       "group": "moebel",
       "kind": "ground",
@@ -219,9 +57,9 @@
         "en": "tray"
       },
       "box": {
-        "x0": -46,
-        "x1": 47,
-        "h": 16
+        "x0": -40,
+        "x1": 41,
+        "h": 15
       },
       "tints": [
         "paper",
@@ -240,7 +78,23 @@
           "tray"
         ]
       },
-      "neutral": false
+      "neutral": false,
+      "grips": {
+        "left": [
+          -36,
+          -3
+        ],
+        "right": [
+          36,
+          -3
+        ]
+      },
+      "container": {
+        "kind": "flat",
+        "x0": -26,
+        "x1": 26,
+        "y": -9
+      }
     },
     {
       "id": "blanket",
@@ -445,7 +299,28 @@
           "bowl"
         ]
       },
-      "neutral": false
+      "neutral": false,
+      "grips": {
+        "left": [
+          -28,
+          -22
+        ],
+        "right": [
+          28,
+          -22
+        ],
+        "under": [
+          0,
+          0
+        ]
+      },
+      "container": {
+        "kind": "deep",
+        "cx": 0,
+        "cy": -24,
+        "rx": 28,
+        "ry": 6
+      }
     },
     {
       "id": "wooden-spoon",
@@ -473,7 +348,17 @@
           "spoon"
         ]
       },
-      "neutral": false
+      "neutral": false,
+      "grips": {
+        "handle": [
+          -24,
+          -6
+        ],
+        "tip": [
+          24,
+          -7
+        ]
+      }
     },
     {
       "id": "baking-tray",
@@ -491,7 +376,9 @@
       "hazards": [
         "heat"
       ],
-      "materials": [],
+      "materials": [
+        "tray"
+      ],
       "terms": {
         "de": [
           "backblech",
@@ -503,7 +390,23 @@
           "tray"
         ]
       },
-      "neutral": false
+      "neutral": false,
+      "grips": {
+        "left": [
+          -50,
+          -8
+        ],
+        "right": [
+          50,
+          -8
+        ]
+      },
+      "container": {
+        "kind": "flat",
+        "x0": -34,
+        "x1": 34,
+        "y": -10
+      }
     },
     {
       "id": "pizza",
@@ -552,12 +455,16 @@
       ],
       "defaultTint": "honey",
       "hazards": [],
-      "materials": [],
+      "materials": [
+        "oven",
+        "stove"
+      ],
       "terms": {
         "de": [
           "ofenhandschuh",
           "topflappen",
-          "backofen"
+          "backofen",
+          "ofen"
         ],
         "en": [
           "oven mitt",
@@ -572,8 +479,8 @@
       "group": "basteln",
       "kind": "object",
       "label": {
-        "de": "Schere",
-        "en": "scissors"
+        "de": "Schere (spitz, nur Erwachsene)",
+        "en": "scissors (pointed, adults only)"
       },
       "box": {
         "x0": -28,
@@ -602,7 +509,17 @@
           "cut"
         ]
       },
-      "neutral": false
+      "neutral": false,
+      "grips": {
+        "handle": [
+          -18,
+          -14
+        ],
+        "tip": [
+          28,
+          -14
+        ]
+      }
     },
     {
       "id": "glue-tube",
@@ -929,6 +846,775 @@
         ]
       },
       "neutral": false
+    },
+    {
+      "id": "plate",
+      "group": "kueche",
+      "kind": "object",
+      "label": {
+        "de": "Teller",
+        "en": "plate"
+      },
+      "box": {
+        "x0": -26,
+        "x1": 27,
+        "h": 14
+      },
+      "hazards": [],
+      "materials": [
+        "plate"
+      ],
+      "terms": {
+        "de": [
+          "teller"
+        ],
+        "en": [
+          "plate"
+        ]
+      },
+      "neutral": false,
+      "tints": [
+        "paper",
+        "rose",
+        "honey"
+      ],
+      "defaultTint": "paper",
+      "grips": {
+        "under": [
+          0,
+          1
+        ]
+      },
+      "container": {
+        "kind": "flat",
+        "x0": -14,
+        "x1": 14,
+        "y": -8
+      }
+    },
+    {
+      "id": "ladle",
+      "group": "kueche",
+      "kind": "object",
+      "label": {
+        "de": "Kelle",
+        "en": "ladle"
+      },
+      "box": {
+        "x0": -42,
+        "x1": 39,
+        "h": 22
+      },
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [
+          "kelle",
+          "schöpflöffel"
+        ],
+        "en": [
+          "ladle"
+        ]
+      },
+      "neutral": false,
+      "grips": {
+        "handle": [
+          -28,
+          -14
+        ],
+        "tip": [
+          24,
+          -6
+        ]
+      }
+    },
+    {
+      "id": "jug",
+      "group": "kueche",
+      "kind": "object",
+      "label": {
+        "de": "Kanne (Krug)",
+        "en": "jug"
+      },
+      "box": {
+        "x0": -32,
+        "x1": 31,
+        "h": 52
+      },
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [
+          "kanne",
+          "krug"
+        ],
+        "en": [
+          "jug",
+          "pitcher"
+        ]
+      },
+      "neutral": false,
+      "tints": [
+        "rose",
+        "honey",
+        "paper"
+      ],
+      "defaultTint": "rose",
+      "grips": {
+        "handle": [
+          -27,
+          -25
+        ],
+        "under": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": "knife",
+      "group": "kueche",
+      "kind": "object",
+      "label": {
+        "de": "Messer (nur Erwachsene)",
+        "en": "knife (adults only)"
+      },
+      "box": {
+        "x0": -32,
+        "x1": 36,
+        "h": 13
+      },
+      "hazards": [
+        "sharp"
+      ],
+      "materials": [
+        "knife"
+      ],
+      "terms": {
+        "de": [
+          "messer"
+        ],
+        "en": [
+          "knife"
+        ]
+      },
+      "neutral": false,
+      "grips": {
+        "handle": [
+          -18,
+          -6
+        ],
+        "tip": [
+          32,
+          -3
+        ]
+      }
+    },
+    {
+      "id": "fork",
+      "group": "kueche",
+      "kind": "object",
+      "label": {
+        "de": "Gabel",
+        "en": "fork"
+      },
+      "box": {
+        "x0": -32,
+        "x1": 26,
+        "h": 13
+      },
+      "hazards": [],
+      "materials": [
+        "fork"
+      ],
+      "terms": {
+        "de": [
+          "gabel"
+        ],
+        "en": [
+          "fork"
+        ]
+      },
+      "neutral": false,
+      "grips": {
+        "handle": [
+          -24,
+          -6
+        ],
+        "tip": [
+          22,
+          -6
+        ]
+      }
+    },
+    {
+      "id": "child-scissors",
+      "group": "basteln",
+      "kind": "object",
+      "label": {
+        "de": "Kinderschere (rund, bunt)",
+        "en": "child scissors (rounded, colourful)"
+      },
+      "box": {
+        "x0": -24,
+        "x1": 28,
+        "h": 30
+      },
+      "hazards": [
+        "sharp"
+      ],
+      "materials": [
+        "scissors"
+      ],
+      "terms": {
+        "de": [
+          "kinderschere",
+          "schere"
+        ],
+        "en": [
+          "scissors"
+        ]
+      },
+      "neutral": false,
+      "tints": [
+        "honey",
+        "rose"
+      ],
+      "defaultTint": "honey",
+      "grips": {
+        "handle": [
+          -15,
+          -14
+        ],
+        "tip": [
+          22,
+          -13
+        ]
+      },
+      "kidSafe": true,
+      "kidTerms": {
+        "de": [
+          "kinderschere"
+        ],
+        "en": [
+          "child scissors",
+          "children's scissors",
+          "kids' scissors",
+          "kids scissors",
+          "safety scissors",
+          "child-safe scissors"
+        ]
+      }
+    },
+    {
+      "id": "cotton-swab",
+      "group": "basteln",
+      "kind": "object",
+      "label": {
+        "de": "Wattestäbchen",
+        "en": "cotton swab"
+      },
+      "box": {
+        "x0": -26,
+        "x1": 26,
+        "h": 10
+      },
+      "hazards": [],
+      "materials": [
+        "cottonSwabs"
+      ],
+      "terms": {
+        "de": [
+          "wattestäbchen"
+        ],
+        "en": [
+          "cotton swab",
+          "cotton bud"
+        ]
+      },
+      "neutral": false,
+      "grips": {
+        "handle": [
+          -6,
+          -4
+        ],
+        "tip": [
+          19,
+          -4
+        ]
+      }
+    },
+    {
+      "id": "stick",
+      "group": "natur",
+      "kind": "nature",
+      "label": {
+        "de": "Stock",
+        "en": "stick"
+      },
+      "box": {
+        "x0": -42,
+        "x1": 43,
+        "h": 16
+      },
+      "hazards": [],
+      "materials": [
+        "stick"
+      ],
+      "terms": {
+        "de": [
+          "stock",
+          "stöcke",
+          "zweig"
+        ],
+        "en": [
+          "stick",
+          "twig"
+        ]
+      },
+      "neutral": false,
+      "grips": {
+        "handle": [
+          -32,
+          -5
+        ],
+        "tip": [
+          38,
+          -4
+        ]
+      }
+    },
+    {
+      "id": "bucket",
+      "group": "natur",
+      "kind": "object",
+      "label": {
+        "de": "Eimer",
+        "en": "bucket"
+      },
+      "box": {
+        "x0": -24,
+        "x1": 25,
+        "h": 62
+      },
+      "hazards": [],
+      "materials": [
+        "bucket"
+      ],
+      "terms": {
+        "de": [
+          "eimer"
+        ],
+        "en": [
+          "bucket",
+          "pail"
+        ]
+      },
+      "neutral": false,
+      "tints": [
+        "rose",
+        "petrol",
+        "honey"
+      ],
+      "defaultTint": "rose",
+      "grips": {
+        "handle": [
+          0,
+          -53
+        ]
+      },
+      "container": {
+        "kind": "deep",
+        "cx": 0,
+        "cy": -36,
+        "rx": 22,
+        "ry": 4
+      }
+    },
+    {
+      "id": "basket",
+      "group": "natur",
+      "kind": "object",
+      "label": {
+        "de": "Korb",
+        "en": "basket"
+      },
+      "box": {
+        "x0": -32,
+        "x1": 33,
+        "h": 64
+      },
+      "hazards": [],
+      "materials": [
+        "basket"
+      ],
+      "terms": {
+        "de": [
+          "korb",
+          "körbchen"
+        ],
+        "en": [
+          "basket"
+        ]
+      },
+      "neutral": false,
+      "grips": {
+        "handle": [
+          0,
+          -53
+        ]
+      },
+      "container": {
+        "kind": "deep",
+        "cx": 0,
+        "cy": -26,
+        "rx": 30,
+        "ry": 5
+      }
+    },
+    {
+      "id": "baked-apples",
+      "group": "inhalt",
+      "kind": "content",
+      "label": {
+        "de": "Bratäpfel",
+        "en": "baked apples"
+      },
+      "box": {
+        "x0": -10,
+        "x1": 11,
+        "h": 19
+      },
+      "hazards": [],
+      "materials": [
+        "apple"
+      ],
+      "terms": {
+        "de": [
+          "bratapf",
+          "bratäpfel"
+        ],
+        "en": [
+          "baked apple"
+        ]
+      },
+      "neutral": false,
+      "fits": [
+        "tray",
+        "plate",
+        "baking-tray"
+      ]
+    },
+    {
+      "id": "cookies",
+      "group": "inhalt",
+      "kind": "content",
+      "label": {
+        "de": "Kekse",
+        "en": "cookies"
+      },
+      "box": {
+        "x0": -11,
+        "x1": 11,
+        "h": 10
+      },
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [
+          "keks",
+          "plätzchen"
+        ],
+        "en": [
+          "cookie",
+          "biscuit"
+        ]
+      },
+      "neutral": false,
+      "fits": [
+        "tray",
+        "plate",
+        "baking-tray",
+        "bowl"
+      ]
+    },
+    {
+      "id": "oat-balls",
+      "group": "inhalt",
+      "kind": "content",
+      "label": {
+        "de": "Haferkugeln",
+        "en": "oat balls"
+      },
+      "box": {
+        "x0": -9,
+        "x1": 9,
+        "h": 15
+      },
+      "hazards": [],
+      "materials": [
+        "oats"
+      ],
+      "terms": {
+        "de": [
+          "haferkugel",
+          "kugeln"
+        ],
+        "en": [
+          "oat ball",
+          "balls"
+        ]
+      },
+      "neutral": false,
+      "fits": [
+        "plate",
+        "tray",
+        "bowl"
+      ]
+    },
+    {
+      "id": "dough",
+      "group": "inhalt",
+      "kind": "content",
+      "label": {
+        "de": "Teig",
+        "en": "dough"
+      },
+      "box": {
+        "x0": -26,
+        "x1": 26,
+        "h": 15
+      },
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [
+          "teig",
+          "brei",
+          "masse"
+        ],
+        "en": [
+          "dough",
+          "batter",
+          "mash",
+          "mixture"
+        ]
+      },
+      "neutral": false,
+      "fits": [
+        "bowl"
+      ],
+      "fill": true
+    },
+    {
+      "id": "fruit",
+      "group": "inhalt",
+      "kind": "content",
+      "label": {
+        "de": "Obst",
+        "en": "fruit"
+      },
+      "box": {
+        "x0": -10,
+        "x1": 11,
+        "h": 21
+      },
+      "hazards": [],
+      "materials": [
+        "fruit",
+        "apple"
+      ],
+      "terms": {
+        "de": [
+          "obst",
+          "apfel",
+          "äpfel"
+        ],
+        "en": [
+          "fruit",
+          "apple"
+        ]
+      },
+      "neutral": false,
+      "fits": [
+        "basket",
+        "bowl",
+        "plate",
+        "tray"
+      ]
+    },
+    {
+      "id": "bananas",
+      "group": "inhalt",
+      "kind": "content",
+      "label": {
+        "de": "Bananen",
+        "en": "bananas"
+      },
+      "box": {
+        "x0": -18,
+        "x1": 20,
+        "h": 17
+      },
+      "hazards": [],
+      "materials": [
+        "banana"
+      ],
+      "terms": {
+        "de": [
+          "banane"
+        ],
+        "en": [
+          "banana"
+        ]
+      },
+      "neutral": false,
+      "fits": [
+        "plate",
+        "basket",
+        "bowl"
+      ]
+    },
+    {
+      "id": "lemon-halves",
+      "group": "inhalt",
+      "kind": "content",
+      "label": {
+        "de": "Zitronenhälften",
+        "en": "lemon halves"
+      },
+      "box": {
+        "x0": -10,
+        "x1": 10,
+        "h": 18
+      },
+      "hazards": [],
+      "materials": [
+        "lemon"
+      ],
+      "terms": {
+        "de": [
+          "zitrone"
+        ],
+        "en": [
+          "lemon"
+        ]
+      },
+      "neutral": false,
+      "fits": [
+        "plate",
+        "tray",
+        "bowl"
+      ]
+    },
+    {
+      "id": "water",
+      "group": "inhalt",
+      "kind": "content",
+      "label": {
+        "de": "Wasser",
+        "en": "water"
+      },
+      "box": {
+        "x0": -27,
+        "x1": 27,
+        "h": 8
+      },
+      "hazards": [
+        "water"
+      ],
+      "materials": [
+        "water",
+        "tapWater"
+      ],
+      "terms": {
+        "de": [
+          "wasser"
+        ],
+        "en": [
+          "water"
+        ]
+      },
+      "neutral": false,
+      "fits": [
+        "bowl",
+        "bucket"
+      ],
+      "fill": true
+    },
+    {
+      "id": "leaves",
+      "group": "inhalt",
+      "kind": "content",
+      "label": {
+        "de": "Blätter",
+        "en": "leaves"
+      },
+      "box": {
+        "x0": -12,
+        "x1": 12,
+        "h": 15
+      },
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [
+          "blätter",
+          "laub"
+        ],
+        "en": [
+          "leaves",
+          "leaf"
+        ]
+      },
+      "neutral": false,
+      "fits": [
+        "basket",
+        "bucket",
+        "tray",
+        "bowl"
+      ],
+      "tints": [
+        "honey",
+        "brown",
+        "rose"
+      ],
+      "defaultTint": "honey"
+    },
+    {
+      "id": "chestnuts",
+      "group": "inhalt",
+      "kind": "content",
+      "label": {
+        "de": "Kastanien",
+        "en": "chestnuts"
+      },
+      "box": {
+        "x0": -9,
+        "x1": 9,
+        "h": 15
+      },
+      "hazards": [
+        "smallParts"
+      ],
+      "materials": [
+        "chestnuts"
+      ],
+      "terms": {
+        "de": [
+          "kastanie"
+        ],
+        "en": [
+          "chestnut"
+        ]
+      },
+      "neutral": false,
+      "fits": [
+        "basket",
+        "bucket",
+        "bowl",
+        "tray"
+      ]
     }
   ]
 }

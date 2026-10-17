@@ -1,0 +1,4 @@
+<path d="M-36 -14H12" fill="none" stroke-width="{{line}}"/>
+<path d="M-36 -14C-40 -14 -40 -20 -35 -20" fill="none" stroke-width="{{line}}"/>
+<path d="M12 -14H36C36 -5 31 0 24 0C17 0 12 -5 12 -14Z" fill="{{brown}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M12 -14H36C36 -5 31 0 24 0C17 0 12 -5 12 -14Z" fill="{{paper}}" stroke-width="{{line}}"/>

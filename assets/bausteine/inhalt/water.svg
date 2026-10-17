@@ -1,0 +1,2 @@
+<ellipse cx="0" cy="-1.5" rx="25" ry="4.5" fill="{{petrol}}" stroke-width="{{line}}"/>
+<path d="M-12 -1.5C-8 -3.5 -4 0.5 0 -1.5C4 -3.5 8 0.5 12 -1.5" fill="none" stroke="{{paper}}" stroke-width="{{fine}}"/>

@@ -3,12 +3,14 @@
 
 import { backdrop, baseY, frame } from './layouts.ts';
 import { renderSceneSvg } from './scene.ts';
+import { containerSheets, poseSheetLabel, poseSheets, type Sheet } from './sheets.ts';
 import { renderTemplate } from '../illustrations.ts';
 import type { Catalog, LoadedBlock, Scene, TintName } from './types.ts';
 
 // Größe der Vorschau: kleine Dinge groß (1,5 wie in der Mitte von „hero“), Figuren und Möbel in Normalgröße.
 export function previewSize(block: LoadedBlock): number {
   const width = block.box.x1 - block.box.x0;
+  if (block.kind === 'content') return 2;
   return block.kind === 'object' || block.kind === 'nature' ? (width <= 100 && block.box.h <= 80 ? 1.5 : 1) : 1;
 }
 
@@ -51,7 +53,7 @@ export type PreviewFile = { path: string; content: string };
 export const previewDir = 'docs/bausteine';
 
 const groupTitles: Record<string, string> = {
-  figuren: 'Figuren',
+  inhalt: 'Inhalte (nur in Behältern, hier allein in doppelter Größe)',
   moebel: 'Möbel und Fläche',
   kueche: 'Küche',
   basteln: 'Basteln',
@@ -63,6 +65,21 @@ const hazardLabels: Record<string, string> = { sharp: 'scharf', heat: 'heiß', g
 
 function image(path: string, width: number, alt: string): string {
   return `<img src="${path}" width="${width}" alt="${alt}">`;
+}
+
+const kb = (svg: string): string => `${(Buffer.byteLength(svg) / 1024).toFixed(1).replace('.', ',')} KB`;
+
+// Eine Tabelle mit Szenen-Bildern: Karte, Daumennagel 96 × 48 und 64 × 32, Größe der Datei.
+function sceneTable(files: PreviewFile[], lines: string[], folder: string, sheets: readonly Sheet[], catalog: Catalog, label: (sheet: Sheet) => string): void {
+  lines.push('| Bild | Karte | 96 × 48 | 64 × 32 | Größe |');
+  lines.push('| --- | --- | --- | --- | --- |');
+  for (const sheet of sheets) {
+    const path = `vorschau/${folder}/${sheet.name}.svg`;
+    const svg = renderSceneSvg(sheet.scene, catalog);
+    files.push({ path: `${previewDir}/${path}`, content: svg });
+    lines.push(`| ${label(sheet)} | ${image(path, 312, sheet.name)} | ${image(path, 96, sheet.name)} | ${image(path, 64, sheet.name)} | ${kb(svg)} |`);
+  }
+  lines.push('');
 }
 
 // Alle Dateien der Vorschau: je Baustein ein SVG (Standardton), je weiterem Ton ein SVG, je Beispielszene ein SVG, und die Seite VORSCHAU.md.
@@ -82,23 +99,29 @@ export function buildPreviewFiles(catalog: Catalog, scenes: ReadonlyMap<string, 
   if (scenes.size > 0) {
     lines.push('## Beispielszenen');
     lines.push('');
-    lines.push('Szenen aus den Bausteinen, geprüft mit den Regeln (Layout, Plätze, Rand, Ecken, Überdeckung, bei Aktivitäten auch Sicherheit und Textabgleich). Sie zeigen, dass die Bausteine zusammenpassen; es sind keine endgültigen Titelbilder.');
+    lines.push('Szenen aus Bausteinen und Figuren der Besetzung, geprüft mit den Regeln (Layout, Plätze, Rand, Ecken, Überdeckung, Haltepunkte, 14 KB, bei Aktivitäten auch Sicherheit und Textabgleich). Die drei `hands-…` zeigen das Layout `hands` (Nahaufnahme für Schrittbilder). Es sind keine endgültigen Titel- oder Schrittbilder.');
     lines.push('');
-    lines.push('| Szene | Karte | 96 × 48 | 64 × 32 |');
-    lines.push('| --- | --- | --- | --- |');
-    for (const [name, scene] of scenes) {
-      const path = `vorschau/beispiele/${name}.svg`;
-      files.push({ path: `${previewDir}/${path}`, content: renderSceneSvg(scene, catalog) });
-      lines.push(`| \`${name}\` (${scene.layout}) | ${image(path, 312, name)} | ${image(path, 96, name)} | ${image(path, 64, name)} |`);
-    }
-    lines.push('');
+    const examples = [...scenes.entries()].map(([name, scene]) => ({ name, title: name, scene }));
+    sceneTable(files, lines, 'beispiele', examples, catalog, (sheet) => `\`${sheet.name}\` (${sheet.scene.layout})${(sheet.scene as Scene & { activity?: string }).activity === undefined ? '' : `<br>Aktivität \`${(sheet.scene as Scene & { activity?: string }).activity}\``}`);
   }
+
+  lines.push('## Posen mit Gegenstand');
+  lines.push('');
+  lines.push('Die Hand sitzt am Haltepunkt des Gegenstands (Arm mit zwei Gliedern). Erwachsene stehen in der Mitte: Nur dort bleibt ihr Kopf unter den Ecken der Kategorie-Pille. Kinder tragen kleinere Gegenstände (Größe 0,75 oder 0,6), damit ihre Arme die Ränder erreichen.');
+  lines.push('');
+  sceneTable(files, lines, 'posen', poseSheets, catalog, (sheet) => `**${poseSheetLabel((sheet as (typeof poseSheets)[number]).pose)}**<br>${sheet.title}`);
+
+  lines.push('## Behälter mit Inhalt');
+  lines.push('');
+  lines.push('Jeder Behälter mit allen Inhalten, die in ihn passen (Tablett, Teller, Backblech: Stücke in einer Reihe; Schüssel, Korb, Eimer: kleiner Haufen oder Fläche). Heiße Inhalte haben Dampf und zählen für die Sicherheitsregeln als heiß.');
+  lines.push('');
+  sceneTable(files, lines, 'behaelter', containerSheets(catalog), catalog, (sheet) => sheet.title);
 
   const groups = [...new Set([...catalog.values()].map((block) => block.group))];
   for (const group of groups) {
     lines.push(`## ${groupTitles[group] ?? group}`);
     lines.push('');
-    lines.push('| Baustein | Karte | 96 × 48 | 64 × 32 | Töne | Merkmale |');
+    lines.push('| Baustein | Karte | 96 × 48 | 64 × 32 | Töne | Merkmale, Haltepunkte, Behälter |');
     lines.push('| --- | --- | --- | --- | --- | --- |');
     for (const block of [...catalog.values()].filter((entry) => entry.group === group)) {
       const path = `vorschau/${block.id}.svg`;
@@ -113,8 +136,14 @@ export function buildPreviewFiles(catalog: Catalog, scenes: ReadonlyMap<string, 
               .join(', ');
       const variantImages = variants.map((tint) => image(`vorschau/${block.id}--${tint}.svg`, 96, `${block.label.de} in ${tint}`)).join(' ');
       const hazards = block.hazards.map((hazard) => hazardLabels[hazard] ?? hazard).join(', ');
+      const extra = [
+        block.grips === undefined ? '' : `Haltepunkte: ${Object.keys(block.grips).join(', ')}`,
+        block.container === undefined ? '' : `Behälter (${block.container.kind === 'flat' ? 'flach' : 'tief'})`,
+        block.fits === undefined ? '' : `passt in: ${block.fits.join(', ')}${block.fill === true ? ' (Fläche)' : ''}`,
+        block.kidSafe === true ? 'darf in Kinderhand, wenn Checkliste und Text es erlauben' : '',
+      ].filter((entry) => entry !== '');
       lines.push(
-        `| \`${block.id}\`<br>${block.label.de} / ${block.label.en}<br>Fläche ${block.box.x1 - block.box.x0} × ${block.box.h} | ${image(path, 312, block.label.de)} | ${image(path, 96, block.label.de)} | ${image(path, 64, block.label.de)} | ${tintCell}${variantImages === '' ? '' : `<br>${variantImages}`} | ${hazards === '' ? (block.neutral ? 'neutral' : '–') : hazards} |`,
+        `| \`${block.id}\`<br>${block.label.de} / ${block.label.en}<br>Fläche ${block.box.x1 - block.box.x0} × ${block.box.h} | ${image(path, 312, block.label.de)} | ${image(path, 96, block.label.de)} | ${image(path, 64, block.label.de)} | ${tintCell}${variantImages === '' ? '' : `<br>${variantImages}`} | ${hazards === '' ? (block.neutral ? 'neutral' : '–') : hazards}${extra.length === 0 ? '' : `<br>${extra.join('<br>')}`} |`,
       );
     }
     lines.push('');

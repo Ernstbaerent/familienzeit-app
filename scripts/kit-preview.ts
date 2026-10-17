@@ -33,7 +33,7 @@ for (const file of files) {
 }
 
 // Dateien in vorschau/, die es nicht mehr geben soll (gelöschter Baustein, anderer Ton), entfernen.
-for (const folder of ['vorschau', 'vorschau/beispiele']) {
+for (const folder of ['vorschau', 'vorschau/beispiele', 'vorschau/posen', 'vorschau/behaelter']) {
   const dir = join(root, previewDir, folder);
   if (!existsSync(dir)) continue;
   for (const name of readdirSync(dir).filter((entry) => entry.endsWith('.svg'))) {

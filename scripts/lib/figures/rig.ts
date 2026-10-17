@@ -2,7 +2,7 @@
 // Eine Pose ist nur Daten (Winkel oder Zielpunkte für die Hände); `buildHuman` rechnet sie in Gelenkpunkte um und zeichnet sie.
 // Dieselben Daten tragen später auch eine Animation (siehe docs/design/FIGUREN.md, „Animation und Video“). Reine Funktionen.
 
-import { add, capsule, fmt, fromAngles, Path, rotate, solveArm, sub, vec, type ElbowSide, type Vec } from './math.ts';
+import { add, capsule, fmt, fromAngles, Path, rotate, scale, solveArm, sub, vec, type ElbowSide, type Vec } from './math.ts';
 
 export type Tint = 'ink' | 'paper' | 'rose' | 'petrol' | 'honey' | 'brown';
 // Hautton-Platz einer Figur: `{{skin1}}` bis `{{skin8}}` für Kopf und Hände, `{{eye1}}` bis `{{eye8}}` für die Augenpunkte (siehe skin.ts).
@@ -58,7 +58,16 @@ export type RenderOptions = {
   flip?: boolean; // spiegelt die Figur an ihrer Mitte
   line?: number; // Linienstärke der Figur (Standard `figureLine` = 5, Gegenstände bleiben 4); feine Linien bleiben 2,5
   limbShadow?: boolean; // versetzte Farbfläche auch an Armen und Beinen (kostet etwa ein Drittel mehr Bytes)
+  outfit?: Outfit; // Regen-Kleidung: Regenjacke mit Kapuze und Gummistiefel statt der eigenen Kleidung
 };
+
+// Regen-Kleidung (M9b, Schritt 3a): Jacke mit Kapuze (ohne Mütze) und Gummistiefel, beides in einem Ton der Kleidung (Petrol oder Rosé).
+export type Outfit = { kind: 'rain'; tint: 'rose' | 'petrol' };
+
+export type Circle = { c: Vec; r: number };
+
+// Wo Haut und Kleidung liegen, für den Szenenprüfer (Petrol hinter tiefen Hauttönen): Kopf, Hände, Kapuze, Farbe des Oberteils.
+export type Geometry = { head: Circle; hands: [Circle, Circle]; hood?: Circle & { tint: Tint }; top: Tint };
 
 export type Anchors = {
   pelvis: Vec;
@@ -73,7 +82,7 @@ export type Anchors = {
 };
 
 // `body` (hinter Gegenständen), `hands` (über Gegenständen, damit sie am Rand sitzen), `head`; `svg` ist alles in der richtigen Reihenfolge.
-export type Rendered = { svg: string; body: string; hands: string; head: string; anchors: Anchors };
+export type Rendered = { svg: string; body: string; hands: string; head: string; anchors: Anchors; geometry: Geometry };
 
 // Umrisslinie der Figuren (Clemens, 2026-10-16): 5, Gegenstände 4, feine Linien 2,5 (docs/design/ILLUSTRATIONEN.md).
 export const figureLine = 5;
@@ -92,10 +101,11 @@ function shape(dPath: string, dShadow: string, tint: Tint): string {
   return `<path d="${dShadow}" fill="${fill(tint)}" stroke="none"/><path d="${dPath}" fill="none" stroke-width="4"/>`;
 }
 
-function torsoPaths(s: HumanSpec, xf: (p: Vec) => Vec, pelvisY: number): string {
+// `drop` verlängert den Rumpf nach unten (Regenjacke über die Hüfte), die Schultern bleiben.
+function torsoPaths(s: HumanSpec, xf: (p: Vec) => Vec, pelvisY: number, drop = 0): string {
   const { torsoH: h, torsoW: w, shoulderW: sw, hipW } = s;
   const top = pelvisY - h;
-  const bottom = s.torso === 'dress' ? pelvisY + 10 : pelvisY;
+  const bottom = (s.torso === 'dress' ? pelvisY + 10 : pelvisY) + drop;
   const p = new Path(xf);
   switch (s.torso) {
     case 'bean': {
@@ -240,9 +250,19 @@ export function buildHuman(spec: HumanSpec, pose: Pose, opts: RenderOptions): Re
     return { side, s, mid: elbow, end: h };
   });
 
+  const rain = opts.outfit?.kind === 'rain' ? opts.outfit : undefined;
+  // Mit Regenjacke: schlanke Jacke bis über die Hüfte in ihrem Ton, Kapuze statt Haaren (eine Mütze bleibt, dann ohne Kapuze).
+  const hooded = rain !== undefined && spec.hair !== 'beanie';
+  const dressed: HumanSpec = rain === undefined ? spec : { ...spec, torso: 'slim', colors: { ...spec.colors, top: rain.tint, accent: undefined }, scarf: false };
   const out: string[] = [];
-  const hair = hairPaths(spec, world(headC), (lean + tilt) * flipX);
+  const hair = hooded ? { back: '', front: '', extra: '' } : hairPaths(spec, world(headC), (lean + tilt) * flipX);
   out.push(hair.back);
+  let hood: Geometry['hood'];
+  if (hooded) {
+    const hc = world(add(headC, rotate(vec(0, -spec.headR * 0.12), lean + tilt)));
+    hood = { c: hc, r: spec.headR * 1.4, tint: rain.tint };
+    out.push(`<circle cx="${fmt(hc.x)}" cy="${fmt(hc.y)}" r="${fmt(hood.r)}" fill="${fill(rain.tint)}" stroke-width="4"/>`);
+  }
 
   const limbSvg = (a: Vec, b: Vec, tint: Tint): string => {
     const wa = world(a);
@@ -258,22 +278,35 @@ export function buildHuman(spec: HumanSpec, pose: Pose, opts: RenderOptions): Re
   for (const leg of legs) {
     out.push(limbSvg(leg.hip, leg.mid, spec.colors.bottom), limbSvg(leg.mid, leg.end, spec.colors.bottom));
     const f = world(add(leg.end, vec(leg.side * spec.footLen * 0.28, 1)));
+    if (rain !== undefined) {
+      // Gummistiefel: Schaft über das untere Drittel des Unterschenkels, vorn die Spitze
+      const top = world(add(leg.end, scale(sub(leg.mid, leg.end), 0.55)));
+      out.push(`<path d="${capsule(top, world(leg.end), spec.footLen * 0.42)}" fill="${fill(rain.tint)}" stroke-width="4"/>`);
+      out.push(`<ellipse cx="${fmt(f.x)}" cy="${fmt(f.y)}" rx="${fmt(spec.footLen * 0.6)}" ry="${fmt(spec.footLen * 0.36)}" fill="${fill(rain.tint)}" stroke-width="4"/>`);
+      continue;
+    }
     out.push(`<ellipse cx="${fmt(f.x)}" cy="${fmt(f.y)}" rx="${fmt(spec.footLen * 0.55)}" ry="${fmt(spec.footLen * 0.33)}" fill="${fill(spec.colors.shoes)}" stroke-width="4"/>`);
   }
   // Arme hinter dem Rumpf (der Rumpf überdeckt den Ansatz)
-  for (const arm of arms) out.push(limbSvg(arm.s, arm.mid, spec.colors.top), limbSvg(arm.mid, arm.end, spec.colors.top));
+  for (const arm of arms) out.push(limbSvg(arm.s, arm.mid, dressed.colors.top), limbSvg(arm.mid, arm.end, dressed.colors.top));
 
-  // Rumpf
-  const torsoD = torsoPaths(spec, upper, pelvis.y);
-  const torsoS = torsoPaths(spec, (p) => add(upper(p), vec(shadow, shadow)), pelvis.y);
-  out.push(shape(torsoD, torsoS, spec.colors.top));
-  if (spec.colors.accent && spec.torso !== 'bean') {
+  // Rumpf (mit Regenjacke: schlank, etwas länger, Reißverschluss als feine Linie)
+  const jacketDrop = rain === undefined ? 0 : 8;
+  const torsoD = torsoPaths(dressed, upper, pelvis.y, jacketDrop);
+  const torsoS = torsoPaths(dressed, (p) => add(upper(p), vec(shadow, shadow)), pelvis.y, jacketDrop);
+  out.push(shape(torsoD, torsoS, dressed.colors.top));
+  if (rain !== undefined) {
+    const a = upper(vec(0, pelvis.y - spec.torsoH + 4));
+    const b = upper(vec(0, pelvis.y + jacketDrop - 3));
+    out.push(`<path d="M${fmt(a.x)} ${fmt(a.y)}L${fmt(b.x)} ${fmt(b.y)}" fill="none" stroke="${rain.tint === 'petrol' ? '{{paper}}' : '{{ink}}'}" stroke-width="2.5"/>`);
+  }
+  if (spec.colors.accent && spec.torso !== 'bean' && rain === undefined) {
     const y = pelvis.y - spec.torsoH * 0.32;
     const a = upper(vec(-spec.torsoW * 0.36, y));
     const b = upper(vec(spec.torsoW * 0.36, y));
     out.push(`<path d="M${fmt(a.x)} ${fmt(a.y)}L${fmt(b.x)} ${fmt(b.y)}" fill="none" stroke="${spec.colors.top === 'petrol' ? '{{paper}}' : '{{ink}}'}" stroke-width="2.5"/>`);
   }
-  if (spec.scarf) {
+  if (dressed.scarf === true) {
     const n = neckBase;
     const q = (x: number, y: number): string => {
       const p = upper(vec(x, n.y + y));
@@ -316,6 +349,13 @@ export function buildHuman(spec: HumanSpec, pose: Pose, opts: RenderOptions): Re
   };
   const lw = opts.line ?? figureLine;
   const thick = (text: string): string => text.replaceAll('stroke-width="4"', `stroke-width="${lw}"`);
-  return { svg: thick(out.join('')), body: thick(out.slice(0, bodyEnd).join('')), hands: thick(out.slice(bodyEnd, handsEnd).join('')), head: thick(out.slice(handsEnd).join('')), anchors };
+  const handR = opts.mitts === true ? spec.handR * 2 : spec.handR;
+  const geometry: Geometry = {
+    head: { c: hw, r: spec.headR },
+    hands: [{ c: anchors.handL, r: handR }, { c: anchors.handR, r: handR }],
+    hood,
+    top: dressed.colors.top,
+  };
+  return { svg: thick(out.join('')), body: thick(out.slice(0, bodyEnd).join('')), hands: thick(out.slice(bodyEnd, handsEnd).join('')), head: thick(out.slice(handsEnd).join('')), anchors, geometry };
 }
 

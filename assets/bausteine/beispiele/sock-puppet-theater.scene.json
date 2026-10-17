@@ -3,7 +3,7 @@
   "layout": "hero",
   "items": [
     { "slot": "main", "block": "cardboard-box" },
-    { "slot": "left", "block": "child-reach", "tint": "rose" },
+    { "slot": "left", "figure": "jette", "pose": "curious" },
     { "slot": "right", "block": "sock", "tint": "petrol" }
   ]
 }

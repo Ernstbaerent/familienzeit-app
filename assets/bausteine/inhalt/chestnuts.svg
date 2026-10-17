@@ -1,0 +1,2 @@
+<circle cx="0" cy="-6.5" r="6.5" fill="{{brown}}" stroke-width="{{line}}"/>
+<ellipse cx="0" cy="-2.5" rx="3.5" ry="1.6" fill="{{paper}}" stroke="none"/>

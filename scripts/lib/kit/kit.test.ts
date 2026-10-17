@@ -10,7 +10,10 @@ import { checkBlock, checkCatalog, loadCatalog, loadExampleScenes, maxBlockBytes
 import { estimateBox, pathPoints } from './geometry';
 import { cornerZone, layouts } from './layouts';
 import { buildPreviewFiles } from './preview';
-import { checkScene, contextFromActivity, maxSceneBytes, placeItems, renderSceneSvg, renderSceneTemplate, type ActivityContext } from './scene';
+import { buildCoverage, coverageMarkdown, mentions, stem } from './coverage';
+import { holdPoseNames } from './figureItems';
+import { checkScene, contextFromActivity, hotDistance, maxSceneBytes, placeItems, renderSceneSvg, renderSceneTemplate, type ActivityContext } from './scene';
+import { containerSheets, poseSheets } from './sheets';
 import type { Block, Catalog, LoadedBlock, Scene } from './types';
 
 const root = join(__dirname, '../../..');
@@ -40,8 +43,10 @@ describe('Katalog (Stufe 1)', () => {
     expect(checkCatalog(catalog)).toEqual([]);
   });
 
-  it('hat die 30 Bausteine der Stufe 1, alle mit Vorschau', () => {
-    expect(catalog.size).toBe(30);
+  it('hat 44 Bausteine (Stufe 1 ohne Strichfiguren, dazu Schritt 3a), alle mit Vorschau', () => {
+    expect(catalog.size).toBe(44);
+    expect([...catalog.values()].filter((entry) => entry.kind === 'content')).toHaveLength(10);
+    for (const id of ['plate', 'ladle', 'jug', 'basket', 'bucket', 'knife', 'fork', 'child-scissors', 'cotton-swab', 'stick']) expect(catalog.has(id)).toBe(true);
     const previews = new Set(buildPreviewFiles(catalog, new Map()).map((file) => file.path));
     for (const id of catalog.keys()) expect(previews).toContain(`docs/bausteine/vorschau/${id}.svg`);
   });
@@ -57,11 +62,34 @@ describe('Katalog (Stufe 1)', () => {
     expect(files.sort()).toEqual([...catalog.values()].map((entry) => `${entry.group}/${entry.id}.svg`).sort());
   });
 
-  it('Figuren: Erwachsene sind deutlich größer als Kinder, Kinder größer als Kleinkinder, Kleidung nur Petrol oder Rosé', () => {
-    const height = (id: string) => catalog.get(id)?.box.h ?? 0;
-    expect(height('adult')).toBeGreaterThanOrEqual(height('child') * 1.4);
-    expect(height('child')).toBeGreaterThan(height('toddler-sit'));
-    for (const entry of catalog.values()) if (entry.kind === 'figure') expect((entry.tints ?? []).every((tint) => tint === 'petrol' || tint === 'rose')).toBe(true);
+  it('Strichfiguren gibt es nicht mehr: Figuren kommen aus der Besetzung (Rig)', () => {
+    expect(existsSync(join(root, 'assets/bausteine/figuren'))).toBe(false);
+    for (const example of scenes.values()) for (const item of example.items) expect(['adult', 'child', 'toddler-sit']).not.toContain(item.block);
+  });
+
+  it('Haltepunkte: Tablett und Backblech an beiden Rändern, Teller von unten, Löffel und Kelle am Griff mit Spitze, Kanne am Henkel, Schere an den Griffen', () => {
+    const grips = (id: string) => Object.keys(catalog.get(id)?.grips ?? {}).sort();
+    expect(grips('tray')).toEqual(['left', 'right']);
+    expect(grips('baking-tray')).toEqual(['left', 'right']);
+    expect(grips('plate')).toEqual(['under']);
+    expect(grips('wooden-spoon')).toEqual(['handle', 'tip']);
+    expect(grips('ladle')).toEqual(['handle', 'tip']);
+    expect(grips('jug')).toEqual(['handle', 'under']);
+    expect(grips('scissors')).toEqual(['handle', 'tip']);
+    expect(grips('child-scissors')).toEqual(['handle', 'tip']);
+  });
+
+  it('Behälter und Inhalte: zehn Inhalte, jeder passt in mindestens einen Behälter', () => {
+    const containers = [...catalog.values()].filter((entry) => entry.container !== undefined).map((entry) => entry.id).sort();
+    expect(containers).toEqual(['baking-tray', 'basket', 'bowl', 'bucket', 'plate', 'tray']);
+    const contents = [...catalog.values()].filter((entry) => entry.kind === 'content');
+    expect(contents.map((entry) => entry.id).sort()).toEqual(['baked-apples', 'bananas', 'chestnuts', 'cookies', 'dough', 'fruit', 'leaves', 'lemon-halves', 'oat-balls', 'water']);
+    for (const content of contents) {
+      expect((content.fits ?? []).length).toBeGreaterThan(0);
+      for (const id of content.fits ?? []) expect(containers).toContain(id);
+    }
+    expect(catalog.get('water')?.hazards).toContain('water');
+    expect(catalog.get('chestnuts')?.hazards).toContain('smallParts');
   });
 
   it('kein Baustein zeigt Feuer, Flamme oder Kerze', () => {
@@ -110,10 +138,15 @@ describe('Regeln für einen Baustein', () => {
     expect(checkBlock(block({ svg: tinted + inkDetail, tints: ['rose', 'honey'], defaultTint: 'rose' }))).toEqual([]);
   });
 
-  it('Kleidung nie in warmen Tönen', () => {
-    const svg = '<path d="M-8 0H8V-8H-8Z" fill="{{tint}}" stroke-width="{{line}}"/>';
-    const figure = block({ svg, kind: 'figure', person: 'adult', neutral: true, tints: ['honey'], defaultTint: 'honey' });
-    expect(checkBlock(figure).join('\n')).toMatch(/Kleidung ist nur Petrol oder Rosé/);
+  it('Haltepunkte liegen auf dem Baustein, eine Spitze nur mit Griff; Inhalte brauchen Behälter; Kinderhand nur bei scharfen Dingen mit Begriffen', () => {
+    expect(checkBlock(block({ svg: good, grips: { handle: [40, 0] } })).join('\n')).toMatch(/Haltepunkt „handle“ .* liegt außerhalb/);
+    expect(checkBlock(block({ svg: good, grips: { tip: [0, -4] } })).join('\n')).toMatch(/Spitze .* nur zusammen mit einem Griff/);
+    expect(checkBlock(block({ svg: good, kind: 'content' })).join('\n')).toMatch(/braucht `fits`/);
+    expect(checkBlock(block({ svg: good, kidSafe: true })).join('\n')).toMatch(/`kidSafe` gibt es nur bei scharfen Dingen/);
+    expect(checkBlock(block({ svg: good, kidSafe: true, hazards: ['sharp'] })).join('\n')).toMatch(/`kidSafe` braucht `kidTerms`/);
+    const fake: Catalog = new Map(catalog);
+    (fake as Map<string, LoadedBlock>).set('test', block({ svg: good, kind: 'content', fits: ['cup'] }));
+    expect(checkCatalog(fake).join('\n')).toMatch(/„cup“ in `fits` ist kein Behälter/);
   });
 
   it('Maße: zu kleine und zu große Fläche werden gemeldet, mit dem gezeichneten Maß', () => {
@@ -163,7 +196,7 @@ describe('Layouts', () => {
 
   it('nur diese Größen kommen vor (die sichtbare Linienstärke bleibt bei jeder gleich)', () => {
     const sizes = new Set(Object.values(layouts).flatMap((layout) => Object.values(layout.slots).flatMap((slot) => slot.sizes)));
-    expect([...sizes].sort()).toEqual([0.6, 1, 1.5]);
+    expect([...sizes].sort()).toEqual([0.6, 1, 1.5, 2]);
   });
 });
 
@@ -179,7 +212,9 @@ describe('Szene prüfen (ohne Aktivität)', () => {
     expect(checkScene(scene('hero', [{ slot: 'nirgends', block: 'bowl' }]), catalog).join('\n')).toMatch(/Platz „nirgends“ gibt es im Layout/);
     expect(checkScene(scene('hero', [{ slot: 'main', block: 'gibt-es-nicht' }]), catalog).join('\n')).toMatch(/Baustein „gibt-es-nicht“ gibt es nicht/);
     expect(checkScene(scene('hero', [{ slot: 'main', block: 'bowl' }, { slot: 'main', block: 'cup' }]), catalog).join('\n')).toMatch(/doppelt besetzt/);
-    expect(checkScene(scene('outdoor', [{ slot: 'front', block: 'adult' }]), catalog).join('\n')).toMatch(/passt nicht auf den Platz/);
+    expect(checkScene(scene('outdoor', [{ slot: 'front', figure: 'arne' }]), catalog).join('\n')).toMatch(/Eine Figur passt nicht auf den Platz/);
+    expect(checkScene(scene('outdoor', [{ slot: 'front', block: 'cookies' }]), catalog).join('\n')).toMatch(/ist ein Inhalt/);
+    expect(checkScene(scene('outdoor', [{ slot: 's1', figure: 'gibt-es-nicht' }]), catalog).join('\n')).toMatch(/Figur „gibt-es-nicht“ gibt es nicht/);
     expect(checkScene(scene('hero', [{ slot: 'main', block: 'bowl', size: 2 }]), catalog).join('\n')).toMatch(/Größe 2 ist auf dem Platz/);
     expect(checkScene(scene('hero', [{ slot: 'main', block: 'bowl', tint: 'brown' }]), catalog).join('\n')).toMatch(/gibt es nicht in „brown“/);
     expect(checkScene(scene('hero', []), catalog)).toContain('Keine Bausteine.');
@@ -201,9 +236,9 @@ describe('Szene prüfen (ohne Aktivität)', () => {
   });
 
   it('Bausteine auf der rechten Hälfte schauen zur Mitte, links nicht', () => {
-    const placed = placeItems(scene('pair', [{ slot: 'left', block: 'child' }, { slot: 'right', block: 'child' }]), catalog);
+    const placed = placeItems(scene('pair', [{ slot: 'left', figure: 'jette' }, { slot: 'right', block: 'cup' }]), catalog);
     expect(placed?.map((entry) => entry.flip)).toEqual([false, true]);
-    const own = placeItems(scene('pair', [{ slot: 'right', block: 'child', flip: false }]), catalog);
+    const own = placeItems(scene('pair', [{ slot: 'right', block: 'cup', flip: false }]), catalog);
     expect(own?.[0].flip).toBe(false);
   });
 
@@ -213,8 +248,10 @@ describe('Szene prüfen (ohne Aktivität)', () => {
   });
 
   it('Ecken der Pille: Hohe Bausteine in den oberen Ecken werden gemeldet', () => {
-    // Ein Erwachsener (118 hoch, Kopf bei 58) ist im Rahmen, ein Baum in der Mitte (147 hoch, Krone bei 29) reicht in die Ecken
-    expect(checkScene(scene('table', [{ slot: 'table', block: 'table' }, { slot: 'left', block: 'adult' }]), catalog)).toEqual([]);
+    // Erwachsene der Besetzung (120 und 123 hoch) reichen links und rechts in die Ecken, in der Mitte nicht; ein Baum (147 hoch) reicht hinein
+    expect(checkScene(scene('table', [{ slot: 'table', block: 'table' }, { slot: 'left', figure: 'arne' }]), catalog).join('\n')).toMatch(/oberen Ecke.*Erwachsene passen nur in die Mitte/);
+    expect(checkScene(scene('table', [{ slot: 'table', block: 'table' }, { slot: 'back', figure: 'arne' }]), catalog)).toEqual([]);
+    expect(checkScene(scene('pair', [{ slot: 'left', figure: 'jette' }, { slot: 'middle', figure: 'ilka' }]), catalog)).toEqual([]);
     expect(checkScene(scene('hero', [{ slot: 'main', block: 'tree', size: 1.5 }]), catalog).join('\n')).toMatch(/oberen Ecke/);
     expect(cornerZone.h).toBeLessThan(60);
   });
@@ -234,7 +271,7 @@ describe('Szene prüfen (ohne Aktivität)', () => {
 
 // Eine Aktivität in der Form des Abgleichs, nur mit den Feldern, die die Regeln lesen.
 function ctx(overrides: { materials?: string[]; ageMin?: number; ageMax?: number; text?: string; safety?: string } = {}): ActivityContext {
-  const text = overrides.text ?? 'Schere Becher Brille Kissen Schüssel Pfütze Backblech Ofenhandschuh';
+  const text = overrides.text ?? 'Schere Messer Becher Brille Kissen Schüssel Teller Pfütze Backblech Ofen Tablett Bratapfel Wasser Kastanie Wattestäbchen Papier Regenjacke';
   const safety = overrides.safety ?? 'nur mit Erwachsenen';
   return {
     materials: overrides.materials ?? [],
@@ -245,34 +282,84 @@ function ctx(overrides: { materials?: string[]; ageMin?: number; ageMax?: number
   };
 }
 
-describe('Sicherheit und Textabgleich', () => {
-  const cut = (items: Scene['items']) => scene('outdoor', items);
+const pair = (items: Scene['items']): Scene => ({ layout: 'pair', items });
 
-  it('Schere: nur bei einem Erwachsenen, eindeutig', () => {
-    expect(checkScene(cut([{ slot: 's1', block: 'adult-reach' }, { slot: 's2', block: 'scissors' }, { slot: 's3', block: 'child' }]), catalog, ctx())).toEqual([]);
-    const noPerson = checkScene(scene('hero', [{ slot: 'main', block: 'scissors' }]), catalog, ctx()).join('\n');
-    expect(noPerson).toMatch(/nicht eindeutig bei einem Erwachsenen/);
-    // Gleichstand zählt nicht (Schere genau in der Mitte zwischen Erwachsenem und Kind)
-    const tie = checkScene(scene('pair', [{ slot: 'left', block: 'child' }, { slot: 'middle', block: 'scissors' }, { slot: 'right', block: 'adult' }]), catalog, ctx()).join('\n');
-    expect(tie).toMatch(/nicht eindeutig bei einem Erwachsenen/);
-    // das Kind ist näher als der Erwachsene
-    const nearChild = checkScene(cut([{ slot: 's1', block: 'child' }, { slot: 's2', block: 'scissors' }, { slot: 's3', block: 'adult' }]), catalog, ctx()).join('\n');
-    expect(nearChild).toMatch(/nicht eindeutig bei einem Erwachsenen/);
+describe('Sicherheit: Scharfes nur in der Hand eines Erwachsenen', () => {
+  const knife = (figure: string, slot = 'middle') => ({ slot, figure, pose: 'cut-supervised', holds: { right: { block: 'knife', size: 0.75 } } });
+
+  it('Arne schneidet, Jette schaut zu: in Ordnung', () => {
+    expect(checkScene(pair([knife('arne'), { slot: 'left', figure: 'jette', pose: 'curious' }]), catalog, ctx())).toEqual([]);
   });
 
-  it('Schere und ein Kleinkind im selben Bild: nie', () => {
-    const problems = checkScene(cut([{ slot: 's1', block: 'adult' }, { slot: 's2', block: 'scissors' }, { slot: 's3', block: 'toddler-sit' }]), catalog, ctx({ ageMin: 1 })).join('\n');
-    expect(problems).toMatch(/und ein Kleinkind im selben Bild/);
+  it('ein Messer, das frei liegt, ist ein Fehler (auch ohne Figur)', () => {
+    expect(checkScene(scene('hero', [{ slot: 'main', block: 'knife' }]), catalog, ctx()).join('\n')).toMatch(/liegt frei im Bild: Scharfes nur in der Hand eines Erwachsenen/);
+    expect(checkScene(scene('hero', [{ slot: 'main', block: 'scissors' }]), catalog, ctx()).join('\n')).toMatch(/liegt frei im Bild/);
   });
 
-  it('Hitze (Backblech): Erwachsener nah, Ofenhandschuh im Bild', () => {
-    const base = [{ slot: 'table', block: 'table' }, { slot: 'on1', block: 'baking-tray', size: 0.6 }];
-    const withAdult = [...base, { slot: 'left', block: 'adult' }];
-    expect(checkScene(scene('table', withAdult), catalog, ctx()).join('\n')).toMatch(/ohne Ofenhandschuh/);
-    expect(checkScene(scene('table', [...withAdult, { slot: 'on3', block: 'oven-mitt' }]), catalog, ctx())).toEqual([]);
-    expect(checkScene(scene('table', [...base, { slot: 'on3', block: 'oven-mitt' }]), catalog, ctx()).join('\n')).toMatch(/nicht eindeutig bei einem Erwachsenen/);
+  it('ein Kind mit Messer oder spitzer Schere: Fehler', () => {
+    expect(checkScene(pair([knife('jette', 'left'), { slot: 'middle', figure: 'arne' }]), catalog, ctx()).join('\n')).toMatch(/„knife“ \(scharf\) hält das Kind „jette“: Scharfes nur in der Hand eines Erwachsenen/);
+    const pointed = { slot: 'left', figure: 'mats', pose: 'cut-supervised', holds: { right: { block: 'scissors', size: 0.6 } } };
+    expect(checkScene(pair([pointed, { slot: 'middle', figure: 'arne' }]), catalog, ctx({ ageMin: 8, ageMax: 12 })).join('\n')).toMatch(/„scissors“ \(scharf\) hält das ältere Kind „mats“/);
   });
 
+  it('Scharfes und ein Kleinkind im selben Bild: nie', () => {
+    expect(checkScene(pair([knife('arne'), { slot: 'left', figure: 'nolli' }]), catalog, ctx({ ageMin: 2 })).join('\n')).toMatch(/\(scharf\) und ein Kleinkind im selben Bild/);
+  });
+
+  describe('Kinderschere: nur wenn die Checkliste es für das Alter erlaubt und der Text sie nennt', () => {
+    const kid = { slot: 'left', figure: 'jette', pose: 'cut-supervised', holds: { right: { block: 'child-scissors', size: 0.6 } } };
+    const adult = { slot: 'middle', figure: 'ilka' };
+    const allowed = ctx({ ageMin: 4, text: 'Schneidet mit der Kinderschere.', materials: ['scissors'] });
+
+    it('alles erfüllt (ab 3, Text nennt die Kinderschere, Erwachsener im Bild): in Ordnung', () => {
+      expect(checkScene(pair([kid, adult]), catalog, allowed)).toEqual([]);
+      expect(checkScene(pair([kid, adult]), catalog, { ...allowed, text: { de: '', en: 'cut with child scissors' } })).toEqual([]);
+    });
+
+    it('der Text sagt nur „Schere“: Fehler (wo die Checkliste schweigt, gilt nur Erwachsene)', () => {
+      expect(checkScene(pair([kid, adult]), catalog, { ...allowed, text: { de: 'schneidet mit der schere.', en: '' } }).join('\n')).toMatch(/aber der Text nennt sie nicht/);
+    });
+
+    it('unter 3 Jahren oder ohne Erwachsenen im Bild: Fehler', () => {
+      const young = { ...allowed, ageMin: 2 };
+      expect(checkScene(pair([kid, adult]), catalog, young).join('\n')).toMatch(/beginnt unter 3 Jahren \(Checkliste, Punkt 5\)/);
+      expect(checkScene(pair([kid]), catalog, allowed).join('\n')).toMatch(/ohne Erwachsenen im Bild \(Checkliste, Punkt 2/);
+    });
+  });
+});
+
+describe('Sicherheit: Heißes nur mit Ofenhandschuhen an der Hand eines Erwachsenen', () => {
+  const tray = (figure: string, mitts: boolean, extra: object = {}) => ({ slot: 'middle', figure, pose: 'carry-tray', mitts, holds: { both: { block: 'tray', content: 'baked-apples', hot: true, ...extra } } });
+
+  it('Arne mit Ofenhandschuhen und heißen Bratäpfeln, Jette mit Abstand: in Ordnung', () => {
+    expect(checkScene(pair([tray('arne', true), { slot: 'left', figure: 'jette', pose: 'hold-plate', holds: { right: { block: 'plate', content: 'baked-apples', size: 0.75 } } }]), catalog, ctx())).toEqual([]);
+  });
+
+  it('ohne Ofenhandschuhe, in Kinderhand oder frei auf dem Tisch: Fehler', () => {
+    expect(checkScene(pair([tray('arne', false)]), catalog, ctx()).join('\n')).toMatch(/\(heiß\) ohne Ofenhandschuhe an den Händen/);
+    expect(checkScene(pair([{ ...tray('mats', true), slot: 'left', holds: { both: { block: 'tray', content: 'baked-apples', hot: true, size: 0.75 } } }]), catalog, ctx({ ageMin: 8, ageMax: 12 })).join('\n')).toMatch(/\(heiß\) ist nicht in der Hand eines Erwachsenen/);
+    const onTable = scene('table', [{ slot: 'table', block: 'table' }, { slot: 'on1', block: 'baking-tray', size: 0.6 }, { slot: 'back', figure: 'arne', mitts: true }]);
+    expect(checkScene(onTable, catalog, ctx()).join('\n')).toMatch(/„baking-tray“ \(heiß\) ist nicht in der Hand eines Erwachsenen/);
+  });
+
+  it('ein Kind zu nah am heißen Tablett, ein Kleinkind im Bild: Fehler', () => {
+    const near: Scene = { layout: 'outdoor', items: [{ ...tray('arne', true), slot: 'mid' }, { slot: 's2', figure: 'jette' }] };
+    expect(checkScene(near, catalog, ctx()).join('\n')).toMatch(new RegExp(`„jette“ steht zu nah an „tray“ \\(heiß\\): mindestens ${hotDistance} Einheiten`));
+    expect(checkScene(pair([tray('arne', true), { slot: 'left', figure: 'nolli' }]), catalog, ctx({ ageMin: 2 })).join('\n')).toMatch(/\(heiß\) und ein Kleinkind im selben Bild/);
+  });
+
+  it('heiß heißt: Dampf im Bild', () => {
+    const hot = renderSceneSvg(pair([tray('arne', true)]), catalog);
+    const cold = renderSceneSvg(pair([{ ...tray('arne', true), holds: { both: { block: 'tray', content: 'baked-apples' } } }]), catalog);
+    expect(hot.length).toBeGreaterThan(cold.length);
+  });
+
+  it('Ofenhandschuhe zeigen nur, was der Text sagt (Ofen, Backofen, Ofenhandschuh)', () => {
+    expect(checkScene(pair([tray('arne', true)]), catalog, ctx({ text: 'Tablett Bratapfel' })).join('\n')).toMatch(/„oven-mitt“ ist im Text der Aktivität nicht gedeckt/);
+  });
+});
+
+describe('Sicherheit: weitere Regeln', () => {
   it('Schutzbrille nur, wenn der Sicherheitshinweis sie nennt', () => {
     const goggles = scene('hero', [{ slot: 'main', block: 'goggles' }]);
     expect(checkScene(goggles, catalog, ctx({ safety: 'Nichts ins Gesicht spritzen.' })).join('\n')).toMatch(/Schutzbrille im Bild, aber der Sicherheitshinweis nennt sie nicht/);
@@ -280,35 +367,164 @@ describe('Sicherheit und Textabgleich', () => {
     expect(checkScene(goggles, catalog, { ...ctx(), safety: { en: 'Wear safety goggles.' } })).toEqual([]);
   });
 
-  it('Wasser (Pfütze) unter 6 Jahren nur mit Erwachsenem im Bild', () => {
+  it('Wasser (Pfütze, Wasser in der Schüssel) unter 6 Jahren nur mit Erwachsenem im Bild', () => {
     const puddle = (items: Scene['items']) => scene('outdoor', items);
-    expect(checkScene(puddle([{ slot: 's3', block: 'puddle' }, { slot: 's2', block: 'child' }]), catalog, ctx({ ageMin: 3 })).join('\n')).toMatch(/Wasser\) ohne Erwachsenen/);
-    expect(checkScene(puddle([{ slot: 's3', block: 'puddle' }, { slot: 's2', block: 'child' }, { slot: 's1', block: 'adult' }]), catalog, ctx({ ageMin: 3 }))).toEqual([]);
-    expect(checkScene(puddle([{ slot: 's3', block: 'puddle' }, { slot: 's2', block: 'child' }]), catalog, ctx({ ageMin: 6 }))).toEqual([]);
+    expect(checkScene(puddle([{ slot: 's3', block: 'puddle' }, { slot: 's1', figure: 'jette' }]), catalog, ctx({ ageMin: 3 })).join('\n')).toMatch(/Wasser\) ohne Erwachsenen/);
+    expect(checkScene(puddle([{ slot: 's4', block: 'puddle' }, { slot: 's1', figure: 'jette' }, { slot: 'mid', figure: 'ilka' }]), catalog, ctx({ ageMin: 3 }))).toEqual([]);
+    expect(checkScene(scene('hero', [{ slot: 'main', block: 'bowl', content: 'water' }]), catalog, ctx({ ageMin: 3 })).join('\n')).toMatch(/„water“ \(Wasser\) ohne Erwachsenen/);
   });
 
-  it('Kleinteile nur ab 3 Jahren (mit einem Baustein, der Kleinteile hat)', () => {
-    const small: Catalog = new Map(catalog);
-    (small as Map<string, LoadedBlock>).set('cup', { ...(catalog.get('cup') as LoadedBlock), hazards: ['smallParts'] });
-    expect(checkScene(scene('hero', [{ slot: 'main', block: 'cup' }]), small, ctx({ ageMin: 2 })).join('\n')).toMatch(/Kleinteile\) bei Kindern unter 3 Jahren/);
-    expect(checkScene(scene('hero', [{ slot: 'main', block: 'cup' }]), small, ctx({ ageMin: 3 }))).toEqual([]);
+  it('Kleinteile (Kastanien) nur ab 3 Jahren', () => {
+    const basket = scene('hero', [{ slot: 'main', block: 'basket', content: 'chestnuts' }]);
+    expect(checkScene(basket, catalog, ctx({ ageMin: 2, materials: ['basket'] })).join('\n')).toMatch(/„chestnuts“ \(Kleinteile\) bei Kindern unter 3 Jahren/);
+    expect(checkScene(basket, catalog, ctx({ ageMin: 3, materials: ['basket'] }))).toEqual([]);
   });
 
-  it('Figuren passen zum Alter: Kleinkind nur bis 2, Kind erst ab 3', () => {
-    expect(checkScene(scene('hero', [{ slot: 'main', block: 'toddler-sit', size: 1 }]), catalog, ctx({ ageMin: 4 })).join('\n')).toMatch(/Kleinkind im Bild, aber die Aktivität beginnt erst ab 3/);
-    expect(checkScene(scene('hero', [{ slot: 'main', block: 'child', size: 1 }]), catalog, ctx({ ageMin: 0, ageMax: 2 })).join('\n')).toMatch(/Kind im Bild, aber die Aktivität ist nur für Kinder unter 3/);
+  it('Figuren passen zum Alter (FIGUREN.md): Nolli 0 bis 4 und nur bis Beginn 2 Jahre, Jette 3 bis 9, Mats 8 bis 16', () => {
+    expect(checkScene(pair([{ slot: 'left', figure: 'nolli' }]), catalog, ctx({ ageMin: 3, ageMax: 6 })).join('\n')).toMatch(/Kleinkind im Bild, aber die Aktivität beginnt erst ab 3/);
+    expect(checkScene(pair([{ slot: 'left', figure: 'jette' }]), catalog, ctx({ ageMin: 10, ageMax: 14 })).join('\n')).toMatch(/„jette“ passt nicht zur Altersspanne/);
+    expect(checkScene(pair([{ slot: 'left', figure: 'mats' }]), catalog, ctx({ ageMin: 3, ageMax: 6 })).join('\n')).toMatch(/„mats“ passt nicht zur Altersspanne/);
+    expect(checkScene(pair([{ slot: 'middle', figure: 'arne' }]), catalog, ctx({ ageMin: 0, ageMax: 2 }))).toEqual([]);
   });
 
-  it('„Ein Bild zeigt nichts, was der Text nicht sagt“: ein Gegenstand ohne Deckung wird gemeldet', () => {
+  it('„Ein Bild zeigt nichts, was der Text nicht sagt“: Gegenstände, Inhalte und Regen-Kleidung brauchen Deckung', () => {
     const bowl = scene('hero', [{ slot: 'main', block: 'bowl' }]);
     expect(checkScene(bowl, catalog, ctx({ text: 'Malt ein Bild.' })).join('\n')).toMatch(/„bowl“ ist im Text der Aktivität nicht gedeckt/);
     expect(checkScene(bowl, catalog, ctx({ text: 'Rührt in der Schüssel.' }))).toEqual([]); // Begriff
     expect(checkScene(bowl, catalog, ctx({ text: 'Malt ein Bild.', materials: ['bowl'] }))).toEqual([]); // Material
     expect(checkScene(bowl, catalog, { ...ctx({ text: '' }), text: { de: '', en: 'stir the bowl' } })).toEqual([]); // englischer Begriff
+    expect(checkScene(scene('hero', [{ slot: 'main', block: 'bowl', content: 'dough' }]), catalog, ctx({ text: 'Rührt in der Schüssel.' })).join('\n')).toMatch(/„dough“ ist im Text/);
+    const rain = pair([{ slot: 'left', figure: 'jette', outfit: { kind: 'rain', tint: 'rose' } }]);
+    expect(checkScene(rain, catalog, ctx({ text: 'Geht raus.' })).join('\n')).toMatch(/Regen-Kleidung .* nicht gedeckt/);
+    expect(checkScene(rain, catalog, ctx({ text: 'Geht raus.', materials: ['rainBoots'] }))).toEqual([]);
   });
 
   it('Figuren, Tisch und Standlinie brauchen keine Deckung', () => {
-    expect(checkScene(scene('table', [{ slot: 'table', block: 'table' }, { slot: 'left', block: 'adult' }]), catalog, ctx({ text: 'Nichts.' }))).toEqual([]);
+    expect(checkScene(scene('table', [{ slot: 'table', block: 'table' }, { slot: 'back', figure: 'arne' }]), catalog, ctx({ text: 'Nichts.' }))).toEqual([]);
+  });
+});
+
+describe('Posen mit Gegenstand (Haltepunkte)', () => {
+  it('jede benannte Pose hat ein Übersichtsbild, und alle bestehen die Prüfung', () => {
+    const shown = new Set(poseSheets.map((sheet) => sheet.pose));
+    for (const name of holdPoseNames) expect(shown.has(name)).toBe(true);
+    for (const sheet of poseSheets) expect([sheet.name, ...checkScene(sheet.scene, catalog)]).toEqual([sheet.name]);
+  });
+
+  it('die Hände sitzen an den Haltepunkten: Tablett an beiden Rändern, Teller von unten, Kanne am Henkel', () => {
+    const near = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y) < 1.5;
+    const placed = placeItems(pair([{ slot: 'middle', figure: 'arne', pose: 'carry-tray', mitts: true, holds: { both: { block: 'tray' } } }]), catalog);
+    const figure = placed?.[0].figure;
+    expect(figure?.problems).toEqual([]);
+    // Das Tablett ist 76 breit: Die Hände liegen 36 links und rechts der Mitte, auf gleicher Höhe
+    const [left, right] = figure?.hands ?? [];
+    expect(Math.abs(right.c.x - left.c.x - 72)).toBeLessThan(1);
+    expect(Math.abs(right.c.y - left.c.y)).toBeLessThan(1);
+    const jug = placeItems(pair([{ slot: 'middle', figure: 'arne', pose: 'pour', holds: { right: { block: 'jug', size: 0.75 } } }]), catalog)?.[0].figure;
+    expect(jug?.problems).toEqual([]);
+    expect(near(jug?.hands[1].c ?? { x: 0, y: 0 }, jug?.hands[1].c ?? { x: 1, y: 1 })).toBe(true);
+  });
+
+  it('erreicht eine Hand ihren Haltepunkt nicht, meldet der Prüfer das (mit dem Hinweis auf eine kleinere Größe)', () => {
+    expect(checkScene(pair([{ slot: 'left', figure: 'nolli', pose: 'carry-tray', holds: { both: { block: 'tray' } } }]), catalog).join('\n')).toMatch(/Nolli erreicht .* Haltepunkt nicht .*0\.75/);
+  });
+
+  it('falsche Pose, falscher Gegenstand oder fehlender Haltepunkt: verständliche Meldung', () => {
+    expect(checkScene(pair([{ slot: 'left', figure: 'jette', pose: 'fliegt' }]), catalog).join('\n')).toMatch(/Pose „fliegt“ gibt es nicht/);
+    expect(checkScene(pair([{ slot: 'left', figure: 'jette', pose: 'stand', holds: { right: { block: 'plate' } } }]), catalog).join('\n')).toMatch(/Die Pose „stand“ hält nichts/);
+    expect(checkScene(pair([{ slot: 'middle', figure: 'arne', pose: 'carry-tray', holds: { both: { block: 'plate' } } }]), catalog).join('\n')).toMatch(/keinen Haltepunkt „left“, „right“/);
+    expect(checkScene(pair([{ slot: 'left', figure: 'jette', pose: 'write', holds: { right: { block: 'cotton-swab' } } }]), catalog).join('\n')).toMatch(/„write“ braucht einen Tisch/);
+    expect(checkScene(pair([{ slot: 'middle', figure: 'arne', pose: 'hold-plate', holds: { right: { block: 'plate', content: 'water' } } }]), catalog).join('\n')).toMatch(/„water“ passt nicht in „plate“/);
+    expect(checkScene(pair([{ slot: 'middle', figure: 'arne', size: 0.6 }]), catalog).join('\n')).toMatch(/Figuren haben immer Größe 1/);
+  });
+});
+
+describe('Behälter mit Inhalt', () => {
+  it('jeder Behälter mit allen Inhalten, die in ihn passen, besteht die Prüfung', () => {
+    const sheets = containerSheets(catalog);
+    for (const sheet of sheets) expect([sheet.name, ...checkScene(sheet.scene, catalog)]).toEqual([sheet.name]);
+    const shown = new Set(sheets.flatMap((sheet) => sheet.scene.items.map((item) => `${item.block}/${item.content}`)));
+    for (const content of [...catalog.values()].filter((entry) => entry.kind === 'content')) {
+      for (const container of content.fits ?? []) expect(shown.has(`${container}/${content.id}`)).toBe(true);
+    }
+  });
+
+  it('ein Inhalt in einem Behälter, in den er nicht passt, oder in einem Gegenstand ohne Öffnung: Fehler', () => {
+    expect(checkScene(scene('hero', [{ slot: 'main', block: 'tray', content: 'water' }]), catalog).join('\n')).toMatch(/„water“ passt nicht in „tray“/);
+    expect(checkScene(scene('hero', [{ slot: 'main', block: 'cup', content: 'cookies' }]), catalog).join('\n')).toMatch(/„cup“ ist kein Behälter/);
+  });
+});
+
+describe('Layout „hands“ (Nahaufnahme)', () => {
+  const hands = (figure: string, extra: object = {}): Scene => ({
+    layout: 'hands',
+    items: [{ slot: 'object', block: 'plate', content: 'lemon-halves', size: 2, hands: { figure, pose: 'cut', tool: { block: 'knife', size: 0.75 }, ...extra } }],
+  });
+
+  it('die drei Beispiele bestehen; Hände gibt es nur in diesem Layout, und das Layout braucht Hände', () => {
+    for (const name of ['hands-stir', 'hands-cut', 'hands-write']) expect(checkScene(scenes.get(name) as Scene, catalog)).toEqual([]);
+    expect(checkScene(scene('hero', [{ slot: 'main', block: 'bowl', hands: { figure: 'jette', pose: 'hold' } }]), catalog).join('\n')).toMatch(/nur im Layout „hands“/);
+    expect(checkScene(scene('hands', [{ slot: 'object', block: 'bowl' }]), catalog).join('\n')).toMatch(/braucht Hände/);
+  });
+
+  it('Messer in Nahaufnahme: Erwachsenenhände in Ordnung, Kinderhände ein Fehler', () => {
+    const lemon = ctx({ ageMin: 6, ageMax: 12, materials: ['lemon', 'knife', 'plate'] });
+    expect(checkScene(hands('arne'), catalog, lemon)).toEqual([]);
+    expect(checkScene(hands('jette'), catalog, lemon).join('\n')).toMatch(/„knife“ \(scharf\) hält das Kind „jette“/);
+  });
+
+  it('Jettes Hände mit Petrol-Ärmel: Fehler (Platz 7 trägt auf Petrol nicht); Rosé geht', () => {
+    const stir = (sleeve: 'petrol' | 'rose'): Scene => ({ layout: 'hands', items: [{ slot: 'object', block: 'bowl', tint: 'honey', content: 'dough', size: 1.5, hands: { figure: 'jette', pose: 'stir', sleeve, tool: { block: 'fork' } } }] });
+    const activity = ctx({ ageMin: 4, text: 'Teig in der Schüssel mit der Gabel.' });
+    expect(checkScene(stir('petrol'), catalog, activity).join('\n')).toMatch(/trägt auf Petrol nicht, aber .*Ärmel/);
+    expect(checkScene(stir('rose'), catalog, activity)).toEqual([]);
+  });
+});
+
+describe('Dateigröße', () => {
+  it('über 14 KB meldet der Prüfer, statt etwas wegzulassen', () => {
+    const big: Catalog = new Map(catalog);
+    const heavy = (catalog.get('cup') as LoadedBlock).svg.repeat(20);
+    (big as Map<string, LoadedBlock>).set('cup', { ...(catalog.get('cup') as LoadedBlock), svg: heavy });
+    const many = scene('outdoor', ['s1', 's2', 's3', 's4'].map((slot) => ({ slot, block: 'cup', size: 0.6 })));
+    expect(checkScene(many, big).join('\n')).toMatch(/Das Bild hat \d+\.\d KB, erlaubt sind höchstens 14 KB/);
+  });
+
+  it('alle Beispiel- und Übersichtsbilder bleiben unter 14 KB', () => {
+    for (const example of [...scenes.values(), ...poseSheets.map((sheet) => sheet.scene), ...containerSheets(catalog).map((sheet) => sheet.scene)]) {
+      expect(Buffer.byteLength(renderSceneSvg(example, catalog))).toBeLessThan(maxSceneBytes);
+    }
+  });
+});
+
+describe('Abdeckung (kit:coverage)', () => {
+  const labels = { bowl: { de: 'Schüssel', en: 'Bowl' }, pencils: { de: 'Stifte', en: 'Pencils' }, pot: { de: 'Topf', en: 'Pot' } };
+  const activity = (id: string, materials: string[], text: string) => ({ id, materials, translations: { de: { title: id, summary: text, steps: [] }, en: { title: id, summary: '', steps: [] } } });
+
+  it('zählt Material und Nennung im Text, ordnet Bausteine über ihr Material zu', () => {
+    const coverage = buildCoverage([activity('a', ['bowl'], ''), activity('b', [], 'Nehmt eure Filzstifte.'), activity('c', [], 'Ein Spot.')], catalog, labels);
+    const row = (key: string) => coverage.materials.find((entry) => entry.key === key);
+    expect(row('bowl')).toMatchObject({ inMaterials: 1, inTextOnly: 0, blocks: ['bowl'] });
+    expect(row('pencils')).toMatchObject({ inMaterials: 0, inTextOnly: 1, blocks: [] });
+    expect(row('pot')).toBeUndefined(); // „pot“ steckt nicht am Wortanfang von „Spot“
+    expect(coverage.activities.find((entry) => entry.id === 'a')).toMatchObject({ objects: 1, withBlock: 1 });
+    expect(coverageMarkdown(coverage, catalog.size, 0)).toMatch(/Stifte \(`pencils`, 1\)/);
+  });
+
+  it('Wortstamm und Suche im Text', () => {
+    expect(stem('Kastanien')).toBe('kastanie');
+    expect(stem('Stifte')).toBe('stift');
+    expect(mentions('nehmt filzstifte', 'stift', 'de')).toBe(true);
+    expect(mentions('a spot', 'pot', 'en')).toBe(false);
+    expect(mentions('the pot', 'pot', 'en')).toBe(true);
+  });
+
+  it('docs/bausteine/ABDECKUNG.md passt zu Daten und Katalog (npm run kit:coverage)', () => {
+    const de = JSON.parse(readFileSync(join(root, 'src/locales/de.json'), 'utf8')) as { materials: Record<string, string> };
+    const en = JSON.parse(readFileSync(join(root, 'src/locales/en.json'), 'utf8')) as { materials: Record<string, string> };
+    const all = Object.fromEntries(Object.keys(de.materials).map((key) => [key, { de: de.materials[key], en: en.materials[key] ?? key }]));
+    const markdown = coverageMarkdown(buildCoverage(loadActivityData().activities, catalog, all), catalog.size, 0);
+    expect(readFileSync(join(root, 'docs/bausteine/ABDECKUNG.md'), 'utf8') === markdown ? '' : 'veraltet: ABDECKUNG.md').toBe('');
   });
 });
 
@@ -319,7 +535,7 @@ describe('Zeichnen', () => {
 
   it.each([...scenes.entries()])('Beispielszene %s: mit Platzhaltern, ohne Reste und ohne verbotenen Code', (_name, example) => {
     const template = renderSceneTemplate(example, catalog);
-    expect(template.match(/\{\{([a-z]+)\}\}/g)?.every((token) => ['{{ground}}', '{{paper}}', '{{ink}}', '{{rose}}', '{{petrol}}', '{{honey}}', '{{brown}}'].includes(token))).toBe(true);
+    expect(template.match(/\{\{([a-z0-9]+)\}\}/g)?.every((token) => /^\{\{(ground|paper|ink|rose|petrol|honey|brown|skin[1-8])\}\}$/.test(token))).toBe(true);
     const svg = renderSceneSvg(example, catalog);
     expect(svg).not.toMatch(/\{\{|\}\}/);
     expect(svg).not.toMatch(forbidden);
@@ -328,14 +544,22 @@ describe('Zeichnen', () => {
     for (const color of svg.match(/#[0-9A-Fa-f]{6}\b/g) ?? []) expect(palette).toContain(color.toUpperCase());
   });
 
-  it('Linienstärken: sichtbar immer 4 oder 2,5, auch bei verkleinerten und vergrößerten Bausteinen', () => {
-    for (const example of scenes.values()) {
+  it('Linienstärken: Gegenstände sichtbar immer 4 oder 2,5 (auch verkleinert und gedreht), Figuren und Hände 5 oder 2,5', () => {
+    const all = [...scenes.values(), ...poseSheets.map((sheet) => sheet.scene), ...containerSheets(catalog).map((sheet) => sheet.scene)];
+    for (const example of all) {
       const svg = renderSceneSvg(example, catalog);
-      for (const group of svg.split('<g ').slice(1)) {
-        const scale = Math.abs(Number(/scale\((-?[\d.]+) /.exec(group)?.[1] ?? 1));
-        for (const match of group.matchAll(/stroke-width="([\d.]+)"/g)) {
-          const visible = Number(match[1]) * scale;
-          expect([4, 2.5].some((width) => Math.abs(visible - width) < 0.05)).toBe(true);
+      // Gruppen ineinander: die sichtbare Stärke ist die eingetragene mal alle Vergrößerungen der umgebenden Gruppen
+      const stack: { scale: number; figure: boolean }[] = [{ scale: 1, figure: false }];
+      for (const token of svg.matchAll(/<g\b([^>]*)>|<\/g>|stroke-width="([\d.]+)"/g)) {
+        if (token[0] === '</g>') stack.pop();
+        else if (token[1] !== undefined) {
+          const outer = stack[stack.length - 1];
+          const own = Math.abs(Number(/scale\((-?[\d.]+)/.exec(token[1])?.[1] ?? 1));
+          stack.push({ scale: outer.scale * own, figure: !token[1].includes('transform=') });
+        } else {
+          const { scale, figure } = stack[stack.length - 1];
+          const visible = Number(token[2]) * scale;
+          expect([figure ? 5 : 4, 2.5].some((width) => Math.abs(visible - width) < 0.05) ? '' : `${visible} (Figur: ${figure})`).toBe('');
         }
       }
     }
@@ -378,7 +602,7 @@ describe('Vorschau', () => {
       expect(readFileSync(target, 'utf8') === file.content ? '' : `veraltet: ${file.path}`).toBe('');
     }
     const wanted = new Set(files.map((file) => file.path));
-    for (const folder of ['vorschau', 'vorschau/beispiele']) {
+    for (const folder of ['vorschau', 'vorschau/beispiele', 'vorschau/posen', 'vorschau/behaelter']) {
       for (const name of readdirSync(join(root, 'docs/bausteine', folder)).filter((entry) => entry.endsWith('.svg'))) {
         expect(wanted.has(`docs/bausteine/${folder}/${name}`) ? '' : `überflüssig: ${folder}/${name}`).toBe('');
       }

@@ -1,0 +1,9 @@
+{
+  "activity": "dance-freeze",
+  "layout": "pair",
+  "items": [
+    { "slot": "left", "figure": "jette", "pose": "freeze" },
+    { "slot": "middle", "block": "radio", "tint": "honey" },
+    { "slot": "right", "figure": "nolli", "pose": "dance" }
+  ]
+}

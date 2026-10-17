@@ -73,7 +73,9 @@ Datenverkehr je Gerät und Monat geschätzt 100 bis 250 KB; ein einmaliges Neuze
 
 - [x] Erster Test der Lieferung (Bucket, `expo-image`, Seed-Fix, Anleitung): eigener Pull Request. **Offen bei Clemens:** ausprobieren.
 - [x] Baukasten Stufe 1 (30 Bausteine, 4 Layouts, Prüfungen, Vorschau): dieser Pull Request. **Offen bei Clemens:** Durchsicht der Vorschau, dann Stufe 2.
-- [ ] Baukasten Stufe 2 (rund 45 Bausteine, Layout „hands“, `kit:coverage`)
+- [x] Schritt 3a (Teil von Stufe 2): Figuren der Besetzung in Szenen, Haltepunkte, acht Posen mit Gegenstand, Regen-Kleidung, Behälter mit zehn Inhalten, 10 neue Bausteine, Layout `hands`, strengere Sicherheitsregeln, `kit:coverage`, Prüfung der 14 KB (`docs/bausteine/README.md`). **Offen bei Clemens:** Durchsicht der Vorschau, Entscheidung „Erwachsene nur in der Mitte“.
+- [ ] Schritt 3b: fünf Titelbilder von Hand als Machbarkeitsprobe (Bratäpfel, Bananen-Haferkugeln, Tanz-Freeze, Geheimschrift, Pfützen-Forscher)
+- [ ] Weitere Bausteine nach der Abdeckung (`docs/bausteine/ABDECKUNG.md`, vorn: Stifte, Handtuch, Ball)
 - [ ] Lieferung vollständig (Migration 0006: `step_images`, Tabellen, Funktion; Schrittbilder in der App; gebündelte Zeichnungen entfernen; Pilot-Bilder in Storage)
 - [ ] Bilder-Lauf (Job-Kette, Modelltest, Bericht)
 - [ ] Pakete 1 bis 5 oder Lauf über die API (Entscheidungsregel)

@@ -2,19 +2,8 @@
   "activity": "puddle-explorers",
   "layout": "outdoor",
   "items": [
-    {
-      "slot": "s1",
-      "block": "adult",
-      "tint": "petrol"
-    },
-    {
-      "slot": "s2",
-      "block": "child-reach",
-      "tint": "rose"
-    },
-    {
-      "slot": "s3",
-      "block": "puddle"
-    }
+    { "slot": "s1", "figure": "jette", "pose": "hold-plate", "outfit": { "kind": "rain", "tint": "rose" }, "holds": { "right": { "block": "stick", "size": 0.6 } } },
+    { "slot": "mid", "figure": "ilka", "pose": "point", "outfit": { "kind": "rain", "tint": "petrol" } },
+    { "slot": "s4", "block": "puddle" }
   ]
 }

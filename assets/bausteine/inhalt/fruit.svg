@@ -1,0 +1,4 @@
+<circle cx="0" cy="-7.5" r="7.5" fill="{{rose}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<circle cx="0" cy="-7.5" r="7.5" fill="{{rose}}" stroke-width="{{line}}"/>
+<path d="M0 -15L1 -18" fill="none" stroke-width="{{fine}}"/>
+<ellipse cx="4.5" cy="-17" rx="3.5" ry="1.8" fill="{{paper}}" stroke-width="{{fine}}"/>

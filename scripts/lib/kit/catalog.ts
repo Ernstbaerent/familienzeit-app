@@ -7,12 +7,13 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { elementNames, estimateBox, parseElements } from './geometry.ts';
-import type { Block, Catalog, KitHazard, LoadedBlock, Scene, TintName } from './types.ts';
+import type { Block, Catalog, GripName, KitHazard, LoadedBlock, Scene, TintName } from './types.ts';
 
 export const kitDir = 'assets/bausteine';
 
 export const tintNames: readonly TintName[] = ['paper', 'rose', 'petrol', 'honey', 'brown'];
 export const hazardNames: readonly KitHazard[] = ['sharp', 'heat', 'goggles', 'smallParts', 'water'];
+export const gripNames: readonly GripName[] = ['handle', 'tip', 'left', 'right', 'under'];
 // Farbplätze und Maßplätze, die ein Baustein nutzen darf. `tint` ist der Platz für den Ton, den die Szene wählt.
 const colorPlaceholders = ['ink', 'paper', 'rose', 'petrol', 'honey', 'brown', 'ground', 'tint'];
 const sizePlaceholders = ['line', 'fine', 'shift'];
@@ -73,10 +74,6 @@ export function checkBlock(block: LoadedBlock): string[] {
   if (tints.length > 0 && (block.defaultTint === undefined || !tints.includes(block.defaultTint))) {
     fail('`defaultTint` fehlt oder steht nicht in `tints`.');
   }
-  // Warme Töne nur für Gegenstände, nie für Kleidung (ILLUSTRATIONEN.md).
-  if (block.kind === 'figure' && tints.some((tint) => tint === 'honey' || tint === 'brown')) {
-    fail('Kleidung ist nur Petrol oder Rosé, nie Honig oder Braun.');
-  }
 
   // Elemente
   const elements = parseElements(block.svg);
@@ -135,8 +132,20 @@ export function checkBlock(block: LoadedBlock): string[] {
 
   // Angaben
   for (const hazard of block.hazards) if (!hazardNames.includes(hazard)) fail(`Unbekanntes Merkmal „${hazard}“.`);
-  if (block.kind === 'figure' && block.person === undefined) fail('Figuren brauchen `person`.');
-  if (block.kind !== 'figure' && block.person !== undefined) fail('`person` gibt es nur bei Figuren.');
+  // Haltepunkte liegen auf dem Baustein (in seiner Fläche), Behälter und Inhalte passen zusammen (Schritt 3a).
+  const { x0, x1, h } = block.box;
+  for (const [name, point] of Object.entries(block.grips ?? {})) {
+    if (!gripNames.includes(name as GripName)) fail(`Unbekannter Haltepunkt „${name}“ (erlaubt: ${gripNames.join(', ')}).`);
+    else if (point[0] < x0 - 2 || point[0] > x1 + 2 || point[1] < -h - 2 || point[1] > 2) fail(`Haltepunkt „${name}“ (${point.join(' ')}) liegt außerhalb der Fläche.`);
+  }
+  if (block.grips?.tip !== undefined && block.grips.handle === undefined) fail('Eine Spitze (`tip`) gibt es nur zusammen mit einem Griff (`handle`).');
+  if (block.container !== undefined && block.kind === 'content') fail('Ein Inhalt ist kein Behälter.');
+  if (block.kind === 'content') {
+    if ((block.fits ?? []).length === 0) fail('Ein Inhalt braucht `fits` (die Behälter, in die er passt).');
+    if (block.grips !== undefined) fail('Ein Inhalt hat keine Haltepunkte.');
+  } else if (block.fits !== undefined || block.fill !== undefined) fail('`fits` und `fill` gibt es nur bei Inhalten.');
+  if (block.kidSafe === true && !block.hazards.includes('sharp')) fail('`kidSafe` gibt es nur bei scharfen Dingen (Kinderschere).');
+  if (block.kidSafe === true && (block.kidTerms === undefined || block.kidTerms.de.length === 0 || block.kidTerms.en.length === 0)) fail('`kidSafe` braucht `kidTerms` in Deutsch und Englisch (der Text muss sie nennen).');
   if (block.surface !== undefined && block.kind !== 'furniture') fail('`surface` gibt es nur bei Möbeln (Tisch).');
   if (!block.neutral && (block.terms.de.length === 0 || block.terms.en.length === 0)) {
     fail('Ein Baustein, der nicht neutral ist, braucht Begriffe in Deutsch und Englisch (`terms`), sonst lässt er sich nicht mit dem Text abgleichen.');
@@ -151,6 +160,13 @@ export function checkCatalog(catalog: Catalog): string[] {
   for (const id of ['ground-line', 'table']) if (!catalog.has(id)) problems.push(`Pflichtbaustein „${id}“ fehlt.`);
   const table = catalog.get('table');
   if (table !== undefined && table.surface === undefined) problems.push('table: `surface` (Höhe der Tischplatte) fehlt.');
+  for (const block of catalog.values()) {
+    for (const id of block.fits ?? []) {
+      const container = catalog.get(id);
+      if (container?.container === undefined) problems.push(`${block.id}: „${id}“ in \`fits\` ist kein Behälter.`);
+      else if (block.fill === true && container.container.kind !== 'deep') problems.push(`${block.id}: Eine Fläche passt nur in tiefe Behälter, „${id}“ ist flach.`);
+    }
+  }
   return problems;
 }
 

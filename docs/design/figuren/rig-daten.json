@@ -183,6 +183,47 @@
       "elbow": "out"
      }
     },
+    "dance": {
+     "dy": -7,
+     "lean": 7,
+     "tilt": -9,
+     "legL": {
+      "angle": 14,
+      "bend": 30
+     },
+     "legR": {
+      "angle": 34,
+      "bend": 48
+     },
+     "armL": {
+      "angle": 150,
+      "bend": 62
+     },
+     "armR": {
+      "angle": 48,
+      "bend": 88
+     }
+    },
+    "freeze": {
+     "lean": -3,
+     "tilt": 5,
+     "legL": {
+      "angle": 2,
+      "bend": 0
+     },
+     "legR": {
+      "angle": 55,
+      "bend": 85
+     },
+     "armL": {
+      "angle": 168,
+      "bend": 0
+     },
+     "armR": {
+      "angle": 92,
+      "bend": 0
+     }
+    },
     "amazed": {
      "lean": -4,
      "tilt": -8,
@@ -462,6 +503,47 @@
        "y": -40.1632
       },
       "elbow": "out"
+     }
+    },
+    "dance": {
+     "dy": -7,
+     "lean": 7,
+     "tilt": -9,
+     "legL": {
+      "angle": 14,
+      "bend": 30
+     },
+     "legR": {
+      "angle": 34,
+      "bend": 48
+     },
+     "armL": {
+      "angle": 150,
+      "bend": 62
+     },
+     "armR": {
+      "angle": 48,
+      "bend": 88
+     }
+    },
+    "freeze": {
+     "lean": -3,
+     "tilt": 5,
+     "legL": {
+      "angle": 2,
+      "bend": 0
+     },
+     "legR": {
+      "angle": 55,
+      "bend": 85
+     },
+     "armL": {
+      "angle": 168,
+      "bend": 0
+     },
+     "armR": {
+      "angle": 92,
+      "bend": 0
      }
     },
     "amazed": {
@@ -751,6 +833,47 @@
       "elbow": "out"
      }
     },
+    "dance": {
+     "dy": -7,
+     "lean": 7,
+     "tilt": -9,
+     "legL": {
+      "angle": 14,
+      "bend": 30
+     },
+     "legR": {
+      "angle": 34,
+      "bend": 48
+     },
+     "armL": {
+      "angle": 150,
+      "bend": 62
+     },
+     "armR": {
+      "angle": 48,
+      "bend": 88
+     }
+    },
+    "freeze": {
+     "lean": -3,
+     "tilt": 5,
+     "legL": {
+      "angle": 2,
+      "bend": 0
+     },
+     "legR": {
+      "angle": 55,
+      "bend": 85
+     },
+     "armL": {
+      "angle": 168,
+      "bend": 0
+     },
+     "armR": {
+      "angle": 92,
+      "bend": 0
+     }
+    },
     "amazed": {
      "lean": -4,
      "tilt": -8,
@@ -1035,6 +1158,47 @@
       "elbow": "out"
      }
     },
+    "dance": {
+     "dy": -7,
+     "lean": 7,
+     "tilt": -9,
+     "legL": {
+      "angle": 14,
+      "bend": 30
+     },
+     "legR": {
+      "angle": 34,
+      "bend": 48
+     },
+     "armL": {
+      "angle": 150,
+      "bend": 62
+     },
+     "armR": {
+      "angle": 48,
+      "bend": 88
+     }
+    },
+    "freeze": {
+     "lean": -3,
+     "tilt": 5,
+     "legL": {
+      "angle": 2,
+      "bend": 0
+     },
+     "legR": {
+      "angle": 55,
+      "bend": 85
+     },
+     "armL": {
+      "angle": 168,
+      "bend": 0
+     },
+     "armR": {
+      "angle": 92,
+      "bend": 0
+     }
+    },
     "amazed": {
      "lean": -4,
      "tilt": -8,
@@ -1311,6 +1475,47 @@
        "y": -60.229599999999984
       },
       "elbow": "out"
+     }
+    },
+    "dance": {
+     "dy": -7,
+     "lean": 7,
+     "tilt": -9,
+     "legL": {
+      "angle": 14,
+      "bend": 30
+     },
+     "legR": {
+      "angle": 34,
+      "bend": 48
+     },
+     "armL": {
+      "angle": 150,
+      "bend": 62
+     },
+     "armR": {
+      "angle": 48,
+      "bend": 88
+     }
+    },
+    "freeze": {
+     "lean": -3,
+     "tilt": 5,
+     "legL": {
+      "angle": 2,
+      "bend": 0
+     },
+     "legR": {
+      "angle": 55,
+      "bend": 85
+     },
+     "armL": {
+      "angle": 168,
+      "bend": 0
+     },
+     "armR": {
+      "angle": 92,
+      "bend": 0
      }
     },
     "amazed": {
