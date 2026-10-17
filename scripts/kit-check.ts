@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { checkCatalog, loadCatalog, loadExampleScenes } from './lib/kit/catalog.ts';
 import { checkScene, contextFromActivity } from './lib/kit/scene.ts';
 import { loadActivityData } from './lib/activityData.ts';
+import { loadProbe } from './lib/kit/probe.ts';
 
 const root = join(import.meta.dirname, '..');
 const catalog = loadCatalog(root);
@@ -19,8 +20,17 @@ for (const [name, scene] of loadExampleScenes(root)) {
   for (const problem of checkScene(scene, catalog, activity === undefined ? undefined : contextFromActivity(activity))) problems.push(`Szene ${name}: ${problem}`);
 }
 
+// Die Probebilder (Schritt 3b) mit ihren Aktivitäten, auch den KI-Aktivitäten aus assets/bausteine/probe/aktivitaeten.json
+const probe = loadProbe(root);
+for (const extra of probe.extra) activities.set(extra.id, extra as never);
+for (const [name, scene] of probe.scenes) {
+  const activity = activities.get(scene.activity);
+  if (activity === undefined) problems.push(`Probebild ${name}: Aktivität „${scene.activity}“ gibt es nicht.`);
+  else for (const problem of checkScene(scene, catalog, contextFromActivity(activity))) problems.push(`Probebild ${name}: ${problem}`);
+}
+
 if (problems.length > 0) {
   console.error(problems.join('\n'));
   process.exit(1);
 }
-console.log(`Baukasten in Ordnung: ${catalog.size} Bausteine, ${loadExampleScenes(root).size} Beispielszenen.`);
+console.log(`Baukasten in Ordnung: ${catalog.size} Bausteine, ${loadExampleScenes(root).size} Beispielszenen, ${probe.scenes.size} Probebilder.`);

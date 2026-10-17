@@ -49,7 +49,7 @@ Fett: neu in Schritt 3a. Die sechs Strichfiguren der Stufe 1 (Erwachsener, Kind,
 **Für die fünf Probebilder (Schritt 3b) neu:** Teller und Inhalt Bratäpfel (Bratäpfel), Gabel, Teig, Haferkugeln und Bananen (Bananen-Haferkugeln), Wattestäbchen und Zitronenhälften (Geheimschrift), Stock und Eimer mit Blättern (Pfützen-Forscher), dazu die Posen `dance`, `freeze`, `write` und die Regen-Kleidung im Rig.
 **Aus deinem Auftrag für Haltepunkte und Behälter:** Kelle, Kanne, Korb, Messer, Kinderschere und die übrigen Inhalte.
 
-Weitere Bausteine kommen nur, wenn eine Aktivität sie braucht: Die Liste „Materialien ohne Baustein“ in [ABDECKUNG.md](ABDECKUNG.md) zeigt, was am häufigsten fehlt (vorn: Stifte, Handtuch, Ball, Filzstifte, Salz). **Feuer, Flammen und Kerzen gibt es nie** (Sicherheits-Checkliste, Punkt 7), auch keine Noten, Pfeile oder Zeichen mit Bedeutung.
+Weitere Bausteine kommen nur, wenn eine Aktivität sie braucht: Die Liste „Materialien ohne Baustein“ in [ABDECKUNG.md](ABDECKUNG.md) zeigt, was am häufigsten fehlt (vorn: Stifte, Handtuch, Klebeband, Ball, Filzstifte). **Feuer, Flammen und Kerzen gibt es nie** (Sicherheits-Checkliste, Punkt 7), auch keine Noten, Pfeile oder Zeichen mit Bedeutung.
 
 ## Regeln für einen Baustein
 
@@ -160,7 +160,19 @@ Gilt für jede Szene **zu einer Aktivität** (`"activity": "<id>"` in der Beispi
 | Alter der Figuren | Kinder-Figuren nur zur Altersspanne der Aktivität (Nolli 0 bis 4, Jette 3 bis 9, Mats 8 bis 16), Nolli zusätzlich nur, wenn die Aktivität ab 2 Jahren oder jünger beginnt. |
 | Nichts, was der Text nicht sagt | Jeder nicht neutrale Baustein, jeder Inhalt, die Regen-Kleidung und die Ofenhandschuhe müssen **gedeckt** sein: durch Material der Aktivität **oder** einen Begriff (`terms`) im Titel, in der Kurzbeschreibung, den Schritten oder im Sicherheitshinweis, in Deutsch oder Englisch. Tisch und Standlinie sind neutral, Figuren ebenso. |
 
+## Probebilder (Schritt 3b)
+
+Fünf Titelbilder von Hand, mit Bewertung je Bild (was trägt, was fehlt, was ein Mensch noch prüft) und einem Vergleich der Bilder untereinander: [PROBE.md](PROBE.md). Die Szenen stehen in `assets/bausteine/probe/*.scene.json` (Feld `review`), der Text der Bratäpfel (KI-Aktivität, nicht in `data/`) in `assets/bausteine/probe/aktivitaeten.json`. `npm run kit:check` prüft sie mit ihren Texten, `npm run kit:preview` erzeugt die Seite.
+
+Neu für die Probebilder:
+- **Lose Inhalte** (`loose` im Katalog): Haferkugeln, Zitronenhälften, Kekse, Kastanien und Bananen dürfen ohne Behälter auf der Tischplatte (`on1` bis `on3`) und neben der Nahaufnahme (Layout `hands`, `left` und `right`) liegen, als Reihe von drei (große Stücke: zwei). Grund: In beiden Texten steht kein Teller.
+- **Überdeckung bei Figuren:** Es zählt nur der Körper, nicht was die Figur hält. So darf der Stock in die Pfütze reichen; für Rand und Ecken zählt weiter der ganze Rahmen mit dem Gehaltenen.
+- **Rühren in der Nahaufnahme** liegt flacher (das Werkzeug zeigt 25° nach oben statt 38°), damit der Arm nicht lang wird.
+
 ## Offen für die Durchsicht (Schritt 3a)
+
+**Entschieden (Clemens, 17. Oktober 2026):** Erwachsene bleiben in der Mitte, höchstens einer je Titelbild. Wird das zu gleichförmig oder verlangt eine Szene den Rand, schlägt Claude Code sitzende oder gebeugte Posen vor.
+
 
 Bitte auf der Vorschau ansehen und rückmelden, **bevor** die fünf Probebilder (Schritt 3b) entstehen:
 

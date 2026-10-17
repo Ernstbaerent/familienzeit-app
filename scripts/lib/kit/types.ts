@@ -45,6 +45,8 @@ export type Block = {
   // Nur Inhalte: in welche Behälter (IDs) sie passen und ob sie Stücke sind (wiederholt) oder eine Fläche (`fill`, für die Öffnung eines tiefen Behälters gezeichnet).
   fits?: string[];
   fill?: boolean;
+  // Nur Inhalte: darf auch lose auf der Tischplatte liegen (Plätze `on1` bis `on3`), ohne Behälter (Schritt 3b: Haferkugeln, Zitronenhälften).
+  loose?: boolean;
   // Nur scharfe Dinge: Ein Kind darf es halten (Kinderschere), wenn die Aktivität es nach der Sicherheits-Checkliste erlaubt (scene.ts, `kidSharpProblems`).
   kidSafe?: boolean;
   // Wörter, die ein Kind mit diesem scharfen Ding in der Hand erlauben (zum Beispiel „Kinderschere“). Fehlen sie im Text, hält es nur ein Erwachsener.

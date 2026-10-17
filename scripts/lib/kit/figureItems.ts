@@ -50,6 +50,7 @@ export type FigureRender = {
   back: string; // Körper (hinter Gegenständen und Tisch)
   front: string; // Gegenstände, Hände, Kopf (vor dem Tisch)
   box: Box;
+  bodyBox: Box; // nur der Körper, ohne gehaltene Dinge (für die Überdeckung: ein Stock darf in die Pfütze reichen)
   head?: Circle;
   hands: Circle[];
   skinShapes: Box[]; // Kopf, Hände (und im Layout `hands` die Unterarme) als Rahmen, für die Petrol-Regel
@@ -299,12 +300,12 @@ export function renderFigure(item: SceneItem, catalog: Catalog, x: number, y: nu
     if (item.holds !== undefined || item.mitts === true || item.outfit !== undefined) problems.push(`${petEntry.spec.name} ist ein Tier: hält nichts, trägt nichts (Tiere fassen nichts an).`);
     const svg = buildPet(petEntry.spec, allowed.includes(pose) ? pose : 'stand', { x, y, flip }).svg;
     const box = estimateBox(svg) ?? { minX: x, maxX: x, minY: y, maxY: y };
-    return { id, animal: true, back: '', front: svg, box, hands: [], skinShapes: [], petrolShapes: [], mitts: false, outfit: false, held: [], cornerShapes: [box], problems };
+    return { id, animal: true, back: '', front: svg, box, bodyBox: box, hands: [], skinShapes: [], petrolShapes: [], mitts: false, outfit: false, held: [], cornerShapes: [box], problems };
   }
   const entry = cast.humans.find((h) => h.spec.id === id);
   if (entry === undefined) {
     const names = [...cast.humans, ...cast.pets].map((h) => h.spec.id).join(', ');
-    return { id, animal: false, back: '', front: '', box: { minX: x, maxX: x, minY: y, maxY: y }, hands: [], skinShapes: [], petrolShapes: [], mitts: false, outfit: false, held: [], cornerShapes: [], problems: [`Figur „${id}“ gibt es nicht (erlaubt: ${names}).`] };
+    return { id, animal: false, back: '', front: '', box: { minX: x, maxX: x, minY: y, maxY: y }, bodyBox: { minX: x, maxX: x, minY: y, maxY: y }, hands: [], skinShapes: [], petrolShapes: [], mitts: false, outfit: false, held: [], cornerShapes: [], problems: [`Figur „${id}“ gibt es nicht (erlaubt: ${names}).`] };
   }
   const { spec, quirk } = entry;
   const poseName = item.pose ?? 'stand';
@@ -338,7 +339,8 @@ export function renderFigure(item: SceneItem, catalog: Catalog, x: number, y: nu
   });
   const surfaceItems = held.filter((h) => !h.held).map((h) => h.svg).join('');
   const inHand = held.filter((h) => h.held).map((h) => h.svg).join('');
-  const box = held.reduce((acc, h) => unionBox(acc, h.box), estimateBox(rendered.svg) ?? { minX: x, maxX: x, minY: y, maxY: y });
+  const bodyBox = estimateBox(rendered.svg) ?? { minX: x, maxX: x, minY: y, maxY: y };
+  const box = held.reduce((acc, h) => unionBox(acc, h.box), bodyBox);
   const hood = rendered.geometry.hood;
   const head = rendered.geometry.head;
   const { neck, pelvis, footL, footR } = rendered.anchors;
@@ -353,6 +355,7 @@ export function renderFigure(item: SceneItem, catalog: Catalog, x: number, y: nu
     back: rendered.body,
     front: `${surfaceItems}${inHand}${rendered.hands}${rendered.head}`,
     box,
+    bodyBox,
     head: rendered.geometry.head,
     hands: rendered.geometry.hands,
     skinShapes: [circleBox(rendered.geometry.head), ...(mitts ? [] : rendered.geometry.hands.map((c) => circleBox(c)))],
@@ -399,7 +402,7 @@ function forearm(hand: Vec, side: 1 | -1, skin: string, sleeve: Tint): { svg: st
 export function renderHands(hands: Hands, object: LoadedBlock, at: Pose2D, catalog: Catalog): FigureRender & { toolHeld?: HeldRender } {
   const problems: string[] = [];
   const entry = cast.humans.find((h) => h.spec.id === hands.figure);
-  const empty: FigureRender = { id: hands.figure, animal: false, back: '', front: '', box: { minX: at.x, maxX: at.x, minY: at.y, maxY: at.y }, hands: [], skinShapes: [], petrolShapes: [], mitts: false, outfit: false, held: [], cornerShapes: [], problems };
+  const empty: FigureRender = { id: hands.figure, animal: false, back: '', front: '', box: { minX: at.x, maxX: at.x, minY: at.y, maxY: at.y }, bodyBox: { minX: at.x, maxX: at.x, minY: at.y, maxY: at.y }, hands: [], skinShapes: [], petrolShapes: [], mitts: false, outfit: false, held: [], cornerShapes: [], problems };
   if (entry === undefined) {
     problems.push(`Hände: Figur „${hands.figure}“ gibt es nicht (nur Menschen: ${cast.humans.map((h) => h.spec.id).join(', ')}).`);
     return empty;
@@ -442,7 +445,7 @@ export function renderHands(hands: Hands, object: LoadedBlock, at: Pose2D, catal
       else points.push({ side: -1, at: left });
       const rim = object.container?.kind === 'deep' ? object.container : { cx: 0, cy: -object.box.h, rx: 20, ry: 4 };
       tip = toWorld(vec(rim.cx + rim.rx * 0.2, rim.cy), at);
-      toHandle = unit(-38);
+      toHandle = unit(-25);
     } else if (hands.pose === 'cut') {
       const left = grip('left') ?? grip('under');
       if (left !== undefined) points.push({ side: -1, at: left });
@@ -470,6 +473,7 @@ export function renderHands(hands: Hands, object: LoadedBlock, at: Pose2D, catal
     back: '',
     front,
     box: handCircles.reduce((acc, c) => unionBox(acc, circleBox(c)), toolHeld?.box ?? { minX: at.x, maxX: at.x, minY: at.y, maxY: at.y }),
+    bodyBox: { minX: at.x, maxX: at.x, minY: at.y, maxY: at.y },
     hands: handCircles,
     skinShapes,
     petrolShapes: sleeve === 'petrol' ? arms.map((a) => ({ box: a.sleeveBox, own: true })) : [],
