@@ -40,7 +40,19 @@ Zurückziehen: `update public.activities set image = null where id = '…'`.
 
 ## Modelltest: Haiku gegen Sonnet
 
-Der Test läuft als manueller Lauf derselben Kette (`ids`, Modell und `attach=false` als Eingaben) und braucht deshalb den Workflow im Hauptzweig. **Fünf Aktivitäten:** Tanzfreeze, Pfützen-Spaziergang, Geheimschrift mit Zitronensaft, Kissenburg und Taschenlampen-Geschichten, Bananen-Haferkekse. Je Modell einmal, gemessen werden:
+**Vorbereitet (Schritt 3b):** der manuelle Workflow **„Bild-Test“** (`.github/workflows/image-test.yml`, Skript `scripts/image-test.ts`, Bausteine `scripts/lib/imagetest/`). Er ist ein Ausschnitt der Kette oben, ohne Rückfrage mit dem PNG und ohne Hochladen:
+
+1. `liste` liest die Aktivitäten aus Supabase, nur mit dem **öffentlichen Lese-Schlüssel** (nur `approved`, nur GET).
+2. `zeichnen` lässt die Claude API je Aktivität **eine Szene** wählen (Structured Outputs, nur Layout, Plätze, Bausteine, Figuren, Posen), prüft sie mit dem Szenenprüfer (Sicherheit, Text, Ecken, 14 KB) und zeichnet sie. Verletzt die erste Szene eine Regel, bekommt ein **zweiter Aufruf** die Meldungen; mehr gibt es nicht. Antwortet die KI „keine Szene“, bleibt die Farbfläche (kein Fehler).
+3. `rendern` (ohne Schlüssel) macht mit `rsvg-convert` PNG in Karten- und Daumennagelgröße und schreibt die **Zusammenfassung des Laufs** (Ergebnis, Token, Kosten je Aktivität, die Szenen als JSON). Die Bilder liegen im Artefakt **bild-test** (14 Tage); in der Zusammenfassung selbst zeigt GitHub keine Bilder aus Artefakten.
+
+Er schreibt **nichts** in die Datenbank und fasst **keinen** Bucket an. Jobs mit Schlüssel installieren nichts (kein npm), `librsvg2-bin` nur im Job ohne Schlüssel.
+
+**Einrichten (einmal):** Unter Settings → Secrets and variables → Actions → Secrets das Secret `SUPABASE_ANON_KEY` anlegen (derselbe öffentliche Schlüssel wie `EXPO_PUBLIC_SUPABASE_ANON_KEY` in der `.env`, **nicht** der geheime). `ANTHROPIC_API_KEY` und `SUPABASE_URL` gibt es schon vom Wochenlauf. Freiwillig: Variable `IMAGE_TEST_MAX_COST_USD` (Standard 1 $ je Lauf, im schlimmsten Fall gerechnet).
+**Starten:** Actions → „Bild-Test“ → Run workflow, Modell `haiku` oder `sonnet`, die IDs sind vorbelegt. Einmal mit jedem Modell. Die Bratäpfel (`baked-apples`) müssen dafür in der Datenbank `approved` sein; sonst steht sie in der Zusammenfassung als „nicht gefunden“.
+**Kosten (Rechnung):** Eine Anfrage hat etwa 7 000 Token (Regeln, Bausteine, Schema, Text der Aktivität). Haiku etwa 0,001 bis 0,005 $ je Aufruf, Sonnet etwa 0,02 bis 0,1 $; fünf Aktivitäten mit höchstens zwei Aufrufen: Haiku unter 0,05 $, Sonnet unter 1 $.
+
+**Fünf Aktivitäten** (geändert am 17. Oktober 2026, Texte aus `data/` außer den Bratäpfeln): Bratäpfel aus dem Ofen (`baked-apples`, KI-Aktivität), Bananen-Haferkugeln (`banana-oat-balls`), Tanz-Freeze (`dance-freeze`), Geheimschrift mit Zitronensaft (`secret-lemon-ink`), Pfützen-Forscher (`puddle-explorers`). Zum Vergleich hat Claude Code dieselben fünf von Hand gesetzt (`docs/bausteine/PROBE.md`). Je Modell einmal, gemessen werden:
 
 - **Kosten je Bild** (Token aus den Angaben der API, die Prüfung eingerechnet).
 - **Bestanden?** Alle mechanischen Prüfungen und das Urteil des Modells.
@@ -73,9 +85,9 @@ Datenverkehr je Gerät und Monat geschätzt 100 bis 250 KB; ein einmaliges Neuze
 
 - [x] Erster Test der Lieferung (Bucket, `expo-image`, Seed-Fix, Anleitung): eigener Pull Request. **Offen bei Clemens:** ausprobieren.
 - [x] Baukasten Stufe 1 (30 Bausteine, 4 Layouts, Prüfungen, Vorschau): dieser Pull Request. **Offen bei Clemens:** Durchsicht der Vorschau, dann Stufe 2.
-- [x] Schritt 3a (Teil von Stufe 2): Figuren der Besetzung in Szenen, Haltepunkte, acht Posen mit Gegenstand, Regen-Kleidung, Behälter mit zehn Inhalten, 10 neue Bausteine, Layout `hands`, strengere Sicherheitsregeln, `kit:coverage`, Prüfung der 14 KB (`docs/bausteine/README.md`). **Offen bei Clemens:** Durchsicht der Vorschau, Entscheidung „Erwachsene nur in der Mitte“.
-- [ ] Schritt 3b: fünf Titelbilder von Hand als Machbarkeitsprobe (Bratäpfel, Bananen-Haferkugeln, Tanz-Freeze, Geheimschrift, Pfützen-Forscher)
-- [ ] Weitere Bausteine nach der Abdeckung (`docs/bausteine/ABDECKUNG.md`, vorn: Stifte, Handtuch, Ball)
+- [x] Schritt 3a (Teil von Stufe 2): Figuren der Besetzung in Szenen, Haltepunkte, acht Posen mit Gegenstand, Regen-Kleidung, Behälter mit zehn Inhalten, 10 neue Bausteine, Layout `hands`, strengere Sicherheitsregeln, `kit:coverage`, Prüfung der 14 KB (`docs/bausteine/README.md`). Entscheidung (Clemens, 17. Oktober 2026): Erwachsene bleiben in der Mitte, höchstens einer je Titelbild; zeigt sich, dass das zu gleichförmig wird, kommen sitzende oder gebeugte Posen als Vorschlag.
+- [x] Schritt 3b: fünf Titelbilder von Hand als Machbarkeitsprobe (Bratäpfel, Bananen-Haferkugeln, Tanz-Freeze, Geheimschrift, Pfützen-Forscher) mit Bewertung, `docs/bausteine/PROBE.md`; lose Inhalte auf dem Tisch; Workflow „Bild-Test“ vorbereitet. **Offen bei Clemens:** Probebilder ansehen, Secret `SUPABASE_ANON_KEY` anlegen, Bild-Test mit Haiku und Sonnet starten.
+- [ ] Weitere Bausteine nach der Abdeckung (`docs/bausteine/ABDECKUNG.md`, vorn: Stifte, Handtuch, Klebeband, Ball)
 - [ ] Lieferung vollständig (Migration 0006: `step_images`, Tabellen, Funktion; Schrittbilder in der App; gebündelte Zeichnungen entfernen; Pilot-Bilder in Storage)
 - [ ] Bilder-Lauf (Job-Kette, Modelltest, Bericht)
 - [ ] Pakete 1 bis 5 oder Lauf über die API (Entscheidungsregel)

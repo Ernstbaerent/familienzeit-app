@@ -14,6 +14,7 @@ import { buildCoverage, coverageMarkdown, mentions, stem } from './coverage';
 import { holdPoseNames } from './figureItems';
 import { checkScene, contextFromActivity, hotDistance, maxSceneBytes, placeItems, renderSceneSvg, renderSceneTemplate, type ActivityContext } from './scene';
 import { containerSheets, poseSheets } from './sheets';
+import { buildProbeFiles, elementsOf, loadProbe, similarity, type ProbeActivity } from './probe';
 import type { Block, Catalog, LoadedBlock, Scene } from './types';
 
 const root = join(__dirname, '../../..');
@@ -57,7 +58,7 @@ describe('Katalog (Stufe 1)', () => {
 
   it('jede Datei in assets/bausteine steht im Katalog (keine verwaiste Datei)', () => {
     const files = readdirSync(join(root, 'assets/bausteine'), { withFileTypes: true })
-      .filter((entry) => entry.isDirectory() && entry.name !== 'beispiele')
+      .filter((entry) => entry.isDirectory() && entry.name !== 'beispiele' && entry.name !== 'probe')
       .flatMap((dir) => readdirSync(join(root, 'assets/bausteine', dir.name)).map((name) => `${dir.name}/${name}`));
     expect(files.sort()).toEqual([...catalog.values()].map((entry) => `${entry.group}/${entry.id}.svg`).sort());
   });
@@ -613,5 +614,74 @@ describe('Vorschau', () => {
     const page = buildPreviewFiles(catalog, scenes).find((file) => file.path.endsWith('VORSCHAU.md'))?.content ?? '';
     for (const id of catalog.keys()) expect(page).toContain(`\`${id}\``);
     for (const name of scenes.keys()) expect(page).toContain(`\`${name}\``);
+  });
+});
+
+describe('Probebilder (Schritt 3b)', () => {
+  const probe = loadProbe(root);
+  const activities = new Map<string, ProbeActivity>([...loadActivityData().activities, ...probe.extra].map((activity) => [activity.id, activity as ProbeActivity]));
+
+  it('die fünf Aktivitäten aus dem Plan, jede mit Bewertung; alle bestehen alle Regeln mit ihrem Text', () => {
+    expect([...probe.scenes.keys()].sort()).toEqual(['baked-apples', 'banana-oat-balls', 'dance-freeze', 'puddle-explorers', 'secret-lemon-ink']);
+    for (const [name, scene] of probe.scenes) {
+      const activity = activities.get(scene.activity);
+      expect(activity).toBeDefined();
+      expect([name, ...checkScene(scene, catalog, contextFromActivity(activity as ProbeActivity))]).toEqual([name]);
+      for (const part of [scene.review.carries, scene.review.missing, scene.review.check]) expect(part.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('Bratäpfel: Der Text nennt keinen Teller, deshalb fällt „Kind mit Teller“ durch; mit „Teller“ im Text besteht es', () => {
+    const baked = activities.get('baked-apples') as ProbeActivity;
+    const withPlate: Scene = {
+      layout: 'pair',
+      items: [
+        { slot: 'middle', figure: 'arne', pose: 'carry-tray', mitts: true, holds: { both: { block: 'baking-tray', content: 'baked-apples', hot: true, size: 0.75 } } },
+        { slot: 'right', figure: 'jette', pose: 'hold-plate', holds: { right: { block: 'plate', content: 'baked-apples', size: 0.75 } } },
+      ],
+    };
+    expect(checkScene(withPlate, catalog, contextFromActivity(baked)).join('\n')).toMatch(/„plate“ ist im Text der Aktivität nicht gedeckt/);
+    const plateText = { ...baked, translations: { ...baked.translations, de: { ...baked.translations.de, steps: [...baked.translations.de.steps, 'Legt jedem einen Bratapfel auf einen Teller.'] } } };
+    expect(checkScene(withPlate, catalog, contextFromActivity(plateText))).toEqual([]);
+  });
+
+  it('Unterscheidbarkeit: mindestens vier Layouts, mittlere Überschneidung unter einem Drittel', () => {
+    const scenes = [...probe.scenes.values()];
+    expect(new Set(scenes.map((scene) => scene.layout)).size).toBeGreaterThanOrEqual(4);
+    const sets = scenes.map(elementsOf);
+    const pairs = sets.flatMap((a, i) => sets.slice(i + 1).map((b) => similarity(a, b)));
+    expect(pairs.reduce((sum, value) => sum + value, 0) / pairs.length).toBeLessThan(1 / 3);
+    expect(similarity(new Set(['a', 'b']), new Set(['b', 'c']))).toBeCloseTo(1 / 3);
+  });
+
+  it('die Vorschauseite PROBE.md und ihre Bilder passen zum Code (npm run kit:preview) und nennen Titel, Sicherheitshinweis und Prüfergebnis', () => {
+    const files = buildProbeFiles(catalog, probe, activities);
+    for (const file of files) expect(readFileSync(join(root, file.path), 'utf8') === file.content ? '' : `veraltet: ${file.path}`).toBe('');
+    const page = files.find((file) => file.path.endsWith('PROBE.md'))?.content ?? '';
+    for (const [, scene] of probe.scenes) {
+      const de = (activities.get(scene.activity) as ProbeActivity).translations.de;
+      expect(page).toContain(`## ${de.title}`);
+      expect(page).toContain(de.safetyNote as string);
+    }
+    expect(page.match(/\*\*Prüfergebnis:\*\* bestanden/g)).toHaveLength(5);
+    for (const name of readdirSync(join(root, 'docs/bausteine/probe'))) expect(files.some((file) => file.path === `docs/bausteine/probe/${name}`)).toBe(true);
+  });
+});
+
+describe('Lose Inhalte und Überdeckung (Schritt 3b)', () => {
+  it('Haferkugeln und Zitronenhälften liegen lose auf dem Tisch oder neben der Nahaufnahme, sonst nur im Behälter', () => {
+    expect(checkScene(scene('table', [{ slot: 'table', block: 'table' }, { slot: 'on1', block: 'oat-balls' }]), catalog)).toEqual([]);
+    expect(checkScene(scene('hands', [{ slot: 'object', block: 'bowl', hands: { figure: 'arne', pose: 'hold' } }, { slot: 'left', block: 'lemon-halves' }]), catalog)).toEqual([]);
+    expect(checkScene(scene('outdoor', [{ slot: 's1', block: 'oat-balls' }]), catalog).join('\n')).toMatch(/lose auf der Tischplatte/);
+    expect(checkScene(scene('table', [{ slot: 'table', block: 'table' }, { slot: 'on1', block: 'dough' }]), catalog).join('\n')).toMatch(/steht nur in einem Behälter/);
+    expect(checkBlock({ ...(catalog.get('dough') as LoadedBlock), loose: true }).join('\n')).toMatch(/Fläche .* kann nicht lose liegen/);
+  });
+
+  it('bei Figuren zählt für die Überdeckung nur der Körper: Ein Stock darf in die Pfütze reichen', () => {
+    const poke = scene('outdoor', [{ slot: 's3', figure: 'jette', pose: 'hold-plate', flip: false, holds: { right: { block: 'stick', size: 0.6 } } }, { slot: 's4', block: 'puddle' }]);
+    expect(checkScene(poke, catalog)).toEqual([]);
+    const figure = placeItems(poke, catalog)?.[0].figure;
+    // Der Rahmen mit Stock reicht weiter nach rechts als der Körper; für Rand und Ecken zählt der ganze Rahmen
+    expect((figure?.box.maxX ?? 0) - (figure?.bodyBox.maxX ?? 0)).toBeGreaterThan(15);
   });
 });

@@ -143,7 +143,8 @@ export function checkBlock(block: LoadedBlock): string[] {
   if (block.kind === 'content') {
     if ((block.fits ?? []).length === 0) fail('Ein Inhalt braucht `fits` (die Behälter, in die er passt).');
     if (block.grips !== undefined) fail('Ein Inhalt hat keine Haltepunkte.');
-  } else if (block.fits !== undefined || block.fill !== undefined) fail('`fits` und `fill` gibt es nur bei Inhalten.');
+  } else if (block.fits !== undefined || block.fill !== undefined || block.loose !== undefined) fail('`fits`, `fill` und `loose` gibt es nur bei Inhalten.');
+  if (block.loose === true && block.fill === true) fail('Eine Fläche (`fill`) kann nicht lose liegen.');
   if (block.kidSafe === true && !block.hazards.includes('sharp')) fail('`kidSafe` gibt es nur bei scharfen Dingen (Kinderschere).');
   if (block.kidSafe === true && (block.kidTerms === undefined || block.kidTerms.de.length === 0 || block.kidTerms.en.length === 0)) fail('`kidSafe` braucht `kidTerms` in Deutsch und Englisch (der Text muss sie nennen).');
   if (block.surface !== undefined && block.kind !== 'furniture') fail('`surface` gibt es nur bei Möbeln (Tisch).');

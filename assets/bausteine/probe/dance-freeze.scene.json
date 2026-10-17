@@ -1,0 +1,35 @@
+{
+  "activity": "dance-freeze",
+  "layout": "pair",
+  "items": [
+    {
+      "slot": "left",
+      "figure": "jette",
+      "pose": "freeze"
+    },
+    {
+      "slot": "middle",
+      "block": "radio",
+      "tint": "honey"
+    },
+    {
+      "slot": "right",
+      "figure": "nolli",
+      "pose": "happy"
+    }
+  ],
+  "review": {
+    "carries": [
+      "Radio und zwei bewegte Kinder sagen „Tanzen zu Musik“. Jette (≈7) steht wie eine Statue auf einem Bein, Nolli (≈3) hüpft mit erhobenen Armen.",
+      "Die Spanne 1 bis 12 Jahre zeigt sich in zwei Größen."
+    ],
+    "missing": [
+      "Das Spiel selbst (Musik stoppt, alle erstarren) ist im Standbild nicht zu sehen: Erstarren und Tanzen sehen fast gleich aus. Noten oder Pausenzeichen gibt es nicht (kein Zeichen mit Bedeutung).",
+      "Der Sicherheitshinweis (barfuß, keine rutschigen Socken, ganz Kleine auf dem Arm) ist nicht sichtbar; das muss ein Titelbild nicht leisten."
+    ],
+    "check": [
+      "Ist das Radio als Musik erkennbar (kein Lautsprecher-Symbol, keine Noten)?",
+      "Wirkt Nolli allein beim Tanzen passend, obwohl der Text sagt, dass ganz kleine Kinder auf dem Arm tanzen? (Nolli ist ≈3, nicht „ganz klein“.)"
+    ]
+  }
+}

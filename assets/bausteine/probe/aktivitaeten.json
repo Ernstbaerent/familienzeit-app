@@ -1,0 +1,39 @@
+{
+  "hinweis": "Aktivitäten, die nicht in data/ stehen (KI-Aktivitäten aus der Datenbank), mit dem Text, den Clemens am 16. Oktober 2026 geschickt hat. Nur für die Probebilder; die App liest diese Datei nicht.",
+  "activities": [
+    {
+      "id": "baked-apples",
+      "ageMin": 4,
+      "ageMax": 12,
+      "materials": ["apple", "knife", "raisins", "sugar", "cinnamon", "bowl", "tray", "oven"],
+      "translations": {
+        "de": {
+          "title": "Bratäpfel aus dem Ofen",
+          "summary": "Ausgehöhlte Äpfel mit Rosinen und Zimt füllen, backen und warm genießen: Die ganze Wohnung duftet.",
+          "steps": [
+            "Ein Erwachsener heizt den Ofen auf 180 Grad vor und schneidet bei jedem Apfel das Kerngehäuse heraus, sodass ein Loch entsteht.",
+            "Mischt Rosinen, einen Teelöffel Zucker und eine Prise Zimt in einer kleinen Schüssel.",
+            "Die Kinder stopfen die Mischung mit den Fingern in die Äpfel und drücken sie fest.",
+            "Stellt die Äpfel auf ein Backblech oder in eine ofenfeste Form.",
+            "Backt die Äpfel etwa 25 bis 30 Minuten, bis die Schale schrumpelig wird.",
+            "Lasst sie etwas abkühlen, bevor ihr sie esst. Innen bleiben sie lange heiß."
+          ],
+          "safetyNote": "Messer und Backofen nur mit Erwachsenen. Die Füllung wird sehr heiß, lasst sie vor dem Essen gut abkühlen. Rosinen sind für Kinder unter 4 Jahren eine Verschluckgefahr."
+        },
+        "en": {
+          "title": "Oven-Baked Apples",
+          "summary": "Fill hollowed-out apples with raisins and cinnamon, bake them and enjoy them warm: the whole home smells wonderful.",
+          "steps": [
+            "An adult preheats the oven to 180 degrees Celsius and cuts the core out of each apple to make a hole.",
+            "Mix raisins, a teaspoon of sugar and a pinch of cinnamon in a small bowl.",
+            "The children stuff the mixture into the apples with their fingers and press it down.",
+            "Put the apples on a baking sheet or in an ovenproof dish.",
+            "Bake the apples for about 25 to 30 minutes, until the skin gets wrinkly.",
+            "Let them cool a little before eating. They stay hot inside for a long time."
+          ],
+          "safetyNote": "Knife and oven only with adults. The filling gets very hot, so let it cool well before eating. Raisins are a choking hazard for children under 4."
+        }
+      }
+    }
+  ]
+}
