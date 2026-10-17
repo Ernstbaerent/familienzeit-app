@@ -2,30 +2,10 @@
   "activity": "pillow-fort",
   "layout": "outdoor",
   "items": [
-    {
-      "slot": "s1",
-      "block": "blanket",
-      "tint": "petrol"
-    },
-    {
-      "slot": "s2",
-      "block": "chair"
-    },
-    {
-      "slot": "s3",
-      "block": "child-cheer",
-      "tint": "rose"
-    },
-    {
-      "slot": "s4",
-      "block": "pillow",
-      "tint": "honey"
-    },
-    {
-      "slot": "front",
-      "block": "flashlight",
-      "tint": "petrol",
-      "size": 0.6
-    }
+    { "slot": "s1", "block": "blanket", "tint": "petrol" },
+    { "slot": "s2", "block": "chair" },
+    { "slot": "s3", "figure": "jette", "pose": "cheer" },
+    { "slot": "s4", "block": "pillow", "tint": "honey" },
+    { "slot": "front", "block": "flashlight", "tint": "petrol", "size": 0.6 }
   ]
 }

@@ -84,13 +84,12 @@ Petrol ist nie Bildgrund; in Bausteinen mit Petrol sind feine Linien Leinen, nic
 
 ## Figuren
 
-- **Einfache Strichfiguren ohne Gesichtszüge:** Kreis als Kopf, Arme und Beine als Linien (Stärke 4), der Oberkörper als
-  gerundete Farbfläche (Kleidung in Petrol oder Rosé). Keine Augen, kein Mund, keine Haare, keine Nase.
-- **Köpfe und Hände sind `{{paper}}`** mit Tinten-Umriss. So legt das Bild keine Hautfarbe fest.
-- **Erwachsene sind deutlich größer als Kinder** (Erwachsene etwa 150, Kinder etwa 95 Einheiten hoch, Kopf gleich groß).
-  Wer was tut, ist so ohne Gesicht erkennbar.
-- **Hände und Gegenstände sind gut erkennbar:** Sie sind groß, haben eine klare Form (Fäustling mit Daumen) und stehen
-  frei, nicht hinter anderen Formen.
+**Seit dem 16. Oktober 2026 gilt die festgeschriebene Besetzung (`docs/design/FIGUREN.md`):** Jette, Mats, Nolli, Ilka, Arne, Stups und Tüpfel, gesichtslos, Köpfe und Hände im **Hautton** der Figur (nicht mehr Leinen), Linie 5.
+Die einfachen Strichfiguren der Pilot-Bilder und der Stufe 1 (Köpfe in Leinen, Erwachsene etwa 150 hoch) sind abgelöst; die Pilot-Bilder in `assets/illustrations/` zeigen noch den alten Stand.
+
+- **Erwachsene sind deutlich größer als Kinder** (Ilka 120, Arne 123, Mats 105, Jette 88, Nolli 67). Wer was tut, ist so ohne Gesicht erkennbar.
+- **Hände halten Gegenstände an deren Haltepunkten** (Griff, Henkel, Rand; Baukasten, Schritt 3a). Hände und Gegenstände sind gut erkennbar und stehen frei, nicht hinter anderen Formen.
+- **Erwachsene stehen auf Titelbildern in der Mitte:** An den Seiten reicht ihr Kopf in die Ecken der Kategorie-Pille (siehe „Bildaufbau“).
 
 ## Bildaufbau
 
@@ -120,13 +119,18 @@ widerspricht. **Ein Bild darf nichts zeigen, was der Text nicht sagt.** Für jed
 
 | Thema | Im Bild |
 | --- | --- |
-| Hitze (Ofen, Herd, Blech) | nur ein Erwachsener mit Ofenhandschuhen, das Kind mit Abstand |
-| Schere, Messer | nur in der Hand eines Erwachsenen (Ausnahme: die Aktivität erlaubt es Kindern ausdrücklich) |
+| Hitze (Ofen, Herd, Blech, alles frisch aus dem Ofen) | nur **in der Hand** eines Erwachsenen **mit Ofenhandschuhen an der Hand**, kein Kleinkind im Bild, andere Kinder mit Abstand (mindestens 20 Einheiten) |
+| Messer, spitze Schere | nur **in der Hand eines Erwachsenen**, nie frei liegend; ein Kind darf zuschauen |
+| Kinderschere (rund, bunt) | in Kinderhand nur, wenn die Sicherheits-Checkliste es für das Alter erlaubt (ab 3 Jahren, Punkt 5), ein Erwachsener im Bild ist (Punkt 2) und der Text die Kinderschere nennt. Wo die Checkliste schweigt, gilt: nur Erwachsene. Nie in der Hand eines Kleinkinds |
+| Tiere (Stups, Tüpfel) | nie im selben Bild mit Hitze, Feuer, Messer oder Schere, und nie bei einer Aktivität mit solchem Material |
 | Feuer | keine offene Flamme, keine Kerze (auch nicht in Laternen, Punkt 7) |
 | Wasser | kein Kind allein am Wasser, bei Kindern unter 6 immer ein Erwachsener daneben (Punkt 3) |
 | Kleinteile | keine losen Kleinteile in der Nähe von Kleinkindern (Punkt 1) |
 | Spritzer, Augen | Schutzbrille nur, wenn der Text sie nennt (sonst Bild oder Text anpassen) |
-| Alter | Größe der Figuren passt zur Altersgruppe der Aktivität |
+| Alter | die Figuren passen zur Altersspanne der Aktivität (`docs/design/FIGUREN.md`) |
+| Hautton und Petrol | hinter oder an Kopf und Händen einer Figur, deren Hautton auf Petrol nicht trägt (heute Jette), liegt nichts Petrolfarbenes |
+
+Der Szenenprüfer des Baukastens setzt diese Regeln mechanisch um (`scripts/lib/kit/scene.ts`, Tabelle in `docs/bausteine/README.md`, „Sicherheit“).
 
 **Natron-Vulkan (erledigt 2026-10-15):** Sein Sicherheitshinweis nennt jetzt „Schutzbrille oder normale Brille“ (de/en), die Schutzbrille im Bild ist damit gedeckt. Die Regel bleibt: Eine Schutzbrille zeigt ein Bild nur, wenn der Text sie nennt.
 

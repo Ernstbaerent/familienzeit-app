@@ -4,11 +4,11 @@
 import { vec, type Vec } from './math.ts';
 import { legLength, type HumanSpec, type Pose } from './rig.ts';
 
-export type PoseName = 'stand' | 'hold' | 'tray' | 'cheer' | 'walk' | 'take' | ExpressionName;
+export type PoseName = 'stand' | 'hold' | 'tray' | 'cheer' | 'walk' | 'take' | 'dance' | 'freeze' | ExpressionName;
 // Ausdrucksposen (Entscheidung von Clemens, 2026-10-16): Emotionen über Haltung statt über Gesichtszüge. Nur Daten, nichts wird animiert.
 export type ExpressionName = 'amazed' | 'happy' | 'disappointed' | 'thoughtful' | 'curious';
 export const expressionNames: readonly ExpressionName[] = ['amazed', 'happy', 'disappointed', 'thoughtful', 'curious'];
-export const poseNames: readonly PoseName[] = ['stand', 'hold', 'tray', 'cheer', 'walk', 'take', ...expressionNames];
+export const poseNames: readonly PoseName[] = ['stand', 'hold', 'tray', 'cheer', 'walk', 'take', 'dance', 'freeze', ...expressionNames];
 
 // Besonderheiten einer Figur, die in „stand“ auffallen (spielerisch geneigter Kopf, Hand in die Hüfte).
 export type Quirk = { tilt?: number; handOnHip?: 'L' | 'R' };
@@ -20,6 +20,8 @@ export const poseLabels: Record<PoseName, { de: string; en: string }> = {
   cheer: { de: 'jubelt', en: 'cheering' },
   walk: { de: 'läuft', en: 'walking' },
   take: { de: 'nimmt Tablett', en: 'taking the tray' },
+  dance: { de: 'tanzt', en: 'dancing' },
+  freeze: { de: 'erstarrt wie eine Statue', en: 'frozen like a statue' },
   amazed: { de: 'staunt', en: 'amazed' },
   happy: { de: 'freut sich', en: 'happy' },
   disappointed: { de: 'enttäuscht', en: 'disappointed' },
@@ -120,6 +122,27 @@ export function poseOf(s: HumanSpec, name: PoseName, quirk: Quirk = {}): Pose {
         armR: { to: vec(s.shoulderW * 0.5 + s.upperArm * 0.95, sh + 4), elbow: 'down' },
       };
     }
+    case 'dance':
+      // tanzt (Schritt 3a): kleiner Hüpfer, ein Arm angewinkelt nach oben, der andere locker nach außen, ein Bein schwingt
+      return {
+        dy: -7,
+        lean: 7,
+        tilt: -9,
+        legL: { angle: 14, bend: 30 },
+        legR: { angle: 34, bend: 48 },
+        armL: { angle: 150, bend: 62 },
+        armR: { angle: 48, bend: 88 },
+      };
+    case 'freeze':
+      // erstarrt wie eine Statue (Schritt 3a): steif, ein Arm gestreckt nach oben, einer zur Seite, ein Bein angehoben (Standbein gerade)
+      return {
+        lean: -3,
+        tilt: 5,
+        legL: { angle: 2, bend: 0 },
+        legR: { angle: 55, bend: 85 },
+        armL: { angle: 168, bend: 0 },
+        armR: { angle: 92, bend: 0 },
+      };
     case 'walk':
       return {
         lean: 2,

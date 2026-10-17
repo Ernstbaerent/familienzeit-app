@@ -1,0 +1,7 @@
+{
+  "layout": "hands",
+  "items": [
+    { "slot": "object", "block": "plate", "content": "lemon-halves", "size": 2, "hands": { "figure": "arne", "pose": "cut", "tool": { "block": "knife", "size": 0.75 } } },
+    { "slot": "left", "block": "cup", "tint": "rose" }
+  ]
+}

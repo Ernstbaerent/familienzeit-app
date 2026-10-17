@@ -3,8 +3,12 @@
 
 import type { BlockKind, LayoutName } from './types.ts';
 
+// Was auf einem Platz stehen darf: Arten von Bausteinen oder eine Figur der Besetzung.
+export type SlotKind = Exclude<BlockKind, 'content' | 'ground'> | 'figure';
+
 export const frame = { w: 400, h: 200 } as const;
 export const baseY = 176; // Standlinie: Hier stehen Figuren und Gegenstände (24 Einheiten Rand nach unten)
+export const handsY = 150; // Tischkante im Layout `hands`: Darunter kommen die Unterarme vom Bildrand
 export const margin = 24; // alles bleibt innerhalb dieses Rands
 // Grund: ein weicher großer Kreis hinter dem Motiv (ILLUSTRATIONEN.md, „Grund“).
 export const backdrop = { cx: 200, cy: 108, r: 90 } as const;
@@ -18,14 +22,15 @@ export type Slot = {
   x: number;
   y: number | 'surface'; // `surface`: auf der Tischplatte
   z: number; // Zeichenreihenfolge, kleiner = weiter hinten
-  kinds: readonly BlockKind[];
+  kinds: readonly SlotKind[];
   sizes: readonly number[]; // erlaubte Größen, die erste ist die Vorgabe
 };
 
-export type Layout = { name: LayoutName; description: string; slots: Readonly<Record<string, Slot>> };
+// `groundY`: Höhe der Standlinie, wenn sie nicht `baseY` ist (Layout `hands`: die Tischkante der Nahaufnahme).
+export type Layout = { name: LayoutName; description: string; groundY?: number; slots: Readonly<Record<string, Slot>> };
 
-const everything: readonly BlockKind[] = ['figure', 'object', 'furniture', 'nature'];
-const things: readonly BlockKind[] = ['object', 'furniture', 'nature'];
+const everything: readonly SlotKind[] = ['figure', 'object', 'furniture', 'nature'];
+const things: readonly SlotKind[] = ['object', 'furniture', 'nature'];
 
 export const layouts: Readonly<Record<LayoutName, Layout>> = {
   hero: {
@@ -47,6 +52,8 @@ export const layouts: Readonly<Record<LayoutName, Layout>> = {
       on3: { x: 250, y: 'surface', z: 2, kinds: ['object'], sizes: [1, 0.6] },
       left: { x: 70, y: baseY, z: 0, kinds: ['figure', 'object', 'nature'], sizes: [1] },
       right: { x: 330, y: baseY, z: 0, kinds: ['figure', 'object', 'nature'], sizes: [1] },
+      // hinter dem Tisch in der Mitte: der einzige Platz, auf dem ein Erwachsener unter den Ecken der Pille bleibt (Schritt 3a)
+      back: { x: 200, y: baseY, z: 0.5, kinds: ['figure'], sizes: [1] },
     },
   },
   pair: {
@@ -66,7 +73,18 @@ export const layouts: Readonly<Record<LayoutName, Layout>> = {
       s2: { x: 150, y: baseY, z: 1, kinds: everything, sizes: [1, 0.6] },
       s3: { x: 250, y: baseY, z: 1, kinds: everything, sizes: [1, 0.6] },
       s4: { x: 320, y: baseY, z: 1, kinds: everything, sizes: [1, 0.6] },
+      mid: { x: 200, y: baseY, z: 1, kinds: ['figure'], sizes: [1] }, // Mitte: Platz für einen Erwachsenen (Ecken der Pille)
       front: { x: 200, y: baseY, z: 2, kinds: things, sizes: [1, 0.6] },
+    },
+  },
+  hands: {
+    name: 'hands',
+    description: 'Nahaufnahme für Schrittbilder: ein großer Gegenstand auf der Tischkante, Hände kommen vom unteren Rand und halten ihn.',
+    groundY: handsY,
+    slots: {
+      object: { x: 200, y: handsY, z: 2, kinds: ['object'], sizes: [2, 1.5] },
+      left: { x: 84, y: handsY, z: 1, kinds: ['object', 'nature'], sizes: [1.5, 1] },
+      right: { x: 316, y: handsY, z: 1, kinds: ['object', 'nature'], sizes: [1.5, 1] },
     },
   },
 };

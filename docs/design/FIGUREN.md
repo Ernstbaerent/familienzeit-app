@@ -1,7 +1,7 @@
 # Figuren (M9b): Identifikationsfiguren
 
 **Stand: festgeschrieben (Clemens, 16. Oktober 2026).** Satz C „schlank und verspielt“, Hautton-Variante A (bunte Besetzung), **keine Augenpunkte** (Emotionen über Haltung und Bewegung), Papa **Arne**, Junge **Mats**. Alle Bilder: [VORSCHAU.md](figuren/VORSCHAU.md) (erzeugt mit `npm run figures:preview`). Der Rig steht in `scripts/lib/figures/`.
-Bis die Bausteine erweitert sind (Schritt 3 des Plans), ist nichts davon in der App oder in einem Bild verwendet.
+Seit Schritt 3a stehen die Figuren im Baukasten (`docs/bausteine/README.md`, „Figuren in Szenen“): mit Haltepunkten an Gegenständen, Posen mit Gegenstand in der Hand, Regen-Kleidung und Händen in Nahaufnahme. In der App ist noch kein Bild mit ihnen.
 
 ## Wozu Figuren?
 
@@ -23,7 +23,7 @@ Anmutung: lange dünne Linien-Glieder, kleine Köpfe, Kleid und Schal, Haarbüsc
 | **Nolli** | Nebenfigur (kleinstes Kind) | ≈ 3 Jahre | 67 | Platz 2 `#DDAA85` | Dutt, Petrol-Kleidchen, Rosé-Schuhe |
 | **Tüpfel** | **Cameo-Figur** (Katze) | – | 55 | – (Leinen) | rund und sitzend, schlank stehend, langer Schwanz, spitze Ohren |
 
-(Standhöhe in Einheiten der 400 × 200-Fläche; Erwachsene bleiben unter 125, damit der Kopf unter den oberen Ecken der Karte bleibt. Tests prüfen das.)
+(Standhöhe in Einheiten der 400 × 200-Fläche. **Korrektur (Schritt 3a):** Erwachsene unter 125 bleiben **nicht** unter den oberen Ecken der Karte: Die Ecken der Pille reichen bis 56, der Kopf von Arne beginnt bei 176 − 123 = 53, mit Haaren noch höher. An den Seiten des Bildes reicht der Kopf von Ilka und Arne also 3 bis 6 Einheiten in die Pille; in der Mitte (zwischen den Ecken) passt er. Der Szenenprüfer meldet das; offen bei Clemens, siehe `docs/bausteine/README.md`, „Offen für die Durchsicht“.)
 
 - **Hauptfiguren** tragen die Titelbilder (Jette, Mats nach Altersspanne, Stups als Begleiter). **Nebenfiguren** (Ilka, Arne, Nolli) kommen dazu, wenn die Aktivität sie braucht (Erwachsene bei Hitze und Schere, Nolli bei Kleinkind-Aktivitäten). **Tüpfel** erscheint nur als kleiner Gast (Cameo) mit wenigen Posen.
 - Die Figuren sind **geschlechtsneutral** gezeichnet. Die Namen sind es nicht alle (Vornamen): Sie nennen kein Geschlecht in der App, im Text über die Figuren steht „Kind“, „Erwachsene“.
@@ -102,7 +102,7 @@ Emotionen über Haltung statt über Gesichtszüge. Fünf Posen im Rig (`poses.ts
 | nachdenklich | `thoughtful` | eine Hand am Kinn, der andere Arm quer vor dem Bauch, Kopf geneigt |
 | neugierig | `curious` | nach vorn gebeugt, Kopf gestreckt, eine Hand streckt sich nach vorn |
 
-Dazu die Gebrauchsposen `stand`, `hold`, `tray`, `cheer`, `walk`, `take`. Ehrlich: Bei Jette verschwinden die Arme im Kleid-Schnitt zum Teil, ihre Posen lesen sich vor allem über Kopf und Rumpf; `amazed` und `thoughtful` sind bei beiden die schwächsten Posen. Ein Mensch sollte sie vor der Beta ansehen.
+Dazu die Gebrauchsposen `stand`, `hold`, `tray`, `cheer`, `walk`, `take` und (Schritt 3a) `dance` (tanzt: kleiner Hüpfer, ein Arm angewinkelt oben) und `freeze` (erstarrt wie eine Statue: ein Arm gestreckt nach oben, einer zur Seite, ein Bein angehoben). Die Posen mit Gegenstand (`hold-plate`, `carry-tray`, `point`, `pour`, `stir`, `cut-supervised`, `hand-over`, `write`) rechnet der Baukasten aus den Haltepunkten (`scripts/lib/kit/figureItems.ts`). Ehrlich: Bei Jette verschwinden die Arme im Kleid-Schnitt zum Teil, ihre Posen lesen sich vor allem über Kopf und Rumpf; `amazed` und `thoughtful` sind bei beiden die schwächsten Posen. Ein Mensch sollte sie vor der Beta ansehen.
 
 ## Tiere: Stups und Tüpfel
 
@@ -119,7 +119,8 @@ Alle Figuren bestehen aus **getrennten Teilen mit Ankerpunkten**:
 - **Tiere:** Körper, Kopf, Ohren (Katze) oder Schnabel und Schopf (Vogel), Beine, Schwanz, Flügel oder Pfote.
 - **Maße** stehen als Zahlen (`HumanSpec`, `PetSpec`) in `scripts/lib/figures/cast.ts`, alle in Einheiten der 400 × 200-Fläche wie die Bausteine.
 - **Benannte Posen als Daten** (`scripts/lib/figures/poses.ts`), für Tiere in `pets.ts`. Eine Pose ist entweder ein Satz **Winkel** (Arm: Winkel und Beugung) oder ein **Zielpunkt für die Hand**: Dann rechnet ein Arm mit zwei Gliedern (`solveArm`) den Ellbogen aus. So sitzen die Hände an den Rändern eines Tabletts, an einem Teller oder an einem Griff.
-- **Haltepunkte (`grip`)** sind die Zielpunkte der Hände. Heute gibt es sie für das Tablett (beide Ränder) und den Teller; der Baukasten bekommt sie für Schüssel, Löffel, Kanne, Schere und andere in der Erweiterung von Stufe 1 (Schritt 3 des Plans).
+- **Haltepunkte (`grips`)** sind die Zielpunkte der Hände. Seit Schritt 3a stehen sie an den Bausteinen im Katalog (`assets/bausteine/katalog.json`): Tablett und Backblech (beide Ränder), Teller (von unten), Schüssel, Löffel, Kelle, Gabel, Messer, beide Scheren, Wattestäbchen, Stock (Griff und Spitze), Kanne (Henkel), Korb und Eimer (Henkel). Die Gegenstände der Figuren-Vorschau (`props.ts`) bleiben nur für diese Vorschau.
+- **Regen-Kleidung** (Schritt 3a, `outfit` in `rig.ts`): Regenjacke mit Kapuze statt der eigenen Kleidung, Gummistiefel statt Schuhen, beides in Rosé oder Petrol. Hat die Figur eine Mütze (Mats), bleibt die Mütze und es gibt keine Kapuze. **Jette nie mit Petrol-Kapuze** (der Szenenprüfer meldet es).
 - **Augenpunkte** sind im Rig als freiwillige Fassung eingebaut (zwei Punkte, getestet), aber **nicht gewählt** und in keiner Vorschau.
 - Die **Rig-Daten** (Maße, Alter, Hautton, Besonderheiten, alle Posen aufgelöst) stehen als JSON in [`figuren/rig-daten.json`](figuren/rig-daten.json). Ein Test prüft, dass aus JSON gelesene Daten dasselbe Bild ergeben.
 

@@ -1,0 +1,4 @@
+<path d="M-22 -34C-22 -60 22 -60 22 -34" fill="none" stroke-width="{{line}}"/>
+<path d="M-22 -36H22L18 0H-18Z" fill="{{tint}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-22 -36H22L18 0H-18Z" fill="{{tint}}" stroke-width="{{line}}"/>
+<ellipse cx="0" cy="-36" rx="22" ry="4" fill="{{paper}}" stroke-width="{{line}}"/>

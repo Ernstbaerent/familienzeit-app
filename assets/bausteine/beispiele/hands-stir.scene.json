@@ -1,0 +1,7 @@
+{
+  "layout": "hands",
+  "items": [
+    { "slot": "object", "block": "bowl", "tint": "honey", "content": "dough", "size": 1.5, "hands": { "figure": "jette", "pose": "stir", "tool": { "block": "fork" } } },
+    { "slot": "right", "block": "plate", "content": "bananas" }
+  ]
+}

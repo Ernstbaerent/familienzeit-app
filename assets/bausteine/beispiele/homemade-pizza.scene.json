@@ -1,34 +1,9 @@
 {
   "activity": "homemade-pizza",
-  "layout": "table",
+  "layout": "pair",
   "items": [
-    {
-      "slot": "table",
-      "block": "table"
-    },
-    {
-      "slot": "on1",
-      "block": "baking-tray",
-      "size": 0.6
-    },
-    {
-      "slot": "on2",
-      "block": "pizza",
-      "size": 0.6
-    },
-    {
-      "slot": "on3",
-      "block": "oven-mitt"
-    },
-    {
-      "slot": "left",
-      "block": "adult-reach",
-      "tint": "petrol"
-    },
-    {
-      "slot": "right",
-      "block": "child",
-      "tint": "rose"
-    }
+    { "slot": "left", "figure": "mats", "pose": "curious" },
+    { "slot": "middle", "figure": "arne", "pose": "carry-tray", "mitts": true, "holds": { "both": { "block": "baking-tray", "size": 0.75, "hot": true } } },
+    { "slot": "right", "block": "pizza" }
   ]
 }

@@ -1,0 +1,4 @@
+<path d="M-17 -38C-30 -36 -30 -14 -18 -12" fill="none" stroke-width="{{line}}"/>
+<path d="M-16 -44H16C20 -46 24 -48 28 -50C25 -44 21 -39 18 -35C22 -22 20 -8 14 0H-14C-20 -8 -22 -24 -16 -44Z" fill="{{tint}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-16 -44H16C20 -46 24 -48 28 -50C25 -44 21 -39 18 -35C22 -22 20 -8 14 0H-14C-20 -8 -22 -24 -16 -44Z" fill="none" stroke-width="{{line}}"/>
+<path d="M-12 -30H14" fill="none" stroke-width="{{fine}}"/>
