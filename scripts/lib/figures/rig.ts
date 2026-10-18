@@ -38,7 +38,8 @@ export type HumanSpec = {
 };
 
 export type ArmPose = { angle: number; bend: number } | { to: Vec; elbow?: ElbowSide };
-export type LegPose = { angle: number; bend: number };
+// Ein Bein aus Winkeln oder (Fahrrad, 2026-10-18) mit Zielpunkt für den Fuß; das Knie zeigt dann nach vorn (zur Bildmitte).
+export type LegPose = { angle: number; bend: number } | { to: Vec };
 
 export type Pose = {
   lean?: number; // Rumpf neigen, Grad, positiv = nach rechts im Bild
@@ -59,6 +60,7 @@ export type RenderOptions = {
   line?: number; // Linienstärke der Figur (Standard `figureLine` = 5, Gegenstände bleiben 4); feine Linien bleiben 2,5
   limbShadow?: boolean; // versetzte Farbfläche auch an Armen und Beinen (kostet etwa ein Drittel mehr Bytes)
   outfit?: Outfit; // Regen-Kleidung: Regenjacke mit Kapuze und Gummistiefel statt der eigenen Kleidung
+  helmet?: Tint; // Fahrradhelm in diesem Ton (statt Haaren und Mütze)
 };
 
 // Regen-Kleidung (M9b, Schritt 3a): Jacke mit Kapuze (ohne Mütze) und Gummistiefel, beides in einem Ton der Kleidung (Petrol oder Rosé).
@@ -235,6 +237,10 @@ export function buildHuman(spec: HumanSpec, pose: Pose, opts: RenderOptions): Re
   // Beine
   const legs = ([[-1, pose.legL], [1, pose.legR]] as const).map(([side, lp]) => {
     const hip = vec(side * spec.hipW / 2, pelvis.y);
+    if ('to' in lp) {
+      const { elbow, hand: foot } = solveArm(hip, lp.to, spec.upperLeg, spec.lowerLeg, 1, 'out');
+      return { side, hip, mid: elbow, end: foot };
+    }
     const { mid, end } = fromAngles(hip, lp.angle, lp.bend, spec.upperLeg, spec.lowerLeg, side);
     return { side, hip, mid, end };
   });
@@ -255,9 +261,17 @@ export function buildHuman(spec: HumanSpec, pose: Pose, opts: RenderOptions): Re
   const hooded = rain !== undefined && spec.hair !== 'beanie';
   const dressed: HumanSpec = rain === undefined ? spec : { ...spec, torso: 'slim', colors: { ...spec.colors, top: rain.tint, accent: undefined }, scarf: false };
   const out: string[] = [];
-  const hair = hooded ? { back: '', front: '', extra: '' } : hairPaths(spec, world(headC), (lean + tilt) * flipX);
+  const hair = hooded || opts.helmet !== undefined ? { back: '', front: '', extra: '' } : hairPaths(spec, world(headC), (lean + tilt) * flipX);
   out.push(hair.back);
   let hood: Geometry['hood'];
+  if (opts.helmet !== undefined) {
+    // Helm: Kuppel über dem Kopf mit kurzem Schirm vorn (wird nach dem Kopf gezeichnet, siehe unten)
+    const R = spec.headR;
+    const hx = (p: Vec): Vec => world(add(headC, rotate(p, lean + tilt)));
+    const dome = new Path(hx).M(-R * 1.15, -R * 0.1).C(-R * 1.25, -R * 1.85, R * 1.25, -R * 1.85, R * 1.15, -R * 0.1).L(R * 1.5, -R * 0.15).L(R * 1.12, -R * 0.38).Q(0, -R * 0.75, -R * 1.15, -R * 0.1).Z().toString();
+    hair.front = `<path d="${dome}" fill="${fill(opts.helmet)}" stroke-width="4"/>`;
+    hood = { c: hx(vec(0, -R * 0.5)), r: R * 1.3, tint: opts.helmet };
+  }
   if (hooded) {
     const hc = world(add(headC, rotate(vec(0, -spec.headR * 0.12), lean + tilt)));
     hood = { c: hc, r: spec.headR * 1.4, tint: rain.tint };

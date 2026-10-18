@@ -95,6 +95,7 @@ Die einfachen Strichfiguren der Pilot-Bilder und der Stufe 1 (Köpfe in Leinen, 
 
 - **Ein Motiv pro Bild.** Ein Gegenstand oder eine Handlung, kein Hintergrund mit Möbeln oder Räumen.
 - **Viel Luft:** Das Motiv bleibt innerhalb von 24 Einheiten Rand.
+- **Titelbild und Schrittbild** (seit dem ersten Bild-Test, 18. Oktober 2026): Ein **Titelbild** zeigt mindestens eine Figur der Besetzung und einen erkennbaren Gegenstand der Aktivität (bevorzugt die Layouts `pair`, `outdoor`, `hero`), **nie ein Messer oder eine Schere** (dafür die Zutat, das Ergebnis oder den Ort), und jeden Gegenstand, den der Titel nennt. Hände ohne Figur (Nahaufnahme, Layout `hands`) gibt es nur in **Schrittbildern**. Gibt es für einen Gegenstand aus dem Titel keinen Baustein, entsteht kein Titelbild (Farbfläche); ein Bild, das den Titel falsch macht, ist schlechter als keines.
 - **Titelbilder: Die oberen Ecken bleiben frei von Wichtigem** (je etwa 180 × 60): Auf der Karte liegt dort die Kategorie-Pille,
   oben am Anfang der Zeile, bei Rechts-nach-links also oben rechts. Schrittbilder haben keine Pille.
 - **Lesbar in jeder Größe:** auf der Karte (ca. 312 × 156), als Schrittbild (ca. 256 × 128) und in Daumennagelgröße
@@ -102,6 +103,8 @@ Die einfachen Strichfiguren der Pilot-Bilder und der Stufe 1 (Köpfe in Leinen, 
 - **Nahaufnahme vor Szene** (Erfahrung aus dem Pilot): Hände und Gegenstände in Nahaufnahme bleiben im Daumennagel lesbar,
   Szenen mit ganzen Figuren verlieren dort ihre Einzelheiten. Ganze Figuren nur, wenn es darauf ankommt, **wer** etwas tut
   (Erwachsener am Ofen, Erwachsener mit Schere).
+- **Inhalt von Bechern und Gläsern:** Zitronensaft und Saft sind Honig, Wasser ist Petrol, ein leerer Becher Leinen. Der Ton ist der Inhalt und braucht wie ein Gegenstand Deckung im Text (Baukasten: `liquids` am Becher).
+- **Papier** ist ein flaches Blatt mit leichter Faltkante, nie eine Tüte oder ein Beutel (dafür gibt es Papiertüte und Stofftasche).
 - **Auch in Palette C gilt:** Ein Becher mit Schaumkrone darf nicht nach Bierglas aussehen, eine Tube nicht nach Kerze. Eine rosa Tomatensauce bleibt Sauce, wenn Teig (Honig) und Käse (Leinen) dazu stehen.
 - **Keine Form, die an etwas anderes erinnert** (Erfahrung aus dem Pilot): Ein Becher mit Schaumkrone wirkte wie ein Bierglas,
   eine Flasche mit spitzer Kappe wie eine Kerze. Jedes Bild einmal mit der Frage „Was könnte man noch darin sehen?“ ansehen.
@@ -131,14 +134,15 @@ Für jedes Bild wird geprüft:
 | Thema | Im Bild |
 | --- | --- |
 | Hitze (Ofen, Herd, Blech, alles frisch aus dem Ofen) | nur **in der Hand** eines Erwachsenen **mit Ofenhandschuhen an der Hand**, kein Kleinkind im Bild, andere Kinder mit Abstand (mindestens 20 Einheiten) |
-| Messer, spitze Schere | nur **in der Hand eines Erwachsenen**, nie frei liegend; ein Kind darf zuschauen |
-| Kinderschere (rund, bunt) | in Kinderhand nur, wenn die Sicherheits-Checkliste es für das Alter erlaubt (ab 3 Jahren, Punkt 5), ein Erwachsener im Bild ist (Punkt 2) und der Text die Kinderschere nennt. Wo die Checkliste schweigt, gilt: nur Erwachsene. Nie in der Hand eines Kleinkinds |
+| Messer, spitze Schere | nur **in der Hand eines Erwachsenen**, nie frei liegend; ein Kind darf zuschauen. **Nie im Titelbild**, nur in Schrittbildern |
+| Kinderschere (rund, bunt) | **nie im Titelbild**; im Schrittbild in Kinderhand nur, wenn die Sicherheits-Checkliste es für das Alter erlaubt (ab 3 Jahren, Punkt 5), ein Erwachsener im Bild ist (Punkt 2) und der Text die Kinderschere nennt. Wo die Checkliste schweigt, gilt: nur Erwachsene. Nie in der Hand eines Kleinkinds |
 | Tiere (Stups, Tüpfel) | nie im selben Bild mit Hitze, Feuer, Messer oder Schere, und nie bei einer Aktivität mit solchem Material |
 | Feuer | keine offene Flamme, keine Kerze (auch nicht in Laternen, Punkt 7) |
 | Wasser | kein Kind allein am Wasser, bei Kindern unter 6 immer ein Erwachsener daneben (Punkt 3) |
 | Kleinteile | keine losen Kleinteile in der Nähe von Kleinkindern (Punkt 1) |
 | Spritzer, Augen | Schutzbrille nur, wenn der Text sie nennt (sonst Bild oder Text anpassen) |
 | Alter | die Figuren passen zur Altersspanne der Aktivität (`docs/design/FIGUREN.md`) |
+| Fahrrad | wer fährt (Pose `ride`), trägt einen Helm |
 | Hautton und Petrol | hinter oder an Kopf und Händen einer Figur, deren Hautton auf Petrol nicht trägt (heute Jette), liegt nichts Petrolfarbenes |
 
 Der Szenenprüfer des Baukastens setzt diese Regeln mechanisch um (`scripts/lib/kit/scene.ts`, Tabelle in `docs/bausteine/README.md`, „Sicherheit“).

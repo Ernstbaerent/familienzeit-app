@@ -1,0 +1,31 @@
+{
+  "activity": "banana-oat-balls",
+  "layout": "hands",
+  "purpose": "step",
+  "items": [
+    {
+      "slot": "object",
+      "block": "bowl",
+      "content": "dough",
+      "tint": "rose",
+      "size": 1.5,
+      "hands": {
+        "figure": "mats",
+        "pose": "stir",
+        "tool": {
+          "block": "fork"
+        }
+      }
+    },
+    {
+      "slot": "left",
+      "block": "bananas",
+      "size": 1
+    },
+    {
+      "slot": "right",
+      "block": "oat-balls",
+      "size": 1
+    }
+  ]
+}

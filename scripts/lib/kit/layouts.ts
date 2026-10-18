@@ -8,7 +8,7 @@ export type SlotKind = Exclude<BlockKind, 'content' | 'ground'> | 'figure';
 
 export const frame = { w: 400, h: 200 } as const;
 export const baseY = 176; // Standlinie: Hier stehen Figuren und Gegenstände (24 Einheiten Rand nach unten)
-export const handsY = 150; // Tischkante im Layout `hands`: Darunter kommen die Unterarme vom Bildrand
+export const handsY = 160; // Tischkante im Layout `hands`: Darunter kommen die Unterarme vom Bildrand (seit 2026-10-18 tiefer, damit die Unterarme kürzer sind; vorher 150)
 export const margin = 24; // alles bleibt innerhalb dieses Rands
 // Grund: ein weicher großer Kreis hinter dem Motiv (ILLUSTRATIONEN.md, „Grund“).
 export const backdrop = { cx: 200, cy: 108, r: 90 } as const;

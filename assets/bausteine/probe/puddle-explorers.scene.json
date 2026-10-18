@@ -1,6 +1,7 @@
 {
   "activity": "puddle-explorers",
   "layout": "outdoor",
+  "purpose": "title",
   "items": [
     {
       "slot": "mid",

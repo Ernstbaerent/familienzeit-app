@@ -52,6 +52,9 @@ export type ClaudeRequest = {
   prompt: string;
   schema: Record<string, unknown>;
   maxTokens: number;
+  // Den festen Teil (system) im Zwischenspeicher der API ablegen (Prompt Caching, `cache_control` am Systemtext, 5 Minuten).
+  // Ändert laut Doku die Antwort nicht, nur die Kosten: schreiben 1,25-fach, lesen 0,1-fach des Eingabepreises. Nur der Bild-Test nutzt es.
+  cacheSystem?: boolean;
 };
 
 function readNumber(value: unknown): number {
@@ -94,7 +97,7 @@ export function buildRequestBody(request: ClaudeRequest): string {
   return JSON.stringify({
     model: request.model,
     max_tokens: request.maxTokens,
-    system: request.system,
+    system: request.cacheSystem === true ? [{ type: 'text', text: request.system, cache_control: { type: 'ephemeral' } }] : request.system,
     messages: [{ role: 'user', content: request.prompt }],
     output_config: { effort: 'medium', format: { type: 'json_schema', schema: request.schema } },
   });

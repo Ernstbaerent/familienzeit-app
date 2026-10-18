@@ -1,5 +1,6 @@
 {
   "layout": "hands",
+  "purpose": "step",
   "items": [
     { "slot": "object", "block": "paper", "size": 2, "hands": { "figure": "jette", "pose": "write", "tool": { "block": "cotton-swab", "size": 0.75 } } },
     { "slot": "right", "block": "cup", "tint": "honey" }

@@ -12,7 +12,7 @@ import { contentFor, drawBlock, gripOf, toWorld, unionBox, type Pose2D } from '.
 import { estimateBox, type Box } from './geometry.ts';
 import type { Catalog, GripName, Hands, HandsPoseName, HeldItem, HoldPoseName, LoadedBlock, Person, SceneItem, TintName } from './types.ts';
 
-export const holdPoseNames: readonly HoldPoseName[] = ['hold-plate', 'carry-tray', 'point', 'pour', 'stir', 'cut-supervised', 'hand-over', 'write'];
+export const holdPoseNames: readonly HoldPoseName[] = ['hold-plate', 'carry-tray', 'point', 'pour', 'stir', 'cut-supervised', 'hand-over', 'write', 'ride'];
 export const handsPoseNames: readonly HandsPoseName[] = ['hold', 'stir', 'cut', 'write'];
 // Posen des Rigs ohne Gegenstand, die eine Szene nutzen darf („hold“, „tray“, „take“ brauchen die Gegenstände der Figuren-Vorschau).
 export const freePoseNames: readonly PoseName[] = poseNames.filter((name) => !['hold', 'tray', 'take'].includes(name));
@@ -26,6 +26,7 @@ export const holdPoseLabels: Record<HoldPoseName, { de: string; en: string }> = 
   'cut-supervised': { de: 'schneidet (nur Erwachsene, Kinder schauen zu)', en: 'cutting (adults only, children watch)' },
   'hand-over': { de: 'reicht', en: 'handing over' },
   write: { de: 'schreibt oder malt am Tisch', en: 'writing or drawing at the table' },
+  ride: { de: 'fährt Fahrrad (mit Helm)', en: 'riding a bike (with helmet)' },
 };
 
 const heldSizes = [1, 0.75, 0.6];
@@ -131,7 +132,7 @@ function needGrip(r: Resolved, grips: GripName[], pose: string, problems: string
 const restArm = { angle: 11, bend: 6 } as const;
 const restLegs = { legL: { angle: 4, bend: 0 }, legR: { angle: 4, bend: 0 } };
 
-type Layout = { pose: Pose; held: LocalHeld[]; targets: { left?: Vec; right?: Vec } };
+type Layout = { pose: Pose; held: LocalHeld[]; targets: { left?: Vec; right?: Vec }; feet?: { left: Vec; right: Vec } };
 
 // Rechnet eine Pose mit Gegenstand (Koordinaten der Figur: Mitte der Füße = (0 0), oben negativ, „rechts“ = zur Bildmitte hin).
 // `surface`: Höhe der Tischplatte relativ zu den Füßen (nur am Tisch), für „write“ und „cut-supervised“.
@@ -144,6 +145,7 @@ export function holdLayout(spec: HumanSpec, name: HoldPoseName, holds: SceneItem
   const shoulderL = vec(-sw / 2, sy);
   const held: LocalHeld[] = [];
   const targets: Layout['targets'] = {};
+  let feet: Layout['feet'];
   const r = resolveHeld(holds?.right, catalog, problems, name);
   const l = resolveHeld(holds?.left, catalog, problems, name);
   const both = resolveHeld(holds?.both, catalog, problems, name);
@@ -157,6 +159,7 @@ export function holdLayout(spec: HumanSpec, name: HoldPoseName, holds: SceneItem
     'cut-supervised': ['right', 'surface'],
     'hand-over': ['right'],
     write: ['right', 'surface'],
+    ride: ['both'],
   };
   for (const key of Object.keys(holds ?? {}) as (keyof NonNullable<SceneItem['holds']>)[]) {
     if (!allowed[name].includes(key)) problems.push(`Die Pose „${name}“ hält nichts in „${key}“ (erlaubt: ${allowed[name].join(', ') || 'nichts'}).`);
@@ -267,6 +270,26 @@ export function holdLayout(spec: HumanSpec, name: HoldPoseName, holds: SceneItem
       pose = { ...pose, lean: 3, tilt: 4, armR: { to: palm, elbow: 'down' } };
       break;
     }
+    case 'ride': {
+      // fährt Fahrrad (2026-10-18): Das Rad steht auf der Standlinie, der Sattel unter dem Becken, die Hände am Lenker, die Füße an den Pedalen.
+      // Alle Zielpunkte gelten vor dem Anheben der Figur (`dy`), deshalb wird `dy` abgezogen.
+      if (both === undefined || !needGrip(both, ['handlebar', 'saddle', 'pedal'], name, problems)) break;
+      const k = both.size;
+      const saddle = gripOf(both.block, 'saddle') as Vec;
+      const at = localAt(-saddle.x * k, 0, k);
+      add2(both, at);
+      const seat = grip(both, at, 'saddle');
+      const bar = grip(both, at, 'handlebar');
+      const crank = grip(both, at, 'pedal');
+      const dy = seat.y - 2 + L;
+      const lift = (p: Vec): Vec => vec(p.x, p.y - dy);
+      // Die zweite Hand liegt hinter dem Körper am Lenker; ihr Arm ist von der hinteren Schulter oft zu kurz, deshalb wird nur die vordere geprüft.
+      targets.right = lift(bar);
+      const backHand = lift(add(bar, vec(-4, 2)));
+      feet = { right: lift(add(crank, vec(7 * k, 3 * k))), left: lift(add(crank, vec(-7 * k, -3 * k))) };
+      pose = { dy, lean: 14, tilt: 2, legL: { to: feet.left }, legR: { to: feet.right }, armL: { to: backHand, elbow: 'down' }, armR: { to: targets.right, elbow: 'down' } };
+      break;
+    }
     case 'write': {
       if (surface === undefined) {
         problems.push('„write“ braucht einen Tisch (Layout „table“, Platz links oder rechts).');
@@ -282,7 +305,7 @@ export function holdLayout(spec: HumanSpec, name: HoldPoseName, holds: SceneItem
       break;
     }
   }
-  return { pose, held, targets };
+  return { pose, held, targets, feet };
 }
 
 const toWorldFigure = (p: Vec, x: number, y: number, flip: boolean): Vec => vec(x + (flip ? -p.x : p.x), y + p.y);
@@ -297,7 +320,7 @@ export function renderFigure(item: SceneItem, catalog: Catalog, x: number, y: nu
     const allowed: readonly PetPoseName[] = petPosesOf(petEntry.spec.kind).filter((pose) => pose !== 'shoulder');
     const pose = (item.pose ?? 'stand') as PetPoseName;
     if (!allowed.includes(pose)) problems.push(`${petEntry.spec.name} kennt die Pose „${item.pose}“ nicht (erlaubt: ${allowed.join(', ')}).`);
-    if (item.holds !== undefined || item.mitts === true || item.outfit !== undefined) problems.push(`${petEntry.spec.name} ist ein Tier: hält nichts, trägt nichts (Tiere fassen nichts an).`);
+    if (item.holds !== undefined || item.mitts === true || item.outfit !== undefined || item.helmet !== undefined) problems.push(`${petEntry.spec.name} ist ein Tier: hält nichts, trägt nichts (Tiere fassen nichts an).`);
     const svg = buildPet(petEntry.spec, allowed.includes(pose) ? pose : 'stand', { x, y, flip }).svg;
     const box = estimateBox(svg) ?? { minX: x, maxX: x, minY: y, maxY: y };
     return { id, animal: true, back: '', front: svg, box, bodyBox: box, hands: [], skinShapes: [], petrolShapes: [], mitts: false, outfit: false, held: [], cornerShapes: [box], problems };
@@ -319,15 +342,25 @@ export function renderFigure(item: SceneItem, catalog: Catalog, x: number, y: nu
     problems.push(`Pose „${poseName}“ gibt es nicht (ohne Gegenstand: ${freePoseNames.join(', ')}; mit Gegenstand: ${holdPoseNames.join(', ')}).`);
   }
   const mitts = item.mitts === true;
-  const rendered = buildHuman(spec, layout.pose, { x, y, flip, mitts, outfit: item.outfit });
+  const rendered = buildHuman(spec, layout.pose, { x, y, flip, mitts, outfit: item.outfit, helmet: item.helmet });
 
-  // Erreichen die Hände ihre Haltepunkte?
+  // Erreichen die Hände ihre Haltepunkte? (Zielpunkte gelten vor dem Anheben `dy`, die Hand im Bild danach.)
+  const dy = layout.pose.dy ?? 0;
   for (const side of ['left', 'right'] as const) {
     const target = layout.targets[side];
     if (target === undefined) continue;
     const hand = side === 'left' ? rendered.anchors.handL : rendered.anchors.handR;
-    if (length(sub(hand, toWorldFigure(target, x, y, flip))) > reachTolerance) {
+    if (length(sub(hand, toWorldFigure(vec(target.x, target.y + dy), x, y, flip))) > reachTolerance) {
       problems.push(`${spec.name} erreicht mit der ${side === 'left' ? 'linken' : 'rechten'} Hand den Haltepunkt nicht (Pose „${poseName}“; kleinere Größe wählen, z. B. "size": 0.75).`);
+    }
+  }
+  // Die Pedale ebenso.
+  for (const side of ['left', 'right'] as const) {
+    const target = layout.feet?.[side];
+    if (target === undefined) continue;
+    const foot = side === 'left' ? rendered.anchors.footL : rendered.anchors.footR;
+    if (length(sub(foot, toWorldFigure(vec(target.x, target.y + dy), x, y, flip))) > reachTolerance * 2) {
+      problems.push(`${spec.name} erreicht mit dem ${side === 'left' ? 'linken' : 'rechten'} Fuß das Pedal nicht (Pose „${poseName}“; kleineres Fahrrad wählen, z. B. "size": 0.75).`);
     }
   }
 
@@ -381,6 +414,9 @@ export function renderFigure(item: SceneItem, catalog: Catalog, x: number, y: nu
 const handR = 10; // Hand in der Nahaufnahme
 const armR = 7; // halbe Dicke des Unterarms
 const sleeveR = 9.5;
+// Wo der Unterarm ins Bild kommt: so weit zur Seite (Einheiten) und auf dieser Höhe (knapp unter dem unteren Rand, 200).
+export const forearmSpread = 20;
+export const forearmEntryY = 206;
 
 function handSvg(c: Vec, skin: string, mitt: boolean): string {
   if (!mitt) return `<circle cx="${fmt(c.x)}" cy="${fmt(c.y)}" r="${handR}" fill="${skin}" stroke-width="${figureLine}"/>`;
@@ -390,7 +426,8 @@ function handSvg(c: Vec, skin: string, mitt: boolean): string {
 
 // Unterarm vom unteren Bildrand zur Hand, mit Ärmel am Rand. `side` +1 rechts, −1 links (der Arm kommt von außen unten).
 function forearm(hand: Vec, side: 1 | -1, skin: string, sleeve: Tint): { svg: string; skinBox: Box; sleeveBox: Box } {
-  const entry = vec(Math.min(392, Math.max(8, hand.x + side * 36)), 216);
+  // kurz und steil von unten (nach dem ersten Bild-Test, 2026-10-18: vorher 36 Einheiten zur Seite und ab y = 216, die Arme wirkten sehr lang)
+  const entry = vec(Math.min(392, Math.max(8, hand.x + side * forearmSpread)), forearmEntryY);
   const cuff = add(entry, scale(sub(hand, entry), 0.42));
   const arm = `<path d="${capsule(entry, hand, armR)}" fill="${skin}" stroke-width="${figureLine}"/>`;
   const sl = `<path d="${capsule(entry, cuff, sleeveR)}" fill="{{${sleeve}}}" stroke-width="${figureLine}"/>`;

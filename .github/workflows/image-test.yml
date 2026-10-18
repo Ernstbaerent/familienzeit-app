@@ -1,9 +1,9 @@
-# Miki, M9b: Bild-Test (nur manuell). Die Claude API wählt für einige Aktivitäten je ein Titelbild aus dem Baukasten (Szene als JSON),
+# Miki, M9b: Bild-Test (nur manuell). Die Claude API (Standard: Haiku) wählt für einige Aktivitäten je ein Titelbild aus dem Baukasten (Szene als JSON),
 # der Szenenprüfer prüft es mechanisch, das Skript zeichnet es, rsvg-convert macht PNG daraus. Ergebnis: Zusammenfassung des Laufs
 # (je Bild: gewählte Szene, Prüfergebnis, Größe, Versuche, Token, Kosten, Figuren, dazu der Zähler der Figuren) und das Artefakt
 # "bild-test" (PNG und SVG zum Ansehen). Anleitung: docs/bilder-plan.md, „Modelltest“ und „Bilder ansehen“.
-# Standard: die fünf Probeaktivitäten und die drei neuesten aus dem KI-Wochenlauf (batch_id gesetzt; fehlt eine Probeaktivität in Supabase,
-# kommt ihr Text aus assets/bausteine/probe/aktivitaeten.json). Die Figurenwahl (scripts/lib/kit/casting.ts) zählt mit, wer schon im Bild war.
+# Standard: dieselben zehn Aktivitäten wie im ersten Lauf mit Haiku (18. Oktober 2026), feste IDs für den Vergleich vorher/nachher
+# (fehlt eine in Supabase, kommt ihr Text aus assets/bausteine/probe/aktivitaeten.json, falls er dort steht). Die Figurenwahl (scripts/lib/kit/casting.ts) zählt mit, wer schon im Bild war.
 #
 # Schreibt NICHTS in die Datenbank und fasst KEINEN Bucket an. Liest Aktivitäten nur mit dem öffentlichen Lese-Schlüssel.
 # Secrets (Settings → Secrets and variables → Actions → Secrets): ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY
@@ -28,13 +28,13 @@ on:
           - sonnet
         default: haiku
       ids:
-        description: 'Aktivitäten (IDs, durch Komma getrennt; leer = die fünf Probeaktivitäten)'
+        description: 'Aktivitäten (IDs, durch Komma getrennt, höchstens 10; vorbelegt: die zehn aus dem ersten Lauf vom 18. Oktober)'
         type: string
-        default: 'baked-apples,banana-oat-balls,dance-freeze,secret-lemon-ink,puddle-explorers'
+        default: 'baked-apples,banana-oat-balls,dance-freeze,secret-lemon-ink,puddle-explorers,autumn-salad-with-lemon,bike-slalom-with-sticks,card-tricks-for-the-family,counting-lit-windows-nearby,feely-bag-of-nature-finds'
       ki:
-        description: 'Zusätzlich so viele der neuesten KI-Aktivitäten (batch_id gesetzt), 0 bis 5'
+        description: 'Zusätzlich so viele der neuesten KI-Aktivitäten (batch_id gesetzt), 0 bis 5; nur mit weniger als 10 IDs'
         type: string
-        default: '3'
+        default: '0'
 
 permissions:
   contents: read

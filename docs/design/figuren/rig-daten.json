@@ -224,6 +224,26 @@
       "bend": 0
      }
     },
+    "watch": {
+     "lean": 4,
+     "tilt": 12,
+     "legL": {
+      "angle": 3,
+      "bend": 0
+     },
+     "legR": {
+      "angle": 7,
+      "bend": 4
+     },
+     "armL": {
+      "angle": 5,
+      "bend": 6
+     },
+     "armR": {
+      "angle": 9,
+      "bend": 16
+     }
+    },
     "amazed": {
      "lean": -4,
      "tilt": -8,
@@ -544,6 +564,26 @@
      "armR": {
       "angle": 92,
       "bend": 0
+     }
+    },
+    "watch": {
+     "lean": 4,
+     "tilt": 12,
+     "legL": {
+      "angle": 3,
+      "bend": 0
+     },
+     "legR": {
+      "angle": 7,
+      "bend": 4
+     },
+     "armL": {
+      "angle": 5,
+      "bend": 6
+     },
+     "armR": {
+      "angle": 9,
+      "bend": 16
      }
     },
     "amazed": {
@@ -874,6 +914,26 @@
       "bend": 0
      }
     },
+    "watch": {
+     "lean": 4,
+     "tilt": 12,
+     "legL": {
+      "angle": 3,
+      "bend": 0
+     },
+     "legR": {
+      "angle": 7,
+      "bend": 4
+     },
+     "armL": {
+      "angle": 5,
+      "bend": 6
+     },
+     "armR": {
+      "angle": 9,
+      "bend": 16
+     }
+    },
     "amazed": {
      "lean": -4,
      "tilt": -8,
@@ -1199,6 +1259,26 @@
       "bend": 0
      }
     },
+    "watch": {
+     "lean": 4,
+     "tilt": 12,
+     "legL": {
+      "angle": 3,
+      "bend": 0
+     },
+     "legR": {
+      "angle": 7,
+      "bend": 4
+     },
+     "armL": {
+      "angle": 5,
+      "bend": 6
+     },
+     "armR": {
+      "angle": 9,
+      "bend": 16
+     }
+    },
     "amazed": {
      "lean": -4,
      "tilt": -8,
@@ -1516,6 +1596,26 @@
      "armR": {
       "angle": 92,
       "bend": 0
+     }
+    },
+    "watch": {
+     "lean": 4,
+     "tilt": 12,
+     "legL": {
+      "angle": 3,
+      "bend": 0
+     },
+     "legR": {
+      "angle": 7,
+      "bend": 4
+     },
+     "armL": {
+      "angle": 5,
+      "bend": 6
+     },
+     "armR": {
+      "angle": 9,
+      "bend": 16
      }
     },
     "amazed": {

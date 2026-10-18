@@ -44,10 +44,11 @@ describe('Katalog (Stufe 1)', () => {
     expect(checkCatalog(catalog)).toEqual([]);
   });
 
-  it('hat 44 Bausteine (Stufe 1 ohne Strichfiguren, dazu Schritt 3a), alle mit Vorschau', () => {
-    expect(catalog.size).toBe(44);
-    expect([...catalog.values()].filter((entry) => entry.kind === 'content')).toHaveLength(10);
+  it('hat 50 Bausteine (Stufe 1, Schritt 3a, nach dem ersten Bild-Test), alle mit Vorschau', () => {
+    expect(catalog.size).toBe(50);
+    expect([...catalog.values()].filter((entry) => entry.kind === 'content')).toHaveLength(11);
     for (const id of ['plate', 'ladle', 'jug', 'basket', 'bucket', 'knife', 'fork', 'child-scissors', 'cotton-swab', 'stick']) expect(catalog.has(id)).toBe(true);
+    for (const id of ['cloth-bag', 'paper-bag', 'playing-cards', 'bike', 'house-windows', 'vegetables']) expect(catalog.has(id)).toBe(true);
     const previews = new Set(buildPreviewFiles(catalog, new Map()).map((file) => file.path));
     for (const id of catalog.keys()) expect(previews).toContain(`docs/bausteine/vorschau/${id}.svg`);
   });
@@ -80,11 +81,11 @@ describe('Katalog (Stufe 1)', () => {
     expect(grips('child-scissors')).toEqual(['handle', 'tip']);
   });
 
-  it('Behälter und Inhalte: zehn Inhalte, jeder passt in mindestens einen Behälter', () => {
+  it('Behälter und Inhalte: elf Inhalte, jeder passt in mindestens einen Behälter', () => {
     const containers = [...catalog.values()].filter((entry) => entry.container !== undefined).map((entry) => entry.id).sort();
-    expect(containers).toEqual(['baking-tray', 'basket', 'bowl', 'bucket', 'plate', 'tray']);
+    expect(containers).toEqual(['baking-tray', 'basket', 'bowl', 'bucket', 'cloth-bag', 'paper-bag', 'plate', 'tray']);
     const contents = [...catalog.values()].filter((entry) => entry.kind === 'content');
-    expect(contents.map((entry) => entry.id).sort()).toEqual(['baked-apples', 'bananas', 'chestnuts', 'cookies', 'dough', 'fruit', 'leaves', 'lemon-halves', 'oat-balls', 'water']);
+    expect(contents.map((entry) => entry.id).sort()).toEqual(['baked-apples', 'bananas', 'chestnuts', 'cookies', 'dough', 'fruit', 'leaves', 'lemon-halves', 'oat-balls', 'vegetables', 'water']);
     for (const content of contents) {
       expect((content.fits ?? []).length).toBeGreaterThan(0);
       for (const id of content.fits ?? []) expect(containers).toContain(id);

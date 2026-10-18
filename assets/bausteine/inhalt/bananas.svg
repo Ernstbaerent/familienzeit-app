@@ -1,2 +1,5 @@
-<path d="M-16 -4C-6 4 12 -2 17 -20C10 -10 -2 -5 -13 -9C-16 -9 -17 -7 -16 -4Z" fill="{{honey}}" stroke-width="{{line}}"/>
-<path d="M17 -20L19 -24" fill="none" stroke-width="{{fine}}"/>
+<path d="M-18 -10C-11 2 9 2 16 -15C11 -8 -3 -6 -14 -12C-16 -13 -18 -12 -18 -10Z" fill="{{honey}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-18 -10C-11 2 9 2 16 -15C11 -8 -3 -6 -14 -12C-16 -13 -18 -12 -18 -10Z" fill="{{honey}}" stroke-width="{{line}}"/>
+<path d="M-12 -6C-4 -1 6 -3 12 -11" fill="none" stroke-width="{{fine}}"/>
+<path d="M14 -14L17 -21L21 -19L17 -12Z" fill="{{brown}}" stroke-width="{{fine}}"/>
+<path d="M-18 -10C-19 -12 -18 -14 -15 -13L-15 -9C-16 -8 -17 -8 -18 -10Z" fill="{{ink}}" stroke="none"/>

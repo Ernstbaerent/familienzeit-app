@@ -1,6 +1,7 @@
 {
   "activity": "sock-puppet-theater",
   "layout": "hero",
+  "purpose": "title",
   "items": [
     { "slot": "main", "block": "cardboard-box" },
     { "slot": "left", "figure": "jette", "pose": "curious" },

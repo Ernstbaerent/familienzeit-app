@@ -64,7 +64,9 @@ function layoutOf(s: PetSpec, pose: PetPoseName): Layout {
       return { ...base, tilt, bodyY, headRot: pose === 'watch' ? -16 : 0, sit: true };
     }
     case 'hop':
-      return { ...base, dy: -13, tilt: s.kind === 'bird' ? -20 : -12, hop: true };
+      // Überarbeitet nach dem ersten Bild-Test (2026-10-18): Rumpf fast waagerecht, Beine hängen gestreckt mit Füßen nach unten,
+      // ein großer gefüllter Flügel nach oben (vorher eine Linie quer über den Rücken, im Daumennagel wie ein Käfer).
+      return { ...base, dy: s.kind === 'bird' ? -17 : -13, tilt: s.kind === 'bird' ? -6 : -12, hop: true };
     case 'point':
       return { ...base, tilt: s.kind === 'bird' ? 8 : -6, headRot: s.kind === 'bird' ? 6 : -4, point: true };
   }
@@ -151,8 +153,9 @@ export function buildPet(spec: PetSpec, pose: PetPoseName, opts: { x: number; y:
   const seg = (a: Vec, b: Vec): string => line(`M${fmt(a.x)} ${fmt(a.y)}L${fmt(b.x)} ${fmt(b.y)}`);
   const foot = (b: Vec, dir: number): string => line(`M${fmt(b.x - 1 * f)} ${fmt(b.y)}L${fmt(b.x + dir * 5 * f)} ${fmt(b.y)}`);
   if (bird) {
-    const legs = L.hop ? [{ a: hipFront, b: add(hipFront, vec(4 * f, 6)) }, { a: hipBack, b: add(hipBack, vec(-3 * f, 7)) }] : [{ a: hipBack, b: ground(hipBack.x === 0 ? 0 : (hipBack.x - opts.x) * f - 1) }, { a: hipFront, b: ground((hipFront.x - opts.x) * f - 4) }];
-    for (const leg of legs) out.push(seg(leg.a, leg.b), L.hop ? '' : foot(leg.b, 1));
+    const dangle = spec.legLen * 0.6;
+    const legs = L.hop ? [{ a: hipBack, b: add(hipBack, vec(-5 * f, dangle)) }, { a: hipFront, b: add(hipFront, vec(-3 * f, dangle)) }] : [{ a: hipBack, b: ground(hipBack.x === 0 ? 0 : (hipBack.x - opts.x) * f - 1) }, { a: hipFront, b: ground((hipFront.x - opts.x) * f - 4) }];
+    for (const leg of legs) out.push(seg(leg.a, leg.b), foot(leg.b, 1));
   } else if (L.sit) {
     const front = ground((hipFront.x - opts.x) * f + 1);
     out.push(seg(hipFront, front), foot(front, 1));
@@ -184,8 +187,9 @@ export function buildPet(spec: PetSpec, pose: PetPoseName, opts: { x: number; y:
       const tip = w(vec(rx * 0.3 + 30, L.bodyY - 20));
       out.push(line(`M${fmt(wingBase.x)} ${fmt(wingBase.y)}L${fmt(tip.x)} ${fmt(tip.y)}`), `<circle cx="${fmt(tip.x)}" cy="${fmt(tip.y)}" r="3" fill="${fill(spec.colors.body)}" stroke-width="4"/>`);
     } else if (L.hop) {
-      const tip = bodyXf(vec(-rx * 0.5, body.y - ry - 16));
-      out.push(line(`M${fmt(wingBase.x)} ${fmt(wingBase.y)}Q${fmt(wingBase.x - 4 * f)} ${fmt(wingBase.y - 10)} ${fmt(tip.x)} ${fmt(tip.y)}`));
+      // gefüllter Flügel, nach oben und hinten gehoben
+      const wing = new Path(bodyXf).M(rx * 0.15, body.y - ry * 0.35).Q(-rx * 0.05, body.y - ry - 18, -rx * 0.75, body.y - ry - 14).Q(-rx * 0.85, body.y - ry * 0.5, -rx * 0.45, body.y - ry * 0.1).Z().toString();
+      out.push(`<path d="${wing}" fill="${fill(spec.colors.body)}" stroke-width="4"/>`);
     } else {
       const tip = bodyXf(vec(-rx * 0.75, body.y + ry * 0.25));
       out.push(line(`M${fmt(wingBase.x)} ${fmt(wingBase.y)}Q${fmt(wingBase.x - 6 * f)} ${fmt(wingBase.y + 6)} ${fmt(tip.x)} ${fmt(tip.y)}`, 2.5));

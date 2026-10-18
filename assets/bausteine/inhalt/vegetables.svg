@@ -1,0 +1,3 @@
+<path d="M-6 -16C-6 -7 -2 -1 0 0C2 -1 6 -7 6 -16Z" fill="{{honey}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-6 -16C-6 -7 -2 -1 0 0C2 -1 6 -7 6 -16Z" fill="{{honey}}" stroke-width="{{line}}"/>
+<path d="M-2 -17L-5 -24M0 -17V-25M2 -17L5 -24" fill="none" stroke-width="{{fine}}"/>

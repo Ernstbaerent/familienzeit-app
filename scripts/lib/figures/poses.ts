@@ -4,11 +4,11 @@
 import { vec, type Vec } from './math.ts';
 import { legLength, type HumanSpec, type Pose } from './rig.ts';
 
-export type PoseName = 'stand' | 'hold' | 'tray' | 'cheer' | 'walk' | 'take' | 'dance' | 'freeze' | ExpressionName;
+export type PoseName = 'stand' | 'hold' | 'tray' | 'cheer' | 'walk' | 'take' | 'dance' | 'freeze' | 'watch' | ExpressionName;
 // Ausdrucksposen (Entscheidung von Clemens, 2026-10-16): Emotionen über Haltung statt über Gesichtszüge. Nur Daten, nichts wird animiert.
 export type ExpressionName = 'amazed' | 'happy' | 'disappointed' | 'thoughtful' | 'curious';
 export const expressionNames: readonly ExpressionName[] = ['amazed', 'happy', 'disappointed', 'thoughtful', 'curious'];
-export const poseNames: readonly PoseName[] = ['stand', 'hold', 'tray', 'cheer', 'walk', 'take', 'dance', 'freeze', ...expressionNames];
+export const poseNames: readonly PoseName[] = ['stand', 'hold', 'tray', 'cheer', 'walk', 'take', 'dance', 'freeze', 'watch', ...expressionNames];
 
 // Besonderheiten einer Figur, die in „stand“ auffallen (spielerisch geneigter Kopf, Hand in die Hüfte).
 export type Quirk = { tilt?: number; handOnHip?: 'L' | 'R' };
@@ -22,6 +22,7 @@ export const poseLabels: Record<PoseName, { de: string; en: string }> = {
   take: { de: 'nimmt Tablett', en: 'taking the tray' },
   dance: { de: 'tanzt', en: 'dancing' },
   freeze: { de: 'erstarrt wie eine Statue', en: 'frozen like a statue' },
+  watch: { de: 'schaut zu', en: 'watching' },
   amazed: { de: 'staunt', en: 'amazed' },
   happy: { de: 'freut sich', en: 'happy' },
   disappointed: { de: 'enttäuscht', en: 'disappointed' },
@@ -142,6 +143,17 @@ export function poseOf(s: HumanSpec, name: PoseName, quirk: Quirk = {}): Pose {
         legR: { angle: 55, bend: 85 },
         armL: { angle: 168, bend: 0 },
         armR: { angle: 92, bend: 0 },
+      };
+    case 'watch':
+      // schaut zu (nach dem ersten Bild-Test, 2026-10-18): ohne Gegenstand, Oberkörper leicht zum Geschehen (zur Bildmitte) geneigt,
+      // Kopf zum Geschehen gedreht und etwas gesenkt, Arme hängen locker (kein Zeigen, kein Greifen)
+      return {
+        lean: 4,
+        tilt: 12,
+        legL: { angle: 3, bend: 0 },
+        legR: { angle: 7, bend: 4 },
+        armL: { angle: 5, bend: 6 },
+        armR: { angle: 9, bend: 16 },
       };
     case 'walk':
       return {

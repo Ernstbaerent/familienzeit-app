@@ -128,7 +128,7 @@ Grenze für Titel- und Schrittbilder: 14 KB (das Bucket erlaubt 20 KB). Das grö
 | `vorschau/jette-ausdruck.svg` | 6,4 KB |
 | `vorschau/mats-ausdruck.svg` | 7,4 KB |
 | `vorschau/tuepfel-1.svg` | 2,7 KB |
-| `vorschau/stups-1.svg` | 3,1 KB |
+| `vorschau/stups-1.svg` | 3,3 KB |
 | `vorschau/stups-2.svg` | 4,5 KB |
 | `vorschau/familie.svg` | 8,2 KB |
 | `vorschau/jette-tri1.svg` | 2,0 KB |
@@ -137,9 +137,9 @@ Grenze für Titel- und Schrittbilder: 14 KB (das Bucket erlaubt 20 KB). Das grö
 | `vorschau/mats-tri1.svg` | 2,1 KB |
 | `vorschau/mats-tri2.svg` | 2,2 KB |
 | `vorschau/mats-tri3.svg` | 2,2 KB |
-| `vorschau/stups-tri1.svg` | 1,6 KB |
+| `vorschau/stups-tri1.svg` | 1,7 KB |
 | `vorschau/stups-tri2.svg` | 1,8 KB |
-| `vorschau/stups-tri3.svg` | 1,6 KB |
+| `vorschau/stups-tri3.svg` | 1,8 KB |
 | `vorschau/linie-4.svg` | 8,2 KB |
 | `vorschau/linie-4-5.svg` | 8,4 KB |
 | `vorschau/linie-5.svg` | 8,2 KB |

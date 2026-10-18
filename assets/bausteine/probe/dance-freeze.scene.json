@@ -1,6 +1,7 @@
 {
   "activity": "dance-freeze",
   "layout": "pair",
+  "purpose": "title",
   "items": [
     {
       "slot": "left",

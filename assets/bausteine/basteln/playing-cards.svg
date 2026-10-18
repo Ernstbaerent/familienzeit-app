@@ -1,0 +1,7 @@
+<path d="M-10.3 -0.2L-20.6 -28.4L0.1 -36L10.3 -7.8Z" fill="{{paper}}" stroke-width="{{line}}"/>
+<path d="M-7.9 -5.4L-15.5 -26L-2.3 -30.8L5.2 -10.2Z" fill="{{tint}}" stroke="none"/>
+<path d="M-11 -4L-11 -34L11 -34L11 -4Z" fill="{{paper}}" stroke-width="{{line}}"/>
+<path d="M-7 -8L-7 -30L7 -30L7 -8Z" fill="{{tint}}" stroke="none"/>
+<path d="M-10.3 -7.8L-0.1 -36L20.6 -28.4L10.3 -0.2Z" fill="{{paper}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-10.3 -7.8L-0.1 -36L20.6 -28.4L10.3 -0.2Z" fill="{{paper}}" stroke-width="{{line}}"/>
+<path d="M-5.2 -10.2L2.3 -30.8L15.5 -26L7.9 -5.4Z" fill="{{tint}}" stroke="none"/>

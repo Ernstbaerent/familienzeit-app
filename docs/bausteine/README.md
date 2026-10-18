@@ -1,6 +1,6 @@
 # Baukasten für Zeichnungen (M9b, Stufe 1 und Schritt 3a)
 
-Stand: 17. Oktober 2026. **44 Bausteine (34 Gegenstände, Möbel und Natur, 10 Inhalte), 5 Layouts, 8 Beispielszenen, die Figuren der Besetzung mit 18 Posen, davon 8 mit Gegenstand in der Hand.** Alle Bausteine, Posen und Behälter in der Palette: [VORSCHAU.md](VORSCHAU.md). Welche Gegenstände die Aktivitäten brauchen: [ABDECKUNG.md](ABDECKUNG.md).
+Stand: 18. Oktober 2026. **50 Bausteine (39 Gegenstände, Möbel und Natur, 11 Inhalte), 5 Layouts, 9 Beispielszenen, die Figuren der Besetzung mit 20 Posen, davon 9 mit Gegenstand in der Hand.** Neu nach dem ersten echten Bild-Test: Titelbild und Schrittbild getrennt (unten, „Titelbild und Schrittbild“). Alle Bausteine, Posen und Behälter in der Palette: [VORSCHAU.md](VORSCHAU.md). Welche Gegenstände die Aktivitäten brauchen: [ABDECKUNG.md](ABDECKUNG.md).
 Gesamtplan, Entscheidungen und Job-Kette des Bilder-Laufs: [`docs/bilder-plan.md`](../bilder-plan.md). Stilregeln für jede Zeichnung: [`docs/design/ILLUSTRATIONEN.md`](../design/ILLUSTRATIONEN.md).
 
 ## Die Idee in drei Sätzen
@@ -22,9 +22,10 @@ So bleibt der Stil gleich, und weder ich noch die KI im Bilder-Lauf schreiben fr
 | Zeichnen mit Drehung, Haltepunkten und Inhalt | `scripts/lib/kit/draw.ts` |
 | Figuren in Szenen, Posen mit Gegenstand, Hände in Nahaufnahme | `scripts/lib/kit/figureItems.ts` (der Rig selbst: `scripts/lib/figures/`) |
 | Szene prüfen und zeichnen, Sicherheit und Textabgleich | `scripts/lib/kit/scene.ts` |
+| Gegenstände aus dem Titel einer Aktivität | `scripts/lib/kit/titleObjects.ts` |
 | Übersichtsbilder der Vorschau (Posen, Behälter) | `scripts/lib/kit/sheets.ts` |
 | Abdeckungsbericht | `scripts/lib/kit/coverage.ts`, `scripts/kit-coverage.ts` |
-| Tests | `scripts/lib/kit/kit.test.ts`, `scripts/lib/figures/figures.test.ts` (laufen mit `npm test`) |
+| Tests | `scripts/lib/kit/kit.test.ts`, `scripts/lib/kit/title.test.ts`, `scripts/lib/figures/figures.test.ts` (laufen mit `npm test`) |
 | Vorschau (erzeugt, eingecheckt) | `docs/bausteine/VORSCHAU.md`, `docs/bausteine/vorschau/`, `docs/bausteine/ABDECKUNG.md` |
 
 ```bash
@@ -40,12 +41,19 @@ npm run kit:coverage   # Abdeckungsbericht über alle Aktivitäten in data/ (ABD
 | --- | --- |
 | Möbel und Fläche (8) | Standlinie, Tisch, Tablett, Decke, Kissen, Stuhl, Karton, Radio |
 | Küche (10) | Schüssel, Holzlöffel, Backblech, Pizza, Ofenhandschuh, **Teller, Kelle, Kanne, Messer, Gabel** |
-| Basteln (6) | Schere (spitz, nur Erwachsene), Klebetube, Papier, Socke, **Kinderschere (rund, bunt), Wattestäbchen** |
-| Experiment (4) | Becher, Flasche, Schutzbrille, Taschenlampe |
-| Natur (6) | Baum, Blume, Pfütze, **Stock, Eimer, Korb** |
-| Inhalte (10) | **Bratäpfel, Kekse, Haferkugeln, Teig, Obst, Bananen, Zitronenhälften, Wasser, Blätter, Kastanien** |
+| Basteln (9) | Schere (spitz, nur Erwachsene), Klebetube, Papier, Socke, **Kinderschere (rund, bunt), Wattestäbchen**, *Stofftasche, Papiertüte, Spielkarten* |
+| Experiment (4) | Becher oder Glas (Ton = Inhalt), Flasche, Schutzbrille, Taschenlampe |
+| Natur (8) | Baum, Blume, Pfütze, **Stock, Eimer, Korb**, *Fahrrad, Hauswand mit Fenstern* |
+| Inhalte (11) | **Bratäpfel, Kekse, Haferkugeln, Teig, Obst, Bananen, Zitronenhälften, Wasser, Blätter, Kastanien**, *Gemüse (Möhren)* |
 
-Fett: neu in Schritt 3a. Die sechs Strichfiguren der Stufe 1 (Erwachsener, Kind, Kleinkind) sind entfernt; Figuren kommen aus der Besetzung (siehe unten).
+Fett: neu in Schritt 3a. Kursiv: neu nach dem ersten Bild-Test (18. Oktober 2026); dazu neu gezeichnet: **Wattestäbchen** (ein Stäbchen mit einem Wattekopf, vorher zwei Köpfe, wirkte wie Schlüssel oder Schere), **Bananen** (gebogen, mit Stielansatz und dunkler Spitze) und **Papier** (Blatt mit Faltkante, zwei Flächen, ohne wählbaren Ton).
+
+- **Stofftasche und Papiertüte:** Öffnung (tiefer Behälter, Blätter, Kastanien, bei der Tüte auch Obst und Gemüse passen hinein) und Griff. Damit ist ein Tastsäckchen zeigbar.
+- **Spielkarten:** ein Fächer aus drei Karten, nur Flächen (Rückseiten in Rosé, Petrol oder Honig), keine Zahlen, Zeichen oder Schrift. Haltepunkt `under` (in der Hand vor der Brust).
+- **Fahrrad:** von der Seite, Haltepunkte `handlebar` (Lenker), `saddle` (Sattel), `pedal` (Tretlager). Neue Pose **`ride`**: Die Figur sitzt auf dem Sattel, die vordere Hand am Lenker, die Füße an den Pedalen, **immer mit Helm** (`"helmet": "rose" | "petrol" | "honey"`, sonst Fehler; der Helm braucht Deckung über Material `bike` oder „Helm“). Kinder nehmen Größe 0,75. Ergebnis: im Daumennagel gut lesbar, deshalb kein Roller oder Laufrad als Ersatz.
+- **Hauswand mit Fenstern:** zwei Fenster erleuchtet (Honig), zwei dunkel (Petrol), Dach in Braun; für Abend- und Spaziergangs-Aktivitäten (Fensterlichter).
+- **Becher (Regel h):** Der Ton ist der Inhalt: **Honig = Zitronensaft oder Saft, Petrol = Wasser, Leinen = leer** (`liquids` im Katalog). Der Inhalt braucht wie ein Baustein Deckung im Text, sonst Fehler.
+- **Papier (Regel g):** nie Tüte oder Beutel. Im Katalog: `excludeTerms` (Wörter wie „Papiertüte“, „Papiertuch“ werden vor dem Abgleich aus dem Text entfernt, sie decken das Blatt nicht) und `notFor` (nennt der Text Tüte, Beutel, Säckchen oder bag, steht Papier nur zusammen mit Stofftasche oder Papiertüte im Bild). Die sechs Strichfiguren der Stufe 1 (Erwachsener, Kind, Kleinkind) sind entfernt; Figuren kommen aus der Besetzung (siehe unten).
 **Für die fünf Probebilder (Schritt 3b) neu:** Teller und Inhalt Bratäpfel (Bratäpfel), Gabel, Teig, Haferkugeln und Bananen (Bananen-Haferkugeln), Wattestäbchen und Zitronenhälften (Geheimschrift), Stock und Eimer mit Blättern (Pfützen-Forscher), dazu die Posen `dance`, `freeze`, `write` und die Regen-Kleidung im Rig.
 **Aus deinem Auftrag für Haltepunkte und Behälter:** Kelle, Kanne, Korb, Messer, Kinderschere und die übrigen Inhalte.
 
@@ -88,7 +96,7 @@ Eine Figur steht auf einem Platz wie ein Baustein, aber mit `figure` statt `bloc
   "holds": { "both": { "block": "tray", "content": "baked-apples", "hot": true } } }
 ```
 
-- **Posen ohne Gegenstand** (aus dem Rig): `stand`, `walk`, `cheer`, `dance`, `freeze`, `amazed`, `happy`, `disappointed`, `thoughtful`, `curious`.
+- **Posen ohne Gegenstand** (aus dem Rig): `stand`, `walk`, `cheer`, `dance`, `freeze`, `watch` (schaut zu, neu), `amazed`, `happy`, `disappointed`, `thoughtful`, `curious`.
 - **Posen mit Gegenstand:** Die Pose legt fest, wo der Gegenstand vor der Figur liegt; die Hand wird mit dem Arm aus zwei Gliedern auf seinen **Haltepunkt** gerechnet. Erreicht sie ihn nicht (genauer als 1,5 Einheiten), meldet der Prüfer das mit dem Hinweis, eine kleinere Größe (`"size": 0.75` oder `0.6`) zu wählen.
 
 | Pose | hält | Haltepunkt | Bemerkung |
@@ -101,6 +109,7 @@ Eine Figur steht auf einem Platz wie ein Baustein, aber mit `figure` statt `bloc
 | `cut-supervised` (schneidet unter Aufsicht) | `right`, am Tisch auch `surface` | `handle`, Spitze nach vorn unten | scharf: nur Erwachsene (siehe Sicherheit) |
 | `hand-over` (reicht) | `right` | wie `hold-plate`, Arm fast gestreckt | |
 | `write` (schreibt, malt) | `right` Werkzeug, `surface` Papier | Spitze auf der Tischplatte | nur am Tisch (Layout `table`, Plätze `left`, `right`, `back`) |
+| `ride` (fährt Fahrrad, neu) | `both` Fahrrad | `saddle` unter dem Becken, `handlebar` vordere Hand, `pedal` Füße | immer mit `helmet`; Kinder Größe 0,75 |
 
 - **Haltepunkte** (`grips` im Katalog, in Koordinaten des Bausteins): `handle` Griff oder Henkel, `tip` das arbeitende Ende, `left`/`right` die Ränder, `under` von unten. Heute: Tablett und Backblech (`left`, `right`), Teller (`under`), Schüssel (`left`, `right`, `under`), Holzlöffel, Kelle, Gabel, Messer, Wattestäbchen, Stock, beide Scheren (`handle`, `tip`), Kanne (`handle`, `under`), Korb und Eimer (`handle`).
 - **Ofenhandschuhe** (`mitts`) trägt die Figur an beiden Händen. **Regen-Kleidung** (`"outfit": { "kind": "rain", "tint": "rose" }`): Regenjacke mit Kapuze (eine Mütze bleibt, dann ohne Kapuze) und Gummistiefel in Rosé oder Petrol.
@@ -114,16 +123,29 @@ Ein Behälter (`container` im Katalog) nimmt einen **Inhalt** auf: `{ "block": "
 **Flach** (Tablett, Teller, Backblech): Die Stücke stehen in einer Reihe (so viele, wie Platz haben, höchstens drei). **Tief** (Schüssel, Korb, Eimer): Stücke liegen als kleiner Haufen in der Öffnung, Flächen (Teig, Wasser) füllen sie.
 Welcher Inhalt in welchen Behälter passt, steht beim Inhalt (`fits`), zum Beispiel Wasser nur in Schüssel und Eimer. `"hot": true` setzt Dampf darüber, und das Ding zählt als **heiß**. Inhalte tragen ihre Merkmale selbst: Wasser ist `water`, Kastanien sind `smallParts`.
 
-## Layout `hands` (Nahaufnahme für Schrittbilder, Schritt 3a)
+## Titelbild und Schrittbild (nach dem ersten Bild-Test, 18. Oktober 2026)
 
-Ein großer Gegenstand (`object`, Größe 2 oder 1,5) auf der Tischkante (y = 150), daneben links und rechts je ein kleiner. Die **Hände** hängen am Gegenstand:
+Eine Szene sagt mit `"purpose": "title"` oder `"step"`, wofür sie ist (Beispielszenen und Probebilder tragen es; ohne Angabe gelten nur die allgemeinen Regeln, etwa für die Übersichtsbilder). Der Bild-Test setzt immer `title`. Für **Titelbilder** gilt zusätzlich (`titleProblems` in `scene.ts`, Tests in `title.test.ts`):
+
+| Regel | Prüfung |
+| --- | --- |
+| Figur | Mindestens ein Mensch der Besetzung (Jette, Mats, Nolli, Ilka, Arne); Stups und Tüpfel nur dazu. |
+| Gegenstand | Mindestens ein erkennbarer Gegenstand (ein nicht neutraler Baustein oder ein Inhalt). Ohne Gegenstand nur **zwei Figuren in Bewegung** (`dance`, `freeze`, `walk`, `cheer`, `happy`), und nur, wenn der Baukasten für kein Material der Aktivität einen Baustein hat. |
+| Layout | `hands` ist ein Fehler (Hände ohne Figur nur im Schrittbild). Bevorzugt (nur im Prompt): `pair`, `outdoor`, `hero`. |
+| Scharfes | **Kein Messer und keine Schere**, auch keine Kinderschere. Im Schrittbild gelten die Regeln unten unverändert. |
+| Stups `hop` | gesperrt (`hopAllowedInTitles = false`), bis Clemens die überarbeitete Pose freigibt. |
+| Gegenstände aus dem Titel | Nennt der Titel ein Material der Aktivität (`titleObjects.ts`: Hauptwort des Materialnamens im Titel derselben Sprache, Deutsch auch als hinterer Teil eines zusammengesetzten Wortes, Englisch ohne Plural-s), muss das Bild einen Baustein mit diesem Material zeigen (auch gehalten, als Inhalt, als Ton des Bechers; Ofenhandschuhe zeigen den Ofen). Scharfes aus dem Titel zählt nicht. Gibt es keinen Baustein, ist kein Titelbild möglich (fehlender Baustein). |
+
+## Layout `hands` (Nahaufnahme, nur für Schrittbilder)
+
+Ein großer Gegenstand (`object`, Größe 2 oder 1,5) auf der Tischkante (y = 160, bis 18. Oktober 2026: 150), daneben links und rechts je ein kleiner. Die **Hände** hängen am Gegenstand:
 
 ```json
 { "slot": "object", "block": "bowl", "content": "dough", "size": 1.5,
   "hands": { "figure": "jette", "pose": "stir", "tool": { "block": "fork" } } }
 ```
 
-Unterarme kommen vom unteren Bildrand, mit Ärmel (Ton der Kleidung der Figur oder `sleeve`), Hautton und Alter der Figur zählen wie bei ganzen Figuren. Posen: `hold` (an den Haltepunkten des Gegenstands), `stir` (linke Hand am Rand, Werkzeug in der Schüssel), `cut` (Werkzeug an der Mitte, die andere Hand hält), `write` (Werkzeug auf der Mitte). Die Ecken der Pille werden auch hier freigehalten, damit das Layout notfalls ein Titelbild tragen kann.
+Unterarme kommen steil von knapp unter dem unteren Bildrand (20 Einheiten zur Seite, ab y = 206; vorher 36 und 216, die Arme wirkten zu lang; Vorher/Nachher in [VORSCHAU.md](VORSCHAU.md)), mit Ärmel (Ton der Kleidung der Figur oder `sleeve`), Hautton und Alter der Figur zählen wie bei ganzen Figuren. Posen: `hold` (an den Haltepunkten des Gegenstands), `stir` (linke Hand am Rand, Werkzeug in der Schüssel), `cut` (Werkzeug an der Mitte, die andere Hand hält), `write` (Werkzeug auf der Mitte). Die Ecken der Pille werden auch hier freigehalten, damit das Layout notfalls ein Titelbild tragen kann.
 
 ## Layouts und Plätze
 
@@ -149,7 +171,7 @@ Gilt für jede Szene **zu einer Aktivität** (`"activity": "<id>"` in der Beispi
 | Regel | Prüfung |
 | --- | --- |
 | **Scharfes** (`sharp`: Messer, spitze Schere) | Nur **in der Hand eines Erwachsenen**. Liegt es frei im Bild, hält es ein Kind (auch Mats) oder ist ein Kleinkind im Bild: Fehler. Das gilt auch für Hände in Nahaufnahme. |
-| **Kinderschere** (`kidSafe`) | Ein Kind darf sie halten, wenn die Sicherheits-Checkliste es erlaubt: Aktivität ab **3 Jahren** (Punkt 5), ein **Erwachsener im Bild** (Punkt 2, „mit Erwachsenen“), und der **Text nennt die Kinderschere** („Kinderschere“, „child scissors“ …). Fehlt eines, gilt: nur Erwachsene. Ein Kleinkind hält sie nie. |
+| **Kinderschere** (`kidSafe`) | Nie im Titelbild. Im Schrittbild darf ein Kind sie halten, wenn die Sicherheits-Checkliste es erlaubt: Aktivität ab **3 Jahren** (Punkt 5), ein **Erwachsener im Bild** (Punkt 2, „mit Erwachsenen“), und der **Text nennt die Kinderschere** („Kinderschere“, „child scissors“ …). Fehlt eines, gilt: nur Erwachsene. Ein Kleinkind hält sie nie. |
 | **Heißes** (`heat`: Backblech, `"hot": true`) | Nur in der Hand eines **Erwachsenen mit Ofenhandschuhen** (`mitts`); ein Ofenhandschuh irgendwo im Bild reicht nicht mehr. **Kein Kleinkind** im Bild, andere Kinder mindestens **20 Einheiten** Abstand (waagerecht). |
 | **Tiere** (Stups, Tüpfel) | Nie im selben Bild mit Scharfem oder Heißem (auch in der Hand, auch als heißer Inhalt) und nie bei einer Aktivität mit Backofen, Herd, Messer, Schere, Kerze im Material. |
 | Feuer | Es gibt keinen Baustein dafür. |

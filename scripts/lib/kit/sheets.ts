@@ -7,7 +7,7 @@ import type { Catalog, HoldPoseName, Scene } from './types.ts';
 export type Sheet = { name: string; title: string; scene: Scene };
 
 // Eine Szene je Pose. Erwachsene stehen in der Mitte (nur dort bleibt ihr Kopf unter den Ecken der Pille).
-export const poseSheets: readonly (Sheet & { pose: HoldPoseName | 'dance-freeze' | 'rain' })[] = [
+export const poseSheets: readonly (Sheet & { pose: HoldPoseName | 'dance-freeze' | 'rain' | 'watch' })[] = [
   {
     pose: 'hold-plate',
     name: 'pose-hold-plate',
@@ -56,7 +56,7 @@ export const poseSheets: readonly (Sheet & { pose: HoldPoseName | 'dance-freeze'
       items: [
         { slot: 'left', figure: 'jette', pose: 'pour', holds: { right: { block: 'jug', size: 0.6 } } },
         { slot: 'middle', figure: 'arne', pose: 'pour', holds: { right: { block: 'jug', size: 0.75 } } },
-        { slot: 'right', block: 'cup', tint: 'rose' },
+        { slot: 'right', block: 'cup', tint: 'petrol' },
       ],
     },
   },
@@ -109,7 +109,7 @@ export const poseSheets: readonly (Sheet & { pose: HoldPoseName | 'dance-freeze'
         { slot: 'table', block: 'table' },
         { slot: 'left', figure: 'jette', pose: 'write', holds: { right: { block: 'cotton-swab', size: 0.6 }, surface: { block: 'paper', size: 0.6 } } },
         { slot: 'back', figure: 'arne', pose: 'thoughtful' },
-        { slot: 'right', figure: 'mats', pose: 'write', holds: { right: { block: 'cotton-swab', size: 0.6 }, surface: { block: 'paper', size: 0.6, tint: 'rose' } } },
+        { slot: 'right', figure: 'mats', pose: 'write', holds: { right: { block: 'cotton-swab', size: 0.6 }, surface: { block: 'paper', size: 0.6 } } },
       ],
     },
   },
@@ -123,6 +123,33 @@ export const poseSheets: readonly (Sheet & { pose: HoldPoseName | 'dance-freeze'
         { slot: 'left', figure: 'jette', pose: 'freeze' },
         { slot: 'middle', figure: 'nolli', pose: 'dance' },
         { slot: 'right', figure: 'stups', pose: 'watch' },
+      ],
+    },
+  },
+  {
+    pose: 'ride',
+    name: 'pose-ride',
+    title: 'Fahrrad (neu nach dem ersten Bild-Test): Mats und Jette fahren mit Helm, die Hand am Lenker, die Füße an den Pedalen; Ilka schaut zu, dazwischen ein Stock (Slalom).',
+    scene: {
+      layout: 'outdoor',
+      items: [
+        { slot: 's1', figure: 'mats', pose: 'ride', helmet: 'honey', holds: { both: { block: 'bike', tint: 'petrol', size: 0.75 } } },
+        { slot: 'mid', figure: 'ilka', pose: 'watch' },
+        { slot: 's3', block: 'stick' },
+        { slot: 's4', figure: 'jette', pose: 'ride', helmet: 'rose', holds: { both: { block: 'bike', size: 0.75 } } },
+      ],
+    },
+  },
+  {
+    pose: 'watch',
+    name: 'pose-watch',
+    title: 'Schaut zu (neu nach dem ersten Bild-Test): Jette und Mats ohne Gegenstand, Kopf zum Geschehen in der Mitte gedreht, Arme locker.',
+    scene: {
+      layout: 'pair',
+      items: [
+        { slot: 'left', figure: 'jette', pose: 'watch' },
+        { slot: 'middle', block: 'playing-cards', size: 1.5 },
+        { slot: 'right', figure: 'mats', pose: 'watch' },
       ],
     },
   },
@@ -142,7 +169,7 @@ export const poseSheets: readonly (Sheet & { pose: HoldPoseName | 'dance-freeze'
 ];
 
 export const poseSheetLabel = (pose: (typeof poseSheets)[number]['pose']): string =>
-  pose === 'dance-freeze' ? 'tanzt, erstarrt' : pose === 'rain' ? 'Regen-Kleidung' : holdPoseLabels[pose].de;
+  pose === 'dance-freeze' ? 'tanzt, erstarrt' : pose === 'rain' ? 'Regen-Kleidung' : pose === 'watch' ? 'schaut zu' : holdPoseLabels[pose].de;
 
 // Ein Bild je Behälter mit bis zu vier Inhalten nebeneinander (alle Inhalte, die in ihn passen).
 export function containerSheets(catalog: Catalog): Sheet[] {

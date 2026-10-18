@@ -1,6 +1,7 @@
 {
   "activity": "puddle-explorers",
   "layout": "outdoor",
+  "purpose": "title",
   "items": [
     { "slot": "s1", "figure": "jette", "pose": "hold-plate", "outfit": { "kind": "rain", "tint": "rose" }, "holds": { "right": { "block": "stick", "size": 0.6 } } },
     { "slot": "mid", "figure": "ilka", "pose": "point", "outfit": { "kind": "rain", "tint": "petrol" } },

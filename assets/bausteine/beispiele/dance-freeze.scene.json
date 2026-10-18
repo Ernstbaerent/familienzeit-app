@@ -1,6 +1,7 @@
 {
   "activity": "dance-freeze",
   "layout": "pair",
+  "purpose": "title",
   "items": [
     { "slot": "left", "figure": "jette", "pose": "freeze" },
     { "slot": "middle", "block": "radio", "tint": "honey" },

@@ -15,7 +15,11 @@ export type Person = 'adult' | 'teen' | 'child' | 'toddler';
 
 // Haltepunkte eines Gegenstands (Schritt 3a): Dort sitzt die Hand einer Figur.
 // `handle` Griff oder Henkel, `tip` das arbeitende Ende (Löffelkopf, Spitze), `left`/`right` die Ränder (Tablett, Schüssel), `under` von unten getragen (Teller).
-export type GripName = 'handle' | 'tip' | 'left' | 'right' | 'under';
+// Fahrrad: `handlebar` Lenker, `saddle` Sattel, `pedal` Tretlager (dort sitzen die Füße beim Fahren).
+export type GripName = 'handle' | 'tip' | 'left' | 'right' | 'under' | 'handlebar' | 'saddle' | 'pedal';
+
+// Ein Inhalt, den der Ton eines Bausteins zeigt (Becher: Petrol = Wasser, Honig = Zitronensaft). Er braucht Deckung im Text wie ein Baustein.
+export type Liquid = { label: { de: string; en: string }; materials: string[]; terms: { de: string[]; en: string[] } };
 
 // Inhaltsfläche eines Behälters in seinen eigenen Koordinaten (Größe 1):
 // `flat` (Tablett, Teller): Die Stücke stehen in einer Reihe auf der Höhe `y` zwischen `x0` und `x1`.
@@ -51,6 +55,13 @@ export type Block = {
   kidSafe?: boolean;
   // Wörter, die ein Kind mit diesem scharfen Ding in der Hand erlauben (zum Beispiel „Kinderschere“). Fehlen sie im Text, hält es nur ein Erwachsener.
   kidTerms?: { de: string[]; en: string[] };
+  // Wörter, die vor dem Abgleich aus dem Text entfernt werden: „Papiertüte“ deckt nicht das Blatt Papier.
+  excludeTerms?: { de: string[]; en: string[] };
+  // Nennt der Text eines dieser Wörter, darf dieser Baustein nur zusammen mit einem der Bausteine `use` im Bild stehen
+  // (Papier ist nie die Tüte oder der Beutel eines Tastsäckchens).
+  notFor?: { de: string[]; en: string[]; use: string[] };
+  // Der Ton zeigt einen Inhalt (Becher): Ton → Inhalt. Ein Ton ohne Eintrag zeigt nichts (leer).
+  liquids?: Partial<Record<TintName, Liquid>>;
 };
 
 export type LoadedBlock = Block & { svg: string };
@@ -69,7 +80,7 @@ export type HeldItem = {
 };
 
 // Benannte Posen mit Gegenstand (Schritt 3a). Dazu kommen die Posen des Rigs ohne Gegenstand (`stand`, `walk`, `cheer`, `dance`, …).
-export type HoldPoseName = 'hold-plate' | 'carry-tray' | 'point' | 'pour' | 'stir' | 'cut-supervised' | 'hand-over' | 'write';
+export type HoldPoseName = 'hold-plate' | 'carry-tray' | 'point' | 'pour' | 'stir' | 'cut-supervised' | 'hand-over' | 'write' | 'ride';
 
 // Hände in Nahaufnahme (Layout `hands`): Unterarme kommen vom unteren Rand, die Hände sitzen an den Haltepunkten.
 export type HandsPoseName = 'hold' | 'stir' | 'cut' | 'write';
@@ -97,10 +108,16 @@ export type SceneItem = {
   holds?: { left?: HeldItem; right?: HeldItem; both?: HeldItem; surface?: HeldItem };
   mitts?: boolean; // Ofenhandschuhe an beiden Händen
   outfit?: { kind: 'rain'; tint: 'rose' | 'petrol' };
+  helmet?: 'rose' | 'petrol' | 'honey'; // Fahrradhelm (Pflicht in der Pose `ride`)
 };
+
+// Wofür ein Bild ist (Aufgabe nach dem ersten Bild-Test, 2026-10-18): Ein Titelbild (Karte) hat strengere Regeln als ein Schrittbild
+// (Anleitung): mindestens eine Figur und ein Gegenstand, kein Layout `hands`, kein Messer und keine Schere. Ohne Angabe gelten nur die allgemeinen Regeln.
+export type ScenePurpose = 'title' | 'step';
 
 export type Scene = {
   layout: LayoutName;
   items: SceneItem[];
   ground?: boolean; // Standlinie, Vorgabe: ja
+  purpose?: ScenePurpose;
 };
