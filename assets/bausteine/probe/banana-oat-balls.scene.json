@@ -9,7 +9,7 @@
       "tint": "rose",
       "size": 1.5,
       "hands": {
-        "figure": "jette",
+        "figure": "mats",
         "pose": "stir",
         "tool": {
           "block": "fork"
@@ -29,9 +29,10 @@
   ],
   "review": {
     "carries": [
-      "Nahaufnahme (Layout `hands`): Jettes Hände rühren mit der Gabel in der Schüssel, links zwei Bananen, rechts drei Haferkugeln. Das sind genau die Zutaten und Werkzeuge aus dem Text.",
+      "Nahaufnahme (Layout `hands`): Mats’ Hände rühren mit der Gabel in der Schüssel, links zwei Bananen, rechts drei Haferkugeln. Das sind genau die Zutaten und Werkzeuge aus dem Text.",
       "Im Daumennagel bleibt die Schüssel mit den Händen gut erkennbar; das Bild unterscheidet sich klar von den Szenen mit ganzen Figuren.",
-      "Kein Teller, keine Kekse: Die Kugeln liegen lose auf dem Tisch (neu: `loose`)."
+      "Kein Teller, keine Kekse: Die Kugeln liegen lose auf dem Tisch (neu: `loose`).",
+      "Besetzung: Jette war schon bei den Bratäpfeln, deshalb sind es hier Mats’ Hände (die am seltensten benutzte passende Figur, `casting.ts`)."
     ],
     "missing": [
       "Haferflocken und Kakao sind nicht einzeln zu sehen; der Teig ist eine Honig-Fläche.",

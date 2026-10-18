@@ -169,6 +169,10 @@ Neu für die Probebilder:
 - **Überdeckung bei Figuren:** Es zählt nur der Körper, nicht was die Figur hält. So darf der Stock in die Pfütze reichen; für Rand und Ecken zählt weiter der ganze Rahmen mit dem Gehaltenen.
 - **Rühren in der Nahaufnahme** liegt flacher (das Werkzeug zeigt 25° nach oben statt 38°), damit der Arm nicht lang wird.
 
+Nachgetragen (2026-10-17, Entscheidungen von Clemens):
+- **Neutrale Gegenstände:** Teller, Tisch, Stuhl, Kissen und Decke müssen nicht im Text stehen, solange sie nichts Sicherheitsrelevantes tragen (Regel in `docs/design/ILLUSTRATIONEN.md`, „Sicherheit“). Die Bratäpfel zeigen deshalb Jette mit leerem Teller neben Arne mit dem heißen Blech.
+- **Figurenwahl:** die am seltensten benutzte passende Figur, keine in mehr als 40 % der Bilder, Mats bevorzugt ab 8, Stups gelegentlich (`scripts/lib/kit/casting.ts`, `docs/design/FIGUREN.md`). In den fünf Probebildern stehen Jette, Mats und Nolli jetzt je zweimal (vorher Jette fünfmal).
+
 ## Offen für die Durchsicht (Schritt 3a)
 
 **Entschieden (Clemens, 17. Oktober 2026):** Erwachsene bleiben in der Mitte, höchstens einer je Titelbild. Wird das zu gleichförmig oder verlangt eine Szene den Rand, schlägt Claude Code sitzende oder gebeugte Posen vor.

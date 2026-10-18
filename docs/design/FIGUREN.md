@@ -41,6 +41,15 @@ Regel (in Code: `scripts/lib/figures/castRules.ts`, `figureFitsActivity`; Tests)
 
 Gilt die Aktivität für 0 bis 16 Jahre, nimmt die Szene die Figur, die am besten zum Kern der Aktivität passt, oder gar kein Kind. Ergänzend gelten die Regeln des Baukastens (Kleinkind nur bei Aktivitäten ab 2 Jahren, Schere und Hitze nur beim Erwachsenen, `docs/bausteine/README.md`).
 
+**Figurenwahl über viele Bilder (Entscheidung von Clemens, 2026-10-17;** Code `scripts/lib/kit/casting.ts`, Tests): Damit nicht jede Karte dieselbe Figur zeigt,
+
+- kommt von den passenden Kinder-Figuren die **am seltensten benutzte** zuerst (bei Gleichstand die, deren Alter näher an der Mitte der Spanne liegt),
+- steht **keine Figur in mehr als 40 %** der Titelbilder eines Laufs (bei 5 Bildern höchstens 2, bei 8 höchstens 3); auch Hände in der Nahaufnahme zählen, weil der Hautton die Figur zeigt,
+- ist **Mats bevorzugt** bei Aktivitäten ab 8 Jahren,
+- kommt **Stups gelegentlich** als Begleiter dazu (Vorschlag in etwa jedem fünften Bild), nie bei Hitze, Feuer oder Schärfe. Tüpfel bleibt ein seltener Cameo.
+
+Der Bild-Test gibt jeder Anfrage diesen Rat mit, zählt nach jedem Bild mit (Protokoll und Zusammenfassung) und verwirft ein Bild mit einer gesperrten Figur. Die Probebilder folgen derselben Regel (`docs/bausteine/PROBE.md`, „Besetzung“).
+
 ### Namensprüfung
 
 Geprüft am 15. und 16. Oktober 2026 mit einer Websuche gegen bekannte Kinderfiguren (Bücher, Serien, Maskottchen, Deutsch und Englisch). **Das ist keine Markenprüfung** (DPMA, EUIPO, App Stores): Sie steht unter „Nach M12“ in der CLAUDE.md. Ein Name ohne Treffer ist nicht automatisch frei.

@@ -6,6 +6,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { kitDir } from './catalog.ts';
+import { companion, figureLimit, matsPreferredFrom, maxShare, replayCasting } from './casting.ts';
 import { checkScene, contextFromActivity, renderSceneSvg } from './scene.ts';
 import type { Catalog, Scene } from './types.ts';
 
@@ -21,6 +22,8 @@ export type Review = { carries: string[]; missing: string[]; check: string[] };
 export type ProbeScene = Scene & { activity: string; review: Review };
 
 export const probeDir = 'docs/bausteine';
+// Reihenfolge der Probebilder: dieselbe wie die Standard-Liste des Bild-Tests (der Zähler der Figurenwahl läuft in dieser Reihenfolge).
+export const probeOrder = ['baked-apples', 'banana-oat-balls', 'dance-freeze', 'secret-lemon-ink', 'puddle-explorers'] as const;
 
 export function loadProbe(root: string): { scenes: Map<string, ProbeScene>; extra: ProbeActivity[] } {
   const dir = join(root, kitDir, 'probe');
@@ -119,12 +122,44 @@ export function buildProbeFiles(catalog: Catalog, probe: { scenes: ReadonlyMap<s
     lines.push(`| ${entries[i][0]} | ${cells.join(' | ')} |`);
   }
   lines.push('');
-  lines.push(`Mittlere Überschneidung: **${percent(pairs === 0 ? 0 : sum / pairs)}**. Gemeinsam sind fast nur die Figuren (Jette kommt in allen fünf vor, weil sie zu allen Altersspannen passt).`);
+  lines.push(`Mittlere Überschneidung: **${percent(pairs === 0 ? 0 : sum / pairs)}**. Gemeinsam sind fast nur die Figuren.`);
   lines.push('');
-  lines.push('Alle fünf nebeneinander im Daumennagel:');
+  lines.push(...castingSection(probe.scenes, activities));
+  lines.push('## Alle fünf nebeneinander');
+  lines.push('');
+  lines.push('Im Daumennagel:');
   lines.push('');
   lines.push(entries.map(([name]) => img(`probe/${name}.svg`, 96, name)).join(' '));
   lines.push('');
   files.push({ path: `${probeDir}/PROBE.md`, content: `${lines.join('\n')}\n` });
   return files;
+}
+
+// Die Besetzung der fünf Bilder nach der Figurenwahl (casting.ts): Rat vor jedem Bild, gezeigte Figuren, Zähler danach.
+function castingSection(scenes: ReadonlyMap<string, ProbeScene>, activities: ReadonlyMap<string, ProbeActivity>): string[] {
+  const order = probeOrder.filter((name) => scenes.has(name) && activities.has((scenes.get(name) as ProbeScene).activity));
+  const entries = order.map((name) => {
+    const scene = scenes.get(name) as ProbeScene;
+    return { activity: activities.get(scene.activity) as ProbeActivity, scene };
+  });
+  const replay = replayCasting(entries);
+  const lines: string[] = [];
+  lines.push('## Besetzung (Figurenwahl)');
+  lines.push('');
+  lines.push(`Passen mehrere Figuren, kommt die am seltensten benutzte zuerst; keine Figur in mehr als ${Math.round(maxShare * 100)} % der Bilder (bei ${entries.length} Bildern höchstens ${figureLimit(entries.length)}), Mats bevorzugt ab ${matsPreferredFrom} Jahren, Stups gelegentlich als Begleiter. Regeln: \`scripts/lib/kit/casting.ts\`, derselbe Code rät im Bild-Test.`);
+  lines.push('');
+  lines.push('| Bild | Rat: Kind | Rat: Erwachsene | Stups | gesperrt | gezeigt | Zähler danach |');
+  lines.push('| --- | --- | --- | --- | --- | --- | --- |');
+  const pet = { suggested: 'vorgeschlagen', allowed: 'erlaubt', forbidden: 'nicht erlaubt' } as const;
+  for (const [index, entry] of replay.entries()) {
+    const counter = Object.entries(entry.counts).map(([id, value]) => `${id} ${value}`).join(', ');
+    const blocked = entry.advice.blocked.filter((item) => item.id !== companion).map((item) => item.id).join(', ') || '–';
+    const shown = `${entry.figures.join(', ')}${entry.problems.length > 0 ? ` (**Verstoß:** ${entry.problems.join(' ')})` : ''}`;
+    lines.push(`| ${order[index]} | ${entry.advice.kids.join(' → ') || '–'} | ${entry.advice.adults.join(' → ')} | ${pet[entry.advice.pet]} | ${blocked} | ${shown} | ${counter} |`);
+  }
+  const final = replay.at(-1)?.counts ?? {};
+  lines.push('');
+  lines.push(`Am Ende: ${Object.entries(final).sort(([, a], [, b]) => b - a).map(([id, value]) => `**${id}** ${value} von ${entries.length} (${percent(value / entries.length)})`).join(', ')}. Vorher (Stand 3b) stand Jette in allen fünf Bildern.`);
+  lines.push('');
+  return lines;
 }

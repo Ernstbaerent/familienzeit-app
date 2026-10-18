@@ -9,9 +9,9 @@ import { loadCatalog, loadExampleScenes } from '../kit/catalog';
 import { loadProbe, type ProbeActivity } from '../kit/probe';
 import { checkScene, contextFromActivity } from '../kit/scene';
 import type { FetchLike, HttpRequest } from '../weekly/http';
-import { buildHeaders, buildUrl, defaultIds, fetchTestActivities, parseIds, rowToActivity } from './activities';
+import { buildHeaders, buildKiUrl, buildUrl, defaultIds, fetchTestActivities, parseIds, parseKi, rowToActivity } from './activities';
 import { buildSceneSchema, buildSystemPrompt, buildUserPrompt, toScene } from './prompt';
-import { drawAll, maxAttempts, models, summaryMarkdown } from './run';
+import { describeScene, drawAll, maxAttempts, models, summaryMarkdown } from './run';
 
 const root = join(__dirname, '../../..');
 const catalog = loadCatalog(root);
@@ -71,6 +71,29 @@ describe('Aktivitäten lesen (nur lesen, öffentlicher Schlüssel)', () => {
     expect(calls).toHaveLength(1);
     expect(calls[0].init.method).toBe('GET');
     expect(calls[0].init.body).toBeUndefined();
+  });
+
+  it('KI-Aktivitäten: die neuesten mit batch_id, ohne die schon gewählten; Anzahl 0 bis 5, zusammen höchstens zehn', async () => {
+    expect(parseKi('')).toBe(3);
+    expect(parseKi(' 0 ')).toBe(0);
+    expect(() => parseKi('6')).toThrow(/0 bis 5/);
+    expect(() => parseKi('2; drop')).toThrow(/ungültig/);
+    const url = buildKiUrl('https://testprojekt.supabase.co', 3, ['dance-freeze']);
+    expect(url).toContain('status=eq.approved&batch_id=not.is.null');
+    expect(url).toContain(`id=not.in.(${encodeURIComponent('"dance-freeze"')})`);
+    expect(url).toMatch(/order=generated_at\.desc\.nullslast,id\.asc&limit=3$/);
+    const ai = { id: 'ki-laternen', age_min: 4, age_max: 10, materials: ['paper'], translations: (byId.get('dance-freeze') as ProbeActivity).translations };
+    const dance = { ...ai, id: 'dance-freeze', age_min: 1, age_max: 12, materials: ['musicPlayer'] };
+    const { fetchImpl, calls } = fakeFetch([{ body: [dance] }, { body: [ai] }]);
+    const result = await fetchTestActivities({ url: 'https://testprojekt.supabase.co', key: anon, ids: ['dance-freeze', 'baked-apples', 'gibt-es-nicht'], ki: 3, fallback: probe.extra, fetchImpl });
+    expect(result.activities.map((a) => a.id)).toEqual(['dance-freeze', 'baked-apples', 'ki-laternen']);
+    expect(result.fromFile).toEqual(['baked-apples']);
+    expect(result.missing).toEqual(['gibt-es-nicht']);
+    expect(result.ki).toEqual(['ki-laternen']);
+    expect(calls.map((call) => call.init.method)).toEqual(['GET', 'GET']);
+    expect(calls[1].url).toContain('batch_id=not.is.null');
+    const full = Array.from({ length: 10 }, (_, i) => `a${i}`);
+    await expect(fetchTestActivities({ url: 'https://testprojekt.supabase.co', key: anon, ids: full, ki: 1, fetchImpl: fakeFetch([]).fetchImpl })).rejects.toThrow(/Höchstens 10/);
   });
 
   it('kaputte Zeilen fallen weg, Fehler der Datenbank werden gemeldet', async () => {
@@ -175,14 +198,37 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
     expect(summary).not.toContain(apiKey);
   });
 
-  it('die Zusammenfassung nennt Ergebnis, Token, Kosten und das Artefakt mit den Bildern', async () => {
+  it('die Zusammenfassung nennt je Bild Szene, Prüfergebnis, Größe, Versuche, Token, Kosten, Figuren und das Artefakt', async () => {
     const { fetchImpl } = fakeFetch([claudeReply(goodPuddle)]);
     const report = await drawAll({ activities: [puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl });
     const summary = summaryMarkdown(report, new Set(['puddle-explorers']));
     expect(summary).toContain('**1 von 1**');
-    expect(summary).toContain('7000 / 600');
+    expect(summary).toContain('| Aktivität | Gewählte Szene | Prüfergebnis | Größe | Versuche | Token (Anfrage / Antwort) | Kosten | Figuren | Bild |');
+    expect(summary).toContain('outdoor; mid: ilka hold-plate hält bucket mit leaves (Regenkleidung); s3: jette hold-plate hält stick (Regenkleidung); s4: puddle');
+    expect(summary).toMatch(/\| bestanden \| \d+,\d KB \| 1 \| 7000 \/ 600 \| 0,0010 \$ \| ilka, jette \|/);
     expect(summary).toContain('`puddle-explorers.png`');
     expect(summary).toContain('Artefakt **bild-test**');
+    expect(summary).toContain('### Zähler der Figuren');
+    expect(summary).toContain('ilka 1/1, jette 1/1');
+    expect(report.results[0].bytes).toBe(Buffer.byteLength(report.results[0].svg as string));
+  });
+
+  it('Figurenwahl: der Rat steht in der Anfrage, eine gesperrte Figur führt zum zweiten Versuch, der Zähler steht im Protokoll', async () => {
+    // Zwei Bilder: höchstens eines je Figur (40 % von 2, mindestens 1). Das zweite Mal Jette und Ilka wird verworfen, Nolli mit Arne besteht.
+    const swap: Record<string, string> = { jette: 'nolli', ilka: 'arne' };
+    const withNolli = { ...goodPuddle, items: goodPuddle.items.map((item) => (item.figure === undefined ? item : { ...item, figure: swap[item.figure] ?? item.figure })) };
+    const { fetchImpl, calls } = fakeFetch([claudeReply(goodPuddle), claudeReply(goodPuddle), claudeReply(withNolli)]);
+    const log: string[] = [];
+    const report = await drawAll({ activities: [puddle, puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl, log: (line) => log.push(line) });
+    expect(calls).toHaveLength(3);
+    const prompt = (index: number): string => JSON.parse(calls[index].init.body as string).messages[0].content as string;
+    expect(prompt(0)).toMatch(/Besetzung für dieses Bild[\s\S]*Kind-Figur: bevorzugt jette, sonst nolli, mats/);
+    expect(prompt(1)).toMatch(/Kind-Figur: bevorzugt nolli[\s\S]*bevorzugt arne[\s\S]*NICHT jette: steht schon in 1 von 2 Titelbildern[\s\S]*NICHT ilka/);
+    expect(prompt(2)).toMatch(/verworfen[\s\S]*„jette“ steht schon in 1 von 2/);
+    expect(report.results.map((entry) => entry.passed)).toEqual([true, true]);
+    expect(report.results[1].figures).toEqual(['arne', 'nolli']);
+    expect(report.counts).toEqual({ ilka: 1, jette: 1, arne: 1, nolli: 1 });
+    expect(log[1]).toBe('puddle-explorers: Figuren arne, nolli; Zähler arne 1/2, ilka 1/2, jette 1/2, nolli 1/2');
   });
 });
 

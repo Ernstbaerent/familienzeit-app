@@ -20,7 +20,7 @@
     },
     {
       "slot": "s3",
-      "figure": "jette",
+      "figure": "nolli",
       "pose": "hold-plate",
       "flip": false,
       "outfit": {
@@ -41,12 +41,13 @@
   ],
   "review": {
     "carries": [
-      "Alles kommt aus dem Text: Regenjacken, Gummistiefel, die Pfütze, Jette prüft sie mit dem Stock, Ilka trägt den Eimer mit Blättern. Ilka ist dabei, wie es der Sicherheitshinweis für Kinder unter 6 verlangt.",
-      "Das stärkste Bild: Die Handlung (Stock in die Pfütze) ist auch im Daumennagel zu erkennen."
+      "Alles kommt aus dem Text: Regenjacken, Gummistiefel, die Pfütze, Nolli prüft sie mit dem Stock, Ilka trägt den Eimer mit Blättern. Ilka ist dabei, wie es der Sicherheitshinweis für Kinder unter 6 verlangt.",
+      "Das stärkste Bild: Die Handlung (Stock in die Pfütze) ist auch im Daumennagel zu erkennen.",
+      "Besetzung: Jette und Mats sind schon in je zwei Bildern (Grenze 40 %), Nolli passt, weil die Aktivität ab 2 Jahren ist."
     ],
     "missing": [
       "Das Springen und Spritzen (der Spaß) fehlt, ebenso Regen, Würmer und Schnecken.",
-      "Ilkas Kapuze ist Petrol (ihr Hautton trägt darauf); für Jette ist Petrol am Kopf verboten, deshalb trägt sie Rosé."
+      "Ilkas Kapuze ist Petrol (ihr Hautton trägt darauf); Nolli trägt Rosé."
     ],
     "check": [
       "Sind die Gummistiefel als Stiefel zu erkennen?",

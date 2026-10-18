@@ -161,7 +161,8 @@ export function buildSystemPrompt(catalog: Catalog, examples: readonly { name: s
       '7. Erwachsene (ilka, arne) nur auf den Plätzen in der Mitte (pair: middle; outdoor: mid; table: back): An den Seiten verdeckt die Kategorie-Pille ihren Kopf. Erhobene Arme an den Seiten ebenso vermeiden.\n' +
       '8. Höchstens 6 Einträge, ein Eintrag je Platz; ein Eintrag hat entweder block oder figure. Figuren haben immer Größe 1 (size null). Inhalte (content) stehen nur in Behältern, die sie in „passt in“ nennen, oder lose auf dem Tisch, wenn erlaubt.\n' +
       '9. Posen mit Gegenstand halten ihn in holds: hold-plate und hand-over in right, carry-tray in both (für Kinder size 0.75 oder 0.6), pour in right, stir: Schüssel in left und Werkzeug in right, cut-supervised und write: Werkzeug in right, optional surface (write nur am Tisch).\n' +
-      '10. Im Layout hands hängen die Hände am Gegenstand auf dem Platz object (hands: figure, pose hold/stir/cut/write, Werkzeug in tool).',
+      '10. Im Layout hands hängen die Hände am Gegenstand auf dem Platz object (hands: figure, pose hold/stir/cut/write, Werkzeug in tool).\n' +
+      '11. Besetzung: Die Anfrage nennt je Bild, welche Figur bevorzugt ist und welche gesperrt (keine Figur in mehr als 40 % der Bilder; Mats bevorzugt ab 8 Jahren; Stups gelegentlich als Begleiter). Eine gesperrte Figur (auch als Hände) verwirft das Bild.',
     `Layouts:\n${layoutLines.join('\n')}`,
     `Figuren:\n${figureLines.join('\n')}`,
     `Posen ohne Gegenstand (Menschen): ${freePoseNames.join(', ')}.\nPosen mit Gegenstand:\n${holdLines.join('\n')}`,
@@ -170,7 +171,7 @@ export function buildSystemPrompt(catalog: Catalog, examples: readonly { name: s
   ].join('\n\n');
 }
 
-export function buildUserPrompt(activity: ProbeActivity, problems: readonly string[] = []): string {
+export function buildUserPrompt(activity: ProbeActivity, problems: readonly string[] = [], casting = ''): string {
   const de = activity.translations.de;
   const en = activity.translations.en;
   const lines = [
@@ -180,8 +181,9 @@ export function buildUserPrompt(activity: ProbeActivity, problems: readonly stri
     `Schritte: ${de.steps.map((step, index) => `${index + 1}. ${step}`).join(' ')}`,
     `Sicherheitshinweis: ${de.safetyNote ?? '–'}`,
     `English title: ${en.title}. English safety note: ${en.safetyNote ?? '–'}`,
-    'Setze genau ein Titelbild als JSON nach dem Schema.',
   ];
+  if (casting !== '') lines.push(casting);
+  lines.push('Setze genau ein Titelbild als JSON nach dem Schema.');
   if (problems.length > 0) lines.push(`Dein erster Vorschlag wurde verworfen. Die Prüfung meldete:\n- ${problems.join('\n- ')}\nSetze eine neue Szene, die diese Punkte vermeidet, oder antworte mit noScene: true.`);
   return lines.join('\n');
 }

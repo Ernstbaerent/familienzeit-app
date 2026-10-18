@@ -3,10 +3,21 @@
 // nur die Spalten, die eine Szene braucht. Ein geheimer Schlüssel wird abgelehnt, bevor er benutzt wird. Es wird nichts geschrieben.
 
 import { readJson, shorten, withTimeout, type FetchLike } from '../weekly/http.ts';
-import type { ProbeActivity } from '../kit/probe.ts';
+import { probeOrder, type ProbeActivity } from '../kit/probe.ts';
 
-export const defaultIds = ['baked-apples', 'banana-oat-balls', 'dance-freeze', 'secret-lemon-ink', 'puddle-explorers'] as const;
+export const defaultIds = probeOrder;
 export const maxIds = 10;
+// Zusätzlich zur Liste: so viele der neuesten Aktivitäten aus dem KI-Wochenlauf (`batch_id is not null`), damit auch Aktivitäten
+// ohne Entsprechung in data/ getestet werden. Standard 3, höchstens 5, zusammen höchstens `maxIds`.
+export const defaultKi = 3;
+export const maxKi = 5;
+
+export function parseKi(input: string | undefined): number {
+  const text = (input ?? '').trim();
+  if (text === '') return defaultKi;
+  if (!/^\d+$/.test(text) || Number(text) > maxKi) throw new Error(`Anzahl KI-Aktivitäten „${text}“ ungültig (0 bis ${maxKi}).`);
+  return Number(text);
+}
 
 // Wie in supabaseConfig.ts: sb_secret_… oder ein JWT mit der Rolle service_role gehört nicht in diesen Test.
 export function isSecretKey(key: string): boolean {
@@ -30,11 +41,24 @@ export function parseIds(input: string | undefined): string[] {
   return list;
 }
 
+const columns = 'select=id,age_min,age_max,materials,translations';
+
+function origin(supabaseUrl: string): string {
+  const value = supabaseUrl.trim().replace(/\/+$/, '');
+  if (!/^https:\/\/[a-z0-9.-]+$/i.test(value)) throw new Error('SUPABASE_URL fehlt oder ist ungültig (erwartet: https://<projekt>.supabase.co).');
+  return value;
+}
+
+const idList = (ids: readonly string[]): string => encodeURIComponent(ids.map((id) => `"${id}"`).join(','));
+
 export function buildUrl(supabaseUrl: string, ids: readonly string[]): string {
-  const origin = supabaseUrl.trim().replace(/\/+$/, '');
-  if (!/^https:\/\/[a-z0-9.-]+$/i.test(origin)) throw new Error('SUPABASE_URL fehlt oder ist ungültig (erwartet: https://<projekt>.supabase.co).');
-  const list = ids.map((id) => `"${id}"`).join(',');
-  return `${origin}/rest/v1/activities?select=id,age_min,age_max,materials,translations&status=eq.approved&id=in.(${encodeURIComponent(list)})`;
+  return `${origin(supabaseUrl)}/rest/v1/activities?${columns}&status=eq.approved&id=in.(${idList(ids)})`;
+}
+
+// Die neuesten freigegebenen Aktivitäten aus dem KI-Wochenlauf (batch_id gesetzt), ohne die schon gewählten.
+export function buildKiUrl(supabaseUrl: string, count: number, exclude: readonly string[]): string {
+  const without = exclude.length === 0 ? '' : `&id=not.in.(${idList(exclude)})`;
+  return `${origin(supabaseUrl)}/rest/v1/activities?${columns}&status=eq.approved&batch_id=not.is.null${without}&order=generated_at.desc.nullslast,id.asc&limit=${count}`;
 }
 
 export function buildHeaders(key: string): Record<string, string> {
@@ -58,17 +82,44 @@ export function rowToActivity(row: unknown): ProbeActivity | null {
   return { id: row.id, ageMin: row.age_min, ageMax: row.age_max, materials: row.materials as string[], translations: translations as ProbeActivity['translations'] };
 }
 
-export async function fetchTestActivities(options: { url: string; key: string; ids: readonly string[]; fetchImpl: FetchLike; timeoutMs?: number }): Promise<{ activities: ProbeActivity[]; missing: string[] }> {
-  const headers = buildHeaders(options.key);
-  const url = buildUrl(options.url, options.ids);
-  const { response, body } = await withTimeout(options.timeoutMs ?? 15_000, 'Supabase', async (signal) => {
-    const res = await options.fetchImpl(url, { method: 'GET', headers, signal });
+async function getRows(url: string, headers: Record<string, string>, fetchImpl: FetchLike, timeoutMs: number): Promise<ProbeActivity[]> {
+  const { response, body } = await withTimeout(timeoutMs, 'Supabase', async (signal) => {
+    const res = await fetchImpl(url, { method: 'GET', headers, signal });
     return { response: res, body: await readJson(res) };
   });
   if (!response.ok) throw new Error(`Supabase antwortet mit HTTP ${response.status}${body === null ? '' : `: ${shorten(JSON.stringify(body), 200)}`}`);
   if (!Array.isArray(body)) throw new Error('Supabase: Antwort ist keine Liste.');
-  const activities = body.map(rowToActivity).filter((entry): entry is ProbeActivity => entry !== null);
-  const found = new Set(activities.map((activity) => activity.id));
-  const ordered = options.ids.flatMap((id) => activities.filter((activity) => activity.id === id));
-  return { activities: ordered, missing: options.ids.filter((id) => !found.has(id)) };
+  return body.map(rowToActivity).filter((entry): entry is ProbeActivity => entry !== null);
+}
+
+export type TestActivities = {
+  activities: ProbeActivity[]; // in der Reihenfolge des Tests: erst die Liste, dann die KI-Aktivitäten
+  missing: string[]; // weder in Supabase (freigegeben) noch in der Datei
+  fromFile: string[]; // nicht in Supabase, Text aus assets/bausteine/probe/aktivitaeten.json
+  ki: string[]; // aus dem KI-Wochenlauf dazugenommen
+};
+
+// Liest die Aktivitäten der Liste und `ki` KI-Aktivitäten dazu. Fehlt eine Aktivität der Liste in Supabase, nimmt der Test den Text
+// aus `fallback` (die Probe-Datei), falls er dort steht. Nur GET mit dem öffentlichen Schlüssel.
+export async function fetchTestActivities(options: { url: string; key: string; ids: readonly string[]; ki?: number; fallback?: readonly ProbeActivity[]; fetchImpl: FetchLike; timeoutMs?: number }): Promise<TestActivities> {
+  const headers = buildHeaders(options.key);
+  const timeoutMs = options.timeoutMs ?? 15_000;
+  const ki = Math.min(options.ki ?? 0, maxIds - options.ids.length);
+  if ((options.ki ?? 0) > 0 && ki <= 0) throw new Error(`Höchstens ${maxIds} Aktivitäten je Test: Die Liste hat schon ${options.ids.length}, für KI-Aktivitäten ist kein Platz.`);
+  const rows = await getRows(buildUrl(options.url, options.ids), headers, options.fetchImpl, timeoutMs);
+  const fromFile: string[] = [];
+  const missing: string[] = [];
+  const listed = options.ids.flatMap((id) => {
+    const row = rows.find((activity) => activity.id === id);
+    if (row !== undefined) return [row];
+    const file = options.fallback?.find((activity) => activity.id === id);
+    if (file !== undefined) {
+      fromFile.push(id);
+      return [file];
+    }
+    missing.push(id);
+    return [];
+  });
+  const kiRows = ki > 0 ? await getRows(buildKiUrl(options.url, ki, options.ids), headers, options.fetchImpl, timeoutMs) : [];
+  return { activities: [...listed, ...kiRows], missing, fromFile, ki: kiRows.map((activity) => activity.id) };
 }

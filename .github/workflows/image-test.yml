@@ -1,6 +1,9 @@
 # Miki, M9b: Bild-Test (nur manuell). Die Claude API wählt für einige Aktivitäten je ein Titelbild aus dem Baukasten (Szene als JSON),
 # der Szenenprüfer prüft es mechanisch, das Skript zeichnet es, rsvg-convert macht PNG daraus. Ergebnis: Zusammenfassung des Laufs
-# (Ergebnis, Token, Kosten je Aktivität) und das Artefakt "bild-test" (PNG und SVG zum Ansehen). Anleitung: docs/bilder-plan.md, „Modelltest“.
+# (je Bild: gewählte Szene, Prüfergebnis, Größe, Versuche, Token, Kosten, Figuren, dazu der Zähler der Figuren) und das Artefakt
+# "bild-test" (PNG und SVG zum Ansehen). Anleitung: docs/bilder-plan.md, „Modelltest“ und „Bilder ansehen“.
+# Standard: die fünf Probeaktivitäten und die drei neuesten aus dem KI-Wochenlauf (batch_id gesetzt; fehlt eine Probeaktivität in Supabase,
+# kommt ihr Text aus assets/bausteine/probe/aktivitaeten.json). Die Figurenwahl (scripts/lib/kit/casting.ts) zählt mit, wer schon im Bild war.
 #
 # Schreibt NICHTS in die Datenbank und fasst KEINEN Bucket an. Liest Aktivitäten nur mit dem öffentlichen Lese-Schlüssel.
 # Secrets (Settings → Secrets and variables → Actions → Secrets): ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY
@@ -25,9 +28,13 @@ on:
           - sonnet
         default: haiku
       ids:
-        description: 'Aktivitäten (IDs, durch Komma getrennt; leer = die fünf aus dem Plan)'
+        description: 'Aktivitäten (IDs, durch Komma getrennt; leer = die fünf Probeaktivitäten)'
         type: string
         default: 'baked-apples,banana-oat-balls,dance-freeze,secret-lemon-ink,puddle-explorers'
+      ki:
+        description: 'Zusätzlich so viele der neuesten KI-Aktivitäten (batch_id gesetzt), 0 bis 5'
+        type: string
+        default: '3'
 
 permissions:
   contents: read
@@ -53,7 +60,8 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           IDS: ${{ inputs.ids }}
-        run: node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/image-test.ts list --ids "$IDS" --out image-test-out
+          KI: ${{ inputs.ki }}
+        run: node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/image-test.ts list --ids "$IDS" --ki "$KI" --out image-test-out
       - uses: actions/upload-artifact@v4
         with:
           name: aktivitaeten
