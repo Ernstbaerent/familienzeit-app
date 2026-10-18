@@ -1,0 +1,57 @@
+{
+  "activity": "puddle-explorers",
+  "layout": "outdoor",
+  "items": [
+    {
+      "slot": "mid",
+      "figure": "ilka",
+      "pose": "hold-plate",
+      "outfit": {
+        "kind": "rain",
+        "tint": "petrol"
+      },
+      "holds": {
+        "right": {
+          "block": "bucket",
+          "content": "leaves",
+          "size": 0.6
+        }
+      }
+    },
+    {
+      "slot": "s3",
+      "figure": "nolli",
+      "pose": "hold-plate",
+      "flip": false,
+      "outfit": {
+        "kind": "rain",
+        "tint": "rose"
+      },
+      "holds": {
+        "right": {
+          "block": "stick",
+          "size": 0.6
+        }
+      }
+    },
+    {
+      "slot": "s4",
+      "block": "puddle"
+    }
+  ],
+  "review": {
+    "carries": [
+      "Alles kommt aus dem Text: Regenjacken, Gummistiefel, die Pfütze, Nolli prüft sie mit dem Stock, Ilka trägt den Eimer mit Blättern. Ilka ist dabei, wie es der Sicherheitshinweis für Kinder unter 6 verlangt.",
+      "Das stärkste Bild: Die Handlung (Stock in die Pfütze) ist auch im Daumennagel zu erkennen.",
+      "Besetzung: Jette und Mats sind schon in je zwei Bildern (Grenze 40 %), Nolli passt, weil die Aktivität ab 2 Jahren ist."
+    ],
+    "missing": [
+      "Das Springen und Spritzen (der Spaß) fehlt, ebenso Regen, Würmer und Schnecken.",
+      "Ilkas Kapuze ist Petrol (ihr Hautton trägt darauf); Nolli trägt Rosé."
+    ],
+    "check": [
+      "Sind die Gummistiefel als Stiefel zu erkennen?",
+      "Liest sich die Pfütze als Pfütze (Petrol mit Leinen-Wellen) und nicht als Loch oder Teller?"
+    ]
+  }
+}

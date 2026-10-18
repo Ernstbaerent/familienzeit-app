@@ -1,0 +1,139 @@
+# Miki, M9b: Bild-Test (nur manuell). Die Claude API wählt für einige Aktivitäten je ein Titelbild aus dem Baukasten (Szene als JSON),
+# der Szenenprüfer prüft es mechanisch, das Skript zeichnet es, rsvg-convert macht PNG daraus. Ergebnis: Zusammenfassung des Laufs
+# (je Bild: gewählte Szene, Prüfergebnis, Größe, Versuche, Token, Kosten, Figuren, dazu der Zähler der Figuren) und das Artefakt
+# "bild-test" (PNG und SVG zum Ansehen). Anleitung: docs/bilder-plan.md, „Modelltest“ und „Bilder ansehen“.
+# Standard: die fünf Probeaktivitäten und die drei neuesten aus dem KI-Wochenlauf (batch_id gesetzt; fehlt eine Probeaktivität in Supabase,
+# kommt ihr Text aus assets/bausteine/probe/aktivitaeten.json). Die Figurenwahl (scripts/lib/kit/casting.ts) zählt mit, wer schon im Bild war.
+#
+# Schreibt NICHTS in die Datenbank und fasst KEINEN Bucket an. Liest Aktivitäten nur mit dem öffentlichen Lese-Schlüssel.
+# Secrets (Settings → Secrets and variables → Actions → Secrets): ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY
+#   (SUPABASE_ANON_KEY ist der öffentliche Schlüssel, derselbe wie EXPO_PUBLIC_SUPABASE_ANON_KEY in der .env der App; NIE der geheime).
+# Variable (freiwillig): IMAGE_TEST_MAX_COST_USD (Standard 1, Obergrenze für einen Lauf im schlimmsten Fall).
+#
+# Drei Jobs, jeder nur mit dem, was er braucht:
+#   liste    SUPABASE_URL + SUPABASE_ANON_KEY, installiert nichts
+#   zeichnen ANTHROPIC_API_KEY, installiert nichts (kein npm: keine fremden Paketskripte neben dem Schlüssel)
+#   rendern  KEIN Schlüssel, installiert librsvg2-bin (apt) für rsvg-convert
+
+name: Bild-Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'Modell'
+        type: choice
+        options:
+          - haiku
+          - sonnet
+        default: haiku
+      ids:
+        description: 'Aktivitäten (IDs, durch Komma getrennt; leer = die fünf Probeaktivitäten)'
+        type: string
+        default: 'baked-apples,banana-oat-balls,dance-freeze,secret-lemon-ink,puddle-explorers'
+      ki:
+        description: 'Zusätzlich so viele der neuesten KI-Aktivitäten (batch_id gesetzt), 0 bis 5'
+        type: string
+        default: '3'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: image-test
+  cancel-in-progress: false
+
+jobs:
+  liste:
+    name: Aktivitäten lesen
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Aktivitäten aus Supabase lesen (nur lesen, öffentlicher Schlüssel)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          IDS: ${{ inputs.ids }}
+          KI: ${{ inputs.ki }}
+        run: node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/image-test.ts list --ids "$IDS" --ki "$KI" --out image-test-out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aktivitaeten
+          path: image-test-out/activities.json
+          retention-days: 3
+
+  zeichnen:
+    name: Szenen wählen und zeichnen
+    needs: liste
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: aktivitaeten
+          path: image-test-out
+      # Kein "npm ci": Das Skript braucht nur Node. Der Schlüssel steht nur in diesem Schritt.
+      - name: Claude API fragen, prüfen, zeichnen
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          MAX_COST_USD: ${{ vars.IMAGE_TEST_MAX_COST_USD }}
+          MODEL: ${{ inputs.model }}
+        run: node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/image-test.ts draw --model "$MODEL" --out image-test-out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: szenen
+          path: image-test-out
+          retention-days: 3
+
+  rendern:
+    name: PNG und Zusammenfassung
+    needs: zeichnen
+    if: always() && needs.zeichnen.result != 'skipped'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: szenen
+          path: image-test-out
+      - name: rsvg-convert installieren (dieser Job hat keinen Schlüssel)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
+      - name: PNG in Kartengröße und Daumennagel
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for svg in image-test-out/*.svg; do
+            base="${svg%.svg}"
+            rsvg-convert -w 624 -h 312 "$svg" -o "$base.png"
+            rsvg-convert -w 96 -h 48 "$svg" -o "$base-96.png"
+            rsvg-convert -w 64 -h 32 "$svg" -o "$base-64.png"
+          done
+      - name: Zusammenfassung
+        run: node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/image-test.ts summary --out image-test-out >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bild-test
+          path: |
+            image-test-out/*.png
+            image-test-out/*.svg
+            image-test-out/report.json
+          retention-days: 14

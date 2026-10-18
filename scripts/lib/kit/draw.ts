@@ -139,6 +139,17 @@ export function drawBlock(
   return { svg: `<g transform="${transform(at)}" ${groupStyle}>${fillBlock(block, at.size, tint)}${inner.svg}${extra}</g>`, box };
 }
 
+// Ein Inhalt lose auf dem Tisch (`loose`): drei kleine oder zwei große Stücke nebeneinander, Ursprung in der Mitte der Reihe auf der Tischplatte.
+export function drawLoose(content: LoadedBlock, at: Pose2D): { svg: string; box: Box } {
+  const w = content.box.x1 - content.box.x0;
+  const step = w + 3;
+  const offsets = w > 30 ? [-0.5, 0.5] : [-1, 0, 1];
+  const items = offsets.map((i) => itemAt(content, i * step, 0, at.size)).join('');
+  const reach = offsets[offsets.length - 1] * step;
+  const box = boxOf({ ...content, box: { x0: -reach + content.box.x0, x1: reach + content.box.x1, h: content.box.h } }, at);
+  return { svg: `<g transform="${transform(at)}" ${groupStyle}>${items}</g>`, box };
+}
+
 // Gibt den Inhalt zu einer ID zurück, wenn er in diesen Behälter passt; sonst eine Fehlermeldung.
 export function contentFor(catalog: Catalog, container: LoadedBlock, id: string): LoadedBlock | string {
   const content = catalog.get(id);

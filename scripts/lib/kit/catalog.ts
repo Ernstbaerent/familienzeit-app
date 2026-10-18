@@ -7,6 +7,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { elementNames, estimateBox, parseElements } from './geometry.ts';
+import { getMaterialInfo, isMaterialKey } from '../../../src/features/activities/materials.ts';
 import type { Block, Catalog, GripName, KitHazard, LoadedBlock, Scene, TintName } from './types.ts';
 
 export const kitDir = 'assets/bausteine';
@@ -14,6 +15,10 @@ export const kitDir = 'assets/bausteine';
 export const tintNames: readonly TintName[] = ['paper', 'rose', 'petrol', 'honey', 'brown'];
 export const hazardNames: readonly KitHazard[] = ['sharp', 'heat', 'goggles', 'smallParts', 'water'];
 export const gripNames: readonly GripName[] = ['handle', 'tip', 'left', 'right', 'under'];
+// Neutrale Gegenstände (Entscheidung von Clemens, 2026-10-17): Sie dürfen im Bild stehen, auch wenn der Text sie nicht nennt,
+// weil sie nichts Sicherheitsrelevantes ändern. Nur diese (dazu die Standlinie); eine Erweiterung entscheidet Clemens.
+// Nie neutral: alles, was scharf, heiß, elektrisch oder klein ist, und kein Inhalt.
+export const neutralBlockIds: readonly string[] = ['ground-line', 'table', 'chair', 'pillow', 'blanket', 'plate'];
 // Farbplätze und Maßplätze, die ein Baustein nutzen darf. `tint` ist der Platz für den Ton, den die Szene wählt.
 const colorPlaceholders = ['ink', 'paper', 'rose', 'petrol', 'honey', 'brown', 'ground', 'tint'];
 const sizePlaceholders = ['line', 'fine', 'shift'];
@@ -143,10 +148,18 @@ export function checkBlock(block: LoadedBlock): string[] {
   if (block.kind === 'content') {
     if ((block.fits ?? []).length === 0) fail('Ein Inhalt braucht `fits` (die Behälter, in die er passt).');
     if (block.grips !== undefined) fail('Ein Inhalt hat keine Haltepunkte.');
-  } else if (block.fits !== undefined || block.fill !== undefined) fail('`fits` und `fill` gibt es nur bei Inhalten.');
+  } else if (block.fits !== undefined || block.fill !== undefined || block.loose !== undefined) fail('`fits`, `fill` und `loose` gibt es nur bei Inhalten.');
+  if (block.loose === true && block.fill === true) fail('Eine Fläche (`fill`) kann nicht lose liegen.');
   if (block.kidSafe === true && !block.hazards.includes('sharp')) fail('`kidSafe` gibt es nur bei scharfen Dingen (Kinderschere).');
   if (block.kidSafe === true && (block.kidTerms === undefined || block.kidTerms.de.length === 0 || block.kidTerms.en.length === 0)) fail('`kidSafe` braucht `kidTerms` in Deutsch und Englisch (der Text muss sie nennen).');
   if (block.surface !== undefined && block.kind !== 'furniture') fail('`surface` gibt es nur bei Möbeln (Tisch).');
+  if (block.neutral) {
+    if (!neutralBlockIds.includes(block.id)) fail(`Neutral dürfen nur ${neutralBlockIds.join(', ')} sein (Entscheidung von Clemens).`);
+    if (block.kind === 'content') fail('Ein Inhalt ist nie neutral (er zeigt, was gemacht wird).');
+    if (block.hazards.length > 0) fail(`Ein neutraler Baustein darf kein Merkmal haben (hier: ${block.hazards.join(', ')}): Scharfes, Heißes, Wasser und Kleinteile sind nie neutral.`);
+    const materialHazards = block.materials.flatMap((key) => (isMaterialKey(key) ? (getMaterialInfo(key).hazards ?? []) : []));
+    if (materialHazards.length > 0) fail(`Ein neutraler Baustein darf kein Material mit Gefahr haben (hier: ${[...new Set(materialHazards)].join(', ')}), z. B. nichts Elektrisches.`);
+  }
   if (!block.neutral && (block.terms.de.length === 0 || block.terms.en.length === 0)) {
     fail('Ein Baustein, der nicht neutral ist, braucht Begriffe in Deutsch und Englisch (`terms`), sonst lässt er sich nicht mit dem Text abgleichen.');
   }

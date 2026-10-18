@@ -9,7 +9,7 @@ import { renderTemplate } from '../illustrations.ts';
 import { animalBannedHazards, figureFitsActivity } from '../figures/castRules.ts';
 import { backgrounds, skinCarriesOn } from '../figures/skin.ts';
 import { getMaterialInfo, isMaterialKey } from '../../../src/features/activities/materials.ts';
-import { contentFor, drawBlock, fillBlock, type Pose2D } from './draw.ts';
+import { contentFor, drawBlock, drawLoose, fillBlock, type Pose2D } from './draw.ts';
 import { renderFigure, renderHands, type FigureRender } from './figureItems.ts';
 import type { Box } from './geometry.ts';
 import type { Catalog, KitHazard, LoadedBlock, Person, Scene, SceneItem, TintName } from './types.ts';
@@ -106,7 +106,7 @@ export function placeItems(scene: Scene, catalog: Catalog): Placement[] | null {
     }
     const at: Pose2D = { x: slot.x, y, size, flip, rot: 0, mirror: false };
     const tint = item.tint ?? block.defaultTint;
-    const drawn = drawBlock(block, at, { tint, content, hot: item.hot });
+    const drawn = block.kind === 'content' ? drawLoose(block, at) : drawBlock(block, at, { tint, content, hot: item.hot });
     let figure: FigureRender | undefined;
     let box = drawn.box;
     if (item.hands !== undefined) {
@@ -230,10 +230,12 @@ export function checkAgainstActivity(placements: readonly Placement[], activity:
   const notCovered = (id: string) => `„${id}“ ist im Text der Aktivität nicht gedeckt (weder Material noch Begriff): Ein Bild zeigt nichts, was der Text nicht sagt.`;
   for (const thing of things) {
     const { block } = thing;
-    // Nichts im Bild, was der Text nicht sagt: jeder nicht neutrale Baustein und jeder Inhalt muss über Material oder Begriff gedeckt sein.
-    if (!block.neutral && !covered(block, activity)) problems.push(notCovered(block.id));
-    if (thing.content !== undefined && !covered(thing.content, activity)) problems.push(notCovered(thing.content.id));
     const hazards = hazardsOf(thing);
+    // Nichts im Bild, was der Text nicht sagt: jeder Baustein und jeder Inhalt muss über Material oder Begriff gedeckt sein.
+    // Ausnahme: neutrale Gegenstände (Teller, Tisch, Stuhl, Kissen, Decke), solange sie nichts Sicherheitsrelevantes tragen
+    // (ein Teller mit heißem Inhalt oder mit Kleinteilen ist nicht mehr neutral). Inhalte sind nie neutral.
+    if (!(block.neutral && hazards.length === 0) && !covered(block, activity)) problems.push(notCovered(block.id));
+    if (thing.content !== undefined && !covered(thing.content, activity)) problems.push(notCovered(thing.content.id));
     for (const hazard of hazards) {
       if (hazard === 'sharp') {
         // Scharfes nur in der Hand eines Erwachsenen (Ausnahme: Kinderschere, siehe kidSharpProblems).
@@ -301,7 +303,10 @@ export function checkScene(scene: Scene, catalog: Catalog, activity?: ActivityCo
       continue;
     }
     if (block.id === 'ground-line') problems.push('Die Standlinie setzt der Zeichner selbst (`ground`), nicht als Baustein.');
-    if (block.kind === 'content') problems.push(`„${block.id}“ ist ein Inhalt und steht nur in einem Behälter (\`content\`).`);
+    // lose auf der Tischplatte (`on1` bis `on3`) oder neben dem Gegenstand der Nahaufnahme (Layout `hands`, links und rechts)
+    const looseOnTable = block.kind === 'content' && block.loose === true && (slot?.y === 'surface' || (scene.layout === 'hands' && item.slot !== 'object'));
+    if (block.kind === 'content' && !looseOnTable) problems.push(`„${block.id}“ ist ein Inhalt und steht nur in einem Behälter (\`content\`)${block.loose === true ? ' oder lose auf der Tischplatte (`on1` bis `on3`, im Layout `hands` links und rechts)' : ''}.`);
+    if (looseOnTable && (item.content !== undefined || item.hot !== undefined || item.hands !== undefined)) problems.push(`„${block.id}“ liegt lose: \`content\`, \`hot\` und \`hands\` gibt es dafür nicht.`);
     if (item.holds !== undefined || item.pose !== undefined || item.mitts !== undefined || item.outfit !== undefined) problems.push(`Baustein „${block.id}“: \`pose\`, \`holds\`, \`mitts\` und \`outfit\` gibt es nur bei Figuren.`);
     if (item.hands !== undefined && scene.layout !== 'hands') problems.push('Hände (`hands`) gibt es nur im Layout „hands“.');
     if (slot === undefined) continue;
@@ -344,7 +349,9 @@ export function checkScene(scene: Scene, catalog: Catalog, activity?: ActivityCo
       // Dinge auf dem Tisch stehen vor einer Figur hinter dem Tisch
       const behind = (p: Placement, q: Placement) => p.figure !== undefined && p.block === undefined && p.slot.z < 1 && q.slot.y === 'surface';
       if (behind(a, b) || behind(b, a)) continue;
-      const share = overlap(a.box, b.box) / Math.min(area(a.box), area(b.box));
+      // Bei Figuren zählt nur der Körper: Was sie halten (Stock, Tablett), darf an andere Dinge reichen (der Stock in der Pfütze).
+      const own = (p: Placement): Box => (p.figure !== undefined && p.block === undefined ? p.figure.bodyBox : p.box);
+      const share = overlap(own(a), own(b)) / Math.max(1, Math.min(area(own(a)), area(own(b))));
       const name = (p: Placement) => p.block?.id ?? p.item.figure ?? '?';
       if (share > maxOverlap) problems.push(`„${name(a)}“ und „${name(b)}“ überdecken sich zu ${Math.round(share * 100)} % (höchstens ${maxOverlap * 100} %).`);
     }

@@ -7,6 +7,8 @@ import { dirname, join } from 'node:path';
 
 import { checkCatalog, loadCatalog, loadExampleScenes } from './lib/kit/catalog.ts';
 import { buildPreviewFiles, previewDir } from './lib/kit/preview.ts';
+import { buildProbeFiles, loadProbe } from './lib/kit/probe.ts';
+import { loadActivityData } from './lib/activityData.ts';
 
 const root = join(import.meta.dirname, '..');
 const check = process.argv.includes('--check');
@@ -17,7 +19,9 @@ if (problems.length > 0) {
   console.error(problems.join('\n'));
   process.exit(1);
 }
-const files = buildPreviewFiles(catalog, loadExampleScenes(root));
+const probe = loadProbe(root);
+const activities = new Map([...loadActivityData().activities, ...probe.extra].map((activity) => [activity.id, activity]));
+const files = [...buildPreviewFiles(catalog, loadExampleScenes(root)), ...buildProbeFiles(catalog, probe, activities)];
 const wanted = new Set(files.map((file) => file.path));
 let outdated = 0;
 
@@ -33,7 +37,7 @@ for (const file of files) {
 }
 
 // Dateien in vorschau/, die es nicht mehr geben soll (gelöschter Baustein, anderer Ton), entfernen.
-for (const folder of ['vorschau', 'vorschau/beispiele', 'vorschau/posen', 'vorschau/behaelter']) {
+for (const folder of ['vorschau', 'vorschau/beispiele', 'vorschau/posen', 'vorschau/behaelter', 'probe']) {
   const dir = join(root, previewDir, folder);
   if (!existsSync(dir)) continue;
   for (const name of readdirSync(dir).filter((entry) => entry.endsWith('.svg'))) {

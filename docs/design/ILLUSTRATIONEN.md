@@ -115,7 +115,18 @@ Die einfachen Strichfiguren der Pilot-Bilder und der Stufe 1 (Köpfe in Leinen, 
 ## Sicherheit
 
 Ein Bild zeigt nie etwas, was der Sicherheits-Checkliste (`docs/sicherheits-checkliste.md`) oder dem Text der Aktivität
-widerspricht. **Ein Bild darf nichts zeigen, was der Text nicht sagt.** Für jedes Bild wird geprüft:
+widerspricht. **Ein Bild darf nichts zeigen, was der Text nicht sagt.**
+
+**Ausnahme: neutrale Gegenstände** (Entscheidung von Clemens, 2026-10-17). Teller, Tisch, Stuhl, Kissen und Decke dürfen im Bild stehen,
+auch wenn der Text sie nicht nennt, solange sie nichts Sicherheitsrelevantes ändern. Sie sind im Katalog mit `neutral` markiert,
+die Liste ist fest (`neutralBlockIds` in `scripts/lib/kit/catalog.ts`); eine Erweiterung entscheidet Clemens. Nicht neutral sind:
+
+- ein Teller mit heißem Inhalt (in Kinderhänden ohnehin verboten, siehe Hitze) oder mit Kleinteilen: dann muss der Text den Teller nennen, und die Regeln für Hitze und Kleinteile gelten,
+- alles, was scharf, heiß, elektrisch oder klein ist, und jeder Inhalt (Bratäpfel auf dem Teller muss der Text nennen, den leeren Teller nicht).
+
+Beispiel: Bei den Bratäpfeln wartet Jette mit einem leeren Teller, Arne trägt das heiße Blech (`docs/bausteine/PROBE.md`).
+
+Für jedes Bild wird geprüft:
 
 | Thema | Im Bild |
 | --- | --- |

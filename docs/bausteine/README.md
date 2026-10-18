@@ -49,7 +49,7 @@ Fett: neu in Schritt 3a. Die sechs Strichfiguren der Stufe 1 (Erwachsener, Kind,
 **Für die fünf Probebilder (Schritt 3b) neu:** Teller und Inhalt Bratäpfel (Bratäpfel), Gabel, Teig, Haferkugeln und Bananen (Bananen-Haferkugeln), Wattestäbchen und Zitronenhälften (Geheimschrift), Stock und Eimer mit Blättern (Pfützen-Forscher), dazu die Posen `dance`, `freeze`, `write` und die Regen-Kleidung im Rig.
 **Aus deinem Auftrag für Haltepunkte und Behälter:** Kelle, Kanne, Korb, Messer, Kinderschere und die übrigen Inhalte.
 
-Weitere Bausteine kommen nur, wenn eine Aktivität sie braucht: Die Liste „Materialien ohne Baustein“ in [ABDECKUNG.md](ABDECKUNG.md) zeigt, was am häufigsten fehlt (vorn: Stifte, Handtuch, Ball, Filzstifte, Salz). **Feuer, Flammen und Kerzen gibt es nie** (Sicherheits-Checkliste, Punkt 7), auch keine Noten, Pfeile oder Zeichen mit Bedeutung.
+Weitere Bausteine kommen nur, wenn eine Aktivität sie braucht: Die Liste „Materialien ohne Baustein“ in [ABDECKUNG.md](ABDECKUNG.md) zeigt, was am häufigsten fehlt (vorn: Stifte, Handtuch, Klebeband, Ball, Filzstifte). **Feuer, Flammen und Kerzen gibt es nie** (Sicherheits-Checkliste, Punkt 7), auch keine Noten, Pfeile oder Zeichen mit Bedeutung.
 
 ## Regeln für einen Baustein
 
@@ -72,7 +72,7 @@ Jede Regel prüft `npm run kit:check` bzw. der Test, außer wo „Mensch“ steh
 Jeder neue Baustein ist ein **kleiner Pull Request** mit Vorschau:
 
 1. `assets/bausteine/<gruppe>/<id>.svg` zeichnen und einen Eintrag in `katalog.json` machen: `id` (englisch, kleingeschrieben), `group`, `kind` (`figure`, `object`, `furniture`, `nature`), Name de/en, `box`, `tints` und `defaultTint` (wenn `{{tint}}` vorkommt),
-   `hazards` (`sharp`, `heat`, `goggles`, `smallParts`, `water`), `materials` (Schlüssel aus `src/features/activities/materials.ts`), `terms` (Wörter im Text, de und en, kleingeschrieben, Wortteile genügen) und `neutral` (nur Tisch und Standlinie).
+   `hazards` (`sharp`, `heat`, `goggles`, `smallParts`, `water`), `materials` (Schlüssel aus `src/features/activities/materials.ts`), `terms` (Wörter im Text, de und en, kleingeschrieben, Wortteile genügen) und `neutral` (nur Teller, Tisch, Stuhl, Kissen, Decke und Standlinie, feste Liste `neutralBlockIds`; nie mit Merkmal und nie mit Material, das eine Gefahr hat, z. B. elektrisch).
    Dazu, wenn es passt: `grips` (Haltepunkte, siehe unten), `container` (Behälter), bei Inhalten `fits` (in welche Behälter) und `fill` (Fläche statt Stücke), bei der Kinderschere `kidSafe` und `kidTerms`.
 2. `npm run kit:check`, dann `npm run kit:preview`. Beides gehört in den Pull Request.
 3. Auf der Vorschau (`VORSCHAU.md`) in Karten- und Daumennagelgröße ansehen und die Frage aus Regel 9 stellen.
@@ -158,9 +158,25 @@ Gilt für jede Szene **zu einer Aktivität** (`"activity": "<id>"` in der Beispi
 | Wasser (`water`: Pfütze, Wasser in Schüssel oder Eimer) | Bei `ageMin` unter 6 ist ein **Erwachsener im Bild**. |
 | **Petrol hinter tiefen Hauttönen** | Trägt der Hautton einer Figur auf Petrol nicht (Plätze 6 bis 8, heute Jette), liegt **an Kopf und Händen** nichts Petrolfarbenes: kein Baustein in Petrol, kein Petrol-Inhalt (Wasser), keine eigene Petrol-Kapuze, kein Petrol-Ärmel, keine Petrol-Kleidung einer anderen Figur. Geprüft mit der echten Lage von Kopf und Händen aus dem Rig. |
 | Alter der Figuren | Kinder-Figuren nur zur Altersspanne der Aktivität (Nolli 0 bis 4, Jette 3 bis 9, Mats 8 bis 16), Nolli zusätzlich nur, wenn die Aktivität ab 2 Jahren oder jünger beginnt. |
-| Nichts, was der Text nicht sagt | Jeder nicht neutrale Baustein, jeder Inhalt, die Regen-Kleidung und die Ofenhandschuhe müssen **gedeckt** sein: durch Material der Aktivität **oder** einen Begriff (`terms`) im Titel, in der Kurzbeschreibung, den Schritten oder im Sicherheitshinweis, in Deutsch oder Englisch. Tisch und Standlinie sind neutral, Figuren ebenso. |
+| Nichts, was der Text nicht sagt | Jeder nicht neutrale Baustein, jeder Inhalt, die Regen-Kleidung und die Ofenhandschuhe müssen **gedeckt** sein: durch Material der Aktivität **oder** einen Begriff (`terms`) im Titel, in der Kurzbeschreibung, den Schritten oder im Sicherheitshinweis, in Deutsch oder Englisch. Neutral (müssen nicht im Text stehen) sind Teller, Tisch, Stuhl, Kissen, Decke, die Standlinie und die Figuren; aber nur, solange sie nichts Sicherheitsrelevantes tragen: ein Teller mit heißem Inhalt oder Kleinteilen muss gedeckt sein. Inhalte sind nie neutral. |
+
+## Probebilder (Schritt 3b)
+
+Fünf Titelbilder von Hand, mit Bewertung je Bild (was trägt, was fehlt, was ein Mensch noch prüft) und einem Vergleich der Bilder untereinander: [PROBE.md](PROBE.md). Die Szenen stehen in `assets/bausteine/probe/*.scene.json` (Feld `review`), der Text der Bratäpfel (KI-Aktivität, nicht in `data/`) in `assets/bausteine/probe/aktivitaeten.json`. `npm run kit:check` prüft sie mit ihren Texten, `npm run kit:preview` erzeugt die Seite.
+
+Neu für die Probebilder:
+- **Lose Inhalte** (`loose` im Katalog): Haferkugeln, Zitronenhälften, Kekse, Kastanien und Bananen dürfen ohne Behälter auf der Tischplatte (`on1` bis `on3`) und neben der Nahaufnahme (Layout `hands`, `left` und `right`) liegen, als Reihe von drei (große Stücke: zwei). Grund: In beiden Texten steht kein Teller.
+- **Überdeckung bei Figuren:** Es zählt nur der Körper, nicht was die Figur hält. So darf der Stock in die Pfütze reichen; für Rand und Ecken zählt weiter der ganze Rahmen mit dem Gehaltenen.
+- **Rühren in der Nahaufnahme** liegt flacher (das Werkzeug zeigt 25° nach oben statt 38°), damit der Arm nicht lang wird.
+
+Nachgetragen (2026-10-17, Entscheidungen von Clemens):
+- **Neutrale Gegenstände:** Teller, Tisch, Stuhl, Kissen und Decke müssen nicht im Text stehen, solange sie nichts Sicherheitsrelevantes tragen (Regel in `docs/design/ILLUSTRATIONEN.md`, „Sicherheit“). Die Bratäpfel zeigen deshalb Jette mit leerem Teller neben Arne mit dem heißen Blech.
+- **Figurenwahl:** die am seltensten benutzte passende Figur, keine in mehr als 40 % der Bilder, Mats bevorzugt ab 8, Stups gelegentlich (`scripts/lib/kit/casting.ts`, `docs/design/FIGUREN.md`). In den fünf Probebildern stehen Jette, Mats und Nolli jetzt je zweimal (vorher Jette fünfmal).
 
 ## Offen für die Durchsicht (Schritt 3a)
+
+**Entschieden (Clemens, 17. Oktober 2026):** Erwachsene bleiben in der Mitte, höchstens einer je Titelbild. Wird das zu gleichförmig oder verlangt eine Szene den Rand, schlägt Claude Code sitzende oder gebeugte Posen vor.
+
 
 Bitte auf der Vorschau ansehen und rückmelden, **bevor** die fünf Probebilder (Schritt 3b) entstehen:
 

@@ -130,7 +130,7 @@
           "sheet"
         ]
       },
-      "neutral": false
+      "neutral": true
     },
     {
       "id": "chair",
@@ -163,7 +163,7 @@
           "chair"
         ]
       },
-      "neutral": false
+      "neutral": true
     },
     {
       "id": "pillow",
@@ -199,7 +199,7 @@
           "pillow"
         ]
       },
-      "neutral": false
+      "neutral": true
     },
     {
       "id": "cardboard-box",
@@ -872,7 +872,7 @@
           "plate"
         ]
       },
-      "neutral": false,
+      "neutral": true,
       "tints": [
         "paper",
         "rose",
@@ -1336,7 +1336,8 @@
         "plate",
         "baking-tray",
         "bowl"
-      ]
+      ],
+      "loose": true
     },
     {
       "id": "oat-balls",
@@ -1370,7 +1371,8 @@
         "plate",
         "tray",
         "bowl"
-      ]
+      ],
+      "loose": true
     },
     {
       "id": "dough",
@@ -1452,9 +1454,9 @@
         "en": "bananas"
       },
       "box": {
-        "x0": -18,
-        "x1": 20,
-        "h": 17
+        "x0": -19,
+        "x1": 21,
+        "h": 26
       },
       "hazards": [],
       "materials": [
@@ -1473,7 +1475,8 @@
         "plate",
         "basket",
         "bowl"
-      ]
+      ],
+      "loose": true
     },
     {
       "id": "lemon-halves",
@@ -1505,7 +1508,8 @@
         "plate",
         "tray",
         "bowl"
-      ]
+      ],
+      "loose": true
     },
     {
       "id": "water",
@@ -1614,7 +1618,8 @@
         "bucket",
         "bowl",
         "tray"
-      ]
+      ],
+      "loose": true
     }
   ]
 }
