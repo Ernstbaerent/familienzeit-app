@@ -41,7 +41,7 @@ concurrency:
 jobs:
   generate:
     name: Aktivitäten erzeugen
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Zeitplan und Pausen-Schalter prüfen
@@ -81,15 +81,16 @@ jobs:
 
       - name: Code holen
         if: steps.gate.outputs.run == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
       - name: Node 22 einrichten
         if: steps.gate.outputs.run == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
+          package-manager-cache: false # kein Cache neben Schlüsseln (setup-node ab v5 legt sonst selbst einen an)
 
       # Kein "npm ci": Das Skript braucht keine Pakete, nur Node. So laufen keine fremden Paketskripte neben den Schlüsseln.
       # Die Schlüssel stehen nur in diesem Schritt und nur als Umgebungsvariablen.

@@ -11,7 +11,11 @@ import { checkScene, contextFromActivity } from '../kit/scene';
 import type { FetchLike, HttpRequest } from '../weekly/http';
 import { buildHeaders, buildKiUrl, buildUrl, defaultIds, fetchTestActivities, parseIds, parseKi, rowToActivity } from './activities';
 import { buildSceneSchema, buildSystemPrompt, buildUserPrompt, toScene } from './prompt';
-import { describeScene, drawAll, maxAttempts, models, summaryMarkdown } from './run';
+import * as limitsModule from '../schemaLimits';
+import { apiLimits, optionalParameters, schemaLimitProblems, unionParameters } from '../schemaLimits';
+import { buildResponseSchema } from '../weekly/prompt';
+import { testCatalog } from '../weekly/testHelpers';
+import { describeScene, drawAll, maxAttempts, models, runFailure, summaryMarkdown } from './run';
 
 const root = join(__dirname, '../../..');
 const catalog = loadCatalog(root);
@@ -34,8 +38,9 @@ function fakeFetch(replies: Reply[]): { fetchImpl: FetchLike; calls: { url: stri
   return { fetchImpl, calls };
 }
 
-// Eine Antwort der Claude API mit der Szene als JSON (in der Form des Schemas: unbenutzte Felder sind null).
-const nullItem = { block: null, figure: null, pose: null, tint: null, content: null, hot: null, size: null, flip: null, mitts: null, rainOutfit: null, holds: null, hands: null };
+// Eine Antwort der Claude API mit der Szene als JSON (in der Form des Schemas: unbenutzte Felder haben ihren Ersatzwert).
+const nullItem = { block: 'none', figure: 'none', pose: 'none', tint: 'none', content: 'none', hot: false, size: 0, flip: 'auto', mitts: false, rainOutfit: 'none', holds: [], hands: [] };
+const hold = (hand: string, block: string, extra: Record<string, unknown> = {}) => ({ hand, block, content: 'none', tint: 'none', hot: false, size: 0, ...extra });
 function claudeReply(scene: { noScene?: boolean; reason?: string; layout: string; items: Record<string, unknown>[] }, usage = { input_tokens: 7000, output_tokens: 600 }): Reply {
   const data = { noScene: scene.noScene ?? false, reason: scene.reason ?? '', layout: scene.layout, items: scene.items.map((item) => ({ ...nullItem, ...item })) };
   return { body: { content: [{ type: 'text', text: JSON.stringify(data) }], stop_reason: 'end_turn', usage } };
@@ -43,8 +48,8 @@ function claudeReply(scene: { noScene?: boolean; reason?: string; layout: string
 const goodPuddle = {
   layout: 'outdoor',
   items: [
-    { slot: 'mid', figure: 'ilka', pose: 'hold-plate', rainOutfit: 'petrol', holds: { left: null, right: { block: 'bucket', content: 'leaves', tint: null, hot: null, size: 0.6 }, both: null, surface: null } },
-    { slot: 's3', figure: 'jette', pose: 'hold-plate', flip: false, rainOutfit: 'rose', holds: { left: null, right: { block: 'stick', content: null, tint: null, hot: null, size: 0.6 }, both: null, surface: null } },
+    { slot: 'mid', figure: 'ilka', pose: 'hold-plate', rainOutfit: 'petrol', holds: [hold('right', 'bucket', { content: 'leaves', size: 0.6 })] },
+    { slot: 's3', figure: 'jette', pose: 'hold-plate', flip: 'no', rainOutfit: 'rose', holds: [hold('right', 'stick', { size: 0.6 })] },
     { slot: 's4', block: 'puddle' },
   ],
 };
@@ -121,6 +126,25 @@ describe('Schema und Prompt', () => {
     walk(schema);
   });
 
+  it('Grenzen der API: höchstens 10 Unions (API 16), keine optionalen Parameter (API 24); heute gar keine Unions', () => {
+    expect(unionParameters(schema)).toEqual([]);
+    expect(unionParameters(schema).length).toBeLessThanOrEqual(10);
+    expect(optionalParameters(schema)).toEqual([]);
+    expect(schemaLimitProblems(schema)).toEqual([]);
+    // der Zähler erkennt beide Formen (anyOf und Typ-Liste), auch in $defs
+    const sample = { $defs: { a: { anyOf: [{ type: 'string' }, { type: 'null' }] } }, type: 'object', properties: { b: { type: ['string', 'null'] }, c: { type: 'string' } }, required: ['b'] };
+    expect(unionParameters(sample)).toEqual(['#/$defs/a', '#/properties/b']);
+    expect(optionalParameters(sample)).toEqual(['#/properties/c']);
+    expect(schemaLimitProblems(sample, { unions: 1, optional: 0 }).join(' ')).toMatch(/2 Parameter mit Union-Typ[\s\S]*1 optionale Parameter/);
+    expect(apiLimits).toEqual({ unions: 16, optional: 24 });
+  });
+
+  it('auch das Schema des Wochenlaufs bleibt unter den Grenzen', () => {
+    const weekly = buildResponseSchema(testCatalog());
+    expect(unionParameters(weekly).length).toBeLessThanOrEqual(10);
+    expect(optionalParameters(weekly).length).toBeLessThanOrEqual(apiLimits.optional);
+  });
+
   it('kennt jeden Baustein, jede Figur und jedes Layout; keine Koordinaten', () => {
     const text = JSON.stringify(schema);
     for (const id of catalog.keys()) if (id !== 'ground-line') expect(text).toContain(`"${id}"`);
@@ -138,7 +162,22 @@ describe('Schema und Prompt', () => {
     expect(buildUserPrompt(puddle, ['„stick“ ist zu lang'])).toMatch(/verworfen[\s\S]*„stick“ ist zu lang/);
   });
 
-  it('die Antwort (mit null für Unbenutztes) wird zu einer Szene, die der Prüfer kennt', () => {
+  it('Ersatzwerte werden übersetzt: none, Größe 0, false, flip auto/yes/no, leere Listen; Doppeltes wird gemeldet', () => {
+    const answer = toScene({
+      noScene: false,
+      reason: '',
+      layout: 'hands',
+      items: [{ ...nullItem, slot: 'object', block: 'bowl', content: 'dough', tint: 'rose', size: 1.5, flip: 'yes', hands: [{ figure: 'mats', pose: 'stir', tool: hold('none', 'fork'), mitts: false, sleeve: 'none' }] }],
+    });
+    expect(answer.scene.items[0]).toEqual({ slot: 'object', block: 'bowl', content: 'dough', tint: 'rose', size: 1.5, flip: true, hands: { figure: 'mats', pose: 'stir', tool: { block: 'fork' } } });
+    expect(answer.problems).toEqual([]);
+    const noTool = toScene({ layout: 'hands', items: [{ ...nullItem, slot: 'object', block: 'bowl', hands: [{ figure: 'mats', pose: 'hold', tool: hold('none', 'none'), mitts: true, sleeve: 'petrol' }] }] });
+    expect(noTool.scene.items[0].hands).toEqual({ figure: 'mats', pose: 'hold', mitts: true, sleeve: 'petrol' });
+    const twice = toScene({ layout: 'pair', items: [{ ...nullItem, slot: 'left', figure: 'jette', pose: 'hold-plate', holds: [hold('right', 'plate'), hold('right', 'cup')], hands: [{}, {}] }] });
+    expect(twice.problems.join(' ')).toMatch(/Hand „right“ hält zwei Dinge[\s\S]*höchstens ein Paar Hände/);
+  });
+
+  it('die Antwort (mit Ersatzwerten für Unbenutztes) wird zu einer Szene, die der Prüfer kennt', () => {
     const answer = toScene(JSON.parse((claudeReply(goodPuddle).body as { content: { text: string }[] }).content[0].text));
     expect(answer.noScene).toBe(false);
     expect(answer.scene.items[0]).toEqual({ slot: 'mid', figure: 'ilka', pose: 'hold-plate', outfit: { kind: 'rain', tint: 'petrol' }, holds: { right: { block: 'bucket', content: 'leaves', size: 0.6 } } });
@@ -186,6 +225,36 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
     const report = await drawAll({ activities: [puddle, puddle], catalog, examples, apiKey, model: models.sonnet, fetchImpl, maxCostUsd: 0.01 });
     expect(calls).toHaveLength(0);
     expect(report.stopped).toMatch(/Kostengrenze/);
+  });
+
+  it('eine abgelehnte Anfrage (invalid_request_error) beendet den Lauf nach der ersten Anfrage, und er endet rot', async () => {
+    const reply = { status: 400, body: { type: 'error', error: { type: 'invalid_request_error', message: 'Schemas contains too many parameters with union types (19 parameters with type arrays or anyOf)' } } };
+    const { fetchImpl, calls } = fakeFetch([reply, reply, reply]);
+    const report = await drawAll({ activities: [puddle, puddle, puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl });
+    expect(calls).toHaveLength(1);
+    expect(report.stopped).toMatch(/invalid_request_error/);
+    expect(report.results.map((entry) => entry.attempts.length)).toEqual([0, 0, 0]);
+    expect(summaryMarkdown(report, new Set())).toMatch(/nicht versucht \(Lauf abgebrochen\)/);
+    expect(runFailure(report)).toMatch(/^Abgebrochen: .*union types/);
+  });
+
+  it('rot, wenn keine Aktivität ein Bild bekommt; grün bei Teilfehlern', async () => {
+    const bad = { layout: 'outdoor', items: [{ slot: 's1', figure: 'jette', pose: 'stand' }, { slot: 's4', block: 'puddle' }] };
+    const allBad = await drawAll({ activities: [puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl: fakeFetch([claudeReply(bad), claudeReply(bad)]).fetchImpl });
+    expect(runFailure(allBad)).toMatch(/Keine der 1 Aktivitäten/);
+    const partly = await drawAll({ activities: [puddle, puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl: fakeFetch([claudeReply(goodPuddle), claudeReply(bad), claudeReply(bad)]).fetchImpl });
+    expect(partly.results.map((entry) => entry.passed)).toEqual([true, false]);
+    expect(runFailure(partly)).toBeNull();
+  });
+
+  it('ein Schema über der eigenen Grenze geht gar nicht erst zur API', async () => {
+    const { fetchImpl, calls } = fakeFetch([claudeReply(goodPuddle)]);
+    const spy = jest.spyOn(limitsModule, 'schemaLimitProblems').mockReturnValue(['zu viele Unions']);
+    const report = await drawAll({ activities: [puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl });
+    spy.mockRestore();
+    expect(calls).toHaveLength(0);
+    expect(report.stopped).toMatch(/keine Anfrage gesendet\. zu viele Unions/);
+    expect(runFailure(report)).toMatch(/Abgebrochen/);
   });
 
   it('leeres Guthaben oder falscher Schlüssel beendet den ganzen Test, ohne den Schlüssel zu nennen', async () => {
