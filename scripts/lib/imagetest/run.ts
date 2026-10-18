@@ -10,12 +10,15 @@ import type { ProbeActivity } from '../kit/probe.ts';
 import { addToCounts, adviseCasting, castingProblems, castingPrompt, figuresInScene, type CastingAdvice } from '../kit/casting.ts';
 import { checkScene, contextFromActivity, renderSceneSvg } from '../kit/scene.ts';
 import type { Catalog, Scene } from '../kit/types.ts';
+import { schemaLimitProblems } from '../schemaLimits.ts';
 import { buildSceneSchema, buildSystemPrompt, buildUserPrompt, toScene } from './prompt.ts';
 
 export const models = { haiku: 'claude-haiku-5-5', sonnet: 'claude-sonnet-5-5' } as const;
 export const maxAttempts = 2;
 export const maxOutputTokens = 8_000;
 export const defaultMaxCostUsd = 1;
+// Fehlerarten, bei denen der ganze Lauf sofort aufhört (scripts/lib/weekly/anthropic.ts, classifyError).
+export const stopKinds = ['billing', 'limit', 'auth', 'permission', 'model', 'request'] as const;
 
 export type Attempt = { scene: Scene; noScene: boolean; reason: string; problems: string[]; usage: Usage; costUsd: number };
 export type Drawn = {
@@ -50,6 +53,12 @@ export async function drawAll(options: {
   const schema = buildSceneSchema(options.catalog);
   const report: DrawReport = { model: options.model, results: [], totalUsd: 0, tokens: { input: 0, output: 0 }, counts: {} };
   const total = options.activities.length;
+  // Grenzen der strukturierten Ausgaben vor der ersten Anfrage prüfen (scripts/lib/schemaLimits.ts): kein Aufruf, der sicher scheitert.
+  const limitProblems = schemaLimitProblems(schema);
+  if (limitProblems.length > 0) {
+    report.stopped = `Schema zu groß für die API, keine Anfrage gesendet. ${limitProblems.join(' ')}`;
+    return report;
+  }
 
   for (const activity of options.activities) {
     // Figurenwahl (casting.ts): Rat aus den bisher bestandenen Bildern, eine gesperrte Figur gilt wie eine Meldung der Prüfung.
@@ -71,7 +80,7 @@ export async function drawAll(options: {
         report.tokens.input += result.usage.input_tokens + result.usage.cache_creation_input_tokens + result.usage.cache_read_input_tokens;
         report.tokens.output += result.usage.output_tokens;
         const answer = toScene(result.data);
-        problems = answer.noScene ? [] : [...checkScene(answer.scene, options.catalog, contextFromActivity(activity)), ...castingProblems(answer.scene, casting)];
+        problems = answer.noScene ? [] : [...answer.problems, ...checkScene(answer.scene, options.catalog, contextFromActivity(activity)), ...castingProblems(answer.scene, casting)];
         drawn.attempts.push({ scene: answer.scene, noScene: answer.noScene, reason: answer.reason, problems, usage: result.usage, costUsd });
         if (answer.noScene) break; // Farbfläche: kein zweiter Versuch
         if (problems.length === 0) {
@@ -86,14 +95,24 @@ export async function drawAll(options: {
       } catch (error) {
         if (error instanceof ClaudeApiError && error.usage !== null) report.totalUsd += actualUsd(price, error.usage);
         drawn.error = error instanceof Error ? error.message : String(error);
-        // Guthaben, Limit, Schlüssel oder Modell: Der ganze Test hört auf, ohne weitere Aufrufe.
-        if (error instanceof ClaudeApiError && ['billing', 'limit', 'auth', 'permission', 'model'].includes(error.kind)) report.stopped = drawn.error;
+        // Guthaben, Limit, Schlüssel, Modell oder eine abgelehnte Anfrage (400, z. B. invalid_request_error beim Schema):
+        // Der ganze Test hört sofort auf, ohne weitere Aufrufe. Die nächste Anfrage wäre gleich gebaut und würde genauso scheitern.
+        if (error instanceof ClaudeApiError && (stopKinds as readonly string[]).includes(error.kind)) report.stopped = drawn.error;
         break;
       }
     }
     options.log?.(`${activity.id}: ${drawn.passed ? `Figuren ${drawn.figures.join(', ') || 'keine'}` : 'kein Bild'}; Zähler ${counterText(report.counts, total)}`);
   }
   return report;
+}
+
+// Endet der Lauf rot? Ja, wenn er abgebrochen wurde (Guthaben, Schlüssel, abgelehnte Anfrage, Kostengrenze, Schema) oder wenn
+// keine einzige Aktivität ein Bild bekam, obwohl es welche gab (dann ist eher der Test kaputt als die Szenen). So schickt GitHub eine E-Mail.
+// Teilfehler (einige bestehen, andere nicht) bleiben grün: Das Ergebnis steht in der Zusammenfassung.
+export function runFailure(report: DrawReport): string | null {
+  if (report.stopped !== undefined) return `Abgebrochen: ${report.stopped}`;
+  if (report.results.length > 0 && !report.results.some((entry) => entry.passed)) return `Keine der ${report.results.length} Aktivitäten hat ein Bild bekommen.`;
+  return null;
 }
 
 // Zähler als Text: „jette 2/8, mats 1/8“ (meiste zuerst).

@@ -46,15 +46,16 @@ concurrency:
 jobs:
   liste:
     name: Aktivitäten lesen
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
+          package-manager-cache: false # kein Cache neben Schlüsseln (setup-node ab v5 legt sonst selbst einen an)
       - name: Aktivitäten aus Supabase lesen (nur lesen, öffentlicher Schlüssel)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -62,7 +63,7 @@ jobs:
           IDS: ${{ inputs.ids }}
           KI: ${{ inputs.ki }}
         run: node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/image-test.ts list --ids "$IDS" --ki "$KI" --out image-test-out
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: aktivitaeten
           path: image-test-out/activities.json
@@ -71,16 +72,17 @@ jobs:
   zeichnen:
     name: Szenen wählen und zeichnen
     needs: liste
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
-      - uses: actions/download-artifact@v4
+          package-manager-cache: false # kein Cache neben Schlüsseln (setup-node ab v5 legt sonst selbst einen an)
+      - uses: actions/download-artifact@v7
         with:
           name: aktivitaeten
           path: image-test-out
@@ -91,7 +93,7 @@ jobs:
           MAX_COST_USD: ${{ vars.IMAGE_TEST_MAX_COST_USD }}
           MODEL: ${{ inputs.model }}
         run: node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/image-test.ts draw --model "$MODEL" --out image-test-out
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: szenen
@@ -102,16 +104,17 @@ jobs:
     name: PNG und Zusammenfassung
     needs: zeichnen
     if: always() && needs.zeichnen.result != 'skipped'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
-      - uses: actions/download-artifact@v4
+          package-manager-cache: false # kein Cache neben Schlüsseln (setup-node ab v5 legt sonst selbst einen an)
+      - uses: actions/download-artifact@v7
         with:
           name: szenen
           path: image-test-out
@@ -129,7 +132,7 @@ jobs:
           done
       - name: Zusammenfassung
         run: node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/image-test.ts summary --out image-test-out >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: bild-test
           path: |

@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import { loadCatalog, loadExampleScenes } from './lib/kit/catalog.ts';
 import { fetchTestActivities, parseIds, parseKi } from './lib/imagetest/activities.ts';
 import { loadProbe } from './lib/kit/probe.ts';
-import { drawAll, models, summaryMarkdown, type DrawReport } from './lib/imagetest/run.ts';
+import { drawAll, models, runFailure, summaryMarkdown, type DrawReport } from './lib/imagetest/run.ts';
 import { createRedactor } from './lib/weekly/redact.ts';
 import type { FetchLike } from './lib/weekly/http.ts';
 import type { ProbeActivity } from './lib/kit/probe.ts';
@@ -64,7 +64,8 @@ async function main(): Promise<void> {
     for (const entry of report.results) if (entry.svg !== null) writeFileSync(join(out, `${entry.id}.svg`), entry.svg);
     writeFileSync(join(out, 'report.json'), `${redact(JSON.stringify({ ...report, results: report.results.map(({ svg, ...entry }) => ({ ...entry, hasSvg: svg !== null })) }, null, 1))}\n`);
     console.log(`${report.results.filter((entry) => entry.passed).length} von ${report.results.length} bestanden, ${report.totalUsd.toFixed(4)} $.`);
-    if (report.stopped !== undefined) fail(`Abgebrochen: ${report.stopped}`);
+    const failure = runFailure(report);
+    if (failure !== null) fail(failure);
     return;
   }
   if (command === 'summary') {
