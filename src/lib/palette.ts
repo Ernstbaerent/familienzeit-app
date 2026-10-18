@@ -1,5 +1,5 @@
 // Die Palette „C“ (DESIGN.md, Entscheidung 55): Leinen, Rosé, Petrol, Tinte, dazu zwei warme Gegenstandsfarben für Zeichnungen.
-// Reine Werte ohne React Native: Das Theme (theme.ts) und das Zeichnungs-Skript (scripts/build-illustrations.ts) lesen sie von hier.
+// Reine Werte ohne React Native: Das Theme (theme.ts) und der Zeichner des Baukastens (scripts/lib/kit/) lesen sie von hier.
 // Kontraste und Herkunft: docs/theme.md. Alles andere im Theme (Flächen, Nebentext, Rahmen) wird aus diesen Farben abgeleitet.
 
 export const palette = {
@@ -23,8 +23,8 @@ export function mixColors(base: string, other: string, share: number): string {
   return `#${mixed.map((value) => value.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
 }
 
-// Die Farbplätze der Zeichnungen (docs/design/ILLUSTRATIONEN.md): Jede Farbe in einer Zeichnung ist ein Platzhalter
-// `{{name}}` in der Vorlage (assets/illustrations/src/), das Skript `npm run illustrations:build` setzt diese Werte ein.
+// Die Farbplätze der Zeichnungen (docs/design/ILLUSTRATIONEN.md): Jede Farbe in einem Baustein ist ein Platzhalter
+// `{{name}}` (assets/bausteine/), der Zeichner (scripts/lib/kit/, renderTemplate in scripts/lib/illustrations.ts) setzt diese Werte ein.
 // Zeichnungen bleiben auch im Dunkelmodus hell, deshalb gibt es nur diese eine Belegung.
 export const illustrationPalette = {
   paper: palette.linen, // Köpfe, Hände, helle Gegenstände, Schaum, großer Kreis hinter dem Motiv

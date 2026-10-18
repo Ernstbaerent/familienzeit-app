@@ -5,7 +5,8 @@
 
 import type { Activity } from './activities.ts';
 
-// Alle Spalten, die die App liest (und das Seed-Skript schreibt). `updated_at` setzt die Datenbank selbst.
+// Alle Spalten, die die App liest (und das Seed-Skript schreibt, außer `step_images`). `updated_at` setzt die Datenbank selbst.
+// `step_images` gibt es erst mit Migration 0006: Fehlt sie in der Datenbank, scheitert der Abgleich, und die App bleibt still beim Zwischenspeicher.
 export const activityColumns = [
   'id',
   'status',
@@ -27,6 +28,7 @@ export const activityColumns = [
   'sibling_friendly',
   'source',
   'image',
+  'step_images',
   'created_at',
 ] as const;
 
@@ -53,6 +55,7 @@ export type ActivityRow = {
   sibling_friendly: boolean;
   source: string;
   image: string | null;
+  step_images: Record<string, string> | null; // Schrittnummer (ab 1) → Adresse; null = keine (M9b, Migration 0006)
   created_at: string;
 };
 
@@ -78,6 +81,7 @@ export function activityToRow(activity: Activity): ActivityRow {
     sibling_friendly: activity.siblingFriendly,
     source: activity.source,
     image: activity.image ?? null,
+    step_images: activity.stepImages ?? null,
     created_at: activity.createdAt,
   };
 }
@@ -112,5 +116,6 @@ export function rowToActivityInput(row: unknown): unknown {
     source: row.source,
     createdAt: row.created_at,
     ...(row.image != null && { image: row.image }),
+    ...(row.step_images != null && { stepImages: row.step_images }),
   };
 }

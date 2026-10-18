@@ -375,6 +375,92 @@ describe('Rückfall: nichts davon wirft, nichts davon schreibt etwas', () => {
   });
 });
 
+describe('Bilder (M9b, Migration 0006)', () => {
+  const bucket = `${prefix}activity-images/activities/a-0001/`;
+  const cover = `${bucket}cover-0123456789abcdef.svg`;
+  const step = (n: number) => `${bucket}step-${n}-000000000000000${n}.svg`;
+  const withImages = (image: string | null, stepImages: Record<string, string> | null) => ({
+    ...activityToRow(makeActivity({ id: 'a-0001', translations: {
+      de: { title: 'Titel', summary: 'Kurz', steps: ['Eins', 'Zwei', 'Drei'] },
+      en: { title: 'Title', summary: 'Short', steps: ['One', 'Two', 'Three'] },
+    } })),
+    image,
+    step_images: stepImages,
+  });
+
+  it('Datenbank ohne step_images (Migration 0006 fehlt): der Abgleich scheitert still, Bestand und Stand bleiben, eine Warnung', async () => {
+    const server = new FakeActivitiesServer();
+    server.upsert(rowsOf(5));
+    const phone = device(server);
+    await phone.sync();
+    const before = phone.record;
+    server.missingColumns = ['step_images'];
+    server.advance(hour);
+    server.upsert(rowsOf(2, 'neu'));
+    phone.save.mockClear();
+    warn.mockClear();
+    expect(await phone.sync()).toBeNull();
+    expect(phone.save).not.toHaveBeenCalled();
+    expect(phone.record).toBe(before);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0][0])).toContain('HTTP 400');
+    // Ist die Migration eingespielt, klappt der nächste Abgleich (ein Fehlschlag erneuert den Zeitpunkt nicht).
+    server.missingColumns = [];
+    expect(ids(await phone.sync())).toHaveLength(7);
+  });
+
+  it('erster Start ohne Zwischenspeicher und ohne step_images in der Datenbank: null (die App bleibt beim Mitgelieferten)', async () => {
+    const server = new FakeActivitiesServer();
+    server.upsert(rowsOf(5));
+    server.missingColumns = ['step_images'];
+    const phone = device(server);
+    expect(await phone.sync()).toBeNull();
+    expect(phone.save).not.toHaveBeenCalled();
+  });
+
+  it('ein gesetztes Bild ändert updated_at: das Gerät holt Titelbild und Schrittbilder mit den Änderungen, nur diese eine Zeile', async () => {
+    const server = new FakeActivitiesServer();
+    server.upsert([...rowsOf(4, 'b'), withImages(null, null)]);
+    const phone = device(server);
+    await phone.sync();
+    expect(phone.record?.activities.find((activity) => activity.id === 'a-0001')?.image).toBeUndefined();
+    server.advance(hour);
+    server.upsert([withImages(cover, { 1: step(1), 3: step(3) })]); // set_activity_images: der Trigger setzt updated_at neu
+    await phone.sync();
+    const changes = server.log.filter((entry) => entry.kind === 'changes');
+    expect(changes).toHaveLength(1);
+    expect(JSON.parse(changes[0].body)).toHaveLength(1);
+    const activity = phone.record?.activities.find((entry) => entry.id === 'a-0001');
+    expect(activity?.image).toBe(cover);
+    expect(activity?.stepImages).toEqual({ 1: step(1), 3: step(3) });
+  });
+
+  it('zurückgezogen (image und step_images NULL, z. B. weil sich der Sicherheitshinweis geändert hat): das Gerät zeigt keine Bilder mehr', async () => {
+    const server = new FakeActivitiesServer();
+    server.upsert([...rowsOf(4, 'b'), withImages(cover, { 2: step(2) })]);
+    const phone = device(server);
+    await phone.sync();
+    expect(phone.record?.activities.find((activity) => activity.id === 'a-0001')?.stepImages).toEqual({ 2: step(2) });
+    server.advance(hour);
+    server.upsert([withImages(null, null)]);
+    await phone.sync();
+    const activity = phone.record?.activities.find((entry) => entry.id === 'a-0001');
+    expect(activity?.image).toBeUndefined();
+    expect(activity?.stepImages).toBeUndefined();
+  });
+
+  it('ein einzelnes falsches Schrittbild (fremder Speicher, Schritt fehlt) fällt weg, die übrigen und die Aktivität bleiben', async () => {
+    const server = new FakeActivitiesServer();
+    server.upsert([...rowsOf(4, 'b'), withImages(cover, { 1: 'https://example.org/x.svg', 2: step(2), 7: step(7) })]);
+    const phone = device(server);
+    await phone.sync();
+    const activity = phone.record?.activities.find((entry) => entry.id === 'a-0001');
+    expect(activity?.image).toBe(cover);
+    expect(activity?.stepImages).toEqual({ 2: step(2) });
+    expect(warn.mock.calls.some((call) => String(call[0]).includes('Schrittbild'))).toBe(true);
+  });
+});
+
 describe('kaputter Stand und falsche Uhr', () => {
   it('Stand nicht lesbar: einmal alles laden, der bisherige Bestand bleibt bis dahin', async () => {
     const server = new FakeActivitiesServer();

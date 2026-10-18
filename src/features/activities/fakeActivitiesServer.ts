@@ -62,6 +62,9 @@ export class FakeActivitiesServer {
   sendCountHeader = true;
   // Hängt eine Antwort ab: z. B. `(url) => url.includes('limit=0') ? 503 : null` liefert für die Zählprobe einen Fehler.
   failWith: ((url: string) => number | null) | null = null;
+  // Spalten, die es in der Datenbank (noch) nicht gibt, z. B. ['step_images'] vor Migration 0006. Fragt die App sie ab,
+  // antwortet der Server wie PostgREST mit HTTP 400 (Code 42703, „column … does not exist“).
+  missingColumns: string[] = [];
   log: LoggedResponse[] = [];
 
   constructor(startIso = '2026-10-18T16:00:00Z') {
@@ -150,6 +153,11 @@ export class FakeActivitiesServer {
       } else if (name === 'order') order = value;
       else if (name === 'limit') limit = Number(value);
       else fail(`unbekannter Parameter ${name}`);
+    }
+    const missing = columns.find((column) => this.missingColumns.includes(column));
+    if (missing !== undefined) {
+      const error = { code: '42703', details: null, hint: null, message: `column activities.${missing} does not exist` };
+      return { ok: false, status: 400, json: async () => error, headers: this.headers(null, null) };
     }
     if (order === 'updated_at.asc,id.asc') rows.sort((a, b) => a.updatedAt - b.updatedAt || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
     else if (order === 'id.asc') rows.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));

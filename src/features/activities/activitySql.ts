@@ -59,6 +59,8 @@ function sqlValue(row: ActivityRow, column: ActivityColumn): string {
       return row[column] ? 'true' : 'false';
     case 'image':
       return row.image === null ? 'null' : sqlString(row.image);
+    case 'step_images':
+      return row.step_images === null ? 'null' : `${sqlString(JSON.stringify(row.step_images))}::jsonb`;
     case 'created_at':
       return `${sqlString(row.created_at)}::timestamptz`;
     default:
@@ -66,16 +68,20 @@ function sqlValue(row: ActivityRow, column: ActivityColumn): string {
   }
 }
 
+// Spalten, die der Seed schreibt: alle außer `step_images`. Schrittbilder setzt nur set_activity_images (Migration 0006) in der Datenbank,
+// die Dateien in data/ kennen sie nicht. So bleiben die Seed-Dateien unabhängig von Migration 0006.
+export const seedColumns = activityColumns.filter((column) => column !== 'step_images');
+
 function sqlRow(activity: Activity): string {
   const row = activityToRow(activity);
-  return `  (${activityColumns.map((column) => sqlValue(row, column)).join(', ')})`;
+  return `  (${seedColumns.map((column) => sqlValue(row, column)).join(', ')})`;
 }
 
 // Ein Teil: einfügen oder, wenn es die Aktivität schon gibt, aktualisieren (so lässt sich jede Datei gefahrlos wiederholen).
 export function renderSeedPart(activities: readonly Activity[], part: number, parts: number): string {
   // `image` bleibt beim Aktualisieren stehen (M9b): Die Bild-Adressen setzt der Bilder-Lauf bzw. man von Hand in der Datenbank,
   // die Dateien in data/ kennen sie nicht. Ein erneutes Einspielen darf sie nie auf `null` zurücksetzen. Beim ersten Einfügen steht `image` weiter in der Liste.
-  const columns = activityColumns.filter((column) => column !== 'id' && column !== 'image');
+  const columns = seedColumns.filter((column) => column !== 'id' && column !== 'image');
   const update = columns.map((column) => `${column} = excluded.${column}`).join(',\n  ');
   // Nur bei echter Änderung schreiben (M8b): Sonst setzt jedes erneute Einspielen `updated_at` neu, und jedes Gerät lädt alles noch einmal.
   // `updated_at` selbst steht nicht in der Liste (setzt die Datenbank), zählt also nicht als Änderung.
@@ -86,7 +92,7 @@ export function renderSeedPart(activities: readonly Activity[], part: number, pa
 -- danach alle ${parts} Teile (die Reihenfolge ist egal). Jeden Teil gefahrlos wiederholbar: Vorhandene Aktivitäten werden aktualisiert,
 -- aber nur, wenn sich etwas geändert hat (sonst bliebe updated_at nicht stehen, und jedes Handy lüde sie neu).
 
-insert into public.activities (${activityColumns.join(', ')})
+insert into public.activities (${seedColumns.join(', ')})
 values
 ${activities.map(sqlRow).join(',\n')}
 on conflict (id) do update set

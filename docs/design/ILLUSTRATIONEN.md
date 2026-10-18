@@ -1,7 +1,8 @@
 # Illustrationen – Stilregeln (Pilot, nicht endgültig)
 
-Stand: Oktober 2026. **Pilot:** Wir testen mit drei Aktivitäten, ob ein selbst gezeichneter Stil trägt
-(Sockenpuppen-Theater, Pizza selber machen, Natron-Vulkan). Nichts davon ist endgültig, es gibt keine Automatik.
+Stand: Oktober 2026. **Pilot (abgeschlossen):** Getestet wurde mit drei Aktivitäten, ob ein selbst gezeichneter Stil trägt
+(Sockenpuppen-Theater, Pizza selber machen, Natron-Vulkan). **Seit M9b (18. Oktober 2026)** entstehen alle Bilder aus dem Baukasten und kommen aus Supabase Storage;
+die gebündelten Pilot-Zeichnungen sind entfernt (Git-Historie), der Bilder-Lauf zeichnet die drei Titelbilder neu.
 Ergebnis und Bilder: `docs/illustrationen-pilot.md`. Seit DESIGN.md, Zusatz 45, gibt es keine Stock-Fotos mehr: Bilder werden selbst gezeichnet, diese Datei ist die Regelsammlung dafür (M9b zeichnet die Bilder für alle Aktivitäten). Der Pilot gilt weiter als „nicht endgültig“, bis ein Mensch die Bilder durchgesehen hat.
 
 ## Gefühl
@@ -18,14 +19,14 @@ nicht **wie gut** es aussehen muss.
 | Zeichenfläche | `viewBox="0 0 400 200"`, alle Maße unten in diesen Einheiten |
 | Eigengröße | `width="1200" height="600"`: Falls ein Handy das SVG in seiner Eigengröße rastert (iOS), bleibt es auf der Karte (ca. 312 pt, also 936 px bei 3×) scharf |
 | Datei | SVG, **unter 14 KB** (Titel- und Schrittbilder; das Bucket in Supabase erlaubt 20 KB), keine externen Schriften, Bilder oder Links |
-| Ablage | Ausgabe in `assets/illustrations/` (**erzeugt**, nicht von Hand ändern), Vorlagen in `assets/illustrations/src/` (siehe „Farbplätze und Erzeugen“) |
-| Name | Titelbild `aktivitaets-id.svg`, Schrittbild `aktivitaets-id-step-N.svg` (N = Schrittnummer, wie sie in der App steht, ab 1) |
+| Ablage | Supabase Storage, Bucket `activity-images` (Migration 0005); Adresse in `image` bzw. `step_images` der Aktivität (Migration 0006, gesetzt nur über `set_activity_images`). Nichts gebündelt in der App |
+| Name | Titelbild `activities/<id>/cover-<Prüfsumme>.svg`, Schrittbild `activities/<id>/step-N-<Prüfsumme>.svg` (N = Schrittnummer ab 1, Prüfsumme = 16 Zeichen 0–9, a–f). **Dateien nie überschreiben:** neuer Inhalt = neuer Name (`docs/supabase.md`) |
 
 **Erlaubter SVG-Code** (damit es auf iOS, Android und im Browser gleich aussieht): nur `svg`, `g`, `path`, `circle`, `ellipse`,
 `rect`, `line`, `polyline`, `polygon` mit Attributen (`fill`, `stroke`, `stroke-width`, `stroke-linecap`, `stroke-linejoin`, `transform`,
 `stroke-dasharray` für vorgezeichnete Linien, z. B. die Schnittlinie am Karton).
 **Nicht erlaubt:** `text`, `image`, `style`, `script`, `use`, `defs`, Verläufe, Filter, Masken, Schnittpfade, `href`, `url(…)`, `opacity`.
-Der Test `src/features/activities/illustrations.test.ts` prüft das.
+Der Prüfer des Baukastens (`scripts/lib/kit/catalog.ts`, `npm run kit:check`) prüft das für Bausteine und Szenen.
 
 ## Linie
 
@@ -38,7 +39,7 @@ Der Test `src/features/activities/illustrations.test.ts` prüft das.
 ## Farben: die Zeichnungs-Palette
 
 Zeichnungen haben eine **feste eigene Palette** (`illustrationPalette` in `src/lib/palette.ts`): die vier Farben der App und zwei **warme Gegenstandsfarben**, flach, ohne Verläufe und ohne Transparenz.
-Jede Farbe in einer Zeichnung ist ein **Platzhalter** `{{name}}` (Rolle), nie ein fester Hexwert (siehe „Farbplätze und Erzeugen“).
+Jede Farbe in einer Zeichnung ist ein **Platzhalter** `{{name}}` (Rolle), nie ein fester Hexwert (siehe „Farbplätze“).
 
 | Platzhalter | Wert | Einsatz im Bild | Tinte darauf | Leinen darauf |
 | --- | --- | --- | --- | --- |
@@ -56,7 +57,7 @@ Jede Farbe in einer Zeichnung ist ein **Platzhalter** `{{name}}` (Rolle), nie ei
 - **Kontraste:** Tinte-Linien auf Rosé, Honig, Braun und Leinen sind klar sichtbar (mindestens 3,7:1). **Auf Petrol nur 1,8:1:** Der Umriss verschwindet im Petrol und die Fläche trägt die Form.
   Deshalb bleiben Petrol-Flächen groß und einfach (Kleidung, Puppen), Details darauf sind in Leinen. Rosé auf Leinen hat nur 1,5:1, Rosé-Flächen stehen deshalb immer mit Tinten-Umriss.
 - **Hauttöne:** Auf Petrol tragen die Plätze 6 bis 8 nicht (Haut gegen Petrol unter 1,4:1, Tinte gegen Haut unter 2,5:1): Hinter dem Kopf einer Figur mit so einem Ton liegt nie eine Petrol-Fläche (Szenenprüfer, FIGUREN.md).
-- Der Test `src/features/activities/illustrations.test.ts` prüft: nur diese 15 Werte (sieben Gegenstands- und Flächenfarben, acht Hauttöne), keine festen Farben in den Vorlagen, jeder Platzhalter ist bekannt.
+- Der Test `src/lib/palette.test.ts` prüft die 15 Werte (sieben Gegenstands- und Flächenfarben, acht Hauttöne) und dass ein unbekannter Platzhalter ein Fehler ist; feste Farben in Bausteinen meldet `npm run kit:check`.
 - **Versetzte Flächen:** Farbflächen sitzen 3 bis 4 Einheiten neben ihrem Umriss, wie beim Druck mit leicht verrutschter Farbe.
   Das macht den handgemachten Eindruck und kostet keine Bytes.
 - **Grund:** `{{ground}}` mit einem großen, weichen Kreis in `{{paper}}` hinter dem Motiv (das Echo der Farbfläche mit dem Kreis).
@@ -68,24 +69,22 @@ Ab M9b entstehen Titelbilder nicht mehr frei von Hand, sondern aus **Bausteinen*
 Alle Regeln dieser Datei gelten weiter (Format, Linien, Palette, Figuren, Sicherheit); der Baukasten setzt die mechanisch prüfbaren davon um (Linienstärken 4 und 2,5, nur Palette, erlaubter Code, Ecken der Pille, Rand) und ergänzt die **Petrol-Regel:**
 Petrol ist nie Bildgrund; in Bausteinen mit Petrol sind feine Linien Leinen, nicht Tinte (Tinte auf Petrol nur 1,8:1).
 
-## Farbplätze und Erzeugen
+## Farbplätze
 
-**Jede künftige Zeichnung entsteht mit den Platzhaltern.** So lässt sich die Palette später ändern, ohne Zeichnungen neu zu zeichnen (SVG-Dateien kennen keine Laufzeit-Variablen, und `expo-image` kann sie nicht umfärben;
+**Jede Zeichnung entsteht mit den Platzhaltern.** So lässt sich die Palette später ändern, ohne Zeichnungen neu zu zeichnen (SVG-Dateien kennen keine Laufzeit-Variablen, und `expo-image` kann sie nicht umfärben;
 `tintColor` färbt nur einfarbig).
 
-1. **Vorlage schreiben:** `assets/illustrations/src/<name>.svg` mit Platzhaltern wie `fill="{{petrol}}"` statt `#1A5D74`. Namen nach „Format“ oben (Titelbild `aktivitaets-id.svg`, Schrittbild `aktivitaets-id-step-N.svg`).
-   Feste Farbwerte sind in Vorlagen verboten (Test).
-2. **Erzeugen:** `npm run illustrations:build` liest alle Vorlagen, setzt die Werte aus `illustrationPalette` (`src/lib/palette.ts`) ein und schreibt die fertigen SVGs nach `assets/illustrations/`.
-   **Die erzeugten Dateien werden eingecheckt** (Metro lädt sie wie bisher mit `require`), von Hand ändert man sie nie.
-3. **Palette ändert sich?** Wert in `src/lib/palette.ts` ändern und **`npm run illustrations:build` neu ausführen**, die Ausgabedateien mitchecken. Der Test meldet jede erzeugte Datei, die nicht zu Vorlage und Palette passt
-   (`npm run illustrations:build -- --check` prüft dasselbe ohne zu schreiben).
-4. **Neue Rolle** (z. B. eine siebte Farbe): in `illustrationPalette` ergänzen, hier in die Tabelle, Kontraste angeben, dann die Vorlagen anpassen.
-5. Eintragen in `src/features/activities/illustrations.ts` wie bisher.
+1. Bausteine (`assets/bausteine/`) haben Platzhalter wie `fill="{{petrol}}"` statt `#1A5D74`, feste Farbwerte sind verboten (`npm run kit:check`).
+2. Der Zeichner des Baukastens setzt die Werte aus `illustrationPalette` (`src/lib/palette.ts`) ein (`renderTemplate` in `scripts/lib/illustrations.ts`), wenn er eine Szene zeichnet.
+3. **Palette ändert sich?** Wert in `src/lib/palette.ts` ändern. Neue Bilder haben die neuen Farben; schon hochgeladene Bilder im Bucket bleiben, wie sie sind (Dateien werden nie überschrieben). Sollen sie umgefärbt werden, zeichnet der Bilder-Lauf sie neu (Szenen stehen in `activity_scenes`).
+4. **Neue Rolle** (z. B. eine siebte Farbe): in `illustrationPalette` ergänzen, hier in die Tabelle, Kontraste angeben, dann die Bausteine anpassen.
+
+(Bis M9b gab es dazu `assets/illustrations/src/` und `npm run illustrations:build` für die gebündelten Pilot-Zeichnungen; beides ist entfernt.)
 
 ## Figuren
 
 **Seit dem 16. Oktober 2026 gilt die festgeschriebene Besetzung (`docs/design/FIGUREN.md`):** Jette, Mats, Nolli, Ilka, Arne, Stups und Tüpfel, gesichtslos, Köpfe und Hände im **Hautton** der Figur (nicht mehr Leinen), Linie 5.
-Die einfachen Strichfiguren der Pilot-Bilder und der Stufe 1 (Köpfe in Leinen, Erwachsene etwa 150 hoch) sind abgelöst; die Pilot-Bilder in `assets/illustrations/` zeigen noch den alten Stand.
+Die einfachen Strichfiguren der Pilot-Bilder und der Stufe 1 (Köpfe in Leinen, Erwachsene etwa 150 hoch) sind abgelöst; die Pilot-Bilder sind deshalb nicht in Supabase gewandert, sondern werden neu gezeichnet.
 
 - **Erwachsene sind deutlich größer als Kinder** (Ilka 120, Arne 123, Mats 105, Jette 88, Nolli 67). Wer was tut, ist so ohne Gesicht erkennbar.
 - **Hände halten Gegenstände an deren Haltepunkten** (Griff, Henkel, Rand; Baukasten, Schritt 3a). Hände und Gegenstände sind gut erkennbar und stehen frei, nicht hinter anderen Formen.
@@ -151,14 +150,12 @@ Der Szenenprüfer des Baukastens setzt diese Regeln mechanisch um (`scripts/lib/
 
 ## Vorrang im Bildbereich
 
-Im Bildbereich der Karte und der Detailansicht gilt:
+Im Bildbereich der Karte und der Detailansicht gilt (seit M9b):
 
-1. `image` der Aktivität (Web-Adresse),
-2. **Illustration** aus der zentralen Zuordnung (`src/features/activities/illustrations.ts`),
-3. Farbfläche mit Symbol.
+1. `image` der Aktivität (Web-Adresse in unserem Bucket, `expo-image` mit Gerätespeicher),
+2. Farbfläche mit Symbol (auch, wenn das Bild nicht lädt).
 
-Die Bildkette (`src/features/suggestions/cardImage.ts`) kennt `image` und die Farbfläche; der Bildbereich (`CardMedia`)
-schiebt die Illustration dazwischen, sobald die Kette kein geladenes `image` hat.
+Die Bildkette steht in `src/features/suggestions/cardImage.ts`, der Bildbereich in `CardMedia`. Gebündelte Illustrationen gibt es nicht mehr.
 
 ## Schrittbilder
 
@@ -166,13 +163,13 @@ schiebt die Illustration dazwischen, sobald die Kette kein geladenes `image` hat
   Zum eigenen Text sind es 16 px, nach dem Bild bis zum nächsten Schritt 44 px (28 + 16): So gehört es sichtbar zu seinem Schritt.
   Neben dem Text wäre die Anleitung (20 px) zu schmal.
 - Es zeigt genau die Handlung dieses Schritts, nicht das Ergebnis eines späteren.
-- Die Zuordnung hängt an der Schrittnummer. **Ändert sich die Anleitung, müssen die Schrittbilder mitgeprüft werden**
-  (der Test meldet nur Nummern, die es nicht gibt, nicht einen geänderten Inhalt).
+- Die Zuordnung hängt an der Schrittnummer (Spalte `step_images`: `{"1": "<Adresse>", "3": "<Adresse>"}`). Die App zeigt ein Schrittbild nur, wenn es den Schritt in der angezeigten Sprache gibt und die Adresse aus unserem Speicher kommt; lädt es nicht, verschwindet es still (`StepList`, `stepImages.ts`).
+- **Ändert sich die Anleitung, müssen die Schrittbilder mitgeprüft werden.** `set_activity_images` lehnt nur Nummern ab, die es nicht gibt. Ändern sich Sicherheitshinweis oder Material, zieht die Datenbank Titel- und Schrittbilder automatisch zurück (Migration 0006, `docs/supabase.md`).
+- Gezeichnet werden Schrittbilder noch nicht (nur der Weg dahin ist gebaut, `docs/bilder-plan.md`).
 
 ## Prüfung vor dem Einbau
 
-1. Im Browser rendern: Karte, Schrittbild, Daumennagel 96 × 48 und 64 × 32.
+1. Gerendert ansehen: Karte, Schrittbild, Daumennagel 96 × 48 und 64 × 32 (der Bilder-Lauf legt PNG und Kontaktbögen ins Artefakt, `docs/bilder-plan.md`).
 2. Fragen: Erkennt man das Motiv im Daumennagel? Ist jede Hand und jeder Gegenstand eindeutig? Stimmt das Bild mit Text und Sicherheitshinweis überein?
-3. `npm run illustrations:build`, dann `npm test` (prüft Größe, Format, Farben, Vorlagen, erlaubten SVG-Code und die Zuordnung, Test `src/features/activities/illustrations.test.ts`).
-   Linienstärken, Lesbarkeit und Sicherheit prüft der Test nicht.
+3. `npm run kit:check` und `npm test` (prüfen Bausteine, Szenen, Farben, erlaubten SVG-Code, Größe, Sicherheit und Text). Linienstärken, Lesbarkeit und Sicherheit im Bild sieht nur der Mensch.
 4. Vor der Beta schaut ein Mensch alle Illustrationen durch (wie die Aktivitäten).

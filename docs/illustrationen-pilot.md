@@ -1,5 +1,9 @@
 # Pilot: Illustrationen statt Farbfläche
 
+> **Hinweis (M9b, 18. Oktober 2026):** Die sechs Pilot-Zeichnungen sind aus der App und aus `assets/illustrations/` entfernt (Beschluss von Clemens: gebündelte Zeichnungen entfallen, alle Bilder kommen aus Supabase).
+> Sie stehen in der Git-Historie (Stand davor: der Commit vor „M9b: Lieferung vollständig“). Die drei Titelbilder zeichnet der Bilder-Lauf neu aus dem Baukasten, die drei Schrittbilder vom Sockenpuppen-Theater kommen mit den Schrittbildern.
+> Die Bilder unten sind deshalb nicht mehr zu sehen; diese Seite bleibt als Bericht über den Pilot.
+
 > **Hinweis (Farb-Umstellung, DESIGN.md Entscheidung 55):** Die Beschreibung unten gilt für die Farben von „Sonntagslicht“ (Terrakotta, Salbei, Honig). Die sechs Zeichnungen sind seither auf die Palette C umgefärbt
 > (gleiche Formen, nichts neu gezeichnet) und entstehen aus Vorlagen mit Farbplätzen, siehe `docs/design/ILLUSTRATIONEN.md`. Vorher und nachher: `docs/farbumstellung/README.md`.
 > Die Bilder unten verweisen auf die erzeugten Dateien und zeigen deshalb schon die neuen Farben; die Beschreibung der Farben im Text ist Stand des Pilots.

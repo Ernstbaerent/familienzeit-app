@@ -74,7 +74,10 @@ export type Activity = {
   status: ActivityStatus; // nur "approved" erscheint in der App
   source: ActivitySource;
   createdAt: string; // ISO-Zeitpunkt
-  image?: string; // freiwillig: Web-Adresse, nur von unserem eigenen Speicher (imageAllowlist.ts). Ohne Bild zeigt die App die Illustration oder das Symbol der Kategorie.
+  image?: string; // freiwillig: Web-Adresse, nur von unserem eigenen Speicher (imageAllowlist.ts). Ohne Bild zeigt die App die Farbfläche mit dem Symbol der Kategorie.
+  // freiwillig: Schrittbilder, Schrittnummer (ab 1, als Text wie in der Datenbank) → Web-Adresse, nur von unserem eigenen Speicher.
+  // Kommen nur aus Supabase (Spalte step_images, Migration 0006, gesetzt von set_activity_images), nie aus data/.
+  stepImages?: Record<string, string>;
 };
 
 export type ParseResult =
@@ -205,6 +208,32 @@ function readTranslations(raw: unknown, problems: string[]): Record<string, Acti
   return valid ? (raw as Record<string, ActivityText>) : null;
 }
 
+// Schlüssel der Schrittbilder: Schrittnummer ab 1, ohne führende Null ("1" bis "99").
+export const stepImageKey = /^[1-9][0-9]?$/;
+
+// Die kleinste Zahl an Schritten über alle Sprachen (ein Schrittbild muss in jeder Sprache einen Schritt haben), `null`, wenn unbekannt.
+export function minStepCount(translations: unknown): number | null {
+  if (!isRecord(translations)) return null;
+  const counts = Object.values(translations).map((text) => (isRecord(text) && Array.isArray(text.steps) ? text.steps.length : 0));
+  return counts.length === 0 ? null : Math.min(...counts);
+}
+
+// Schrittbilder prüfen: Objekt, Schlüssel = Schrittnummer, die es in jeder Sprache gibt, Wert = erlaubte Adresse (wie `image`).
+function readStepImages(value: unknown, translations: unknown, options: ParseOptions, problems: string[]): void {
+  if (!isRecord(value)) {
+    problems.push('stepImages: Objekt Schrittnummer → Web-Adresse erwartet (oder weglassen)');
+    return;
+  }
+  const steps = minStepCount(translations);
+  for (const [key, uri] of Object.entries(value)) {
+    if (!stepImageKey.test(key) || (steps !== null && Number(key) > steps)) {
+      problems.push(`stepImages: Schritt „${key}“ gibt es nicht`);
+    } else if (options.imagePrefix === undefined ? !(isNonEmptyString(uri) && uri.startsWith('https://')) : !isAllowedImageUrl(uri, options.imagePrefix)) {
+      problems.push(`stepImages: Schritt ${key} braucht eine Adresse von unserem eigenen Speicher`);
+    }
+  }
+}
+
 // Einstellungen für die Prüfung.
 // `imagePrefix` steuert das Feld `image` (Allowlist, Zusatz 35): ein Text = Adressen müssen damit beginnen,
 // `null` = es ist kein Speicher festgelegt, also ist kein Bild erlaubt, nicht angegeben = nur `https://` wird geprüft.
@@ -277,6 +306,8 @@ export function parseActivity(raw: unknown, options: ParseOptions = {}): ParseRe
       );
     }
   }
+
+  if (raw.stepImages !== undefined) readStepImages(raw.stepImages, raw.translations, options, problems);
 
   if (problems.length > 0) return { ok: false, id, problems };
   // Alle Felder sind oben geprüft, deshalb ist diese Umwandlung hier sicher.

@@ -158,11 +158,11 @@ Indoorspielplatz, Trampolin-, Kletterhalle, Eisbahn → Bewegung; Freizeitpark, 
 
 ### Bilder auf Karten und in der Detailansicht
 
-Es gibt keine Kategorie-Fotos mehr (DESIGN.md, Zusatz 45). Im Bildbereich gilt: `image` der Aktivität, dann die Illustration (`src/features/activities/illustrations.ts`, Regeln: `docs/design/ILLUSTRATIONEN.md`), dann die Farbfläche mit großem Symbol.
-Heute zeigen drei Aktivitäten eine Illustration, alle anderen die Farbfläche. Die Illustrationen für alle Aktivitäten entstehen in M9b.
+Es gibt keine Kategorie-Fotos mehr (DESIGN.md, Zusatz 45). Im Bildbereich gilt: `image` der Aktivität (gezeichnet, aus Supabase Storage, Regeln: `docs/design/ILLUSTRATIONEN.md`), sonst die Farbfläche mit großem Symbol.
+Gebündelte Zeichnungen gibt es seit M9b nicht mehr; der Bilder-Lauf zeichnet die Titelbilder für alle Aktivitäten (`docs/bilder-plan.md`).
 
 **Zeichnungs-Palette:** Zeichnungen haben eine eigene feste Palette (Leinen, Rosé, Petrol, Tinte plus Honig und Braun als warme Gegenstandsfarben, `illustrationPalette` in `src/lib/palette.ts`, Werte und Kontraste in `docs/design/ILLUSTRATIONEN.md`).
-Sie entstehen aus Vorlagen mit Farbplätzen (`npm run illustrations:build`). Honig und Braun gelten nur für Gegenstände in Zeichnungen, nie für Flächen der App.
+Bausteine und Szenen haben Farbplätze, der Zeichner des Baukastens setzt die Werte ein (`docs/bausteine/README.md`). Honig und Braun gelten nur für Gegenstände in Zeichnungen, nie für Flächen der App.
 
 Zuordnung Kategorie → Symbol: nur in `src/features/activities/CategoryIcon.tsx` (`categoryIcons`, für Orte `placeVisualIcons`). Spielplatz und Bad gibt es seit M10b (siehe „Farben und Symbole der Orte“), Termine kommen mit M11 (Entscheidung 12).
 

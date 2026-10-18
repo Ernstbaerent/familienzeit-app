@@ -14,7 +14,7 @@ Die Bilder sind mit Chromium (Webausgabe der App, 390 × 844, doppelte Pixeldich
 
 ## Zeichnungen: vorher und nachher
 
-Nur die Farben sind geändert, nichts ist neu gezeichnet. Links Sonntagslicht, rechts Palette C (Vorlagen mit Farbplätzen, `npm run illustrations:build`).
+Nur die Farben sind geändert, nichts ist neu gezeichnet. Links Sonntagslicht, rechts Palette C (Vorlagen mit Farbplätzen, damals `npm run illustrations:build`; die Pilot-Zeichnungen und der Befehl sind seit M9b entfernt, alle Bilder kommen aus Supabase).
 
 ![Die sechs Pilot-Zeichnungen vorher und nachher](zeichnungen-vorher-nachher.png)
 
