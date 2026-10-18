@@ -8,12 +8,12 @@ Die fünf Aktivitäten aus dem Modelltest (`docs/bilder-plan.md`), von Hand aus 
 
 <img src="probe/baked-apples.svg" width="312" alt="Bratäpfel aus dem Ofen"> <img src="probe/baked-apples.svg" width="96" alt="baked-apples"> <img src="probe/baked-apples.svg" width="64" alt="baked-apples">
 
-- **Aktivität:** `baked-apples`, 4 bis 12 Jahre, Layout `pair`, 4,7 KB
+- **Aktivität:** `baked-apples`, 4 bis 12 Jahre, Layout `pair`, 5,1 KB
 - **Sicherheitshinweis:** Messer und Backofen nur mit Erwachsenen. Die Füllung wird sehr heiß, lasst sie vor dem Essen gut abkühlen. Rosinen sind für Kinder unter 4 Jahren eine Verschluckgefahr.
 - **Prüfergebnis:** bestanden (Layout, Rand, Ecken, Überdeckung, Haltepunkte, 14 KB, Sicherheit, Textabgleich)
-- **Trägt:** Wer was tut, ist ohne Gesicht klar: Arne trägt das heiße Backblech mit Ofenhandschuhen, Jette schaut mit Abstand zu. Der Dampf sagt „frisch aus dem Ofen“, das Bild entspricht dem Sicherheitshinweis (Backofen nur mit Erwachsenen). Backblech statt Tablett, weil der Text „Backblech“ sagt.
-- **Fehlt:** **Kein Teller:** Der Text nennt keinen Teller; „Kind mit Teller“ würde etwas zeigen, was der Text nicht sagt. Mit „Teller“ im Text (Schritt 6) ginge Jette mit einem abgekühlten Bratapfel auf dem Teller (Pose `hold-plate`, geprüft). Die Bratäpfel sind auf der Karte kleine rosa Kugeln mit Honig-Deckel; im Daumennagel sind sie nicht mehr als Äpfel zu erkennen, dort bleibt „jemand trägt ein Blech“. Das Füllen der Äpfel (der Teil für die Kinder) und der Ofen (kein Baustein) fehlen. Die linke Hälfte ist leer; dort sitzt die Pille.
-- **Ein Mensch prüft noch:** Liest man „Bratäpfel“ oder nur „Blech mit Kugeln“? Stört der Dampf vor Arnes Brust? Wirkt die Szene neben den anderen zu gleichförmig (ein Erwachsener in der Mitte)?
+- **Trägt:** Wer was tut, ist ohne Gesicht klar: Arne trägt das heiße Backblech mit Ofenhandschuhen, Jette wartet mit leerem Teller und Abstand. Der Dampf sagt „frisch aus dem Ofen“, das Bild entspricht dem Sicherheitshinweis (Backofen nur mit Erwachsenen). Backblech statt Tablett, weil der Text „Backblech“ sagt. Der Teller ist neutral (Entscheidung von Clemens): Der Text muss ihn nicht nennen, solange er leer ist oder nichts Heißes trägt.
+- **Fehlt:** Die Bratäpfel sind auf der Karte kleine rosa Kugeln mit Honig-Deckel; im Daumennagel sind sie nicht mehr als Äpfel zu erkennen, dort bleibt „jemand trägt ein Blech, ein Kind wartet“. Das Füllen der Äpfel (der Teil für die Kinder) und der Ofen (kein Baustein) fehlen. Die linke Hälfte ist leer; dort sitzt die Pille.
+- **Ein Mensch prüft noch:** Liest man „Bratäpfel“ oder nur „Blech mit Kugeln“? Liest man den leeren Teller als Teller oder als Ring? Stört der Dampf vor Arnes Brust?
 
 ## Bananen-Haferkugeln
 
@@ -65,11 +65,11 @@ Mechanisch: **4 verschiedene Layouts** bei 5 Bildern (pair, hands, outdoor, tabl
 
 | | baked-apples | banana-oat-balls | dance-freeze | puddle-explorers | secret-lemon-ink |
 | --- | --- | --- | --- | --- | --- |
-| baked-apples | – | 11 % | 17 % | 11 % | 11 % |
-| banana-oat-balls | 11 % | – | 13 % | 9 % | 9 % |
-| dance-freeze | 17 % | 13 % | – | 13 % | 13 % |
-| puddle-explorers | 11 % | 9 % | 13 % | – | 9 % |
-| secret-lemon-ink | 11 % | 9 % | 13 % | 9 % | – |
+| baked-apples | – | 10 % | 14 % | 10 % | 10 % |
+| banana-oat-balls | 10 % | – | 13 % | 9 % | 9 % |
+| dance-freeze | 14 % | 13 % | – | 13 % | 13 % |
+| puddle-explorers | 10 % | 9 % | 13 % | – | 9 % |
+| secret-lemon-ink | 10 % | 9 % | 13 % | 9 % | – |
 
 Mittlere Überschneidung: **11 %**. Gemeinsam sind fast nur die Figuren (Jette kommt in allen fünf vor, weil sie zu allen Altersspannen passt).
 

@@ -130,7 +130,7 @@
           "sheet"
         ]
       },
-      "neutral": false
+      "neutral": true
     },
     {
       "id": "chair",
@@ -163,7 +163,7 @@
           "chair"
         ]
       },
-      "neutral": false
+      "neutral": true
     },
     {
       "id": "pillow",
@@ -199,7 +199,7 @@
           "pillow"
         ]
       },
-      "neutral": false
+      "neutral": true
     },
     {
       "id": "cardboard-box",
@@ -872,7 +872,7 @@
           "plate"
         ]
       },
-      "neutral": false,
+      "neutral": true,
       "tints": [
         "paper",
         "rose",

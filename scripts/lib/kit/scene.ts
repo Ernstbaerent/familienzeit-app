@@ -230,10 +230,12 @@ export function checkAgainstActivity(placements: readonly Placement[], activity:
   const notCovered = (id: string) => `„${id}“ ist im Text der Aktivität nicht gedeckt (weder Material noch Begriff): Ein Bild zeigt nichts, was der Text nicht sagt.`;
   for (const thing of things) {
     const { block } = thing;
-    // Nichts im Bild, was der Text nicht sagt: jeder nicht neutrale Baustein und jeder Inhalt muss über Material oder Begriff gedeckt sein.
-    if (!block.neutral && !covered(block, activity)) problems.push(notCovered(block.id));
-    if (thing.content !== undefined && !covered(thing.content, activity)) problems.push(notCovered(thing.content.id));
     const hazards = hazardsOf(thing);
+    // Nichts im Bild, was der Text nicht sagt: jeder Baustein und jeder Inhalt muss über Material oder Begriff gedeckt sein.
+    // Ausnahme: neutrale Gegenstände (Teller, Tisch, Stuhl, Kissen, Decke), solange sie nichts Sicherheitsrelevantes tragen
+    // (ein Teller mit heißem Inhalt oder mit Kleinteilen ist nicht mehr neutral). Inhalte sind nie neutral.
+    if (!(block.neutral && hazards.length === 0) && !covered(block, activity)) problems.push(notCovered(block.id));
+    if (thing.content !== undefined && !covered(thing.content, activity)) problems.push(notCovered(thing.content.id));
     for (const hazard of hazards) {
       if (hazard === 'sharp') {
         // Scharfes nur in der Hand eines Erwachsenen (Ausnahme: Kinderschere, siehe kidSharpProblems).

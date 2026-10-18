@@ -72,7 +72,7 @@ Jede Regel prüft `npm run kit:check` bzw. der Test, außer wo „Mensch“ steh
 Jeder neue Baustein ist ein **kleiner Pull Request** mit Vorschau:
 
 1. `assets/bausteine/<gruppe>/<id>.svg` zeichnen und einen Eintrag in `katalog.json` machen: `id` (englisch, kleingeschrieben), `group`, `kind` (`figure`, `object`, `furniture`, `nature`), Name de/en, `box`, `tints` und `defaultTint` (wenn `{{tint}}` vorkommt),
-   `hazards` (`sharp`, `heat`, `goggles`, `smallParts`, `water`), `materials` (Schlüssel aus `src/features/activities/materials.ts`), `terms` (Wörter im Text, de und en, kleingeschrieben, Wortteile genügen) und `neutral` (nur Tisch und Standlinie).
+   `hazards` (`sharp`, `heat`, `goggles`, `smallParts`, `water`), `materials` (Schlüssel aus `src/features/activities/materials.ts`), `terms` (Wörter im Text, de und en, kleingeschrieben, Wortteile genügen) und `neutral` (nur Teller, Tisch, Stuhl, Kissen, Decke und Standlinie, feste Liste `neutralBlockIds`; nie mit Merkmal und nie mit Material, das eine Gefahr hat, z. B. elektrisch).
    Dazu, wenn es passt: `grips` (Haltepunkte, siehe unten), `container` (Behälter), bei Inhalten `fits` (in welche Behälter) und `fill` (Fläche statt Stücke), bei der Kinderschere `kidSafe` und `kidTerms`.
 2. `npm run kit:check`, dann `npm run kit:preview`. Beides gehört in den Pull Request.
 3. Auf der Vorschau (`VORSCHAU.md`) in Karten- und Daumennagelgröße ansehen und die Frage aus Regel 9 stellen.
@@ -158,7 +158,7 @@ Gilt für jede Szene **zu einer Aktivität** (`"activity": "<id>"` in der Beispi
 | Wasser (`water`: Pfütze, Wasser in Schüssel oder Eimer) | Bei `ageMin` unter 6 ist ein **Erwachsener im Bild**. |
 | **Petrol hinter tiefen Hauttönen** | Trägt der Hautton einer Figur auf Petrol nicht (Plätze 6 bis 8, heute Jette), liegt **an Kopf und Händen** nichts Petrolfarbenes: kein Baustein in Petrol, kein Petrol-Inhalt (Wasser), keine eigene Petrol-Kapuze, kein Petrol-Ärmel, keine Petrol-Kleidung einer anderen Figur. Geprüft mit der echten Lage von Kopf und Händen aus dem Rig. |
 | Alter der Figuren | Kinder-Figuren nur zur Altersspanne der Aktivität (Nolli 0 bis 4, Jette 3 bis 9, Mats 8 bis 16), Nolli zusätzlich nur, wenn die Aktivität ab 2 Jahren oder jünger beginnt. |
-| Nichts, was der Text nicht sagt | Jeder nicht neutrale Baustein, jeder Inhalt, die Regen-Kleidung und die Ofenhandschuhe müssen **gedeckt** sein: durch Material der Aktivität **oder** einen Begriff (`terms`) im Titel, in der Kurzbeschreibung, den Schritten oder im Sicherheitshinweis, in Deutsch oder Englisch. Tisch und Standlinie sind neutral, Figuren ebenso. |
+| Nichts, was der Text nicht sagt | Jeder nicht neutrale Baustein, jeder Inhalt, die Regen-Kleidung und die Ofenhandschuhe müssen **gedeckt** sein: durch Material der Aktivität **oder** einen Begriff (`terms`) im Titel, in der Kurzbeschreibung, den Schritten oder im Sicherheitshinweis, in Deutsch oder Englisch. Neutral (müssen nicht im Text stehen) sind Teller, Tisch, Stuhl, Kissen, Decke, die Standlinie und die Figuren; aber nur, solange sie nichts Sicherheitsrelevantes tragen: ein Teller mit heißem Inhalt oder Kleinteilen muss gedeckt sein. Inhalte sind nie neutral. |
 
 ## Probebilder (Schritt 3b)
 

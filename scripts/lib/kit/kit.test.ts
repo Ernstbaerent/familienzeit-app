@@ -162,7 +162,16 @@ describe('Regeln für einen Baustein', () => {
 
   it('nicht neutrale Bausteine brauchen Begriffe in beiden Sprachen', () => {
     expect(checkBlock(block({ svg: good, terms: { de: [], en: ['x'] } })).join('\n')).toMatch(/Begriffe in Deutsch und Englisch/);
-    expect(checkBlock(block({ svg: good, terms: { de: [], en: [] }, neutral: true }))).toEqual([]);
+    expect(checkBlock(block({ svg: good, id: 'pillow', terms: { de: [], en: [] }, neutral: true }))).toEqual([]);
+  });
+
+  it('neutral sind genau Teller, Tisch, Stuhl, Kissen, Decke (und die Standlinie), nie etwas Scharfes, Heißes, Elektrisches oder Kleines', () => {
+    expect([...catalog.values()].filter((entry) => entry.neutral).map((entry) => entry.id).sort()).toEqual(['blanket', 'chair', 'ground-line', 'pillow', 'plate', 'table']);
+    expect(checkBlock(block({ svg: good, id: 'cup', neutral: true })).join('\n')).toMatch(/Neutral dürfen nur/);
+    expect(checkBlock(block({ svg: good, id: 'plate', neutral: true, hazards: ['heat'] })).join('\n')).toMatch(/kein Merkmal haben \(hier: heat\)/);
+    expect(checkBlock(block({ svg: good, id: 'plate', neutral: true, hazards: ['smallParts'] })).join('\n')).toMatch(/kein Merkmal/);
+    expect(checkBlock(block({ svg: good, id: 'chair', neutral: true, materials: ['oldDevice'] })).join('\n')).toMatch(/Material mit Gefahr haben \(hier: electric\)/);
+    expect(checkBlock(block({ svg: good, id: 'table', neutral: true, materials: ['knife'] })).join('\n')).toMatch(/hier: sharp/);
   });
 });
 
@@ -631,18 +640,34 @@ describe('Probebilder (Schritt 3b)', () => {
     }
   });
 
-  it('Bratäpfel: Der Text nennt keinen Teller, deshalb fällt „Kind mit Teller“ durch; mit „Teller“ im Text besteht es', () => {
+  it('Bratäpfel: Der Text nennt keinen Teller, der Teller ist aber neutral; mit heißem Inhalt in Kinderhand fällt er durch', () => {
     const baked = activities.get('baked-apples') as ProbeActivity;
-    const withPlate: Scene = {
+    const withPlate = (held: object): Scene => ({
       layout: 'pair',
       items: [
         { slot: 'middle', figure: 'arne', pose: 'carry-tray', mitts: true, holds: { both: { block: 'baking-tray', content: 'baked-apples', hot: true, size: 0.75 } } },
-        { slot: 'right', figure: 'jette', pose: 'hold-plate', holds: { right: { block: 'plate', content: 'baked-apples', size: 0.75 } } },
+        { slot: 'right', figure: 'jette', pose: 'hold-plate', holds: { right: { block: 'plate', size: 0.75, ...held } } },
       ],
-    };
-    expect(checkScene(withPlate, catalog, contextFromActivity(baked)).join('\n')).toMatch(/„plate“ ist im Text der Aktivität nicht gedeckt/);
-    const plateText = { ...baked, translations: { ...baked.translations, de: { ...baked.translations.de, steps: [...baked.translations.de.steps, 'Legt jedem einen Bratapfel auf einen Teller.'] } } };
-    expect(checkScene(withPlate, catalog, contextFromActivity(plateText))).toEqual([]);
+    });
+    const context = contextFromActivity(baked);
+    expect(/teller|plate/i.test(Object.values(context.text).join(' '))).toBe(false);
+    // leerer Teller: neutral, braucht keinen Text
+    expect(checkScene(withPlate({}), catalog, context)).toEqual([]);
+    // abgekühlter Bratapfel auf dem Teller: der Inhalt ist über „Apfel“ gedeckt
+    expect(checkScene(withPlate({ content: 'baked-apples' }), catalog, context)).toEqual([]);
+    // heißer Inhalt in Kinderhand: nicht mehr neutral und nicht erlaubt
+    const hot = checkScene(withPlate({ content: 'baked-apples', hot: true }), catalog, context).join('\n');
+    expect(hot).toMatch(/„plate“ \(heiß\) ist nicht in der Hand eines Erwachsenen/);
+    expect(hot).toMatch(/„plate“ ist im Text der Aktivität nicht gedeckt/);
+  });
+
+  it('neutral heißt nur: muss nicht im Text stehen; heiße Kekse auf dem Teller machen ihn nicht neutral', () => {
+    const hotCookies = scene('table', [{ slot: 'table', block: 'table' }, { slot: 'on2', block: 'plate', content: 'cookies', hot: true, size: 0.6 }, { slot: 'right', figure: 'jette', pose: 'curious' }]);
+    const problems = checkScene(hotCookies, catalog, ctx({ text: 'Kekse backen', ageMin: 4, ageMax: 8 })).join('\n');
+    expect(problems).toMatch(/„plate“ ist im Text der Aktivität nicht gedeckt/);
+    expect(problems).toMatch(/„plate“ \(heiß\) ist nicht in der Hand eines Erwachsenen/);
+    const pillows = scene('table', [{ slot: 'table', block: 'table' }, { slot: 'left', block: 'pillow' }, { slot: 'on2', block: 'plate', size: 0.6 }, { slot: 'right', figure: 'jette', pose: 'curious' }]);
+    expect(checkScene(pillows, catalog, ctx({ text: 'Malen', ageMin: 4, ageMax: 8 }))).toEqual([]);
   });
 
   it('Unterscheidbarkeit: mindestens vier Layouts, mittlere Überschneidung unter einem Drittel', () => {
