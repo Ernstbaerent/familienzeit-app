@@ -12,6 +12,7 @@ import { checkScene, contextFromActivity, renderSceneSvg } from '../kit/scene.ts
 import type { Catalog, Scene } from '../kit/types.ts';
 import { schemaLimitProblems } from '../schemaLimits.ts';
 import { buildSceneSchema, buildSystemPrompt, buildUserPrompt, toScene } from './prompt.ts';
+import { findTitleObjects, missingTitleBlocks, type MaterialLabels } from '../kit/titleObjects.ts';
 
 export const models = { haiku: 'claude-haiku-5-5', sonnet: 'claude-sonnet-5-5' } as const;
 export const maxAttempts = 2;
@@ -20,7 +21,10 @@ export const defaultMaxCostUsd = 1;
 // Fehlerarten, bei denen der ganze Lauf sofort aufhört (scripts/lib/weekly/anthropic.ts, classifyError).
 export const stopKinds = ['billing', 'limit', 'auth', 'permission', 'model', 'request'] as const;
 
-export type Attempt = { scene: Scene; noScene: boolean; reason: string; problems: string[]; usage: Usage; costUsd: number };
+export type Attempt = { scene: Scene; noScene: boolean; reason: string; missingBlocks: string[]; problems: string[]; usage: Usage; costUsd: number };
+// Fehlende Bausteine über den ganzen Lauf (Name → wie oft, bei welchen Aktivitäten, wer sie gemeldet hat).
+// „Prüfer“: Der Titel nennt einen Gegenstand ohne Baustein (vor jedem Aufruf erkannt). „KI“: von der KI bei „keine Szene“ vorgeschlagen.
+export type MissingBlocks = Record<string, { count: number; activities: string[]; sources: ('Prüfer' | 'KI')[] }>;
 export type Drawn = {
   id: string;
   title: string;
@@ -31,14 +35,42 @@ export type Drawn = {
   casting: CastingAdvice;
   figures: string[]; // Figuren im bestandenen Bild
   counts: Record<string, number>; // Zähler der Figuren nach diesem Bild
+  skipped?: string; // keine Anfrage: Der Titel nennt einen Gegenstand ohne Baustein
   error?: string;
 };
-export type DrawReport = { model: string; results: Drawn[]; totalUsd: number; tokens: { input: number; output: number }; counts: Record<string, number>; stopped?: string };
+export type DrawReport = {
+  model: string;
+  results: Drawn[];
+  totalUsd: number;
+  tokens: { input: number; output: number; cacheRead: number; cacheWrite: number };
+  counts: Record<string, number>;
+  missingBlocks: MissingBlocks;
+  stopped?: string;
+};
+
+// Normalisiert einen gemeldeten Namen („ Fahrrad “ → „fahrrad“).
+const normalize = (name: string): string => name.trim().toLowerCase().replace(/\s+/g, ' ');
+
+// Nimmt fehlende Bausteine in die Liste auf. Namen, die einen vorhandenen Baustein meinen (ID oder Name), zählen nicht:
+// Die KI darf fehlende Bausteine vorschlagen, nie welche erfinden, die es schon gibt.
+export function addMissing(list: MissingBlocks, names: readonly string[], source: 'Prüfer' | 'KI', activity: string, catalog: Catalog): MissingBlocks {
+  const known = new Set([...catalog.values()].flatMap((block) => [block.id, block.label.de, block.label.en].map(normalize)));
+  const next: MissingBlocks = { ...list };
+  for (const name of new Set(names.map(normalize).filter((entry) => entry !== '' && !known.has(entry)))) {
+    const entry = next[name] ?? { count: 0, activities: [], sources: [] };
+    next[name] = {
+      count: entry.count + (entry.activities.includes(activity) ? 0 : 1),
+      activities: entry.activities.includes(activity) ? entry.activities : [...entry.activities, activity],
+      sources: entry.sources.includes(source) ? entry.sources : [...entry.sources, source],
+    };
+  }
+  return next;
+}
 
 export async function drawAll(options: {
   activities: readonly ProbeActivity[];
   catalog: Catalog;
-  examples: readonly { name: string; scene: Scene }[];
+  labels?: MaterialLabels; // Namen der Materialien (für die Gegenstände aus dem Titel); ohne sie prüft der Lauf das nicht
   apiKey: string;
   model: string;
   fetchImpl: FetchLike;
@@ -49,9 +81,9 @@ export async function drawAll(options: {
   const price = priceOf(options.model);
   if (price === null) throw new Error(`Für das Modell „${options.model}“ ist kein Preis hinterlegt (scripts/lib/weekly/cost.ts).`);
   const limit = options.maxCostUsd ?? defaultMaxCostUsd;
-  const system = buildSystemPrompt(options.catalog, options.examples);
-  const schema = buildSceneSchema(options.catalog);
-  const report: DrawReport = { model: options.model, results: [], totalUsd: 0, tokens: { input: 0, output: 0 }, counts: {} };
+  const system = buildSystemPrompt(options.catalog);
+  const schema = buildSceneSchema(options.catalog, 'title');
+  const report: DrawReport = { model: options.model, results: [], totalUsd: 0, tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, counts: {}, missingBlocks: {} };
   const total = options.activities.length;
   // Grenzen der strukturierten Ausgaben vor der ersten Anfrage prüfen (scripts/lib/schemaLimits.ts): kein Aufruf, der sicher scheitert.
   const limitProblems = schemaLimitProblems(schema);
@@ -65,24 +97,40 @@ export async function drawAll(options: {
     const casting = adviseCasting(activity, report.counts, total);
     const drawn: Drawn = { id: activity.id, title: activity.translations.de.title, attempts: [], passed: false, svg: null, bytes: null, casting, figures: [], counts: report.counts };
     report.results.push(drawn);
+    // Gegenstände aus dem Titel: Fehlt für einen der Baustein, ist kein Titelbild möglich. Dann gibt es gar keine Anfrage (spart Kosten).
+    const titleObjects = options.labels === undefined ? undefined : findTitleObjects(activity, options.labels, options.catalog);
+    const context = contextFromActivity(activity, titleObjects);
+    const missing = missingTitleBlocks(titleObjects ?? []);
+    if (missing.length > 0) {
+      drawn.skipped = `Der Titel nennt ${missing.map((name) => `„${name}“`).join(', ')}, dafür gibt es keinen Baustein.`;
+      report.missingBlocks = addMissing(report.missingBlocks, missing, 'Prüfer', activity.id, options.catalog);
+      options.log?.(`${activity.id}: keine Anfrage, ${drawn.skipped}`);
+      continue;
+    }
     let problems: string[] = [];
     for (let attempt = 0; attempt < maxAttempts && report.stopped === undefined; attempt += 1) {
       const prompt = buildUserPrompt(activity, problems, castingPrompt(casting));
-      const worst = worstCaseUsd(price, estimateTokens(system + prompt + JSON.stringify(schema)), maxOutputTokens);
+      // schlimmster Fall: Der feste Teil wird in den Zwischenspeicher geschrieben (1,25-facher Preis), der Rest voll bezahlt
+      const worst = worstCaseUsd(price, Math.ceil(estimateTokens(system) * 1.25) + estimateTokens(prompt + JSON.stringify(schema)), maxOutputTokens);
       if (report.totalUsd + worst > limit) {
         report.stopped = `Kostengrenze ${limit} $ wäre im schlimmsten Fall überschritten (bisher ${report.totalUsd.toFixed(4)} $), weitere Aufrufe ausgelassen.`;
         break;
       }
       try {
-        const result = await callClaude({ apiKey: options.apiKey, model: options.model, system, prompt, schema, maxTokens: maxOutputTokens }, options.fetchImpl, options.timeoutMs ?? 120_000);
+        const result = await callClaude({ apiKey: options.apiKey, model: options.model, system, prompt, schema, maxTokens: maxOutputTokens, cacheSystem: true }, options.fetchImpl, options.timeoutMs ?? 120_000);
         const costUsd = actualUsd(price, result.usage);
         report.totalUsd += costUsd;
         report.tokens.input += result.usage.input_tokens + result.usage.cache_creation_input_tokens + result.usage.cache_read_input_tokens;
         report.tokens.output += result.usage.output_tokens;
-        const answer = toScene(result.data);
-        problems = answer.noScene ? [] : [...answer.problems, ...checkScene(answer.scene, options.catalog, contextFromActivity(activity)), ...castingProblems(answer.scene, casting)];
-        drawn.attempts.push({ scene: answer.scene, noScene: answer.noScene, reason: answer.reason, problems, usage: result.usage, costUsd });
-        if (answer.noScene) break; // Farbfläche: kein zweiter Versuch
+        report.tokens.cacheRead += result.usage.cache_read_input_tokens;
+        report.tokens.cacheWrite += result.usage.cache_creation_input_tokens;
+        const answer = toScene(result.data, 'title');
+        problems = answer.noScene ? [] : [...answer.problems, ...checkScene(answer.scene, options.catalog, context), ...castingProblems(answer.scene, casting)];
+        drawn.attempts.push({ scene: answer.scene, noScene: answer.noScene, reason: answer.reason, missingBlocks: answer.missingBlocks, problems, usage: result.usage, costUsd });
+        if (answer.noScene) {
+          report.missingBlocks = addMissing(report.missingBlocks, answer.missingBlocks, 'KI', activity.id, options.catalog);
+          break; // Farbfläche: kein zweiter Versuch
+        }
         if (problems.length === 0) {
           drawn.passed = true;
           drawn.svg = renderSceneSvg(answer.scene, options.catalog);
@@ -149,7 +197,8 @@ export function summaryMarkdown(report: DrawReport, rendered: ReadonlySet<string
   lines.push('');
   const passed = report.results.filter((entry) => entry.passed).length;
   const noScene = report.results.filter((entry) => entry.attempts.at(-1)?.noScene === true).length;
-  lines.push(`**${passed} von ${total}** Szenen bestehen alle mechanischen Prüfungen${noScene > 0 ? `, ${noScene} ohne Szene (Farbfläche)` : ''}. Kosten **${usd(report.totalUsd)}**, Token: ${report.tokens.input} Anfrage, ${report.tokens.output} Antwort.`);
+  const skipped = report.results.filter((entry) => entry.skipped !== undefined).length;
+  lines.push(`**${passed} von ${total}** Szenen bestehen alle mechanischen Prüfungen${noScene + skipped > 0 ? `, ${noScene + skipped} ohne Szene (Farbfläche)` : ''}. Kosten **${usd(report.totalUsd)}**, Token: ${report.tokens.input} Anfrage (davon ${report.tokens.cacheRead} aus dem Zwischenspeicher gelesen, ${report.tokens.cacheWrite} hineingeschrieben), ${report.tokens.output} Antwort.`);
   if (report.stopped !== undefined) lines.push('', `> **Abgebrochen:** ${report.stopped}`);
   lines.push('');
   lines.push('Die Bilder liegen im Artefakt **bild-test** unten auf dieser Seite (PNG in Kartengröße 624 × 312 und als Daumennagel, dazu die SVG). Wie man es herunterlädt und ansieht: docs/bilder-plan.md, „Bilder ansehen“. „Tragfähig?“ entscheidet ein Mensch beim Ansehen.');
@@ -160,15 +209,28 @@ export function summaryMarkdown(report: DrawReport, rendered: ReadonlySet<string
     const last = entry.attempts.at(-1);
     const result =
       entry.error !== undefined ? `Fehler: ${entry.error}`
+      : entry.skipped !== undefined ? `keine Szene (ohne Anfrage): ${entry.skipped}`
       : entry.attempts.length === 0 ? 'nicht versucht (Lauf abgebrochen)'
       : entry.passed ? `bestanden${entry.attempts.length > 1 ? ` (im 2. Versuch; zuerst: ${(entry.attempts[0]?.problems ?? []).join(' ')})` : ''}`
-      : last?.noScene ? `keine Szene: ${last.reason}`
+      : last?.noScene ? `keine Szene: ${last.reason}${last.missingBlocks.length > 0 ? ` (fehlt: ${last.missingBlocks.join(', ')})` : ''}`
       : `nicht bestanden: ${(last?.problems ?? []).join(' ')}`;
     const scene = last === undefined || last.noScene ? '–' : describeScene(last.scene);
     const tokens = entry.attempts.map((a) => `${a.usage.input_tokens + a.usage.cache_creation_input_tokens + a.usage.cache_read_input_tokens} / ${a.usage.output_tokens}`).join(', ');
     const cost = entry.attempts.reduce((sum, a) => sum + a.costUsd, 0);
     const image = rendered.has(entry.id) ? `\`${entry.id}.png\`` : '–';
     lines.push(`| ${cell(entry.title)} (\`${entry.id}\`) | ${cell(scene)} | ${cell(result)} | ${entry.bytes === null ? '–' : kb(entry.bytes)} | ${entry.attempts.length} | ${tokens || '–'} | ${usd(cost)} | ${entry.figures.join(', ') || '–'} | ${image} |`);
+  }
+  lines.push('');
+  lines.push('### Fehlende Bausteine (missingBlocks)');
+  lines.push('');
+  const missing = Object.entries(report.missingBlocks).sort(([a, x], [b, y]) => y.count - x.count || a.localeCompare(b));
+  if (missing.length === 0) lines.push('Keine: Für jede Aktivität gab es die nötigen Bausteine (oder die KI hat keinen fehlenden genannt).');
+  else {
+    lines.push('Gezählt über den ganzen Lauf. „Prüfer“: Der Titel nennt den Gegenstand, es gibt keinen Baustein (vor dem Aufruf erkannt). „KI“: von der KI bei „keine Szene“ vorgeschlagen; Namen vorhandener Bausteine zählen nicht.');
+    lines.push('');
+    lines.push('| Baustein | Anzahl | Aktivitäten | gemeldet von |');
+    lines.push('| --- | --- | --- | --- |');
+    for (const [name, entry] of missing) lines.push(`| ${cell(name)} | ${entry.count} | ${entry.activities.map((id) => `\`${id}\``).join(', ')} | ${entry.sources.join(', ')} |`);
   }
   lines.push('');
   lines.push(`### Zähler der Figuren`);

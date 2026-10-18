@@ -8,7 +8,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { loadCatalog, loadExampleScenes } from './lib/kit/catalog.ts';
+import { loadCatalog } from './lib/kit/catalog.ts';
+import { loadMaterialLabels } from './lib/kit/titleObjects.ts';
 import { fetchTestActivities, parseIds, parseKi } from './lib/imagetest/activities.ts';
 import { loadProbe } from './lib/kit/probe.ts';
 import { drawAll, models, runFailure, summaryMarkdown, type DrawReport } from './lib/imagetest/run.ts';
@@ -58,9 +59,8 @@ async function main(): Promise<void> {
     if (apiKey === '') fail('ANTHROPIC_API_KEY fehlt.');
     const activities = JSON.parse(readFileSync(join(out, 'activities.json'), 'utf8')) as ProbeActivity[];
     const catalog = loadCatalog(root);
-    const examples = [...loadExampleScenes(root).entries()].slice(0, 4).map(([name, scene]) => ({ name, scene }));
     const maxCost = Number(process.env.MAX_COST_USD ?? '');
-    const report = await drawAll({ activities, catalog, examples, apiKey, model, fetchImpl: fetch as unknown as FetchLike, maxCostUsd: Number.isFinite(maxCost) && maxCost > 0 ? maxCost : undefined, log: (line) => console.log(redact(line)) });
+    const report = await drawAll({ activities, catalog, labels: loadMaterialLabels(root), apiKey, model, fetchImpl: fetch as unknown as FetchLike, maxCostUsd: Number.isFinite(maxCost) && maxCost > 0 ? maxCost : undefined, log: (line) => console.log(redact(line)) });
     for (const entry of report.results) if (entry.svg !== null) writeFileSync(join(out, `${entry.id}.svg`), entry.svg);
     writeFileSync(join(out, 'report.json'), `${redact(JSON.stringify({ ...report, results: report.results.map(({ svg, ...entry }) => ({ ...entry, hasSvg: svg !== null })) }, null, 1))}\n`);
     console.log(`${report.results.filter((entry) => entry.passed).length} von ${report.results.length} bestanden, ${report.totalUsd.toFixed(4)} $.`);

@@ -1,0 +1,7 @@
+<circle cx="-30" cy="-17" r="16" fill="{{paper}}" stroke-width="{{line}}"/>
+<circle cx="32" cy="-17" r="16" fill="{{paper}}" stroke-width="{{line}}"/>
+<path d="M-30 -17L-2 -17L-10 -44M-30 -17L-10 -44L22 -44L-2 -17M22 -44L32 -17M22 -44L20 -52" fill="none" stroke-width="{{line}}"/>
+<path d="M16 -54H27" fill="none" stroke-width="{{line}}"/>
+<path d="M-19 -48C-19 -51 -15 -52 -10 -52C-4 -52 -1 -51 -1 -48Z" fill="{{tint}}" stroke-width="{{line}}"/>
+<circle cx="-30" cy="-17" r="2.5" fill="{{ink}}" stroke="none"/>
+<circle cx="32" cy="-17" r="2.5" fill="{{ink}}" stroke="none"/>

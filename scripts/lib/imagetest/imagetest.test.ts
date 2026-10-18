@@ -5,12 +5,14 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { loadActivityData } from '../activityData';
-import { loadCatalog, loadExampleScenes } from '../kit/catalog';
+import { loadCatalog } from '../kit/catalog';
+import { findTitleObjects, loadMaterialLabels } from '../kit/titleObjects';
 import { loadProbe, type ProbeActivity } from '../kit/probe';
 import { checkScene, contextFromActivity } from '../kit/scene';
 import type { FetchLike, HttpRequest } from '../weekly/http';
 import { buildHeaders, buildKiUrl, buildUrl, defaultIds, fetchTestActivities, parseIds, parseKi, rowToActivity } from './activities';
 import { buildSceneSchema, buildSystemPrompt, buildUserPrompt, toScene } from './prompt';
+import { badExample, goodExamples } from './examples';
 import * as limitsModule from '../schemaLimits';
 import { apiLimits, optionalParameters, schemaLimitProblems, unionParameters } from '../schemaLimits';
 import { buildResponseSchema } from '../weekly/prompt';
@@ -19,7 +21,7 @@ import { describeScene, drawAll, maxAttempts, models, runFailure, summaryMarkdow
 
 const root = join(__dirname, '../../..');
 const catalog = loadCatalog(root);
-const examples = [...loadExampleScenes(root).entries()].slice(0, 4).map(([name, scene]) => ({ name, scene }));
+const labels = loadMaterialLabels(root);
 const probe = loadProbe(root);
 const byId = new Map<string, ProbeActivity>([...loadActivityData().activities, ...probe.extra].map((activity) => [activity.id, activity as ProbeActivity]));
 const puddle = byId.get('puddle-explorers') as ProbeActivity;
@@ -39,10 +41,10 @@ function fakeFetch(replies: Reply[]): { fetchImpl: FetchLike; calls: { url: stri
 }
 
 // Eine Antwort der Claude API mit der Szene als JSON (in der Form des Schemas: unbenutzte Felder haben ihren Ersatzwert).
-const nullItem = { block: 'none', figure: 'none', pose: 'none', tint: 'none', content: 'none', hot: false, size: 0, flip: 'auto', mitts: false, rainOutfit: 'none', holds: [], hands: [] };
+const nullItem = { block: 'none', figure: 'none', pose: 'none', tint: 'none', content: 'none', hot: false, size: 0, flip: 'auto', mitts: false, rainOutfit: 'none', helmet: 'none', holds: [] };
 const hold = (hand: string, block: string, extra: Record<string, unknown> = {}) => ({ hand, block, content: 'none', tint: 'none', hot: false, size: 0, ...extra });
-function claudeReply(scene: { noScene?: boolean; reason?: string; layout: string; items: Record<string, unknown>[] }, usage = { input_tokens: 7000, output_tokens: 600 }): Reply {
-  const data = { noScene: scene.noScene ?? false, reason: scene.reason ?? '', layout: scene.layout, items: scene.items.map((item) => ({ ...nullItem, ...item })) };
+function claudeReply(scene: { noScene?: boolean; reason?: string; missingBlocks?: string[]; layout: string; items: Record<string, unknown>[] }, usage: Record<string, number> = { input_tokens: 7000, output_tokens: 600 }): Reply {
+  const data = { noScene: scene.noScene ?? false, reason: scene.reason ?? '', missingBlocks: scene.missingBlocks ?? [], layout: scene.layout, items: scene.items.map((item) => ({ ...nullItem, ...item })) };
   return { body: { content: [{ type: 'text', text: JSON.stringify(data) }], stop_reason: 'end_turn', usage } };
 }
 const goodPuddle = {
@@ -55,8 +57,9 @@ const goodPuddle = {
 };
 
 describe('Aktivitäten lesen (nur lesen, öffentlicher Schlüssel)', () => {
-  it('IDs: Vorgabe sind die fünf aus dem Plan, Liste mit Komma, nur sichere Zeichen, höchstens zehn', () => {
+  it('IDs: Vorgabe sind die zehn aus dem ersten Lauf (fest), Liste mit Komma, nur sichere Zeichen, höchstens zehn', () => {
     expect(parseIds('')).toEqual([...defaultIds]);
+    expect(defaultIds).toEqual(['baked-apples', 'banana-oat-balls', 'dance-freeze', 'secret-lemon-ink', 'puddle-explorers', 'autumn-salad-with-lemon', 'bike-slalom-with-sticks', 'card-tricks-for-the-family', 'counting-lit-windows-nearby', 'feely-bag-of-nature-finds']);
     expect(parseIds(' baked-apples, dance-freeze ,dance-freeze')).toEqual(['baked-apples', 'dance-freeze']);
     expect(() => parseIds('a;drop')).toThrow(/Ungültige ID/);
     expect(() => parseIds(Array.from({ length: 11 }, (_, i) => `a${i}`).join(','))).toThrow(/Höchstens 10/);
@@ -79,7 +82,7 @@ describe('Aktivitäten lesen (nur lesen, öffentlicher Schlüssel)', () => {
   });
 
   it('KI-Aktivitäten: die neuesten mit batch_id, ohne die schon gewählten; Anzahl 0 bis 5, zusammen höchstens zehn', async () => {
-    expect(parseKi('')).toBe(3);
+    expect(parseKi('')).toBe(0);
     expect(parseKi(' 0 ')).toBe(0);
     expect(() => parseKi('6')).toThrow(/0 bis 5/);
     expect(() => parseKi('2; drop')).toThrow(/ungültig/);
@@ -145,15 +148,26 @@ describe('Schema und Prompt', () => {
     expect(optionalParameters(weekly).length).toBeLessThanOrEqual(apiLimits.optional);
   });
 
-  it('kennt jeden Baustein, jede Figur und jedes Layout; keine Koordinaten', () => {
+  it('kennt jeden Baustein, jede Figur und jedes Layout für Titelbilder; keine Koordinaten', () => {
     const text = JSON.stringify(schema);
     for (const id of catalog.keys()) if (id !== 'ground-line') expect(text).toContain(`"${id}"`);
-    for (const id of ['jette', 'mats', 'nolli', 'ilka', 'arne', 'stups', 'tuepfel', 'hands', 'outdoor']) expect(text).toContain(`"${id}"`);
+    for (const id of ['jette', 'mats', 'nolli', 'ilka', 'arne', 'stups', 'tuepfel', 'outdoor', 'pair', 'hero', 'watch', 'ride', 'missingBlocks', 'helmet']) expect(text).toContain(`"${id}"`);
     expect(text).not.toMatch(/"x"|"y"|"svg"/);
   });
 
+  it('Titelbild: Layout hands und Stups-Pose hop stehen gar nicht zur Wahl; für Schrittbilder gibt es hands', () => {
+    const title = buildSceneSchema(catalog, 'title') as { properties: { layout: { enum: string[] } }; $defs: Record<string, unknown> };
+    expect(title.properties.layout.enum).not.toContain('hands');
+    expect(JSON.stringify(title)).not.toContain('"hop"');
+    expect(title.$defs).not.toHaveProperty('hands');
+    const step = buildSceneSchema(catalog, 'step') as { properties: { layout: { enum: string[] } }; $defs: Record<string, unknown> };
+    expect(step.properties.layout.enum).toContain('hands');
+    expect(step.$defs).toHaveProperty('hands');
+    expect(schemaLimitProblems(step)).toEqual([]);
+  });
+
   it('der feste Teil nennt die harten Regeln, Bausteine mit Deckung und Beispiele; der Teil je Aktivität ihren Text und bei Wiederholung die Meldungen', () => {
-    const system = buildSystemPrompt(catalog, examples);
+    const system = buildSystemPrompt(catalog);
     for (const phrase of ['nichts, was der Text nicht sagt', 'nur in der Hand eines Erwachsenen', 'mitts: true', 'Kinderschere', 'Erwachsene (ilka, arne) nur auf den Plätzen in der Mitte', 'noScene', 'NIE etwas in Petrol']) expect(system).toContain(phrase);
     expect(system).toContain('puddle (Pfütze');
     const user = buildUserPrompt(puddle);
@@ -168,10 +182,11 @@ describe('Schema und Prompt', () => {
       reason: '',
       layout: 'hands',
       items: [{ ...nullItem, slot: 'object', block: 'bowl', content: 'dough', tint: 'rose', size: 1.5, flip: 'yes', hands: [{ figure: 'mats', pose: 'stir', tool: hold('none', 'fork'), mitts: false, sleeve: 'none' }] }],
-    });
+    }, 'step');
     expect(answer.scene.items[0]).toEqual({ slot: 'object', block: 'bowl', content: 'dough', tint: 'rose', size: 1.5, flip: true, hands: { figure: 'mats', pose: 'stir', tool: { block: 'fork' } } });
     expect(answer.problems).toEqual([]);
-    const noTool = toScene({ layout: 'hands', items: [{ ...nullItem, slot: 'object', block: 'bowl', hands: [{ figure: 'mats', pose: 'hold', tool: hold('none', 'none'), mitts: true, sleeve: 'petrol' }] }] });
+    expect(answer.scene.purpose).toBe('step');
+    const noTool = toScene({ layout: 'hands', items: [{ ...nullItem, slot: 'object', block: 'bowl', hands: [{ figure: 'mats', pose: 'hold', tool: hold('none', 'none'), mitts: true, sleeve: 'petrol' }] }] }, 'step');
     expect(noTool.scene.items[0].hands).toEqual({ figure: 'mats', pose: 'hold', mitts: true, sleeve: 'petrol' });
     const twice = toScene({ layout: 'pair', items: [{ ...nullItem, slot: 'left', figure: 'jette', pose: 'hold-plate', holds: [hold('right', 'plate'), hold('right', 'cup')], hands: [{}, {}] }] });
     expect(twice.problems.join(' ')).toMatch(/Hand „right“ hält zwei Dinge[\s\S]*höchstens ein Paar Hände/);
@@ -189,15 +204,17 @@ describe('Schema und Prompt', () => {
 describe('Ablauf: wählen, prüfen, zeichnen', () => {
   it('besteht die Szene, wird sie gezeichnet; Kosten und Token werden gezählt', async () => {
     const { fetchImpl, calls } = fakeFetch([claudeReply(goodPuddle)]);
-    const report = await drawAll({ activities: [puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl });
+    const report = await drawAll({ activities: [puddle], catalog, apiKey, model: models.haiku, fetchImpl });
     expect(report.results[0].passed).toBe(true);
     expect(report.results[0].svg).toMatch(/^<svg/);
     expect(calls).toHaveLength(1);
     expect(calls[0].init.headers['x-api-key']).toBe(apiKey);
-    const body = JSON.parse(calls[0].init.body as string) as { model: string; output_config: { format: { type: string } } };
+    const body = JSON.parse(calls[0].init.body as string) as { model: string; system: unknown; output_config: { format: { type: string } } };
     expect(body.model).toBe('claude-haiku-5-5');
+    // Zwischenspeicher: Der feste Teil steht als Block mit cache_control (5 Minuten); die Anfrage je Aktivität bleibt dahinter
+    expect(body.system).toEqual([{ type: 'text', text: buildSystemPrompt(catalog), cache_control: { type: 'ephemeral' } }]);
     expect(body.output_config.format.type).toBe('json_schema');
-    expect(report.tokens).toEqual({ input: 7000, output: 600 });
+    expect(report.tokens).toEqual({ input: 7000, output: 600, cacheRead: 0, cacheWrite: 0 });
     expect(report.totalUsd).toBeCloseTo((7000 * 0.1 + 600 * 0.5) / 1_000_000, 8);
   });
 
@@ -205,7 +222,7 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
     // Jette allein an der Pfütze (Kinder unter 6 nur mit Erwachsenem): verworfen
     const bad = { layout: 'outdoor', items: [{ slot: 's1', figure: 'jette', pose: 'stand' }, { slot: 's4', block: 'puddle' }] };
     const { fetchImpl, calls } = fakeFetch([claudeReply(bad), claudeReply(bad), claudeReply(goodPuddle)]);
-    const report = await drawAll({ activities: [puddle], catalog, examples, apiKey, model: models.sonnet, fetchImpl });
+    const report = await drawAll({ activities: [puddle], catalog, apiKey, model: models.sonnet, fetchImpl });
     expect(calls).toHaveLength(maxAttempts);
     expect(JSON.parse(calls[1].init.body as string).messages[0].content).toMatch(/verworfen[\s\S]*ohne Erwachsenen/);
     expect(report.results[0].passed).toBe(false);
@@ -214,7 +231,7 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
 
   it('keine Szene (Farbfläche) ist kein Fehler und braucht keinen zweiten Aufruf', async () => {
     const { fetchImpl, calls } = fakeFetch([claudeReply({ noScene: true, reason: 'Das Spiel lässt sich nicht zeigen.', layout: 'pair', items: [] })]);
-    const report = await drawAll({ activities: [puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl });
+    const report = await drawAll({ activities: [puddle], catalog, apiKey, model: models.haiku, fetchImpl });
     expect(calls).toHaveLength(1);
     expect(report.results[0].attempts[0].noScene).toBe(true);
     expect(summaryMarkdown(report, new Set())).toMatch(/keine Szene: Das Spiel lässt sich nicht zeigen/);
@@ -222,7 +239,7 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
 
   it('Kostengrenze: Ist sie im schlimmsten Fall erreicht, gibt es keinen Aufruf mehr', async () => {
     const { fetchImpl, calls } = fakeFetch([claudeReply(goodPuddle)]);
-    const report = await drawAll({ activities: [puddle, puddle], catalog, examples, apiKey, model: models.sonnet, fetchImpl, maxCostUsd: 0.01 });
+    const report = await drawAll({ activities: [puddle, puddle], catalog, apiKey, model: models.sonnet, fetchImpl, maxCostUsd: 0.01 });
     expect(calls).toHaveLength(0);
     expect(report.stopped).toMatch(/Kostengrenze/);
   });
@@ -230,7 +247,7 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
   it('eine abgelehnte Anfrage (invalid_request_error) beendet den Lauf nach der ersten Anfrage, und er endet rot', async () => {
     const reply = { status: 400, body: { type: 'error', error: { type: 'invalid_request_error', message: 'Schemas contains too many parameters with union types (19 parameters with type arrays or anyOf)' } } };
     const { fetchImpl, calls } = fakeFetch([reply, reply, reply]);
-    const report = await drawAll({ activities: [puddle, puddle, puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl });
+    const report = await drawAll({ activities: [puddle, puddle, puddle], catalog, apiKey, model: models.haiku, fetchImpl });
     expect(calls).toHaveLength(1);
     expect(report.stopped).toMatch(/invalid_request_error/);
     expect(report.results.map((entry) => entry.attempts.length)).toEqual([0, 0, 0]);
@@ -240,9 +257,9 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
 
   it('rot, wenn keine Aktivität ein Bild bekommt; grün bei Teilfehlern', async () => {
     const bad = { layout: 'outdoor', items: [{ slot: 's1', figure: 'jette', pose: 'stand' }, { slot: 's4', block: 'puddle' }] };
-    const allBad = await drawAll({ activities: [puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl: fakeFetch([claudeReply(bad), claudeReply(bad)]).fetchImpl });
+    const allBad = await drawAll({ activities: [puddle], catalog, apiKey, model: models.haiku, fetchImpl: fakeFetch([claudeReply(bad), claudeReply(bad)]).fetchImpl });
     expect(runFailure(allBad)).toMatch(/Keine der 1 Aktivitäten/);
-    const partly = await drawAll({ activities: [puddle, puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl: fakeFetch([claudeReply(goodPuddle), claudeReply(bad), claudeReply(bad)]).fetchImpl });
+    const partly = await drawAll({ activities: [puddle, puddle], catalog, apiKey, model: models.haiku, fetchImpl: fakeFetch([claudeReply(goodPuddle), claudeReply(bad), claudeReply(bad)]).fetchImpl });
     expect(partly.results.map((entry) => entry.passed)).toEqual([true, false]);
     expect(runFailure(partly)).toBeNull();
   });
@@ -250,7 +267,7 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
   it('ein Schema über der eigenen Grenze geht gar nicht erst zur API', async () => {
     const { fetchImpl, calls } = fakeFetch([claudeReply(goodPuddle)]);
     const spy = jest.spyOn(limitsModule, 'schemaLimitProblems').mockReturnValue(['zu viele Unions']);
-    const report = await drawAll({ activities: [puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl });
+    const report = await drawAll({ activities: [puddle], catalog, apiKey, model: models.haiku, fetchImpl });
     spy.mockRestore();
     expect(calls).toHaveLength(0);
     expect(report.stopped).toMatch(/keine Anfrage gesendet\. zu viele Unions/);
@@ -259,7 +276,7 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
 
   it('leeres Guthaben oder falscher Schlüssel beendet den ganzen Test, ohne den Schlüssel zu nennen', async () => {
     const { fetchImpl, calls } = fakeFetch([{ status: 402, body: { error: { type: 'billing_error', message: 'Your credit balance is too low' } } }]);
-    const report = await drawAll({ activities: [puddle, puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl });
+    const report = await drawAll({ activities: [puddle, puddle], catalog, apiKey, model: models.haiku, fetchImpl });
     expect(calls).toHaveLength(1);
     expect(report.stopped).toMatch(/Guthaben/);
     const summary = summaryMarkdown(report, new Set());
@@ -269,7 +286,7 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
 
   it('die Zusammenfassung nennt je Bild Szene, Prüfergebnis, Größe, Versuche, Token, Kosten, Figuren und das Artefakt', async () => {
     const { fetchImpl } = fakeFetch([claudeReply(goodPuddle)]);
-    const report = await drawAll({ activities: [puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl });
+    const report = await drawAll({ activities: [puddle], catalog, apiKey, model: models.haiku, fetchImpl });
     const summary = summaryMarkdown(report, new Set(['puddle-explorers']));
     expect(summary).toContain('**1 von 1**');
     expect(summary).toContain('| Aktivität | Gewählte Szene | Prüfergebnis | Größe | Versuche | Token (Anfrage / Antwort) | Kosten | Figuren | Bild |');
@@ -288,7 +305,7 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
     const withNolli = { ...goodPuddle, items: goodPuddle.items.map((item) => (item.figure === undefined ? item : { ...item, figure: swap[item.figure] ?? item.figure })) };
     const { fetchImpl, calls } = fakeFetch([claudeReply(goodPuddle), claudeReply(goodPuddle), claudeReply(withNolli)]);
     const log: string[] = [];
-    const report = await drawAll({ activities: [puddle, puddle], catalog, examples, apiKey, model: models.haiku, fetchImpl, log: (line) => log.push(line) });
+    const report = await drawAll({ activities: [puddle, puddle], catalog, apiKey, model: models.haiku, fetchImpl, log: (line) => log.push(line) });
     expect(calls).toHaveLength(3);
     const prompt = (index: number): string => JSON.parse(calls[index].init.body as string).messages[0].content as string;
     expect(prompt(0)).toMatch(/Besetzung für dieses Bild[\s\S]*Kind-Figur: bevorzugt jette, sonst nolli, mats/);
@@ -298,6 +315,102 @@ describe('Ablauf: wählen, prüfen, zeichnen', () => {
     expect(report.results[1].figures).toEqual(['arne', 'nolli']);
     expect(report.counts).toEqual({ ilka: 1, jette: 1, arne: 1, nolli: 1 });
     expect(log[1]).toBe('puddle-explorers: Figuren arne, nolli; Zähler arne 1/2, ilka 1/2, jette 1/2, nolli 1/2');
+  });
+});
+
+describe('Nach dem ersten echten Lauf: Titelbild, Gegenstände aus dem Titel, fehlende Bausteine, Zwischenspeicher', () => {
+  // Ausgedachte KI-Aktivitäten in der Form der Datenbank (die echten stehen nur in Supabase)
+  const text = (title: string, en: string, steps: string[] = ['Los geht es.']) => ({
+    de: { title, summary: title, steps, safetyNote: 'Mit Helm fahren, Erwachsene schauen zu.' },
+    en: { title: en, summary: en, steps: ['Go.'], safetyNote: 'Ride with a helmet, adults watch.' },
+  });
+  const bike: ProbeActivity = { id: 'bike-slalom-with-sticks', ageMin: 6, ageMax: 12, materials: ['bike', 'stick'], translations: text('Fahrrad-Slalom mit Stöcken', 'Bike slalom with sticks', ['Steckt Stöcke in den Boden und fahrt mit dem Fahrrad Slalom.']) };
+  const ball: ProbeActivity = { id: 'ball-target', ageMin: 4, ageMax: 10, materials: ['ball', 'bucket'], translations: text('Ball-Zielwurf in den Eimer', 'Ball toss into the bucket', ['Werft den Ball in den Eimer.']) };
+  const cards: ProbeActivity = { id: 'card-tricks-for-the-family', ageMin: 8, ageMax: 16, materials: ['playingCards'], translations: text('Kartentricks für die Familie', 'Card tricks for the family', ['Mischt die Karten und zeigt einen Trick.']) };
+
+  it('ein Gegenstand aus dem Titel ohne Baustein: keine Anfrage, der Lauf zählt ihn als fehlenden Baustein (Prüfer)', async () => {
+    const { fetchImpl, calls } = fakeFetch([]);
+    const log: string[] = [];
+    const report = await drawAll({ activities: [ball, ball], catalog, labels, apiKey, model: models.haiku, fetchImpl, log: (line) => log.push(line) });
+    expect(calls).toHaveLength(0);
+    expect(report.results[0].skipped).toMatch(/„Ball“, dafür gibt es keinen Baustein/);
+    expect(report.missingBlocks).toEqual({ ball: { count: 1, activities: ['ball-target'], sources: ['Prüfer'] } });
+    expect(log[0]).toMatch(/^ball-target: keine Anfrage/);
+    const summary = summaryMarkdown(report, new Set());
+    expect(summary).toContain('### Fehlende Bausteine (missingBlocks)');
+    expect(summary).toContain('| ball | 1 | `ball-target` | Prüfer |');
+    expect(summary).toMatch(/keine Szene \(ohne Anfrage\)/);
+  });
+
+  it('meldet die KI „keine Szene“ mit fehlenden Bausteinen, zählt der Lauf sie über alle Aktivitäten; vorhandene Bausteine zählen nicht', async () => {
+    const noScene = (names: string[]) => claudeReply({ noScene: true, reason: 'Es fehlt ein Baustein.', missingBlocks: names, layout: 'pair', items: [] });
+    const other = { ...puddle, id: 'puddle-two' };
+    const { fetchImpl } = fakeFetch([noScene(['Seil', ' bowl ', 'Schüssel']), noScene(['seil', 'Kreide'])]);
+    const report = await drawAll({ activities: [puddle, other], catalog, apiKey, model: models.haiku, fetchImpl });
+    expect(report.missingBlocks).toEqual({
+      seil: { count: 2, activities: ['puddle-explorers', 'puddle-two'], sources: ['KI'] },
+      kreide: { count: 1, activities: ['puddle-two'], sources: ['KI'] },
+    });
+    expect(report.results[0].attempts[0].missingBlocks).toEqual(['Seil', 'bowl', 'Schüssel']);
+    const summary = summaryMarkdown(report, new Set());
+    expect(summary).toContain('| seil | 2 | `puddle-explorers`, `puddle-two` | KI |');
+    expect(summary).toMatch(/keine Szene: Es fehlt ein Baustein\. \(fehlt: Seil, bowl, Schüssel\)/);
+  });
+
+  it('ein Bild „Fahrrad-Slalom“ ohne Fahrrad wird verworfen, mit fahrender Figur und Helm besteht es', async () => {
+    const withoutBike = { layout: 'outdoor', items: [{ slot: 's1', figure: 'mats', pose: 'walk' }, { slot: 's3', block: 'stick' }] };
+    const riding = {
+      layout: 'outdoor',
+      items: [
+        { slot: 's1', figure: 'mats', pose: 'ride', helmet: 'honey', holds: [hold('both', 'bike', { size: 0.75 })] },
+        { slot: 's3', block: 'stick' },
+      ],
+    };
+    const { fetchImpl, calls } = fakeFetch([claudeReply(withoutBike), claudeReply(riding)]);
+    const report = await drawAll({ activities: [bike], catalog, labels, apiKey, model: models.haiku, fetchImpl });
+    expect(calls).toHaveLength(2);
+    expect(report.results[0].attempts[0].problems.join(' ')).toMatch(/Der Titel nennt „Fahrrad und Helm“, aber das Bild zeigt es nicht/);
+    expect(report.results[0].passed).toBe(true);
+    expect(report.results[0].attempts[1].scene.purpose).toBe('title');
+  });
+
+  it('Kartentricks: Spielkarten aus dem Titel; ein Messer im Titelbild ist ein Fehler', async () => {
+    expect(findTitleObjects(cards, labels, catalog).map((entry) => entry.key)).toEqual(['playingCards']);
+    const knife = { layout: 'pair', items: [{ slot: 'middle', figure: 'arne', pose: 'cut-supervised', holds: [hold('right', 'knife', { size: 0.75 })] }, { slot: 'left', block: 'playing-cards' }] };
+    const good = { layout: 'pair', items: [{ slot: 'left', figure: 'mats', pose: 'hold-plate', holds: [hold('right', 'playing-cards', { size: 0.75 })] }, { slot: 'middle', figure: 'arne', pose: 'watch' }] };
+    const { fetchImpl } = fakeFetch([claudeReply(knife), claudeReply(good)]);
+    const report = await drawAll({ activities: [cards], catalog, labels, apiKey, model: models.haiku, fetchImpl });
+    expect(report.results[0].attempts[0].problems.join(' ')).toMatch(/Messer und Scheren gehören nur in Schrittbilder/);
+    expect(report.results[0].attempts[1].problems).toEqual([]);
+    expect(report.results[0].passed).toBe(true);
+  });
+
+  it('Zwischenspeicher: gelesene und geschriebene Token stehen im Bericht und kosten 0,1- bzw. 1,25-fach', async () => {
+    const usage = { input_tokens: 400, output_tokens: 600, cache_creation_input_tokens: 0, cache_read_input_tokens: 7000 };
+    const { fetchImpl } = fakeFetch([claudeReply(goodPuddle, usage)]);
+    const report = await drawAll({ activities: [puddle], catalog, apiKey, model: models.haiku, fetchImpl });
+    expect(report.tokens).toEqual({ input: 7400, output: 600, cacheRead: 7000, cacheWrite: 0 });
+    expect(report.totalUsd).toBeCloseTo((400 * 0.1 + 7000 * 0.1 * 0.1 + 600 * 0.5) / 1_000_000, 10);
+    expect(summaryMarkdown(report, new Set())).toContain('davon 7000 aus dem Zwischenspeicher gelesen, 0 hineingeschrieben');
+  });
+
+  it('die Beispiele im Prompt: die guten bestehen alle Regeln mit ihren Aktivitäten, das Gegenbeispiel scheitert an hands, Messer und Papier als Tüte', () => {
+    const system = buildSystemPrompt(catalog);
+    for (const example of goodExamples) {
+      const activity = byId.get(example.activity) as ProbeActivity;
+      expect([example.name, ...checkScene(example.scene, catalog, contextFromActivity(activity, findTitleObjects(activity, labels, catalog)))]).toEqual([example.name]);
+      expect(system).toContain(JSON.stringify(example.scene));
+    }
+    expect(system).toContain('Gegenbeispiel (so NICHT)');
+    expect(system).toMatch(/T4\. Für Bewegung ohne Gegenstand[^\n]*zwei Figuren in Bewegung[^\n]*als ein Tier/);
+    expect(system).toMatch(/Zitronensaft und Saft sind honey, Wasser ist petrol/);
+    const feely = { materials: ['paper'], ageMin: 3, ageMax: 8, text: { de: 'tastsäckchen: steckt dinge in einen beutel. papier zum malen.', en: '' }, safety: { de: '', en: '' } };
+    const hands = checkScene(badExample.scene, catalog, feely);
+    expect(hands.join(' ')).toMatch(/nur für Schrittbilder/);
+    const asPair = { layout: 'pair' as const, purpose: 'title' as const, items: [{ slot: 'middle', figure: 'arne', pose: 'cut-supervised', holds: { right: { block: 'knife', size: 0.75 } } }, { slot: 'right', block: 'paper' }] };
+    const problems = checkScene(asPair, catalog, { ...feely, materials: ['paper', 'knife'], text: { de: 'tastsäckchen mit beutel. papier und messer.', en: '' } }).join(' ');
+    expect(problems).toMatch(/Messer und Scheren gehören nur in Schrittbilder/);
+    expect(problems).toMatch(/„paper“ ist ein flaches Blatt, keine Tüte und kein Beutel/);
   });
 });
 

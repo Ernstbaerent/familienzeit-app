@@ -1,48 +1,52 @@
 {
   "activity": "banana-oat-balls",
-  "layout": "hands",
+  "layout": "hero",
+  "purpose": "title",
   "items": [
     {
-      "slot": "object",
-      "block": "bowl",
-      "content": "dough",
-      "tint": "rose",
-      "size": 1.5,
-      "hands": {
-        "figure": "mats",
-        "pose": "stir",
-        "tool": {
-          "block": "fork"
+      "slot": "left",
+      "figure": "mats",
+      "pose": "stir",
+      "holds": {
+        "left": {
+          "block": "bowl",
+          "content": "dough",
+          "tint": "rose",
+          "size": 0.75
+        },
+        "right": {
+          "block": "fork",
+          "size": 0.75
         }
       }
     },
     {
-      "slot": "left",
-      "block": "bananas",
-      "size": 1
+      "slot": "main",
+      "block": "bowl",
+      "content": "oat-balls",
+      "tint": "paper",
+      "size": 1.5
     },
     {
       "slot": "right",
-      "block": "oat-balls",
+      "block": "plate",
+      "content": "bananas",
       "size": 1
     }
   ],
   "review": {
     "carries": [
-      "Nahaufnahme (Layout `hands`): Mats’ Hände rühren mit der Gabel in der Schüssel, links zwei Bananen, rechts drei Haferkugeln. Das sind genau die Zutaten und Werkzeuge aus dem Text.",
-      "Im Daumennagel bleibt die Schüssel mit den Händen gut erkennbar; das Bild unterscheidet sich klar von den Szenen mit ganzen Figuren.",
-      "Kein Teller, keine Kekse: Die Kugeln liegen lose auf dem Tisch (neu: `loose`).",
-      "Besetzung: Jette war schon bei den Bratäpfeln, deshalb sind es hier Mats’ Hände (die am seltensten benutzte passende Figur, `casting.ts`)."
+      "Seit dem ersten Bild-Test (18. Oktober 2026) ist `hands` nur noch für Schrittbilder erlaubt. Das Titelbild zeigt deshalb Mats ganz: Er rührt mit der Gabel den Teig in der Schüssel, in der Mitte eine große Schüssel mit fertigen Haferkugeln, rechts ein Teller mit einer Banane.",
+      "Zutaten aus dem Titel (Bananen, Haferflocken) sind beide im Bild, wie es die neue Regel verlangt; dazu Gabel und Schüssel aus dem Text, der Teller ist neutral.",
+      "Die alte Nahaufnahme lebt als Schrittbild-Beispiel weiter (`beispiele/banana-oat-balls-step.scene.json`), mit den kürzeren Unterarmen."
     ],
     "missing": [
-      "Haferflocken und Kakao sind nicht einzeln zu sehen; der Teig ist eine Honig-Fläche.",
-      "Das Rollen der Kugeln mit den Händen (der Kern der Aktivität) ist nicht gezeigt, das Bild zeigt den ersten Schritt.",
-      "Die Unterarme sind lang, der rechte überdeckt eine Haferkugel ein wenig."
+      "Haferflocken und Kakao sind nicht einzeln zu sehen; der Teig ist eine Fläche.",
+      "Das Rollen der Kugeln mit den Händen (der Kern der Aktivität) ist nicht gezeigt."
     ],
     "check": [
-      "Sehen die Haferkugeln wie Haferkugeln aus oder wie Kekse oder Pralinen?",
-      "Sind die Bananen (schmale Sicheln) erkennbar?",
-      "Wirken die Hände ohne Körper befremdlich?"
+      "Sehen die Haferkugeln in der Schüssel wie Haferkugeln aus oder wie Kekse?",
+      "Liest man die Banane auf dem Teller als Banane (gebogen, mit Stiel und dunkler Spitze)?"
     ]
   }
 }

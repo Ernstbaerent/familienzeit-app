@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { kitDir } from './catalog.ts';
 import { companion, figureLimit, matsPreferredFrom, maxShare, replayCasting } from './casting.ts';
 import { checkScene, contextFromActivity, renderSceneSvg } from './scene.ts';
+import { findTitleObjects, type MaterialLabels } from './titleObjects.ts';
 import type { Catalog, Scene } from './types.ts';
 
 export type ProbeActivity = {
@@ -69,21 +70,21 @@ const kb = (svg: string): string => `${(Buffer.byteLength(svg) / 1024).toFixed(1
 const img = (path: string, width: number, alt: string): string => `<img src="${path}" width="${width}" alt="${alt}">`;
 const percent = (value: number): string => `${Math.round(value * 100)} %`;
 
-export function buildProbeFiles(catalog: Catalog, probe: { scenes: ReadonlyMap<string, ProbeScene> }, activities: ReadonlyMap<string, ProbeActivity>): ProbeFile[] {
+export function buildProbeFiles(catalog: Catalog, probe: { scenes: ReadonlyMap<string, ProbeScene> }, activities: ReadonlyMap<string, ProbeActivity>, labels?: MaterialLabels): ProbeFile[] {
   const files: ProbeFile[] = [];
   const lines: string[] = [];
   lines.push('# Probebilder: fünf Titelbilder von Hand (M9b, Schritt 3b)');
   lines.push('');
   lines.push('> **ERZEUGT** von `npm run kit:preview` aus `assets/bausteine/probe/`. Nicht von Hand ändern. Szenen und Bewertungen stehen in den `*.scene.json`, Regeln in [README.md](README.md).');
   lines.push('');
-  lines.push('Die fünf Aktivitäten aus dem Modelltest (`docs/bilder-plan.md`), von Hand aus dem Baukasten gesetzt: Kartengröße und Daumennagel (96 × 48 und 64 × 32). Die Texte stammen aus `data/`, die Bratäpfel (KI-Aktivität, nicht in `data/`) aus `assets/bausteine/probe/aktivitaeten.json`. Geprüft mit allen Regeln des Szenenprüfers, auch Sicherheit und „nichts, was der Text nicht sagt“.');
+  lines.push('Die fünf Aktivitäten aus dem Modelltest (`docs/bilder-plan.md`), von Hand aus dem Baukasten gesetzt: Kartengröße und Daumennagel (96 × 48 und 64 × 32). Die Texte stammen aus `data/`, die Bratäpfel (KI-Aktivität, nicht in `data/`) aus `assets/bausteine/probe/aktivitaeten.json`. Geprüft mit allen Regeln des Szenenprüfers, auch Sicherheit, „nichts, was der Text nicht sagt“ und (seit dem ersten Bild-Test am 18. Oktober 2026) den Titelbild-Regeln: Figur und Gegenstand, kein `hands`, kein Messer und keine Schere, jeder Gegenstand aus dem Titel im Bild. Deshalb sind die Bananen-Haferkugeln jetzt eine ganze Figur statt einer Nahaufnahme.');
   lines.push('');
   for (const [name, scene] of probe.scenes) {
     const activity = activities.get(scene.activity);
     const path = `probe/${name}.svg`;
     const svg = renderSceneSvg(scene, catalog);
     files.push({ path: `${probeDir}/${path}`, content: svg });
-    const problems = activity === undefined ? [`Aktivität „${scene.activity}“ fehlt.`] : checkScene(scene, catalog, contextFromActivity(activity));
+    const problems = activity === undefined ? [`Aktivität „${scene.activity}“ fehlt.`] : checkScene(scene, catalog, contextFromActivity(activity, labels === undefined ? undefined : findTitleObjects(activity, labels, catalog)));
     const de = activity?.translations.de;
     lines.push(`## ${de?.title ?? scene.activity}`);
     lines.push('');
@@ -91,7 +92,7 @@ export function buildProbeFiles(catalog: Catalog, probe: { scenes: ReadonlyMap<s
     lines.push('');
     lines.push(`- **Aktivität:** \`${scene.activity}\`, ${activity?.ageMin} bis ${activity?.ageMax} Jahre, Layout \`${scene.layout}\`, ${kb(svg)}`);
     lines.push(`- **Sicherheitshinweis:** ${de?.safetyNote ?? '–'}`);
-    lines.push(`- **Prüfergebnis:** ${problems.length === 0 ? 'bestanden (Layout, Rand, Ecken, Überdeckung, Haltepunkte, 14 KB, Sicherheit, Textabgleich)' : `**nicht bestanden:** ${problems.join(' ')}`}`);
+    lines.push(`- **Prüfergebnis:** ${problems.length === 0 ? 'bestanden (Layout, Rand, Ecken, Überdeckung, Haltepunkte, 14 KB, Sicherheit, Textabgleich, Titelbild-Regeln)' : `**nicht bestanden:** ${problems.join(' ')}`}`);
     lines.push(`- **Trägt:** ${scene.review.carries.join(' ')}`);
     lines.push(`- **Fehlt:** ${scene.review.missing.join(' ')}`);
     lines.push(`- **Ein Mensch prüft noch:** ${scene.review.check.join(' ')}`);

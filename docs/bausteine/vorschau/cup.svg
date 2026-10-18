@@ -2,5 +2,5 @@
 <rect width="400" height="200" fill="#FAE7E2"/>
 <circle cx="200" cy="108" r="90" fill="#FCF8F2"/>
 <path d="M56 176H344" fill="none" stroke-width="4" stroke="#12323D" stroke-linecap="round" stroke-linejoin="round"/>
-<g transform="translate(200 176) scale(1.5)" stroke="#12323D" stroke-linecap="round" stroke-linejoin="round"><path d="M-18 -36L18 -36L14 0H-14Z" fill="#FCF8F2" stroke="none" transform="translate(2 2)"/><path d="M-16.5 -18H16.5L14 0H-14Z" fill="#1A5D74" stroke="none"/><path d="M-18 -36L18 -36L14 0H-14Z" fill="none" stroke-width="2.6666666666666665"/></g>
+<g transform="translate(200 176) scale(1.5)" stroke="#12323D" stroke-linecap="round" stroke-linejoin="round"><path d="M-18 -36L18 -36L14 0H-14Z" fill="#FCF8F2" stroke="none" transform="translate(2 2)"/><path d="M-16.5 -18H16.5L14 0H-14Z" fill="#FCF8F2" stroke="none"/><path d="M-18 -36L18 -36L14 0H-14Z" fill="none" stroke-width="2.6666666666666665"/></g>
 </svg>

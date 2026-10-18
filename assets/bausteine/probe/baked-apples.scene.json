@@ -1,6 +1,7 @@
 {
   "activity": "baked-apples",
   "layout": "pair",
+  "purpose": "title",
   "items": [
     {
       "slot": "middle",

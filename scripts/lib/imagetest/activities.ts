@@ -3,13 +3,27 @@
 // nur die Spalten, die eine Szene braucht. Ein geheimer Schlüssel wird abgelehnt, bevor er benutzt wird. Es wird nichts geschrieben.
 
 import { readJson, shorten, withTimeout, type FetchLike } from '../weekly/http.ts';
-import { probeOrder, type ProbeActivity } from '../kit/probe.ts';
+import type { ProbeActivity } from '../kit/probe.ts';
 
-export const defaultIds = probeOrder;
+// Vorgabe: dieselben zehn Aktivitäten wie im ersten echten Lauf mit Haiku (18. Oktober 2026, Lauf 39105005711), in derselben Reihenfolge
+// (die Figurenwahl zählt in dieser Reihenfolge): die fünf Probeaktivitäten und die fünf KI-Aktivitäten, die damals die neuesten waren.
+// Fest als IDs, damit ein neuer Wochenlauf den Vergleich vorher/nachher nicht verschiebt.
+export const defaultIds = [
+  'baked-apples',
+  'banana-oat-balls',
+  'dance-freeze',
+  'secret-lemon-ink',
+  'puddle-explorers',
+  'autumn-salad-with-lemon',
+  'bike-slalom-with-sticks',
+  'card-tricks-for-the-family',
+  'counting-lit-windows-nearby',
+  'feely-bag-of-nature-finds',
+] as const;
 export const maxIds = 10;
-// Zusätzlich zur Liste: so viele der neuesten Aktivitäten aus dem KI-Wochenlauf (`batch_id is not null`), damit auch Aktivitäten
-// ohne Entsprechung in data/ getestet werden. Standard 3, höchstens 5, zusammen höchstens `maxIds`.
-export const defaultKi = 3;
+// Zusätzlich zur Liste: so viele der neuesten Aktivitäten aus dem KI-Wochenlauf (`batch_id is not null`), damit auch neue Aktivitäten
+// ohne Entsprechung in data/ getestet werden. Standard 0 (die Liste hat schon zehn), höchstens 5, zusammen höchstens `maxIds`.
+export const defaultKi = 0;
 export const maxKi = 5;
 
 export function parseKi(input: string | undefined): number {
@@ -32,7 +46,7 @@ export function isSecretKey(key: string): boolean {
   }
 }
 
-// Liest die IDs aus der Eingabe des Workflows (durch Komma oder Leerzeichen getrennt). Leer = die fünf aus dem Plan.
+// Liest die IDs aus der Eingabe des Workflows (durch Komma oder Leerzeichen getrennt). Leer = die zehn aus dem ersten Lauf.
 export function parseIds(input: string | undefined): string[] {
   const ids = (input ?? '').split(/[\s,]+/).map((id) => id.trim()).filter((id) => id !== '');
   const list = ids.length === 0 ? [...defaultIds] : [...new Set(ids)];

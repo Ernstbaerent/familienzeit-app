@@ -1,0 +1,4 @@
+<path d="M-14 -42C-15 -60 -4 -60 -4 -42M4 -42C4 -60 15 -60 14 -42" fill="none" stroke-width="{{line}}"/>
+<path d="M-23 0L-26 -42H26L23 0Z" fill="{{tint}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-23 0L-26 -42H26L23 0Z" fill="{{tint}}" stroke-width="{{line}}"/>
+<path d="M-22 -42C-10 -35 10 -35 22 -42" fill="none" stroke-width="{{line}}"/>

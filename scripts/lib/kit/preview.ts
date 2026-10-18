@@ -6,6 +6,8 @@ import { renderSceneSvg } from './scene.ts';
 import { containerSheets, poseSheetLabel, poseSheets, type Sheet } from './sheets.ts';
 import { renderTemplate } from '../illustrations.ts';
 import type { Catalog, LoadedBlock, Scene, TintName } from './types.ts';
+import { pet } from '../figures/cast.ts';
+import { buildPet } from '../figures/pets.ts';
 
 // Größe der Vorschau: kleine Dinge groß (1,5 wie in der Mitte von „hero“), Figuren und Möbel in Normalgröße.
 export function previewSize(block: LoadedBlock): number {
@@ -82,6 +84,40 @@ function sceneTable(files: PreviewFile[], lines: string[], folder: string, sheet
   lines.push('');
 }
 
+// Stups allein in der Mitte (für den Vergleich vorher/nachher der Pose `hop`), im selben Rahmen wie die eingefrorene alte Fassung.
+export function stupsPoseSvg(pose: 'hop' | 'stand' | 'sit'): string {
+  const style = 'stroke="{{ink}}" stroke-linecap="round" stroke-linejoin="round"';
+  return renderTemplate(
+    [
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${frame.w * 3}" height="${frame.h * 3}" viewBox="0 0 ${frame.w} ${frame.h}">`,
+      `<rect width="${frame.w}" height="${frame.h}" fill="{{ground}}"/>`,
+      `<circle cx="${backdrop.cx}" cy="${backdrop.cy}" r="${backdrop.r}" fill="{{paper}}"/>`,
+      `<path d="M56 ${baseY}H344" stroke="{{ink}}" stroke-width="4"/>`,
+      `<g ${style}>${buildPet(pet('stups').spec, pose, { x: frame.w / 2, y: baseY }).svg}</g>`,
+      '</svg>',
+    ].join(''),
+  );
+}
+
+// Der Vergleich vorher/nachher nach dem ersten Bild-Test (2026-10-18). Die alten Fassungen liegen eingefroren in vorschau/vorher/
+// (von Hand kopiert, sie entstehen nicht mehr aus dem Code); die neuen erzeugt dieser Code.
+function beforeAfter(files: PreviewFile[], lines: string[], examples: ReadonlyMap<string, Scene>): void {
+  lines.push('## Nach dem ersten Bild-Test: vorher und nachher');
+  lines.push('');
+  lines.push('Links die alte Fassung (eingefroren in `vorschau/vorher/`), rechts die neue, jeweils in Kartengröße und im Daumennagel 96 × 48.');
+  lines.push('');
+  lines.push('| Was | vorher: Karte | 96 × 48 | nachher: Karte | 96 × 48 |');
+  lines.push('| --- | --- | --- | --- | --- |');
+  const hop = 'vorschau/neu/stups-hop.svg';
+  files.push({ path: `${previewDir}/${hop}`, content: stupsPoseSvg('hop') });
+  const rows: [string, string, string][] = [['**Stups `hop`** (für Titelbilder gesperrt, bis du ihn freigibst): Rumpf fast waagerecht, Beine hängen mit Füßen, großer gefüllter Flügel statt einer Linie quer über den Rücken; der Vogel schwebt sichtbar über der Standlinie.', 'vorschau/vorher/stups-hop-vorher.svg', hop]];
+  for (const name of ['hands-stir', 'hands-cut']) {
+    if (examples.has(name)) rows.push([`**Unterarme in \`hands\`** (\`${name}\`): Tischkante 10 Einheiten tiefer, die Arme kommen steil von knapp unter dem Rand (20 statt 36 zur Seite).`, `vorschau/vorher/${name}-vorher.svg`, `vorschau/beispiele/${name}.svg`]);
+  }
+  for (const [label, before, after] of rows) lines.push(`| ${label} | ${image(before, 312, 'vorher')} | ${image(before, 96, 'vorher')} | ${image(after, 312, 'nachher')} | ${image(after, 96, 'nachher')} |`);
+  lines.push('');
+}
+
 // Alle Dateien der Vorschau: je Baustein ein SVG (Standardton), je weiterem Ton ein SVG, je Beispielszene ein SVG, und die Seite VORSCHAU.md.
 // `scenes`: Beispielszenen mit Namen (ohne Endung).
 export function buildPreviewFiles(catalog: Catalog, scenes: ReadonlyMap<string, Scene>): PreviewFile[] {
@@ -99,15 +135,17 @@ export function buildPreviewFiles(catalog: Catalog, scenes: ReadonlyMap<string, 
   if (scenes.size > 0) {
     lines.push('## Beispielszenen');
     lines.push('');
-    lines.push('Szenen aus Bausteinen und Figuren der Besetzung, geprüft mit den Regeln (Layout, Plätze, Rand, Ecken, Überdeckung, Haltepunkte, 14 KB, bei Aktivitäten auch Sicherheit und Textabgleich). Die drei `hands-…` zeigen das Layout `hands` (Nahaufnahme für Schrittbilder). Es sind keine endgültigen Titel- oder Schrittbilder.');
+    lines.push('Szenen aus Bausteinen und Figuren der Besetzung, geprüft mit den Regeln (Layout, Plätze, Rand, Ecken, Überdeckung, Haltepunkte, 14 KB, bei Aktivitäten auch Sicherheit und Textabgleich; Titelbilder zusätzlich mit den Titelbild-Regeln). Die `hands-…` und `banana-oat-balls-step` zeigen das Layout `hands` (Nahaufnahme, nur für Schrittbilder). Es sind keine endgültigen Titel- oder Schrittbilder.');
     lines.push('');
     const examples = [...scenes.entries()].map(([name, scene]) => ({ name, title: name, scene }));
-    sceneTable(files, lines, 'beispiele', examples, catalog, (sheet) => `\`${sheet.name}\` (${sheet.scene.layout})${(sheet.scene as Scene & { activity?: string }).activity === undefined ? '' : `<br>Aktivität \`${(sheet.scene as Scene & { activity?: string }).activity}\``}`);
+    sceneTable(files, lines, 'beispiele', examples, catalog, (sheet) => `\`${sheet.name}\` (${sheet.scene.layout}, ${sheet.scene.purpose === 'step' ? 'Schrittbild' : sheet.scene.purpose === 'title' ? 'Titelbild' : 'ohne Zweck'})${(sheet.scene as Scene & { activity?: string }).activity === undefined ? '' : `<br>Aktivität \`${(sheet.scene as Scene & { activity?: string }).activity}\``}`);
   }
+
+  beforeAfter(files, lines, scenes);
 
   lines.push('## Posen mit Gegenstand');
   lines.push('');
-  lines.push('Die Hand sitzt am Haltepunkt des Gegenstands (Arm mit zwei Gliedern). Erwachsene stehen in der Mitte: Nur dort bleibt ihr Kopf unter den Ecken der Kategorie-Pille. Kinder tragen kleinere Gegenstände (Größe 0,75 oder 0,6), damit ihre Arme die Ränder erreichen.');
+  lines.push('Die Hand sitzt am Haltepunkt des Gegenstands (Arm mit zwei Gliedern). Erwachsene stehen in der Mitte: Nur dort bleibt ihr Kopf unter den Ecken der Kategorie-Pille. Kinder tragen kleinere Gegenstände (Größe 0,75 oder 0,6), damit ihre Arme die Ränder erreichen. Neu nach dem ersten Bild-Test: **fährt Fahrrad** (`ride`, mit Helm) und **schaut zu** (`watch`, bei Jette und Mats).');
   lines.push('');
   sceneTable(files, lines, 'posen', poseSheets, catalog, (sheet) => `**${poseSheetLabel((sheet as (typeof poseSheets)[number]).pose)}**<br>${sheet.title}`);
 

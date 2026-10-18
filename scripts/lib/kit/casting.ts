@@ -107,9 +107,9 @@ export function addToCounts(counts: Counts, scene: Scene): Record<string, number
 // Der Rat als Text für die Anfrage an die KI.
 export function castingPrompt(advice: CastingAdvice): string {
   const lines = ['Besetzung für dieses Bild (damit nicht jede Karte dieselbe Figur zeigt):'];
-  lines.push(advice.kids.length > 0 ? `- Kind-Figur: bevorzugt ${advice.kids[0]}${advice.kids.length > 1 ? `, sonst ${advice.kids.slice(1).join(', ')}` : ''}.` : '- Keine Kind-Figur frei: zeige einen Erwachsenen, Hände oder nur Gegenstände.');
+  lines.push(advice.kids.length > 0 ? `- Kind-Figur: bevorzugt ${advice.kids[0]}${advice.kids.length > 1 ? `, sonst ${advice.kids.slice(1).join(', ')}` : ''}.` : '- Keine Kind-Figur frei: zeige einen Erwachsenen (ein Titelbild braucht eine Figur).');
   if (advice.adults.length > 0) lines.push(`- Falls ein Erwachsener ins Bild gehört: bevorzugt ${advice.adults[0]}.`);
-  if (advice.pet === 'suggested') lines.push(`- ${companion} darf als Begleiter dazukommen (sitzt, hüpft, schaut zu), wenn ein Platz frei ist.`);
+  if (advice.pet === 'suggested') lines.push(`- ${companion} darf als Begleiter dazukommen (sitzt, steht, schaut zu, zeigt), wenn ein Platz frei ist.`);
   if (advice.pet === 'forbidden') lines.push(`- ${companion} und tuepfel nicht in diesem Bild.`);
   for (const entry of advice.blocked.filter((blocked) => blocked.id !== companion)) lines.push(`- NICHT ${entry.id}: ${entry.reason}.`);
   return lines.join('\n');

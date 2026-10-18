@@ -1,3 +1,5 @@
-<path d="M-32 0L-22 -28H36L26 0Z" fill="{{tint}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
-<path d="M-32 0L-22 -28H36L26 0Z" fill="{{tint}}" stroke-width="{{line}}"/>
-<path d="M28 -28V-18H18" fill="none" stroke-width="{{fine}}"/>
+<path d="M-34 0L-22 -26L7 -26L-3 0Z" fill="{{ground}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-3 0L7 -26L38 -29L28 -3Z" fill="{{ground}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-34 0L-22 -26L7 -26L-3 0Z" fill="{{paper}}" stroke-width="{{line}}"/>
+<path d="M-3 0L7 -26L38 -29L28 -3Z" fill="{{ground}}" stroke-width="{{line}}"/>
+<path d="M0 -5L4 -20" fill="none" stroke-width="{{fine}}"/>

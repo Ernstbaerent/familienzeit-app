@@ -1,0 +1,7 @@
+<path d="M-40 0V-62H40V0Z" fill="{{tint}}" stroke="none" transform="translate({{shift}} {{shift}})"/>
+<path d="M-40 0V-62H40V0Z" fill="{{tint}}" stroke-width="{{line}}"/>
+<path d="M-46 -60L0 -98L46 -60Z" fill="{{brown}}" stroke-width="{{line}}"/>
+<rect x="-29" y="-52" width="20" height="18" fill="{{honey}}" stroke-width="{{line}}"/>
+<rect x="9" y="-52" width="20" height="18" fill="{{petrol}}" stroke-width="{{line}}"/>
+<rect x="-29" y="-26" width="20" height="18" fill="{{petrol}}" stroke-width="{{line}}"/>
+<rect x="9" y="-26" width="20" height="18" fill="{{honey}}" stroke-width="{{line}}"/>

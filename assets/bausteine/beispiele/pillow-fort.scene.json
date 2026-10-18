@@ -1,6 +1,7 @@
 {
   "activity": "pillow-fort",
   "layout": "outdoor",
+  "purpose": "title",
   "items": [
     { "slot": "s1", "block": "blanket", "tint": "petrol" },
     { "slot": "s2", "block": "chair" },

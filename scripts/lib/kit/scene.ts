@@ -12,6 +12,7 @@ import { getMaterialInfo, isMaterialKey } from '../../../src/features/activities
 import { contentFor, drawBlock, drawLoose, fillBlock, type Pose2D } from './draw.ts';
 import { renderFigure, renderHands, type FigureRender } from './figureItems.ts';
 import type { Box } from './geometry.ts';
+import type { TitleObject } from './titleObjects.ts';
 import type { Catalog, KitHazard, LoadedBlock, Person, Scene, SceneItem, TintName } from './types.ts';
 
 export { fillBlock };
@@ -57,7 +58,14 @@ export type ActivityContext = {
   // Alle Texte der Aktivität je Sprache (Titel, Kurzbeschreibung, Schritte, Hinweis), kleingeschrieben, und nur der Sicherheitshinweis.
   text: Readonly<Record<string, string>>;
   safety: Readonly<Record<string, string>>;
+  // Gegenstände, die der Titel nennt (titleObjects.ts). Nur für Titelbilder; fehlt die Angabe, prüft der Szenenprüfer das nicht.
+  titleObjects?: readonly TitleObject[];
 };
+
+// Posen, in denen sich eine Figur bewegt: Zwei Figuren so dürfen ein Titelbild ohne Gegenstand tragen (Tanzen, Hüpfen, Laufen).
+export const motionPoses: readonly string[] = ['dance', 'freeze', 'walk', 'cheer', 'happy'];
+// Stups' Pose `hop` liest sich im Daumennagel wie ein Käfer (erster Bild-Test). Gesperrt für Titelbilder, bis Clemens die Überarbeitung freigibt.
+export const hopAllowedInTitles = false;
 
 // Regen-Kleidung der Figuren (Jacke und Gummistiefel) braucht wie jeder Gegenstand Deckung im Text.
 export const rainOutfitCover = {
@@ -66,6 +74,12 @@ export const rainOutfitCover = {
     de: ['regenjacke', 'regenmantel', 'gummistiefel', 'matschhose', 'regensachen', 'regenkleidung'],
     en: ['rain jacket', 'raincoat', 'rain boots', 'rubber boots', 'wellies', 'rain gear'],
   },
+} as const;
+
+// Der Fahrradhelm gehört zum Material „Fahrrad und Helm“ und braucht wie jeder Gegenstand Deckung im Text.
+export const helmetCover = {
+  materials: ['bike'],
+  terms: { de: ['helm'], en: ['helmet'] },
 } as const;
 
 export function surfaceY(catalog: Catalog): number | undefined {
@@ -156,8 +170,15 @@ const isPetrol = (block: LoadedBlock, tint: TintName | undefined): boolean => ti
 const figuresOf = (placements: readonly Placement[]): FigureRender[] => placements.flatMap((placement) => (placement.figure === undefined ? [] : [placement.figure]));
 
 const hasTerm = (text: string, terms: readonly string[]) => terms.some((term) => text.includes(term.toLowerCase()));
-const covered = (cover: { materials: readonly string[]; terms: Readonly<Record<string, readonly string[]>> }, activity: ActivityContext): boolean =>
-  cover.materials.some((key) => activity.materials.includes(key)) || Object.entries(cover.terms).some(([language, terms]) => hasTerm(activity.text[language] ?? '', terms));
+type Cover = { materials: readonly string[]; terms: Readonly<Record<string, readonly string[]>>; excludeTerms?: Readonly<Record<string, readonly string[]>> };
+// Gedeckt über Material oder Begriff. `excludeTerms` werden vorher aus dem Text entfernt („Papiertüte“ deckt nicht das Blatt Papier).
+const covered = (cover: Cover, activity: ActivityContext): boolean =>
+  cover.materials.some((key) => activity.materials.includes(key)) ||
+  Object.entries(cover.terms).some(([language, terms]) => {
+    let text = activity.text[language] ?? '';
+    for (const term of cover.excludeTerms?.[language] ?? []) text = text.split(term.toLowerCase()).join(' ');
+    return hasTerm(text, terms);
+  });
 
 const personLabel: Record<Person, string> = { adult: 'Erwachsene', teen: 'ältere Kind', child: 'Kind', toddler: 'Kleinkind' };
 
@@ -236,6 +257,17 @@ export function checkAgainstActivity(placements: readonly Placement[], activity:
     // (ein Teller mit heißem Inhalt oder mit Kleinteilen ist nicht mehr neutral). Inhalte sind nie neutral.
     if (!(block.neutral && hazards.length === 0) && !covered(block, activity)) problems.push(notCovered(block.id));
     if (thing.content !== undefined && !covered(thing.content, activity)) problems.push(notCovered(thing.content.id));
+    // Der Ton zeigt den Inhalt (Becher: Petrol = Wasser, Honig = Zitronensaft): Auch der Inhalt braucht Deckung im Text.
+    const liquid = thing.tint === undefined ? undefined : block.liquids?.[thing.tint];
+    if (liquid !== undefined && !covered(liquid, activity)) {
+      problems.push(`„${block.id}“ in „${thing.tint}“ zeigt ${liquid.label.de}, aber der Text nennt es nicht (Wasser ist Petrol, Zitronensaft Honig, ein leerer Becher Leinen).`);
+    }
+    // Papier ist nie die Tüte oder der Beutel: Nennt der Text eine Tüte, braucht das Bild die Tüte (oder den Beutel) selbst.
+    if (block.notFor !== undefined) {
+      const named = Object.entries(block.notFor).some(([language, words]) => language !== 'use' && hasTerm(activity.text[language] ?? '', words));
+      const shown = things.some((other) => block.notFor?.use.includes(other.block.id) === true);
+      if (named && !shown) problems.push(`„${block.id}“ ist ein flaches Blatt, keine Tüte und kein Beutel: Für Tüte oder Beutel ${block.notFor.use.join(' oder ')} nehmen.`);
+    }
     for (const hazard of hazards) {
       if (hazard === 'sharp') {
         // Scharfes nur in der Hand eines Erwachsenen (Ausnahme: Kinderschere, siehe kidSharpProblems).
@@ -263,6 +295,7 @@ export function checkAgainstActivity(placements: readonly Placement[], activity:
 
   // Kleidung und Handschuhe der Figuren: auch sie zeigen nur, was der Text sagt.
   if (figures.some((figure) => figure.outfit) && !covered(rainOutfitCover, activity)) problems.push('Regen-Kleidung (Jacke, Gummistiefel) ist im Text der Aktivität nicht gedeckt.');
+  if (placements.some((p) => p.item.helmet !== undefined) && !covered(helmetCover, activity)) problems.push('Der Fahrradhelm ist im Text der Aktivität nicht gedeckt (Material „bike“ oder „Helm“).');
   const mitt = catalog?.get('oven-mitt');
   if (figures.some((figure) => figure.mitts) && mitt !== undefined && !covered(mitt, activity)) problems.push(notCovered('oven-mitt'));
 
@@ -272,6 +305,61 @@ export function checkAgainstActivity(placements: readonly Placement[], activity:
     if (figure.person === 'toddler' && activity.ageMin > 2) problems.push('Ein Kleinkind im Bild, aber die Aktivität beginnt erst ab 3 Jahren.');
   }
   return [...new Set(problems)];
+}
+
+// Welche Materialien das Bild zeigt: über die Bausteine (auch gehaltene und Inhalte), den Ton (Becher mit Wasser) und die Figuren
+// (Ofenhandschuhe zeigen den Ofen, Regen-Kleidung Regenjacke und Gummistiefel).
+export function shownMaterials(placements: readonly Placement[], catalog?: Catalog): Set<string> {
+  const shown = new Set<string>();
+  for (const thing of thingsOf(placements)) {
+    for (const key of thing.block.materials) shown.add(key);
+    for (const key of thing.content?.materials ?? []) shown.add(key);
+    const liquid = thing.tint === undefined ? undefined : thing.block.liquids?.[thing.tint];
+    for (const key of liquid?.materials ?? []) shown.add(key);
+  }
+  for (const figure of figuresOf(placements)) {
+    if (figure.mitts) for (const key of catalog?.get('oven-mitt')?.materials ?? []) shown.add(key);
+    if (figure.outfit) for (const key of rainOutfitCover.materials) shown.add(key);
+  }
+  return shown;
+}
+
+// Regeln nur für Titelbilder (Entscheidung von Clemens nach dem ersten Bild-Test, 2026-10-18):
+// kein Layout `hands` (nur Schrittbilder), mindestens eine Figur der Besetzung (ein Mensch; Tiere kommen nur dazu), ein erkennbarer Gegenstand
+// (Ausnahme: zwei Figuren in Bewegung, wenn die Aktivität keinen Gegenstand mit Baustein hat), kein Messer und keine Schere,
+// Stups nicht in der Pose `hop`, und jeder Gegenstand aus dem Titel steht im Bild.
+export function titleProblems(scene: Scene, placements: readonly Placement[], activity: ActivityContext | undefined, catalog: Catalog): string[] {
+  const problems: string[] = [];
+  if (scene.layout === 'hands') problems.push('Das Layout „hands“ (Hände ohne Figur) gibt es nur für Schrittbilder, nicht für Titelbilder.');
+  const figures = figuresOf(placements).filter((figure) => figure.person !== undefined && placements.some((p) => p.figure === figure && p.block === undefined));
+  if (figures.length === 0) problems.push('Ein Titelbild braucht mindestens eine Figur der Besetzung (jette, mats, nolli, ilka oder arne); stups und tuepfel kommen nur dazu.');
+  const things = thingsOf(placements);
+  const objects = things.filter((thing) => !thing.block.neutral || thing.content !== undefined);
+  if (objects.length === 0) {
+    const moving = placements.filter((p) => p.figure?.person !== undefined && p.block === undefined && motionPoses.includes(p.item.pose ?? 'stand')).length;
+    const kitHasObject = activity !== undefined && activity.materials.some((key) => [...catalog.values()].some((block) => !block.neutral && block.kind !== 'ground' && block.materials.includes(key)));
+    if (moving < 2 || kitHasObject) {
+      problems.push(
+        kitHasObject
+          ? 'Ein Titelbild braucht einen erkennbaren Gegenstand der Aktivität (der Baukasten hat einen für ihr Material).'
+          : 'Ein Titelbild braucht einen erkennbaren Gegenstand; ohne Gegenstand nur zwei Figuren in Bewegung (dance, freeze, walk, cheer, happy).',
+      );
+    }
+  }
+  for (const thing of things) {
+    if (hazardsOf(thing).includes('sharp')) problems.push(`„${thing.block.id}“: Messer und Scheren gehören nur in Schrittbilder. Ein Titelbild zeigt stattdessen die Zutat, das Ergebnis oder den Ort.`);
+  }
+  if (!hopAllowedInTitles && placements.some((p) => p.item.figure === 'stups' && p.item.pose === 'hop')) {
+    problems.push('Stups in der Pose „hop“ ist für Titelbilder gesperrt (wirkt im Daumennagel wie ein Käfer): sit, stand, watch oder point nehmen.');
+  }
+  if (activity?.titleObjects !== undefined) {
+    const shown = shownMaterials(placements, catalog);
+    for (const object of activity.titleObjects) {
+      if (object.blocks.length === 0) problems.push(`Der Titel nennt „${object.label.de}“, dafür gibt es keinen Baustein: kein Titelbild möglich (fehlender Baustein „${object.label.de}“).`);
+      else if (!shown.has(object.key)) problems.push(`Der Titel nennt „${object.label.de}“, aber das Bild zeigt es nicht (Bausteine: ${object.blocks.join(', ')}). Ohne ihn wäre der Titel falsch.`);
+    }
+  }
+  return problems;
 }
 
 // Alle Probleme einer Szene als Sätze, leer = in Ordnung. Mit `activity` auch die Sicherheitsregeln und der Textabgleich.
@@ -295,6 +383,7 @@ export function checkScene(scene: Scene, catalog: Catalog, activity?: ActivityCo
       if (slot !== undefined && !slot.kinds.includes('figure')) problems.push(`Eine Figur passt nicht auf den Platz „${item.slot}“ (erlaubt: ${slot.kinds.join(', ')}).`);
       if (item.size !== undefined && item.size !== 1) problems.push('Figuren haben immer Größe 1 (ihre Maße stehen in der Besetzung).');
       if (item.tint !== undefined || item.content !== undefined || item.hands !== undefined) problems.push(`Figur „${item.figure}“: \`tint\`, \`content\` und \`hands\` gibt es nur bei Bausteinen.`);
+      if (item.helmet !== undefined && !['rose', 'petrol', 'honey'].includes(item.helmet)) problems.push(`Helm in „${item.helmet}“ gibt es nicht (rose, petrol, honey).`);
       continue;
     }
     const block = catalog.get(item.block as string);
@@ -307,7 +396,7 @@ export function checkScene(scene: Scene, catalog: Catalog, activity?: ActivityCo
     const looseOnTable = block.kind === 'content' && block.loose === true && (slot?.y === 'surface' || (scene.layout === 'hands' && item.slot !== 'object'));
     if (block.kind === 'content' && !looseOnTable) problems.push(`„${block.id}“ ist ein Inhalt und steht nur in einem Behälter (\`content\`)${block.loose === true ? ' oder lose auf der Tischplatte (`on1` bis `on3`, im Layout `hands` links und rechts)' : ''}.`);
     if (looseOnTable && (item.content !== undefined || item.hot !== undefined || item.hands !== undefined)) problems.push(`„${block.id}“ liegt lose: \`content\`, \`hot\` und \`hands\` gibt es dafür nicht.`);
-    if (item.holds !== undefined || item.pose !== undefined || item.mitts !== undefined || item.outfit !== undefined) problems.push(`Baustein „${block.id}“: \`pose\`, \`holds\`, \`mitts\` und \`outfit\` gibt es nur bei Figuren.`);
+    if (item.holds !== undefined || item.pose !== undefined || item.mitts !== undefined || item.outfit !== undefined || item.helmet !== undefined) problems.push(`Baustein „${block.id}“: \`pose\`, \`holds\`, \`mitts\`, \`outfit\` und \`helmet\` gibt es nur bei Figuren.`);
     if (item.hands !== undefined && scene.layout !== 'hands') problems.push('Hände (`hands`) gibt es nur im Layout „hands“.');
     if (slot === undefined) continue;
     if (block.kind !== 'content' && block.kind !== 'ground' && !slot.kinds.includes(block.kind)) problems.push(`„${block.id}“ (${block.kind}) passt nicht auf den Platz „${item.slot}“ (erlaubt: ${slot.kinds.join(', ')}).`);
@@ -317,11 +406,16 @@ export function checkScene(scene: Scene, catalog: Catalog, activity?: ActivityCo
   if (scene.layout === 'table' && !scene.items.some((item) => item.slot === 'table')) problems.push('Das Layout „table“ braucht einen Tisch auf dem Platz „table“.');
   if (scene.layout === 'table' && surfaceY(catalog) === undefined) problems.push('Der Tisch im Katalog hat keine Tischplatte (`surface`).');
   if (scene.layout === 'hands' && !scene.items.some((item) => item.hands !== undefined)) problems.push('Das Layout „hands“ braucht Hände (`hands`) an einem Gegenstand.');
+  if (scene.purpose === 'title' && scene.layout === 'hands') problems.push('Das Layout „hands“ (Hände ohne Figur) gibt es nur für Schrittbilder, nicht für Titelbilder.');
+  if (scene.purpose !== undefined && scene.purpose !== 'title' && scene.purpose !== 'step') problems.push(`Unbekannter Zweck „${String(scene.purpose)}“ (title oder step).`);
   if (problems.length > 0) return problems;
 
   const placements = placeItems(scene, catalog);
   if (placements === null) return ['Szene nicht lesbar.'];
   for (const placement of placements) problems.push(...placement.problems);
+  for (const placement of placements) {
+    if (placement.item.pose === 'ride' && placement.item.helmet === undefined) problems.push(`„${placement.item.figure}“ fährt Fahrrad ohne Helm: In der Pose „ride“ trägt jede Figur einen Helm (\`helmet\`).`);
+  }
 
   // Maße: im Rand, nicht in den Ecken der Pille, nicht übereinander
   const ground = layout.groundY ?? baseY;
@@ -357,6 +451,7 @@ export function checkScene(scene: Scene, catalog: Catalog, activity?: ActivityCo
     }
   }
   if (activity !== undefined) problems.push(...checkAgainstActivity(placements, activity, catalog));
+  if (scene.purpose === 'title') problems.push(...titleProblems(scene, placements, activity, catalog));
   if (problems.length === 0) {
     const bytes = Buffer.byteLength(renderSceneSvg(scene, catalog));
     if (bytes > maxSceneBytes) problems.push(`Das Bild hat ${(bytes / 1024).toFixed(1)} KB, erlaubt sind höchstens ${maxSceneBytes / 1024} KB. Bitte melden, nichts still weglassen.`);
@@ -403,17 +498,21 @@ export function renderSceneSvg(scene: Scene, catalog: Catalog): string {
 }
 
 // Aus einer Aktivität den Kontext für den Abgleich machen (alle Texte kleingeschrieben).
-export function contextFromActivity(activity: {
-  materials: readonly string[];
-  ageMin: number;
-  ageMax: number;
-  translations: Readonly<Record<string, { title: string; summary: string; steps: readonly string[]; safetyNote?: string }>>;
-}): ActivityContext {
+// `titleObjects`: die Gegenstände aus dem Titel (titleObjects.ts, `findTitleObjects`), nur für Titelbilder nötig.
+export function contextFromActivity(
+  activity: {
+    materials: readonly string[];
+    ageMin: number;
+    ageMax: number;
+    translations: Readonly<Record<string, { title: string; summary: string; steps: readonly string[]; safetyNote?: string }>>;
+  },
+  titleObjects?: readonly TitleObject[],
+): ActivityContext {
   const text: Record<string, string> = {};
   const safety: Record<string, string> = {};
   for (const [language, entry] of Object.entries(activity.translations)) {
     text[language] = [entry.title, entry.summary, ...entry.steps, entry.safetyNote ?? ''].join(' ').toLowerCase();
     safety[language] = entry.safetyNote ?? '';
   }
-  return { materials: activity.materials, ageMin: activity.ageMin, ageMax: activity.ageMax, text, safety };
+  return { materials: activity.materials, ageMin: activity.ageMin, ageMax: activity.ageMax, text, safety, ...(titleObjects === undefined ? {} : { titleObjects }) };
 }

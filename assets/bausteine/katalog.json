@@ -555,20 +555,14 @@
       "group": "basteln",
       "kind": "object",
       "label": {
-        "de": "Papier",
-        "en": "paper sheet"
+        "de": "Papier (ein flaches Blatt, nie Tüte oder Beutel)",
+        "en": "paper sheet (flat, never a bag)"
       },
       "box": {
-        "x0": -34,
-        "x1": 39,
-        "h": 30
+        "x0": -36,
+        "x1": 41,
+        "h": 31
       },
-      "tints": [
-        "paper",
-        "rose",
-        "honey"
-      ],
-      "defaultTint": "paper",
       "hazards": [],
       "materials": [
         "paper"
@@ -583,7 +577,49 @@
           "sheet"
         ]
       },
-      "neutral": false
+      "neutral": false,
+      "excludeTerms": {
+        "de": [
+          "papiertüte",
+          "papiertuete",
+          "papiersack",
+          "papierbeutel",
+          "papiertuch",
+          "papiertücher",
+          "küchenpapier",
+          "toilettenpapier",
+          "papierteller",
+          "papierbecher"
+        ],
+        "en": [
+          "paper bag",
+          "paper sack",
+          "paper towel",
+          "kitchen paper",
+          "toilet paper",
+          "paper plate",
+          "paper cup"
+        ]
+      },
+      "notFor": {
+        "de": [
+          "tüte",
+          "tuete",
+          "beutel",
+          "säckchen",
+          "saeckchen",
+          "sack"
+        ],
+        "en": [
+          "bag",
+          "sack",
+          "pouch"
+        ],
+        "use": [
+          "cloth-bag",
+          "paper-bag"
+        ]
+      }
     },
     {
       "id": "sock",
@@ -625,8 +661,8 @@
       "group": "experiment",
       "kind": "object",
       "label": {
-        "de": "Becher",
-        "en": "cup"
+        "de": "Becher oder Glas (Ton = Inhalt)",
+        "en": "cup or glass (tint = contents)"
       },
       "box": {
         "x0": -20,
@@ -636,9 +672,9 @@
       "tints": [
         "petrol",
         "honey",
-        "rose"
+        "paper"
       ],
-      "defaultTint": "petrol",
+      "defaultTint": "paper",
       "hazards": [],
       "materials": [
         "plasticCup"
@@ -653,7 +689,49 @@
           "glass"
         ]
       },
-      "neutral": false
+      "neutral": false,
+      "liquids": {
+        "petrol": {
+          "label": {
+            "de": "Wasser",
+            "en": "water"
+          },
+          "materials": [
+            "water",
+            "tapWater",
+            "sparklingWater"
+          ],
+          "terms": {
+            "de": [
+              "wasser"
+            ],
+            "en": [
+              "water"
+            ]
+          }
+        },
+        "honey": {
+          "label": {
+            "de": "Zitronensaft oder Saft",
+            "en": "lemon juice or juice"
+          },
+          "materials": [
+            "lemon"
+          ],
+          "terms": {
+            "de": [
+              "zitronensaft",
+              "saft",
+              "zitrone"
+            ],
+            "en": [
+              "lemon juice",
+              "juice",
+              "lemon"
+            ]
+          }
+        }
+      }
     },
     {
       "id": "bottle",
@@ -1115,9 +1193,9 @@
         "en": "cotton swab"
       },
       "box": {
-        "x0": -26,
-        "x1": 26,
-        "h": 10
+        "x0": -28,
+        "x1": 34,
+        "h": 13
       },
       "hazards": [],
       "materials": [
@@ -1135,12 +1213,12 @@
       "neutral": false,
       "grips": {
         "handle": [
-          -6,
-          -4
+          -10,
+          -5
         ],
         "tip": [
-          19,
-          -4
+          24,
+          -5
         ]
       }
     },
@@ -1442,7 +1520,8 @@
         "basket",
         "bowl",
         "plate",
-        "tray"
+        "tray",
+        "paper-bag"
       ]
     },
     {
@@ -1454,9 +1533,9 @@
         "en": "bananas"
       },
       "box": {
-        "x0": -19,
-        "x1": 21,
-        "h": 26
+        "x0": -20,
+        "x1": 23,
+        "h": 24
       },
       "hazards": [],
       "materials": [
@@ -1576,7 +1655,9 @@
         "basket",
         "bucket",
         "tray",
-        "bowl"
+        "bowl",
+        "cloth-bag",
+        "paper-bag"
       ],
       "tints": [
         "honey",
@@ -1617,7 +1698,286 @@
         "basket",
         "bucket",
         "bowl",
-        "tray"
+        "tray",
+        "cloth-bag",
+        "paper-bag"
+      ],
+      "loose": true
+    },
+    {
+      "id": "cloth-bag",
+      "group": "basteln",
+      "kind": "object",
+      "label": {
+        "de": "Stofftasche (Beutel)",
+        "en": "cloth bag"
+      },
+      "box": {
+        "x0": -28,
+        "x1": 29,
+        "h": 62
+      },
+      "tints": [
+        "rose",
+        "petrol",
+        "honey",
+        "paper"
+      ],
+      "defaultTint": "rose",
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [
+          "stoffbeutel",
+          "stofftasche",
+          "jutebeutel",
+          "turnbeutel",
+          "beutel",
+          "säckchen",
+          "saeckchen",
+          "stoffsack"
+        ],
+        "en": [
+          "cloth bag",
+          "fabric bag",
+          "tote",
+          "drawstring bag",
+          "bag",
+          "sack",
+          "pouch"
+        ]
+      },
+      "neutral": false,
+      "grips": {
+        "handle": [
+          -9,
+          -57
+        ]
+      },
+      "container": {
+        "kind": "deep",
+        "cx": 0,
+        "cy": -39,
+        "rx": 20,
+        "ry": 3
+      }
+    },
+    {
+      "id": "paper-bag",
+      "group": "basteln",
+      "kind": "object",
+      "label": {
+        "de": "Papiertüte",
+        "en": "paper bag"
+      },
+      "box": {
+        "x0": -24,
+        "x1": 25,
+        "h": 49
+      },
+      "hazards": [],
+      "materials": [
+        "paperBag"
+      ],
+      "terms": {
+        "de": [
+          "papiertüte",
+          "papiertuete",
+          "tüte",
+          "tuete",
+          "papiersack"
+        ],
+        "en": [
+          "paper bag",
+          "paper sack",
+          "bag"
+        ]
+      },
+      "neutral": false,
+      "grips": {
+        "handle": [
+          0,
+          -46
+        ]
+      },
+      "container": {
+        "kind": "deep",
+        "cx": 0,
+        "cy": -44,
+        "rx": 18,
+        "ry": 3
+      }
+    },
+    {
+      "id": "playing-cards",
+      "group": "basteln",
+      "kind": "object",
+      "label": {
+        "de": "Spielkarten (Fächer, ohne Zeichen)",
+        "en": "playing cards (fan, no symbols)"
+      },
+      "box": {
+        "x0": -22,
+        "x1": 23,
+        "h": 37
+      },
+      "tints": [
+        "rose",
+        "petrol",
+        "honey"
+      ],
+      "defaultTint": "rose",
+      "hazards": [],
+      "materials": [
+        "playingCards"
+      ],
+      "terms": {
+        "de": [
+          "spielkarte",
+          "kartenspiel",
+          "kartentrick",
+          "karten"
+        ],
+        "en": [
+          "playing card",
+          "card trick",
+          "deck of cards",
+          "cards"
+        ]
+      },
+      "neutral": false,
+      "grips": {
+        "under": [
+          0,
+          -2
+        ]
+      }
+    },
+    {
+      "id": "bike",
+      "group": "natur",
+      "kind": "object",
+      "label": {
+        "de": "Fahrrad (von der Seite)",
+        "en": "bicycle (side view)"
+      },
+      "box": {
+        "x0": -48,
+        "x1": 50,
+        "h": 56
+      },
+      "tints": [
+        "rose",
+        "petrol",
+        "honey"
+      ],
+      "defaultTint": "rose",
+      "hazards": [],
+      "materials": [
+        "bike"
+      ],
+      "terms": {
+        "de": [
+          "fahrrad",
+          "rad fahren",
+          "radfahren",
+          "laufrad"
+        ],
+        "en": [
+          "bike",
+          "bicycle",
+          "cycling"
+        ]
+      },
+      "neutral": false,
+      "grips": {
+        "handlebar": [
+          24,
+          -54
+        ],
+        "saddle": [
+          -10,
+          -51
+        ],
+        "pedal": [
+          -2,
+          -17
+        ]
+      }
+    },
+    {
+      "id": "house-windows",
+      "group": "natur",
+      "kind": "object",
+      "label": {
+        "de": "Hauswand mit Fenstern (zwei erleuchtet)",
+        "en": "house with windows (two lit)"
+      },
+      "box": {
+        "x0": -48,
+        "x1": 48,
+        "h": 100
+      },
+      "tints": [
+        "paper",
+        "rose"
+      ],
+      "defaultTint": "paper",
+      "hazards": [],
+      "materials": [],
+      "terms": {
+        "de": [
+          "fenster",
+          "beleuchtet",
+          "erleuchtet",
+          "lichter"
+        ],
+        "en": [
+          "window",
+          "lit",
+          "lights"
+        ]
+      },
+      "neutral": false
+    },
+    {
+      "id": "vegetables",
+      "group": "inhalt",
+      "kind": "content",
+      "label": {
+        "de": "Gemüse (Möhren)",
+        "en": "vegetables (carrots)"
+      },
+      "box": {
+        "x0": -8,
+        "x1": 8,
+        "h": 26
+      },
+      "hazards": [],
+      "materials": [
+        "vegetables"
+      ],
+      "terms": {
+        "de": [
+          "gemüse",
+          "gemuese",
+          "möhre",
+          "karotte",
+          "salat"
+        ],
+        "en": [
+          "vegetable",
+          "carrot",
+          "salad"
+        ]
+      },
+      "neutral": false,
+      "fits": [
+        "bowl",
+        "basket",
+        "plate",
+        "tray",
+        "paper-bag"
       ],
       "loose": true
     }

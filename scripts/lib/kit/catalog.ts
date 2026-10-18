@@ -14,7 +14,7 @@ export const kitDir = 'assets/bausteine';
 
 export const tintNames: readonly TintName[] = ['paper', 'rose', 'petrol', 'honey', 'brown'];
 export const hazardNames: readonly KitHazard[] = ['sharp', 'heat', 'goggles', 'smallParts', 'water'];
-export const gripNames: readonly GripName[] = ['handle', 'tip', 'left', 'right', 'under'];
+export const gripNames: readonly GripName[] = ['handle', 'tip', 'left', 'right', 'under', 'handlebar', 'saddle', 'pedal'];
 // Neutrale Gegenstände (Entscheidung von Clemens, 2026-10-17): Sie dürfen im Bild stehen, auch wenn der Text sie nicht nennt,
 // weil sie nichts Sicherheitsrelevantes ändern. Nur diese (dazu die Standlinie); eine Erweiterung entscheidet Clemens.
 // Nie neutral: alles, was scharf, heiß, elektrisch oder klein ist, und kein Inhalt.
@@ -152,6 +152,11 @@ export function checkBlock(block: LoadedBlock): string[] {
   if (block.loose === true && block.fill === true) fail('Eine Fläche (`fill`) kann nicht lose liegen.');
   if (block.kidSafe === true && !block.hazards.includes('sharp')) fail('`kidSafe` gibt es nur bei scharfen Dingen (Kinderschere).');
   if (block.kidSafe === true && (block.kidTerms === undefined || block.kidTerms.de.length === 0 || block.kidTerms.en.length === 0)) fail('`kidSafe` braucht `kidTerms` in Deutsch und Englisch (der Text muss sie nennen).');
+  for (const [tint, liquid] of Object.entries(block.liquids ?? {})) {
+    if (!(block.tints ?? []).includes(tint as TintName)) fail(`\`liquids\`: Ton „${tint}“ steht nicht in \`tints\`.`);
+    if (liquid !== undefined && liquid.materials.length === 0 && (liquid.terms.de.length === 0 || liquid.terms.en.length === 0)) fail(`\`liquids.${tint}\` braucht Material oder Begriffe in Deutsch und Englisch.`);
+  }
+  if (block.notFor !== undefined && (block.notFor.use.length === 0 || block.notFor.de.length === 0 || block.notFor.en.length === 0)) fail('`notFor` braucht Wörter in Deutsch und Englisch und Ersatz-Bausteine (`use`).');
   if (block.surface !== undefined && block.kind !== 'furniture') fail('`surface` gibt es nur bei Möbeln (Tisch).');
   if (block.neutral) {
     if (!neutralBlockIds.includes(block.id)) fail(`Neutral dürfen nur ${neutralBlockIds.join(', ')} sein (Entscheidung von Clemens).`);
@@ -174,6 +179,7 @@ export function checkCatalog(catalog: Catalog): string[] {
   const table = catalog.get('table');
   if (table !== undefined && table.surface === undefined) problems.push('table: `surface` (Höhe der Tischplatte) fehlt.');
   for (const block of catalog.values()) {
+    for (const id of block.notFor?.use ?? []) if (!catalog.has(id)) problems.push(`${block.id}: „${id}“ in \`notFor.use\` gibt es nicht.`);
     for (const id of block.fits ?? []) {
       const container = catalog.get(id);
       if (container?.container === undefined) problems.push(`${block.id}: „${id}“ in \`fits\` ist kein Behälter.`);
