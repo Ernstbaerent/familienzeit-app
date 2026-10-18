@@ -68,7 +68,7 @@ Bilder (seit Zusatz 45)
 
 Es gibt keine Stock-Fotos mehr. Bilder werden selbst gezeichnet (SVG), die Regeln dafür stehen in docs/design/ILLUSTRATIONEN.md (Format, Linie, Farben, Figuren, Sicherheit). Vor der Beta schaut ein Mensch einmal alle Illustrationen durch (wie bei den Aktivitäten).
 
-Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse (nur von unserem eigenen Speicher, Zusatz 35). Im Bildbereich der Karte und der Detailansicht gilt dieser Vorrang: 1. image der Aktivität, 2. Illustration der Aktivität (src/features/activities/illustrations.ts), 3. Farbfläche mit Symbol (Entscheidung 21, geändert durch Zusatz 45). Die Illustrationen für alle Aktivitäten entstehen in M9b.
+Das Datenmodell der Aktivität hat ein freiwilliges Bildfeld (image), es bleibt eine Web-Adresse (nur von unserem eigenen Speicher, Zusatz 35). Im Bildbereich der Karte und der Detailansicht gilt dieser Vorrang: 1. image der Aktivität, 2. Illustration der Aktivität (src/features/activities/illustrations.ts), 3. Farbfläche mit Symbol (Entscheidung 21, geändert durch Zusatz 45). Die Illustrationen für alle Aktivitäten entstehen in M9b. **Geändert mit M9b (Beschluss von Clemens, 15. Oktober 2026, umgesetzt am 18. Oktober 2026):** Gebündelte Illustrationen entfallen, alle Bilder kommen aus Supabase Storage. Der Vorrang ist jetzt 1. image der Aktivität, 2. Farbfläche mit Symbol; Schrittbilder kommen aus der Spalte step_images (docs/design/ILLUSTRATIONEN.md, docs/supabase.md).
 
 Logo A1 „Zwei Bögen"
 

@@ -1,28 +1,98 @@
 # M9b: Bilder für alle Aktivitäten (Plan und Beschlüsse)
 
-Stand: 15. Oktober 2026. Das ist der **beschlossene Plan**, kein fertiger Zustand. Gebaut ist bisher: der Baukasten Stufe 1 (`docs/bausteine/`, dieser Pull Request) und der erste Test der Lieferung (`docs/supabase.md`, „Bilder: erster Test der Lieferung“, eigener Pull Request).
+Stand: 18. Oktober 2026. Das ist der **beschlossene Plan**, kein fertiger Zustand. Gebaut sind: der Baukasten (`docs/bausteine/`), der Bild-Test und die **vollständige Lieferung** (Migration 0006, Schrittbilder in der App, gebündelte Zeichnungen entfernt; `docs/supabase.md`, „Bilder: Lieferung einrichten“). Noch nicht gebaut: der Bilder-Lauf (Teil B, eigener Pull Request nach der Lieferung).
 Alle Zahlen zu Kosten und Datenverkehr sind **Rechnungen aus Token-Mengen und Dateigrößen, nicht gemessen**.
 
 ## Beschlüsse (Clemens, 2026-10-15)
 
-1. **Hybrid mit Entscheidungsregel.** Nach dem Modelltest (unten) gilt: Sind mindestens **4 von 5 Bildern tragfähig**, zeichnet die **API** auch den Startbestand (die 104 Aktivitäten aus `data/`), und Clemens prüft nur die gerenderten Vorschauen. Sonst zeichnet Claude Code den Startbestand in Sitzungen (Pakete, siehe unten).
-2. **Gebündelte Zeichnungen entfallen.** Alle Bilder kommen aus Supabase Storage; die sechs Pilot-Zeichnungen wandern in dasselbe System. Offen unter „Entscheidungen vor M12“ (CLAUDE.md, Punkt 8): Offline-Start mit gebündelten Titelbildern der 104 Aktivitäten neu entscheiden.
+1. ~~**Hybrid mit Entscheidungsregel** (4 von 5 tragfähig → API, sonst Claude Code in Paketen).~~ **Entschieden (Clemens, 18. Oktober 2026):** Der zweite Bild-Test hat tragfähige Titelbilder gezeigt (Fahrrad-Slalom, Pfützen-Forscher, Fensterlichter, Tastsäckchen, Tanz-Freeze). Die **API (Haiku) zeichnet** den Startbestand und alle neuen Aktivitäten im täglichen Bilder-Lauf; die Pakete unten entfallen.
+2. **Gebündelte Zeichnungen entfallen** (umgesetzt am 18. Oktober 2026). Alle Bilder kommen aus Supabase Storage. Die sechs Pilot-Zeichnungen werden **nicht** hochgeladen (alter Stil mit Strichfiguren): Der Bilder-Lauf zeichnet die drei Titelbilder neu, die drei Schrittbilder vom Sockenpuppen-Theater kommen mit den Schrittbildern (Entscheidung von Clemens). Offen unter „Entscheidungen vor M12“ (CLAUDE.md, Punkt 8): Offline-Start mit gebündelten Titelbildern neu entscheiden.
 3. **Natron-Vulkan:** Der Sicherheitshinweis nennt „Schutzbrille oder normale Brille“ (de/en), die Brille bleibt im Bild (erledigt).
 4. **Schrittbilder** erst nach den Titelbildern. Priorität: Basteln und Experimente. Das Sockenpuppen-Theater ist gesetzt. Die Liste (20 bis 30 Aktivitäten) legt Claude Code nach den Titelbildern vor.
 5. Die etwa **15 KI-Aktivitäten** laufen über den Bilder-Lauf (sie stehen nur in der Datenbank).
 6. **Ein Pull Request je Paket**, dazu je einer für Baukasten, Lieferung und Automatik.
-7. **`IMAGES_AUTO_ATTACH=false` nur für die ersten zwei Läufe**, dann an (Clemens löscht die Variable nach dem zweiten Lauf).
+7. ~~`IMAGES_AUTO_ATTACH=false` nur für die ersten zwei Läufe.~~ **Geändert (Clemens, 18. Oktober 2026):** Clemens sieht die Titelbilder **in der App** durch, nicht vorher in Kontaktbögen. Der Bilder-Lauf **hängt automatisch an**, was alle drei Prüfungen besteht (Regeln, Bindung an den Text, Rückfrage mit dem PNG mit dem Urteil `ok`); `IMAGES_AUTO_ATTACH` ist von Anfang an an. **Sanfter Anlauf:** höchstens 25 Aktivitäten je Lauf (`IMAGES_MAX_PER_RUN`), täglich; der Startbestand verteilt sich so auf etwa fünf Tage, und ein systematischer Fehler fällt auf, bevor er alle trifft. **Qualitätsbremse:** Besteht weniger als die Hälfte der gezeichneten Bilder eines Laufs, hängt er nichts an und endet rot (E-Mail von GitHub). **Sperre je Aktivität** (`blocked` in `activity_scenes`, Befehle unten). Kontaktbögen bleiben als Bericht im Artefakt, sind aber keine Voraussetzung.
 8. **`librsvg2-bin` per apt nur in einem Job ohne Schlüssel** (wie `osmium-tool` beim Orte-Import). Die Jobs mit `ANTHROPIC_API_KEY` oder Supabase-Schlüssel installieren nichts.
 9. **Täglicher Bilder-Lauf** (nur Aktivitäten ohne Bild, bei keinem Treffer fast kostenlos) und manuell.
 10. **Passt keine Szene, bleibt die Farbfläche.** Es gibt kein erzwungenes Bild.
 
+## Beschlüsse zur Lieferung und zum Bilder-Lauf (Clemens, 18. Oktober 2026)
+
+1. **Versuche:** Als Versuch zählt ein Lauf, in dem die Aktivität gescheitert ist (Regeln oder Bindung an den Text nach zwei Aufrufen, oder Rückfrage mit dem Bild nicht `ok`). Angehängt oder von der Qualitätsbremse aufgehalten zählt nicht. Höchstens **drei Versuche** je Aktivität über alle Läufe, gezählt seit dem letzten `reset` oder `withdrawn` im Protokoll (`activity_image_log`). Danach bleibt die Farbfläche, und die Aktivität steht im Bericht.
+2. **„Keine Szene“** (die KI findet keine, oder der Titel nennt einen Gegenstand ohne Baustein) zählt **nicht** als Versuch. Die Aktivität wird erst wieder versucht, wenn sich die **Fassung des Baukastens** ändert (neue Bausteine). Gezielt freigeben: Befehl unten („Ohne Szene freigeben“).
+3. **Geänderter Text nach dem Bild:** Titel, Kurzbeschreibung oder Schritte geändert → nur melden (Bericht). **Sicherheitshinweis oder Material geändert → das Bild wird automatisch zurückgezogen** (`image` und `step_images` auf `NULL`, Protokoll `withdrawn`), und die Aktivität ist für neue Versuche frei. Das macht die Datenbank selbst (Trigger aus Migration 0006, getestet), damit es bei jedem Weg gilt (Seed, Table Editor, SQL). Der Bericht des Bilder-Laufs listet diese Rückzüge.
+4. **Schrittbilder:** Spalte, Anzeige in der App und der Weg dahin (`set_activity_images` mit `step_images`) sind gebaut; gezeichnet werden noch keine.
+5. **Reihenfolge:** erst die Lieferung (Teil A) in `main`, dann der Bilder-Lauf (Teil B) in einer neuen Sitzung.
+
+## Befehle zum Kopieren (SQL-Editor von Supabase)
+
+`'<id>'` jeweils durch die ID der Aktivität ersetzen (z. B. `'puddle-explorers'`; steht in der Tabelle `activities`, Spalte `id`). Alle Befehle laufen ab Migration 0006; der Bilder-Lauf (Teil B) wertet Sperre und Protokoll aus.
+
+**Ein Bild zurückziehen, der nächste Lauf versucht es neu** (begrenzt durch die drei Versuche):
+
+```sql
+select public.set_activity_images('<id>', null, null);
+```
+
+**Eine Aktivität sperren** (Bild weg und dauerhaft von der Bildautomatik ausgenommen; `<Grund>` ist frei, z. B. „Bild zeigt Messer“):
+
+```sql
+begin;
+select public.set_activity_images('<id>', null, null);
+insert into public.activity_scenes (activity_id, purpose, blocked, blocked_reason)
+values ('<id>', 'title', true, '<Grund>')
+on conflict (activity_id, purpose) do update set blocked = true, blocked_reason = excluded.blocked_reason;
+commit;
+```
+
+**Sperre aufheben** (der nächste Lauf darf wieder zeichnen):
+
+```sql
+update public.activity_scenes set blocked = false, blocked_reason = null where activity_id = '<id>' and purpose = 'title';
+```
+
+**Versuche einer Aktivität zurücksetzen** (nach drei gescheiterten Läufen noch einmal versuchen lassen):
+
+```sql
+insert into public.activity_image_log (activity_id, result, reasons) values ('<id>', 'reset', '["von Hand freigegeben"]'::jsonb);
+```
+
+**Ohne Szene freigeben** (nach neuen Bausteinen: alle freigegebenen Aktivitäten ohne Bild, deren letzter Eintrag „keine Szene“ war, kommen im nächsten Lauf wieder dran; das Ergebnis zeigt, wie viele):
+
+```sql
+insert into public.activity_image_log (activity_id, result, reasons)
+select l.activity_id, 'reset', '["ohne Szene, nach neuen Bausteinen freigegeben"]'::jsonb
+from (
+  select distinct on (activity_id) activity_id, result
+  from public.activity_image_log
+  where purpose = 'title' and result <> 'replaced'
+  order by activity_id, id desc
+) l
+join public.activities a on a.id = l.activity_id
+where l.result in ('no_scene', 'no_block') and a.image is null and a.status = 'approved'
+returning activity_id;
+```
+
+Normalerweise ist das nicht nötig: Ändert sich die Fassung des Baukastens, versucht der Bilder-Lauf Aktivitäten ohne Szene von selbst noch einmal. Der Befehl hilft, wenn du nicht auf eine Änderung des Baukastens warten willst.
+
+**Übersicht: gesperrte Aktivitäten und der letzte Eintrag je Aktivität:**
+
+```sql
+select activity_id, blocked_reason, updated_at from public.activity_scenes where blocked order by updated_at desc;
+select distinct on (activity_id) activity_id, result, reasons, missing_blocks, created_at
+from public.activity_image_log order by activity_id, id desc;
+```
+
 ## Aufbau
 
 - **Baukasten** (`docs/bausteine/README.md`): Bausteine mit Farbplätzen, Layouts mit festen Plätzen, ein fester Zeichner. Das Modell wählt nur Layout und Bausteine (Szene als JSON), nie SVG-Code und nie Koordinaten.
-- **Lieferung:** öffentlicher Bucket `activity-images` (Migration `0005_activity_images_bucket.sql`), Dateien nie überschreiben (Name mit Prüfsumme), Adresse in `image` (später `step_images`), die App zeigt sie mit `expo-image`, bei Fehler die Farbfläche. `updated_at` zieht die Änderung über die Abfrage aus M8b auf die Geräte. Entwurf: `docs/supabase.md`, „Ausblick: Bilder und Supabase“.
+- **Lieferung (gebaut):** öffentlicher Bucket `activity-images` (Migration 0005), Dateien nie überschreiben (Name mit Prüfsumme), Adressen in `image` und `step_images`, gesetzt nur über `set_activity_images` (Migration 0006). Die App zeigt sie mit `expo-image` und Gerätespeicher, bei Fehler die Farbfläche bzw. beim Schritt nur den Text. `updated_at` zieht die Änderung über die Abfrage aus M8b auf die Geräte. Anleitung: `docs/supabase.md`, „Bilder: Lieferung einrichten“.
 - **Prüfungen vor dem Anhängen:** (1) Szene gegen Layout, Rand, Ecken, Überdeckung; (2) Sicherheit und Textabgleich gegen die Aktivität (`docs/bausteine/README.md`); (3) Endprüfung des SVG (nur Farbplätze, nur erlaubter Code, unter 14 KB, gültig); (4) Rückfrage an Claude mit dem gerenderten PNG und dem Text der Aktivität (Urteil `ok`, `widerspricht_dem_text`, `unsicher`, `unlesbar`). Nur wenn alles besteht, wird ein Bild angehängt.
 
 ## Die Job-Kette des Bilder-Laufs (Entwurf, noch nicht gebaut)
+
+> **Stand 18. Oktober 2026, gilt vor der Tabelle unten:** Workflow `images-run.yml`, täglich **19:00** Uhr Berliner Zeit (zwei UTC-Zeiten und eine Prüfung der Ortszeit wie beim Wochenlauf) und manuell (`dry_run`, `attach` Standard an, `limit` Standard 25, `model` Standard haiku).
+> Jobs: `pruefung` → `liste` → `zeichnen` → `rendern` → `bewerten` → `hochladen` → `bericht`. Hängt automatisch an (Beschluss 7 oben), höchstens 25 je Lauf, Qualitätsbremse, Sperre, drei Versuche wie in „Beschlüsse zur Lieferung und zum Bilder-Lauf“. Die Tabelle unten ist der ältere Entwurf; Teil B ersetzt diesen Abschnitt.
 
 Ein GitHub-Workflow `activity-images.yml` (täglich 19:30 Uhr Berliner Zeit, nach dem Wochenlauf, und manuell) mit fünf Jobs. Zwischen den Jobs gehen **Artefakte** (Texte der Aktivitäten, Szenen, SVG, PNG, Urteile; nichts davon ist geheim, es sind öffentliche Daten und Zeichnungen). Jeder Schlüssel steht nur in dem einen Schritt, der ihn braucht.
 
@@ -93,7 +163,7 @@ Er schreibt **nichts** in die Datenbank und fasst **keinen** Bucket an. Jobs mit
 - **Wie unterscheidbar sind die fünf Bilder?** (1) mechanisch: wie viele verschiedene Layouts, und die mittlere Überschneidung der Baustein-Mengen je Paar (Ziel: kein Paar mit gleichem Layout und gleichen Hauptbausteinen); (2) eine Rückfrage an Claude mit allen fünf Bildern in einem Bild („Welche könnte man verwechseln?“); (3) die Kontaktbögen in 96 × 48 zum Ansehen.
 - **Passt keine Szene,** bleibt es bei der Farbfläche: Das zählt als „nicht tragfähig“, aber nicht als Fehler.
 
-## Pakete (nur falls die Entscheidungsregel gegen die API ausgeht)
+## Pakete (entfallen: die API zeichnet, Beschluss 1)
 
 Wenn Claude Code den Startbestand zeichnet: ein Pull Request je Paket mit Vorschauseite und Durchsicht. Nach Kategorie, die riskanten zuerst:
 
@@ -132,7 +202,7 @@ Datenverkehr je Gerät und Monat geschätzt 100 bis 250 KB; ein einmaliges Neuze
 - [x] Schritt 3b: fünf Titelbilder von Hand als Machbarkeitsprobe (Bratäpfel, Bananen-Haferkugeln, Tanz-Freeze, Geheimschrift, Pfützen-Forscher) mit Bewertung, `docs/bausteine/PROBE.md`; lose Inhalte auf dem Tisch; Workflow „Bild-Test“ vorbereitet. **Offen bei Clemens:** Probebilder ansehen, Secret `SUPABASE_ANON_KEY` anlegen, Bild-Test mit Haiku und Sonnet starten.
 - [x] Nachbesserung nach dem ersten Bild-Test (18. Oktober 2026): Titelbild und Schrittbild getrennt, kein Messer und keine Schere im Titelbild, Gegenstände aus dem Titel, sechs neue und drei neu gezeichnete Bausteine, Posen `watch` und `ride`, Stups `hop` überarbeitet (für Titelbilder gesperrt), kürzere Unterarme, fehlende Bausteine im Bericht, Beispiele im Prompt, Zwischenspeicher. **Offen bei Clemens:** Bild-Test mit Haiku starten und mit dem ersten Lauf vergleichen; Stups `hop` ansehen und freigeben oder nicht.
 - [ ] Weitere Bausteine nach der Abdeckung (`docs/bausteine/ABDECKUNG.md`, vorn: Stifte, Handtuch, Klebeband, Ball) und nach den fehlenden Bausteinen der Bild-Tests
-- [ ] Lieferung vollständig (Migration 0006: `step_images`, Tabellen, Funktion; Schrittbilder in der App; gebündelte Zeichnungen entfernen; Pilot-Bilder in Storage)
-- [ ] Bilder-Lauf (Job-Kette, Modelltest, Bericht)
-- [ ] Pakete 1 bis 5 oder Lauf über die API (Entscheidungsregel)
+- [x] Lieferung vollständig (18. Oktober 2026): Migration 0006 (`step_images`, `activity_scenes` mit Sperre, `activity_image_log`, `set_activity_images`, automatisches Zurückziehen), Schrittbilder in der App, gebündelte Zeichnungen entfernt (Pilot-Bilder nicht hochgeladen, werden neu gezeichnet), Datenverkehr gemessen. **Offen bei Clemens:** Migration 0006 einspielen, **dann** die App testen (`docs/supabase.md`, „Bilder: Lieferung einrichten“).
+- [ ] Bilder-Lauf (Teil B, neue Sitzung auf `main`): Job-Kette, dreifache Prüfung, automatisch anhängen, Bericht mit Kontaktbögen und fehlenden Bausteinen
+- [x] ~~Pakete 1 bis 5 oder Lauf über die API (Entscheidungsregel)~~ entschieden: Lauf über die API
 - [ ] Schrittbilder (Liste nach den Titelbildern)

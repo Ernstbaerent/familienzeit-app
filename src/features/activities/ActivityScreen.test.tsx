@@ -12,7 +12,6 @@ import { act, create, type ReactTestInstance } from 'react-test-renderer';
 import type { Activity } from '@/features/activities/activities';
 import { categoryIcons } from '@/features/activities/CategoryIcon';
 import { getFactTileWidths } from '@/features/activities/detailLayout';
-import { getIllustration, getStepIllustrations } from '@/features/activities/illustrations';
 import { makeActivity } from '@/features/suggestions/testHelpers';
 import { contrastRatio } from '@/lib/contrast';
 import { mirrorInRTL } from '@/lib/rtl';
@@ -812,14 +811,25 @@ describe('„So geht’s“', () => {
   });
 });
 
-// --- Illustrationen (Pilot, docs/design/ILLUSTRATIONEN.md) ----------------------------------------------------------
+// --- Schrittbilder aus Supabase (M9b, step_images, docs/design/ILLUSTRATIONEN.md) --------------------------------------
 
-describe('Illustrationen (Pilot)', () => {
+describe('Schrittbilder (M9b)', () => {
+  const originalUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+  beforeEach(() => {
+    process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://abc.supabase.co';
+  });
+  afterEach(() => {
+    if (originalUrl === undefined) delete process.env.EXPO_PUBLIC_SUPABASE_URL;
+    else process.env.EXPO_PUBLIC_SUPABASE_URL = originalUrl;
+  });
+
+  const bucket = 'https://abc.supabase.co/storage/v1/object/public/activity-images/activities/sock-puppet-theater/';
+  const stepUri = (number: number) => `${bucket}step-${number}-000000000000000${number}.svg`;
   const puppetSteps = {
     de: ['Socke aussuchen.', 'Augen ankleben.', 'Bühne bauen.', 'Geschichte ausdenken.', 'Vorspielen.'],
     en: ['Pick a sock.', 'Glue on eyes.', 'Build the stage.', 'Make up a story.', 'Perform.'],
   };
-  const puppetIdea = () =>
+  const puppetIdea = (stepImages: Record<string, string> | null = { 1: stepUri(1), 2: stepUri(2), 3: stepUri(3) }) =>
     makeIdea({
       id: 'sock-puppet-theater',
       category: 'craft',
@@ -827,6 +837,7 @@ describe('Illustrationen (Pilot)', () => {
         de: { title: 'Sockenpuppen-Theater', summary: 'Puppen aus Socken.', steps: puppetSteps.de },
         en: { title: 'Sock Puppet Theater', summary: 'Puppets from socks.', steps: puppetSteps.en },
       },
+      ...(stepImages !== null && { stepImages }),
     });
   const stepRow = (root: ReactTestInstance, number: number, language: 'de' | 'en' = 'de') =>
     root.find(
@@ -834,27 +845,25 @@ describe('Illustrationen (Pilot)', () => {
         typeof node.type === 'string' &&
         node.props.accessibilityLabel === `${language === 'de' ? 'Schritt' : 'Step'} ${number}. ${puppetSteps[language][number - 1]}`,
     );
+  const bigIcons = (root: ReactTestInstance) =>
+    root.findAllByType(Text).filter((node) => typeof node.props.name === 'string' && node.props.size > iconSize.md);
 
-  it('der Bildbereich zeigt das Titelbild statt der Farbfläche (ohne Pille)', () => {
-    setup(puppetIdea());
+  it('ohne Titelbild: oben die Farbfläche (keine gebündelte Zeichnung mehr)', () => {
+    setup(puppetIdea(null));
     const { root } = renderScreen();
-    const [hero] = root.findAll((node) => typeof node.type === 'string' && flat(node).aspectRatio === 2);
-    const [image] = hero.findAllByType(ExpoImage);
-    expect(image.props.source).toBe(getIllustration('sock-puppet-theater')?.source);
-    expect(hero.findAll((node) => typeof node.props.name === 'string' && node.props.size === iconSize.hero)).toHaveLength(0);
-    expect(hero.props.accessibilityElementsHidden).toBe(true);
-    expect(allTexts(hero)).toHaveLength(0);
+    expect(root.findAllByType(ExpoImage)).toHaveLength(0);
+    expect(bigIcons(root)).toHaveLength(1);
   });
 
-  it('Schrittbilder stehen unter dem Text der Schritte 1 bis 3, die Schritte 4 und 5 haben keins', () => {
+  it('Schrittbilder stehen unter dem Text der Schritte 1 bis 3, aus dem Gerätespeicher; die Schritte 4 und 5 haben keins', () => {
     setup(puppetIdea());
     const { root } = renderScreen();
-    const steps = getStepIllustrations('sock-puppet-theater') ?? {};
     for (const number of [1, 2, 3]) {
       const row = stepRow(root, number);
       const images = row.findAllByType(ExpoImage);
       expect(images).toHaveLength(1);
-      expect(images[0].props.source).toBe(steps[number].source);
+      expect(images[0].props.source).toEqual({ uri: stepUri(number) });
+      expect(images[0].props.cachePolicy).toBe('disk');
       // Unter dem Text: Text und Bild sind Geschwister in derselben Spalte, der Text zuerst.
       const text = textNode(row, puppetSteps.de[number - 1]);
       const column = hostParent(text);
@@ -884,6 +893,32 @@ describe('Illustrationen (Pilot)', () => {
     expect(flat(textNode(row, 'Socke aussuchen.'))).toMatchObject({ fontSize: fontSize.reading, lineHeight: lineHeight.reading });
   });
 
+  it('lädt ein Schrittbild nicht (Datei fehlt), verschwindet es still: kein Rahmen, keine Meldung, die anderen bleiben', () => {
+    setup(puppetIdea());
+    const { root } = renderScreen();
+    act(() => stepRow(root, 2).findAllByType(ExpoImage)[0].props.onError());
+    expect(stepRow(root, 2).findAllByType(ExpoImage)).toHaveLength(0);
+    expect(root.findAll((node) => node.props.testID === 'step-image-2')).toHaveLength(0);
+    expect(stepRow(root, 1).findAllByType(ExpoImage)).toHaveLength(1);
+    expect(stepRow(root, 3).findAllByType(ExpoImage)).toHaveLength(1);
+    expect(allTexts(root)).toContain('Augen ankleben.');
+  });
+
+  it('fremder Host oder Schritt, den es nicht gibt: wird nicht geladen (keine IP-Adresse an Fremde)', () => {
+    setup(puppetIdea({ 1: 'https://example.org/step-1.svg', 9: stepUri(9), 2: stepUri(2) }));
+    const { root } = renderScreen();
+    const images = root.findAllByType(ExpoImage);
+    expect(images).toHaveLength(1);
+    expect(images[0].props.source).toEqual({ uri: stepUri(2) });
+  });
+
+  it('ohne Projekt-Adresse ist kein Schrittbild erlaubt', () => {
+    delete process.env.EXPO_PUBLIC_SUPABASE_URL;
+    setup(puppetIdea());
+    const { root } = renderScreen();
+    expect(root.findAllByType(ExpoImage)).toHaveLength(0);
+  });
+
   it('Englisch: dieselben Bilder bei denselben Schritten', () => {
     setup(puppetIdea());
     const { root } = renderScreen('en');
@@ -891,18 +926,11 @@ describe('Illustrationen (Pilot)', () => {
     expect(stepRow(root, 4, 'en').findAllByType(ExpoImage)).toHaveLength(0);
   });
 
-  it('Aktivitäten ohne Illustration: Farbfläche oben, keine Bilder bei den Schritten', () => {
-    setup();
-    const { root } = renderScreen();
-    expect(root.findAllByType(ExpoImage)).toHaveLength(0);
-  });
-
-  it('Titelbild ohne Schrittbilder (Pizza): nur oben ein Bild', () => {
-    setup(makeIdea({ id: 'homemade-pizza', category: 'cooking' }));
+  it('Titelbild und Schrittbilder zusammen: oben das Titelbild, unten die Schrittbilder', () => {
+    setup({ ...puppetIdea({ 1: stepUri(1) }), image: `${bucket}cover-0123456789abcdef.svg` });
     const { root } = renderScreen();
     const images = root.findAllByType(ExpoImage);
-    expect(images).toHaveLength(1);
-    expect(images[0].props.source).toBe(getIllustration('homemade-pizza')?.source);
+    expect(images.map((image) => image.props.source.uri)).toEqual([`${bucket}cover-0123456789abcdef.svg`, stepUri(1)]);
   });
 });
 

@@ -193,7 +193,7 @@ sie schreibt eine Warnung in die Konsole („Abruf bei Supabase fehlgeschlagen (
 - **Still bei Fehlern:** Kein Netz, Fehlermeldung vom Server, falscher Schlüssel, pausiertes Projekt, Zeitüberschreitung nach 10 Sekunden (für den ganzen Abgleich), kaputte Antwort: Die App zeigt **nichts** an, es gibt nur eine Warnung in der Konsole. Eltern bekommen weiter ihre drei Vorschläge.
 - **Nichts springt:** „Eure Ideen“ und die Detailansicht frieren die Aktivitäten beim Öffnen ein. Kommt im Hintergrund ein neuer Bestand an, sehen sie ihn erst beim nächsten Öffnen. (Kommt der Bestand genau zwischen „Eure Ideen“ und dem Tipp auf eine Karte, kann eine Idee, die inzwischen zurückgezogen wurde, zum Start zurückführen. Das ist selten und harmlos.)
 - **Nur zum Testen:** `EXPO_PUBLIC_ACTIVITIES_REFRESH_MINUTES` in der `.env` ändert den Abstand von 24 Stunden. Der Standard bleibt 24 Stunden; die Variable steht auskommentiert in der `.env.example` und gehört nie in eine fertige App-Version.
-- **Bilder (`image`):** Wird nur angezeigt, wenn die Adresse mit `<Projekt-URL>/storage/v1/object/public/` beginnt (Allowlist, DESIGN.md Zusatz 35). Ein Bild von einem fremden Server wird weggelassen, die Aktivität bleibt. Das prüfen auch `npm run activities:check` (Fehler) und die Karte.
+- **Bilder (`image`, `step_images`):** Werden nur angezeigt, wenn die Adresse mit `<Projekt-URL>/storage/v1/object/public/` beginnt (Allowlist, DESIGN.md Zusatz 35). Ein Bild von einem fremden Server wird weggelassen, die Aktivität bleibt; bei Schrittbildern fällt jedes falsche einzeln weg. Das prüfen auch `npm run activities:check` (Fehler) und die Anzeige. Details: „Bilder: Lieferung einrichten“ unten.
 
 ### Nur Änderungen (M8b)
 
@@ -447,6 +447,9 @@ Der Test `activitySql.test.ts` meldet, wenn die Dateien in `supabase/seed/` nich
 
 ## Bilder: erster Test der Lieferung (M9b)
 
+> **Erledigt** (Clemens, 18. Oktober 2026: ein SVG aus dem Bucket erscheint auf dem iPhone). Die Schritte bleiben als Anleitung stehen. Seit der vollständigen Lieferung (unten, „Bilder: Lieferung einrichten“)
+> gibt es die gebündelten Zeichnungen nicht mehr; als Testbild dient jetzt eine Zeichnung aus dem Baukasten (Schritt 2).
+
 **Ziel:** Du legst **eine** SVG-Datei von Hand in einen Speicherbereich (Bucket) von Supabase, trägst ihre Adresse bei Aktivitäten ein und siehst auf dem iPhone, ob die App sie zeigt.
 Erst wenn das klappt, wird mehr gebaut (Bilder-Lauf, Baukasten, Paketen). Die App zeigt das Feld `image` schon lange; neu ist nur: Sie zeigt es jetzt mit `expo-image`, und **das kann SVG** (das `Image` von React Native konnte es nicht).
 Dein Supabase-Zugang ist nötig, ich selbst habe keinen: Das SQL wurde nur in einem Wegwerf-Postgres mit nachgebautem Speicherbereich geprüft, nicht gegen dein Projekt.
@@ -466,9 +469,9 @@ Klappt das Einfügen mit einer Fehlermeldung zu `storage.buckets`: **Storage →
 
 ### Schritt 2: Testbild hochladen
 
-Als Testbild nehmen wir die vorhandene Zeichnung `assets/illustrations/homemade-pizza.svg` (Pizza). Sie ist als Testbild gut, weil sie in der App nur beim Pizza-Rezept selbst vorkommt: Taucht sie bei einer **anderen** Aktivität auf, kommt sie sicher aus dem Speicher.
+Als Testbild nehmen wir die Zeichnung `docs/bausteine/vorschau/beispiele/homemade-pizza.svg` (Pizza aus dem Baukasten). Taucht sie bei einer **anderen** Aktivität auf, kommt sie sicher aus dem Speicher.
 
-1. Datei von GitHub holen: im Repo `assets/illustrations/homemade-pizza.svg` öffnen → **Raw** → Rechtsklick → „Speichern unter“ (oder **Download raw file**). Dateiname dabei auf **`test-pizza-1.svg`** ändern.
+1. Datei von GitHub holen: im Repo `docs/bausteine/vorschau/beispiele/homemade-pizza.svg` öffnen → **Raw** → Rechtsklick → „Speichern unter“ (oder **Download raw file**). Dateiname dabei auf **`test-pizza-1.svg`** ändern.
 2. Dashboard → **Storage → activity-images → Upload file** → `test-pizza-1.svg` auswählen.
 3. Auf die Datei klicken → **Get URL** (bzw. „Copy URL“). Die Adresse sieht so aus:
    `https://DEIN-PROJEKT.supabase.co/storage/v1/object/public/activity-images/test-pizza-1.svg`
@@ -483,6 +486,8 @@ update public.activities
 set image = 'https://DEIN-PROJEKT.supabase.co/storage/v1/object/public/activity-images/test-pizza-1.svg'
 where category = 'cooking' and id <> 'homemade-pizza';
 ```
+
+(Seit Migration 0006 setzt man Bilder besser mit `set_activity_images`, siehe „Bilder: Lieferung einrichten“. Das `update` hier geht weiter, prüft aber nichts.)
 
 Erwartet: „Success. 13 rows affected“ (oder mehr, wenn der Wochenlauf schon Koch-Aktivitäten ergänzt hat). Das Feld `updated_at` setzt die Datenbank von selbst neu (M8b), die App holt die Zeilen beim nächsten Abgleich.
 
@@ -540,17 +545,196 @@ Kurze Rückmeldung zu diesen Punkten, am besten mit einem Screenshot der Karte u
 
 **Der Seed überschreibt `image` nicht mehr** (seit M9b): `npm run db:seed-sql` schreibt `image` nur beim ersten Einfügen einer Aktivität, beim Aktualisieren bleibt die Spalte stehen. Du kannst die Seed-Dateien also gefahrlos erneut einspielen, auch wenn schon Bilder eingetragen sind.
 
-## Ausblick: Bilder und Supabase (Vorschlag, im Aufbau: erster Test oben, M9b)
+## Bilder: Lieferung einrichten (Migration 0006, M9b)
 
-Heute liegen die Illustrationen gebündelt in der App (`assets/illustrations/`), die Zuordnung steht in `src/features/activities/illustrations.ts`. Ein neues Bild braucht damit ein App-Update. Für laufend neue Aktivitäten (M9) schlage ich später vor:
+**Wichtig: erst Migration 0006 einspielen, dann die App testen.** Die App fragt ab dieser Fassung die Spalte `step_images` ab. Fehlt sie in der Datenbank, antwortet Supabase mit einem Fehler (HTTP 400, „column activities.step_images does not exist“).
+Die App bleibt dann still bei ihrem Zwischenspeicher bzw. den mitgelieferten Aktivitäten (nur eine Warnung in der Konsole, getestet in `activityRefresh.test.ts`), aber neue Aktivitäten und Bilder kommen nicht an, bis die Migration eingespielt ist.
+Die Seed-Dateien (`supabase/seed/`) brauchen 0006 nicht: Sie schreiben `step_images` nie.
 
-- Die Bilder kommen in einen öffentlichen Speicherbereich (Bucket) von Supabase Storage. Die Allowlist (`imageAllowlist.ts`) erlaubt genau diesen Speicher schon.
-- Die Tabelle bekommt zwei freiwillige Spalten: `image` (gibt es schon: Titelbild) und `step_images` (JSON: Schrittnummer → Pfad). Die App zeigt sie mit `expo-image` (das `Image` von React Native kann keine SVG-Dateien aus dem Netz).
-- **Zusammenspiel mit M8b (nur Entwurf, nicht gebaut):** `step_images` kommt in `activityColumns` (`activityRow.ts`) und damit in die Abfrage der Änderungen. Ändert sich `image` oder `step_images`, setzt der Trigger `updated_at` neu, und jedes Gerät bekommt die neue Zeile beim nächsten Abgleich.
-  **Regel: Dateien in Storage nie überschreiben.** Eine neue Fassung bekommt einen neuen Namen mit Prüfsumme (z. B. `activities/<id>/cover-<hash>.svg`), danach wird die Zeile geändert. Würde die Datei unter demselben Namen ersetzt, änderte sich die Zeile nicht, und die Geräte behielten das alte Bild im Cache von `expo-image`.
-  Alte Dateien erst nach etwa 60 Tagen löschen (ein Gerät, das lange nicht abgeglichen hat, zeigt bis dahin das alte Bild; danach fällt es auf Illustration bzw. Farbfläche zurück). Bilder laden erst beim Anzeigen und bleiben im Cache, ihr Datenverkehr zählt bei Storage, nicht bei der Datenbank.
-- Die gebündelten Illustrationen bleiben als Offline-Rückfall. Die Reihenfolge bleibt `image` → gebündelte Illustration → Farbfläche.
-- Bis M9b viele Bilder liefert, genügt der heutige Weg (gebündelt). Entscheiden, sobald mehr als eine Handvoll Aktivitäten Bilder haben.
+### Was Migration 0006 anlegt
+
+| Was | Wozu | Wer darf |
+| --- | --- | --- |
+| Spalte `activities.step_images` (jsonb) | Schrittbilder: `{"1": "<Adresse>", "3": "<Adresse>"}`, `NULL` = keine | App: lesen (wie alle Spalten); schreiben nur über die Funktion |
+| Tabelle `activity_scenes` | Szene (JSON aus dem Baukasten) je Bild, Fassung des Baukastens, Prüfsumme der Texte, **Sperre** (`blocked`) | nur `service_role` (lesen, eintragen, ändern) und du im Dashboard |
+| Tabelle `activity_image_log` | Protokoll der Bild-Versuche (eine Zeile je Aktivität und Lauf), dazu ersetzte und zurückgezogene Adressen | nur `service_role` (lesen, ergänzen; nie ändern, nie löschen) und du |
+| Funktion `set_activity_images(id, image, step_images)` | setzt oder entfernt Titel- und Schrittbilder, prüft jede Adresse (Bucket, Ordner der Aktivität, Name mit Prüfsumme, **Datei liegt im Bucket**) und die Schrittnummern | nur `service_role` und du |
+| Trigger `activities_withdraw_images` | zieht Bilder automatisch zurück, wenn sich der Sicherheitshinweis (in irgendeiner Sprache) oder das Material ändert | läuft bei jeder Änderung, auch beim Seed |
+
+Jede Änderung an `image` oder `step_images` setzt `updated_at` neu (Trigger aus 0001). Damit holt jedes Gerät die Zeile beim nächsten täglichen Abgleich (M8b), und nur diese Zeile.
+`set_activity_images` ändert nichts, wenn die Adressen gleich bleiben (sonst lüde jedes Handy die Zeile ohne Grund neu).
+
+**Dateien im Bucket nie überschreiben.** Jede Datei hat eine Prüfsumme im Namen: `activities/<id>/cover-<16 Zeichen>.svg` (Titelbild), `activities/<id>/step-<n>-<16 Zeichen>.svg` (Schrittbild); 16 Zeichen aus 0–9 und a–f.
+Eine neue Fassung ist eine neue Datei, danach ändert die Funktion die Adresse. Würde man eine Datei unter demselben Namen ersetzen, behielten die Handys das alte Bild (expo-image speichert es auf dem Gerät).
+Der Bilder-Lauf lädt mit `x-upsert: false` (überschreibt nie) und einer langen Cache-Dauer (`cache-control: max-age=31536000`, ein Jahr) hoch.
+
+**Automatisch zurückziehen:** Ändert sich bei einer Aktivität mit Bild der Sicherheitshinweis oder das Material (egal ob im Table Editor, per SQL oder beim erneuten Einspielen der Seed-Dateien), setzt die Datenbank `image` und `step_images` auf `NULL`
+und schreibt eine Zeile `withdrawn` mit dem Grund und den alten Adressen ins Protokoll. Das gibt die Aktivität für neue Versuche des Bilder-Laufs frei. Eine Änderung nur an Titel, Kurzbeschreibung oder Schritten zieht nichts zurück (der Bilder-Lauf meldet sie nur).
+Die Reihenfolge des Materials zählt nicht (nur echte Änderungen).
+
+### Schritt für Schritt (einmal)
+
+**1. Migration einspielen.** Supabase-Dashboard → **SQL Editor** → **New query** → `supabase/migrations/0006_activity_images.sql` (GitHub: Datei → „Raw“) **ganz** kopieren und einfügen, **nichts markieren**, **Run**.
+Erwartet: unten **genau elf Zeilen**:
+
+| objekt | rolle | rechte |
+| --- | --- | --- |
+| Bucket activity-images (Dateien) | - | eine Zahl (z. B. 0 oder 1 vom ersten Test) |
+| Funktion set_activity_images | service_role | EXECUTE |
+| RLS activity_image_log | - | an |
+| RLS activity_scenes | - | an |
+| Spalte activities.step_images | - | jsonb |
+| Tabelle activities | anon | SELECT |
+| Tabelle activities | authenticated | SELECT |
+| Tabelle activities | service_role | INSERT, SELECT, UPDATE |
+| Tabelle activity_image_log | service_role | INSERT, SELECT |
+| Tabelle activity_scenes | service_role | INSERT, SELECT, UPDATE |
+| Trigger activities_withdraw_images | - | an |
+
+Steht dort mehr (z. B. `anon` bei `activity_scenes` oder bei der Funktion), fehlt eine Zeile oder kommt eine Fehlermeldung zu `storage.objects`: Ausgabe an mich schicken, bevor du weitermachst.
+Die Datei darf mehrmals ausgeführt werden.
+
+**2. Die Funktion prüfen (sie muss ablehnen).** Im SQL Editor, einzeln ausführen. Jede Zeile muss mit einer **Fehlermeldung** enden (das ist hier richtig):
+
+```sql
+-- a) fremder Server: „zeigt nicht auf den Bucket activity-images“
+select public.set_activity_images('puddle-explorers', 'https://example.org/bild.svg', null);
+-- b) ohne Prüfsumme im Namen: „Dateiname … passt nicht“ (DEIN-PROJEKT durch deine 20 Zeichen ersetzen)
+select public.set_activity_images('puddle-explorers', 'https://DEIN-PROJEKT.supabase.co/storage/v1/object/public/activity-images/activities/puddle-explorers/cover.svg', null);
+-- c) Datei gibt es nicht: „liegt nicht im Bucket activity-images“
+select public.set_activity_images('puddle-explorers', 'https://DEIN-PROJEKT.supabase.co/storage/v1/object/public/activity-images/activities/puddle-explorers/cover-0000000000000001.svg', null);
+-- d) Schritt gibt es nicht: „Schritt „99“ gibt es bei … nicht“
+select public.set_activity_images('puddle-explorers', null, '{"99": null}'::jsonb);
+```
+
+Deine 20 Zeichen stehen in der Projekt-Adresse (`https://abcdefghijklmnopqrst.supabase.co`, Settings → API, wie `EXPO_PUBLIC_SUPABASE_URL` in der `.env`).
+
+**3. Ein Bild von Hand setzen.**
+
+1. Testbild holen: im Repo `docs/bausteine/probe/puddle-explorers.svg` öffnen → **Raw** → „Speichern unter“, Dateiname **`cover-0000000000000001.svg`**.
+   Für ein Schrittbild zusätzlich `docs/bausteine/vorschau/beispiele/hands-stir.svg` als **`step-1-0000000000000002.svg`** speichern.
+2. Dashboard → **Storage → activity-images**: **Create folder** `activities`, darin **Create folder** `puddle-explorers`, darin **Upload file** mit beiden Dateien.
+   Der Pfad muss genau `activities/puddle-explorers/cover-0000000000000001.svg` sein (die Funktion prüft Ordner und Namen).
+3. Im SQL Editor (Adresse anpassen):
+
+   ```sql
+   select public.set_activity_images(
+     'puddle-explorers',
+     'https://DEIN-PROJEKT.supabase.co/storage/v1/object/public/activity-images/activities/puddle-explorers/cover-0000000000000001.svg',
+     '{"1": "https://DEIN-PROJEKT.supabase.co/storage/v1/object/public/activity-images/activities/puddle-explorers/step-1-0000000000000002.svg"}'::jsonb
+   );
+   ```
+
+   Erwartet: `true`. Noch einmal ausführen: `false` (nichts geändert, `updated_at` bleibt).
+4. Kontrolle: `select image, step_images, updated_at from public.activities where id = 'puddle-explorers';` zeigt beide Adressen und eine frische Zeit.
+
+**4. In der App prüfen (iPhone, Expo Go).** In der `.env` `EXPO_PUBLIC_ACTIVITIES_REFRESH_MINUTES=1`, `npx expo start -c`, App ganz schließen und neu öffnen.
+Im Terminal steht nach ein paar Sekunden `Aktivitäten: 1 Änderung(en), …`. Kommt stattdessen eine Warnung mit „HTTP 400“, ist Migration 0006 noch nicht eingespielt (Schritt 1).
+
+| | So soll es sein |
+| --- | --- |
+| Karte „Pfützen-Forscher“ (draußen, Regen hilft: „Wie ist das Wetter?“ → Regen wählen) | das Titelbild statt der Farbfläche |
+| Detailansicht | oben das Titelbild, **unter dem Text von Schritt 1** das Schrittbild (2:1, runde Ecken), bei den anderen Schritten keins |
+| Zweiter Start, dann Flugmodus und neu starten | beide Bilder stehen sofort da (Gerätespeicher) |
+| Schrittbild-Datei im Dashboard löschen, App-Daten neu (oder anderes Gerät) | das Schrittbild fehlt still, der Schritt steht wie ohne Bild da, keine Meldung |
+
+**5. Zurückziehen.**
+
+```sql
+select public.set_activity_images('puddle-explorers', null, null);   -- erwartet: true
+select result, urls, created_at from public.activity_image_log where activity_id = 'puddle-explorers' order by id desc;
+-- erwartet: eine Zeile „replaced“ mit beiden alten Adressen
+```
+
+Nach dem nächsten Abgleich zeigt die App wieder die Farbfläche. Die Dateien im Bucket bleiben stehen (siehe „Alte Dateien löschen“); für den Test darfst du sie gleich im Dashboard löschen.
+Zum Schluss `EXPO_PUBLIC_ACTIVITIES_REFRESH_MINUTES` aus der `.env` entfernen.
+
+**6. Freiwillig: das automatische Zurückziehen sehen.** Bild wie in Schritt 3 setzen, dann den Sicherheitshinweis ändern und zurück:
+
+```sql
+update public.activities set translations = jsonb_set(translations, '{de,safetyNote}', to_jsonb(translations->'de'->>'safetyNote' || ' ')) where id = 'puddle-explorers';
+select image, step_images from public.activities where id = 'puddle-explorers';              -- erwartet: beide leer (null)
+select result, reasons from public.activity_image_log where activity_id = 'puddle-explorers' order by id desc limit 1;   -- withdrawn, „Sicherheitshinweis geändert“
+update public.activities set translations = jsonb_set(translations, '{de,safetyNote}', to_jsonb(rtrim(translations->'de'->>'safetyNote'))) where id = 'puddle-explorers';
+```
+
+Hat die Aktivität in `data/` den Sicherheitshinweis ohne Leerzeichen, stellt auch das erneute Einspielen der Seed-Dateien ihn wieder her.
+
+### Alte Dateien löschen (nach etwa 60 Tagen)
+
+Ersetzte oder zurückgezogene Adressen stehen im Protokoll (`replaced`, `withdrawn`). Eine Datei darf erst gelöscht werden, wenn sie seit etwa **60 Tagen** nirgends mehr steht: Ein Gerät, das lange nicht abgeglichen hat, zeigt bis dahin noch das alte Bild.
+Diese Abfrage listet die Dateien, die gelöscht werden dürfen:
+
+```sql
+with refs as (
+  select image as url from public.activities where image is not null
+  union
+  select value from public.activities, jsonb_each_text(step_images)
+), released as (
+  select u as url, max(created_at) as since
+  from public.activity_image_log, unnest(urls) u
+  where result in ('replaced', 'withdrawn')
+  group by u
+)
+select o.name, r.since
+from storage.objects o
+join released r on r.url like '%/activity-images/' || o.name
+where o.bucket_id = 'activity-images'
+  and r.url not in (select url from refs)
+  and r.since < now() - interval '60 days'
+order by r.since;
+```
+
+Löschen im Dashboard (**Storage → activity-images**, Datei markieren → Delete), **nicht** mit `delete from storage.objects` (das entfernt laut Supabase die Datei selbst nicht).
+
+### Was die App mit Bildern macht
+
+- **Titelbild:** `image` aus Supabase, mit `expo-image` und Gerätespeicher (`cachePolicy="disk"`); fehlt es oder lädt es nicht, die Farbfläche. Gebündelte Zeichnungen gibt es nicht mehr (die sechs Pilot-Zeichnungen sind entfernt, der Bilder-Lauf zeichnet die drei Titelbilder neu).
+- **Schrittbilder:** aus `step_images`, unter dem Text ihres Schritts (`StepList`), ebenfalls mit Gerätespeicher. Lädt eines nicht oder fehlt die Datei, verschwindet es still (keine Meldung, kein leerer Rahmen).
+- **Allowlist:** Titel- und Schrittbilder nur von `<Projekt-Adresse>/storage/v1/object/public/`. Ein einzelnes falsches Schrittbild (fremder Server, Schritt gibt es nicht) fällt beim Laden allein weg, die Aktivität und die übrigen Bilder bleiben. Beim Anzeigen wird noch einmal geprüft.
+- **Datenbank ohne `step_images`** (Migration 0006 fehlt): Der Abgleich scheitert mit HTTP 400, die App bleibt still beim bisherigen Bestand (Zwischenspeicher oder Mitgeliefertes). Sobald die Migration da ist, klappt der nächste Abgleich.
+- `data/` enthält keine Schrittbilder (`npm run activities:check` meldet sie als Fehler), der Seed schreibt `step_images` nie und `image` nur beim ersten Einfügen.
+
+## Bilder: Datenverkehr (M9b)
+
+**Gemessen** (`TRAFFIC_REPORT=1 npx jest imageTraffic`, 18. Oktober 2026): Größe der 14 Probe- und Beispielbilder des Baukastens, gezeichnet wie im Bilder-Lauf, und die Zeilen gegen den Testserver aus M8b (echte Aktivitäten aus `data/`, für 1 500 vervielfältigt).
+**Gerechnet** (Annahmen, nicht gemessen): ein Gerät holt im Monat 20 Mal Ideen (je etwa 4 Karten, mit „Drei neue Ideen“) und öffnet 10 Detailansichten; Aktivitäten mit Schrittbildern haben etwa 5; beim Startbestand haben 25 Aktivitäten Schrittbilder (später, noch nicht gezeichnet).
+
+| Was | Wert |
+| --- | --- |
+| Titel- oder Schrittbild ungepackt | 2,0 bis 5,7 KB, **im Mittel 3,9 KB** |
+| dasselbe gepackt (gzip) | 0,6 bis 1,3 KB, im Mittel 1,0 KB (ob Supabase Storage gepackt ausliefert und zählt, siehe unten) |
+| Zeile ohne Bild / mit Titelbild / mit Titel- und 5 Schrittbildern | 2 039 / 2 176 / 2 908 Byte (eine Adresse etwa 140 Byte) |
+
+**Einmal je Gerät: Zeilen nachladen, wenn die Bilder angehängt werden** (jede Zeile mit neuem Bild kommt einmal mit den Änderungen):
+
+| | 119 Aktivitäten (5 Läufe zu 25) | 1 500 Aktivitäten (60 Läufe zu 25) |
+| --- | --- | --- |
+| ungepackt / gepackt | 250 KB / 80 KB | 3,2 MB / 1,0 MB |
+
+Das ist etwa so viel wie ein voller Abruf, verteilt auf die Tage der Läufe. Danach kosten neue Aktivitäten mit Bild nur ihre eigene Zeile.
+
+**Bilder je Gerät und Monat** (Storage, nicht Datenbank; Bilder laden erst beim Anzeigen):
+
+| | 119 Aktivitäten | 1 500 Aktivitäten |
+| --- | --- | --- |
+| Titelbilder ohne Gerätespeicher | 347 KB | 347 KB |
+| Titelbilder mit Gerätespeicher (jedes Bild einmal) | 225 KB im ersten Monat, danach weniger | 301 KB |
+| Schrittbilder ohne / mit Gerätespeicher | 41 / 40 KB | 3 / 3 KB (nur 25 Aktivitäten mit Schrittbildern) |
+| wenn jede Detailansicht 5 Schrittbilder hätte | etwa 195 KB ohne Gerätespeicher | gleich |
+| Obergrenze: ein Gerät sieht jedes Titelbild einmal | 0,45 MB | 5,7 MB |
+
+Für alle Geräte zusammen im Monat (Titel- und Schrittbilder, ohne / mit Gerätespeicher): 200 Geräte 76 / 52 MB, 1 000 Geräte 379 / 259 MB, 5 000 Geräte 1,9 / 1,3 GB (bei 119 Aktivitäten; bei 1 500 ähnlich, 1,7 / 1,5 GB).
+Der kostenlose Tarif hat 5 GB Egress im Monat (Preisseite, gelesen am 14. Oktober 2026; aktuell nachlesen); Storage zählt nach meinem Stand mit, über das CDN ausgelieferte Dateien als „Cached Egress“ in einem eigenen Topf.
+Weil Dateien nie überschrieben werden und lange im Cache bleiben dürfen (`max-age` ein Jahr), kann das CDN fast alles aus dem Cache liefern. **Gepackt oder nicht?** Prüfen mit (Adresse eines Bildes aus dem Bucket):
+
+```bash
+curl -s -o /dev/null -D - --compressed "https://DEIN-PROJEKT.supabase.co/storage/v1/object/public/activity-images/activities/puddle-explorers/cover-0000000000000001.svg" | grep -i -E "content-encoding|content-length|cache-control"
+```
+
+Steht dort `content-encoding: gzip` (oder `br`), liefert Supabase gepackt aus, und die Werte in der Spalte „gepackt“ gelten (etwa ein Viertel).
+
+**Zum Vergleich:** Die Orte verbrauchen bis etwa 8,4 MB ungepackt je Gerät und Monat (`docs/orte.md`), die Aktivitäten ohne Bilder etwa 165 KB (oben, „Datenverkehr“). Die Bilder liegen dazwischen und bleiben unter 1 MB je Gerät und Monat.
 
 ## Tests
 
@@ -568,4 +752,10 @@ Zwischenspeicher in Teilen (Umstieg von v1, abgebrochenes Schreiben, fehlender T
 Die Seed-Dateien (nur bei echter Änderung schreiben) wurden zusätzlich in einem Wegwerf-Postgres (PGlite) eingespielt: Erneutes Einspielen lässt `updated_at` stehen.
 Das SQL wurde zusätzlich einmal in einem lokalen Wegwerf-Postgres (PGlite, nicht Teil des Projekts) ausgeführt: Tabelle, Einspielen (auch wiederholt), Lesen als `anon`, Schreiben als `anon`/`authenticated` verboten, Entwürfe unsichtbar.
 Der Test der Migration (`activitySql.test.ts`) rechnet auch die Rechte nach: `anon` und `authenticated` haben am Ende genau `SELECT`, kein Schreibrecht, Row Level Security ist an. Zusätzlich wurde die Migration in dem Wegwerf-Postgres so geprüft, wie Supabase neue Tabellen jetzt behandelt (keine automatisch vergebenen Rechte): Mit der ganzen Datei hat `anon` genau `SELECT`; fehlt das Ende der Datei, hat `anon` kein Recht und bekommt „permission denied“.
-**Ich selbst konnte nichts gegen das echte Supabase-Projekt testen** (kein Zugriff): Das übernimmt Schritt 6 oben.
+**Bilder (Migration 0006):** `activityImagesMigration.test.ts` prüft die Migration als Text (Rechte nach allen grant/revoke, RLS, Kontrollabfrage, Prüfungen der Funktion, Trigger). Zusätzlich lief 0006 in einem Wegwerf-Postgres (PGlite, nicht im Projekt, mit nachgebautem `storage.objects` und den Rollen von Supabase), zweimal hintereinander:
+Kontrollabfrage mit elf Zeilen; `set_activity_images` setzt Bilder, setzt `updated_at` neu, ändert bei gleichen Adressen nichts, lehnt fremde Server, `http`, falsche Ordner, Namen ohne Prüfsumme, fehlende Dateien, unbekannte Aktivitäten und Schritte 0 oder 99 ab und protokolliert ersetzte Adressen;
+`service_role` darf Szenen nicht löschen und das Protokoll nicht ändern oder löschen; `anon` liest `step_images`, darf aber die Funktion nicht ausführen und sieht die neuen Tabellen nicht; erneutes Einspielen der Seed-Dateien lässt Bilder und `updated_at` stehen;
+der Trigger zieht bei geändertem Sicherheitshinweis (auch nur Englisch) und geändertem Material zurück (mit `updated_at` und Protokoll), nicht bei geändertem Titel oder nur anderer Reihenfolge des Materials; die Funktion des Wochenlaufs schreibt weiter (ohne Bilder).
+Die App: `activityRefresh.test.ts` (Datenbank ohne `step_images`, gesetztes und zurückgezogenes Bild, einzelnes falsches Schrittbild), `stepImages.test.ts`, `ActivityScreen.test.tsx` (Schrittbilder unter dem Text, still weg bei Ladefehler), `imageTraffic.test.ts` (Datenverkehr).
+
+**Ich selbst konnte nichts gegen das echte Supabase-Projekt testen** (kein Zugriff): Das übernimmt Schritt 6 oben, für die Bilder „Bilder: Lieferung einrichten“.

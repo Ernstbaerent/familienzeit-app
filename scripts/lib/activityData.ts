@@ -90,6 +90,8 @@ export function loadActivityData(imagePrefix: string | null = readImagePrefix())
       }
       seenIds.set(activity.id, file);
       activities.push(activity);
+      // Schrittbilder setzt nur set_activity_images in der Datenbank (Migration 0006); der Seed schreibt sie nicht, sie gingen hier still verloren.
+      if (activity.stepImages !== undefined) errors.push(`${file}: ${activity.id}: stepImages gehören nicht in data/ (Schrittbilder kommen nur aus Supabase, docs/supabase.md)`);
 
       const problems = checkSafety(activity, allergenNames);
       if (activity.status === 'approved' && problems.length > 0) {

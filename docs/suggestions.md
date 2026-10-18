@@ -33,7 +33,7 @@ Eine Karte zeigt Bild, Illustration oder Farbfläche mit Kategorie-Pille, Titel,
 | Gewählte Kinder: bereinigen, merken, Zustand | `suggestions/selectedChildren.ts`, `selectedChildrenStorage.ts`, `SelectedChildrenContext.tsx` |
 | Verlauf auswerten (kürzlich gemacht, Bewertung) | `suggestions/historyIndex.ts`, Punkte in `scoring.ts` |
 | Ergebnis: Kopf, Karte, Bildbereich         | `suggestions/ResultsHeader.tsx`, `SuggestionCard.tsx`, `CardMedia.tsx` |
-| Welches Bild eine Karte zeigt (Vorrang)    | `suggestions/cardImage.ts`, Illustration: `activities/illustrations.ts` |
+| Welches Bild eine Karte zeigt (Vorrang)    | `suggestions/cardImage.ts`, Schrittbilder: `activities/stepImages.ts` |
 | Altersspanne als Text                      | `activities/formatAgeRange.ts`        |
 | Wetter und Standort (Abruf, Zwischenspeicher, Anzeige) | `weather/`, siehe `docs/weather.md` |
 | Kategorie → Symbol                         | `activities/CategoryIcon.tsx`         |
@@ -112,14 +112,13 @@ Der Schatten liegt am äußeren Element, das Zuschneiden der Ecken am inneren (s
 
 Es gibt keine Stock-Fotos mehr, Bilder werden selbst gezeichnet (DESIGN.md, Zusatz 45). Jede Karte hat eine Kette von Stufen, bestes Bild zuerst. **Alle Fälle haben dieselbe Form und Höhe** (Seitenverhältnis 2:1), mit derselben Pille:
 
-1. **`image` der Aktivität** (Web-Adresse, nur `https://`, `cardImage.ts`). Lädt sie nicht (`onError`), zeigt die Karte die nächste Stufe.
-2. **Illustration der Aktivität** (gezeichnet, SVG, gebündelt, Zuordnung nur in `activities/illustrations.ts`, Regeln `docs/design/ILLUSTRATIONEN.md`). `CardMedia` schiebt sie nach dem `image` ein. Heute haben drei Aktivitäten eine; M9b zeichnet die übrigen.
-3. **Farbfläche der Kategorie** (heute der Normalfall) mit großem, dünnem, am unteren Rand angeschnittenem Symbol (`categoryIcons`) und einem weichen großen Kreis. Farben: `docs/theme.md`, „Kategorie-Farben“.
+1. **`image` der Aktivität** (Web-Adresse, nur `https://`, `cardImage.ts`; gezeichnet, aus Supabase Storage, M9b; `expo-image` mit `cachePolicy="disk"`). Lädt sie nicht (`onError`), zeigt die Karte die Farbfläche. Gebündelte Illustrationen gibt es seit M9b nicht mehr.
+2. **Farbfläche der Kategorie** (heute der Normalfall) mit großem, dünnem, am unteren Rand angeschnittenem Symbol (`categoryIcons`) und einem weichen großen Kreis. Farben: `docs/theme.md`, „Kategorie-Farben“.
    Das Symbol ist Dekoration und bleibt bei großer Systemschrift gleich groß (die Skalierung bleibt an).
 
 **Datenschutz-Hinweis zu `image` (Zusatz 35):** Eine Web-Adresse in `image` lädt das Bild beim Anzeigen von einem Server (die IP-Adresse geht dorthin). Deshalb darf `image` **nur Adressen von unserem eigenen Speicher** laden (Allowlist), damit keine IP-Adressen an fremde Server gehen.
 Seit M8 gibt es die Allowlist (`activities/imageAllowlist.ts`): Erlaubt sind nur Adressen, die mit `<EXPO_PUBLIC_SUPABASE_URL>/storage/v1/object/public/` beginnen (Supabase Storage unseres Projekts, Details `docs/supabase.md`).
-Sie gilt an drei Stellen: beim Laden (`prepareActivities` lässt ein fremdes Bild weg, die Aktivität bleibt), in der Prüfung der Daten (`parseActivity` und `npm run activities:check`, dort ein Fehler) und beim Anzeigen (`cardImage.ts`). Ohne Projekt-Adresse ist kein Bild erlaubt. Bisher hat keine Aktivität ein `image`.
+Sie gilt an drei Stellen: beim Laden (`prepareActivities` lässt ein fremdes Bild weg, die Aktivität bleibt), in der Prüfung der Daten (`parseActivity` und `npm run activities:check`, dort ein Fehler) und beim Anzeigen (`cardImage.ts`). Ohne Projekt-Adresse ist kein Bild erlaubt. Für Schrittbilder (`stepImages`, Spalte `step_images`) gilt dieselbe Allowlist, je Bild einzeln: Ein falsches Schrittbild fällt allein weg (`prepareActivities`), beim Anzeigen prüft `stepImages.ts` noch einmal.
 
 ## Harte Ausschlüsse (`exclusions.ts`)
 

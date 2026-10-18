@@ -17,7 +17,7 @@ import {
   type Activity,
 } from './activities';
 import { activityColumns } from './activityRow';
-import { maxActivitiesPerPart, renderSeedFiles, seedDir, sqlString } from './activitySql';
+import { maxActivitiesPerPart, renderSeedFiles, seedColumns, seedDir, sqlString } from './activitySql';
 
 const root = join(__dirname, '..', '..', '..');
 const read = (path: string) => readFileSync(join(root, path), 'utf8');
@@ -87,19 +87,24 @@ describe('Aufbau eines Teils', () => {
   const [file] = renderSeedFiles([makeActivity({ id: 'a-1', dayParts: ['morning'], months: [4, 5] }), makeActivity({ id: "o'brien" })]);
   const sql = file.content;
 
-  it('fügt in die Tabelle ein, mit allen Spalten in dieser Reihenfolge', () => {
-    expect(sql).toContain(`insert into public.activities (${activityColumns.join(', ')})`);
+  it('fügt in die Tabelle ein, mit allen Spalten in dieser Reihenfolge (ohne step_images)', () => {
+    expect(sql).toContain(`insert into public.activities (${seedColumns.join(', ')})`);
+  });
+
+  it('M9b: step_images schreibt der Seed nie (nur set_activity_images in der Datenbank, Migration 0006); die Dateien brauchen 0006 nicht', () => {
+    expect(seedColumns).toEqual(activityColumns.filter((column) => column !== 'step_images'));
+    expect(sql).not.toContain('step_images');
   });
 
   it('ist wiederholbar: vorhandene Aktivitäten werden aktualisiert statt doppelt angelegt', () => {
     expect(sql).toContain('on conflict (id) do update set');
-    for (const column of activityColumns.filter((name) => name !== 'id' && name !== 'image')) expect(sql).toContain(`${column} = excluded.${column}`);
+    for (const column of seedColumns.filter((name) => name !== 'id' && name !== 'image')) expect(sql).toContain(`${column} = excluded.${column}`);
     expect(sql).not.toContain('id = excluded.id');
   });
 
   it('M9b: `image` wird beim Einfügen gesetzt, beim Aktualisieren aber nie überschrieben (Bild-Adressen kommen aus der Datenbank)', () => {
-    expect(sql).toContain(`insert into public.activities (${activityColumns.join(', ')})`);
-    expect(activityColumns).toContain('image');
+    expect(sql).toContain(`insert into public.activities (${seedColumns.join(', ')})`);
+    expect(seedColumns).toContain('image');
     const update = sql.slice(sql.indexOf('do update set'));
     expect(update).not.toContain('image');
   });
@@ -108,7 +113,7 @@ describe('Aufbau eines Teils', () => {
     const where = sql.slice(sql.indexOf('\nwhere '));
     expect(where).toMatch(/^\nwhere \(activities\.status, /);
     expect(where).toContain('is distinct from (excluded.status, ');
-    for (const column of activityColumns.filter((name) => name !== 'id' && name !== 'image')) {
+    for (const column of seedColumns.filter((name) => name !== 'id' && name !== 'image')) {
       expect(where).toContain(`activities.${column}`);
       expect(where).toContain(`excluded.${column}`);
     }
@@ -274,8 +279,9 @@ describe('die Datenbank-Vorlage supabase/migrations/0001_activities.sql', () => 
   });
 
   describe('Spalten und Regeln passen zum Datenmodell', () => {
-    it('jede Spalte, die die App liest, gibt es in der Tabelle', () => {
-      for (const column of activityColumns) expect(raw).toMatch(new RegExp(`^ {2}${column} `, 'm'));
+    it('jede Spalte, die die App liest, gibt es in der Tabelle (step_images seit Migration 0006)', () => {
+      for (const column of seedColumns) expect(raw).toMatch(new RegExp(`^ {2}${column} `, 'm'));
+      expect(readFileSync(join(__dirname, '../../../supabase/migrations/0006_activity_images.sql'), 'utf8')).toContain('add column if not exists step_images jsonb');
     });
 
     it('zusätzlich gibt es updated_at (setzt die Datenbank selbst)', () => {

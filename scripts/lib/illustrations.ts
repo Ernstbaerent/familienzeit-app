@@ -1,5 +1,5 @@
-// Zeichnungen aus Vorlagen erzeugen (docs/design/ILLUSTRATIONEN.md, „Farbplätze“).
-// Jede Farbe in einer Vorlage ist ein Platzhalter `{{name}}` für eine Rolle der Zeichnungs-Palette (src/lib/palette.ts).
+// Farbplätze einsetzen (docs/design/ILLUSTRATIONEN.md, „Farbplätze“), benutzt vom Zeichner des Baukastens (scripts/lib/kit/scene.ts).
+// Jede Farbe in einem Baustein oder einer Szene ist ein Platzhalter `{{name}}` für eine Rolle der Zeichnungs-Palette (src/lib/palette.ts).
 // Reine Funktionen, ohne Dateizugriff, damit sie sich testen lassen.
 
 import { illustrationPalette, type IllustrationColorName } from '../../src/lib/palette.ts';

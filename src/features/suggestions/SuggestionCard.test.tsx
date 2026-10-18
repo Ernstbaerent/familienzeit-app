@@ -1,4 +1,4 @@
-// Die Vorschlagskarte (DESIGN.md, Bildschirm 02): dieselbe Form und Höhe bei Web-Bild, Illustration und Farbfläche,
+// Die Vorschlagskarte (DESIGN.md, Bildschirm 02): dieselbe Form und Höhe bei Web-Bild und Farbfläche,
 // Texte in de und en, Beschriftung für die Sprachausgabe. Ohne Handy: Die Bausteine werden mit echten Texten gezeichnet.
 
 import { Image as ExpoImage } from 'expo-image';
@@ -9,7 +9,6 @@ import { StyleSheet, Text } from 'react-native';
 
 import type { Activity } from '@/features/activities/activities';
 import { categoryIcons } from '@/features/activities/CategoryIcon';
-import { getIllustration } from '@/features/activities/illustrations';
 import de from '@/locales/de.json';
 import en from '@/locales/en.json';
 import { iconSize, lightTheme, radius } from '@/lib/theme';
@@ -214,48 +213,22 @@ describe('Bild der Karte (Web-Adresse oder Farbfläche)', () => {
   });
 });
 
-// PILOT Illustrationen (docs/design/ILLUSTRATIONEN.md): Vorrang image → Illustration → Farbfläche.
-describe('Illustration (Pilot)', () => {
+// Seit M9b gibt es keine gebündelten Zeichnungen mehr: Vorrang image (aus Supabase) → Farbfläche (docs/design/ILLUSTRATIONEN.md).
+describe('Keine gebündelten Zeichnungen (M9b)', () => {
   const pizza = makeActivity({ id: 'homemade-pizza', category: 'cooking' });
-  const illustration = getIllustration('homemade-pizza');
 
-  it('ohne `image`: die Illustration statt der Farbfläche (kein großes Symbol, Sand als Grund), mit Pille', () => {
+  it('auch die früheren Pilot-Aktivitäten zeigen ohne `image` die Farbfläche', () => {
     const root = renderCard(chains.placeholder, pizza);
-    const [image] = root.findAllByType(ExpoImage);
-    expect(image.props.source).toBe(illustration?.source);
-    expect(image.props.contentFit).toBe('cover');
-    expect(flat(image)).toMatchObject({ position: 'absolute', width: '100%', height: '100%' });
-    expect(bigIcon(root)).toHaveLength(0);
-    expect(flat(media(root)).backgroundColor).toBe(lightTheme.colors.surface);
-    expect(allTexts(root)).toContain(de.categories.cooking);
-  });
-
-  it('das `image` der Aktivität gewinnt vor der Illustration; lädt es nicht, kommt die Illustration', () => {
-    const root = renderCard(chains.web, pizza);
-    expect(root.findAllByType(ExpoImage)).toHaveLength(1);
-    expect(root.findAllByType(ExpoImage)[0].props.source).toEqual({ uri: 'https://example.org/wald.jpg' });
-    act(() => root.findAllByType(ExpoImage)[0].props.onError());
-    expect(root.findAllByType(ExpoImage)).toHaveLength(1);
-    expect(root.findAllByType(ExpoImage)[0].props.source).toBe(illustration?.source);
-  });
-
-  it('lädt die Illustration nicht, zeigt die Karte die Farbfläche', () => {
-    const root = renderCard(chains.placeholder, pizza);
-    act(() => root.findAllByType(ExpoImage)[0].props.onError());
     expect(root.findAllByType(ExpoImage)).toHaveLength(0);
     expect(bigIcon(root)).toHaveLength(1);
     expect(flat(media(root)).backgroundColor).toBe(lightTheme.categoryTones.cooking.field);
   });
 
-  it('für die Sprachausgabe Dekoration, Form und Texte wie bei jeder Karte', () => {
-    const root = renderCard(chains.placeholder, pizza);
-    expect(media(root).props.accessibilityElementsHidden).toBe(true);
-    expect(media(root).props.importantForAccessibility).toBe('no-hide-descendants');
-    expect(flat(media(root)).aspectRatio).toBe(2);
-  });
-
-  it('Aktivitäten ohne Illustration bleiben unverändert bei der Farbfläche', () => {
-    const root = renderCard(chains.placeholder);
+  it('mit `image`: das Bild aus dem Gerätespeicher (cachePolicy disk); lädt es nicht, die Farbfläche', () => {
+    const root = renderCard(chains.web, pizza);
+    const [image] = root.findAllByType(ExpoImage);
+    expect(image.props.cachePolicy).toBe('disk');
+    act(() => image.props.onError());
     expect(root.findAllByType(ExpoImage)).toHaveLength(0);
     expect(bigIcon(root)).toHaveLength(1);
   });

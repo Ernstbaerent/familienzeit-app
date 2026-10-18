@@ -1,7 +1,7 @@
 // Baukasten (M9b): Szene prüfen und zu einem SVG zusammensetzen (docs/bausteine/README.md).
 // Eine Szene wählt ein Layout und setzt Bausteine und Figuren der Besetzung in dessen feste Plätze; Koordinaten gibt es nicht.
 // Figuren halten Gegenstände an deren Haltepunkten (Schritt 3a, figureItems.ts), Behälter haben Inhalt (draw.ts).
-// `renderSceneTemplate` liefert das SVG mit Farbplätzen `{{name}}` (wie die Vorlagen in assets/illustrations/src/),
+// `renderSceneTemplate` liefert das SVG mit Farbplätzen `{{name}}` (wie die Bausteine in assets/bausteine/),
 // `renderSceneSvg` setzt die Palette ein. Reine Funktionen, ohne Dateizugriff.
 
 import { backdrop, baseY, cornerZone, frame, layouts, margin, maxItems, maxOverlap, type Slot } from './layouts.ts';

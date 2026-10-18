@@ -6,7 +6,6 @@ import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import type { ActivityCategory } from '@/features/activities/activities';
 import { cardVisualIcon, isPlaceVisualKey, type CardVisual } from '@/features/activities/CategoryIcon';
-import type { Illustration } from '@/features/activities/illustrations';
 import { fonts, fontSize, iconSize, lineHeight, radius, spacing, type Theme } from '@/lib/theme';
 import { useThemedStyles } from '@/lib/useThemedStyles';
 
@@ -20,18 +19,16 @@ type CardMediaProps = {
   chain: CardImageChain; // die Bild-Stufen dieser Karte (cardImage.ts): `image` der Aktivität, zuletzt die Farbfläche
   // Die weiße Pille mit Kategorie-Symbol und Name. In der Detailansicht aus: Dort steht die Kategorie über dem Titel.
   showPill?: boolean;
-  // Die Illustration dieser Aktivität (illustrations.ts). Sie steht nach dem `image` der Aktivität und vor der Farbfläche.
-  illustration?: Illustration;
 };
 
 // Der Bildbereich oben auf der Vorschlagskarte (DESIGN.md, Zusatz 45). Immer dieselbe Form und Höhe (Seitenverhältnis 2:1):
-//  1. das `image` der Aktivität (Web-Adresse), 2. die Illustration der Aktivität (illustrations.ts, gezeichnet, gebündelt),
-//  3. die Farbfläche der Kategorie mit großem, dünnem, angeschnittenem Symbol. Lädt eine Stufe nicht, zeigt der Bereich die nächste.
-//  Die Bildkette aus cardImage.ts kennt `image` und die Farbfläche, die Illustration wird nur hier dazwischen eingeschoben.
-// Dazu die weiße Pille mit Kategorie-Symbol und Name (bei Bild, Illustration und Fläche gleich), auf Wunsch (`showPill`) auch ohne.
+//  1. das `image` der Aktivität (Web-Adresse, gezeichnet, aus Supabase Storage, M9b),
+//  2. die Farbfläche der Kategorie mit großem, dünnem, angeschnittenem Symbol. Lädt das Bild nicht, zeigt der Bereich die Farbfläche.
+//  Gebündelte Zeichnungen gibt es seit M9b nicht mehr (alle Bilder kommen aus Supabase).
+// Dazu die weiße Pille mit Kategorie-Symbol und Name (bei Bild und Fläche gleich), auf Wunsch (`showPill`) auch ohne.
 // Die Detailansicht (D4) nutzt denselben Bildbereich, ohne Pille.
 // Für die Sprachausgabe ist der Bereich Dekoration: Titel und Kategorie stehen in der Beschriftung der Karte.
-export function CardMedia({ category, pillLabel, chain, showPill = true, illustration }: CardMediaProps) {
+export function CardMedia({ category, pillLabel, chain, showPill = true }: CardMediaProps) {
   const { t } = useTranslation();
   const { styles, categoryTones, placeTones, colors } = useThemedStyles(createStyles);
   // Das Symbol ist ein Schrift-Zeichen und würde mit der Systemschrift mitwachsen. Als Dekoration soll es gleich groß bleiben,
@@ -40,30 +37,19 @@ export function CardMedia({ category, pillLabel, chain, showPill = true, illustr
   // Stufen, die nicht geladen werden konnten (Schlüssel = Web-Adresse). Die letzte Stufe, die Farbfläche, kann nicht fehlschlagen.
   const [failed, setFailed] = useState<readonly string[]>([]);
 
-  // Lädt die Illustration nicht (sollte bei einer gebündelten Datei nicht vorkommen), zeigt der Bereich die Kette ohne sie.
-  const [illustrationFailed, setIllustrationFailed] = useState(false);
-
   const step: CardImageSource =
     chain.find((entry) => entry.kind === 'placeholder' || !failed.includes(stepKey(entry))) ?? { kind: 'placeholder' };
-  const showIllustration = illustration !== undefined && !illustrationFailed && step.kind !== 'activity';
   const tone = isPlaceVisualKey(category) ? placeTones[category] : categoryTones[category];
   const icon = cardVisualIcon(category);
   const label = pillLabel ?? t(`categories.${category as ActivityCategory}`);
 
   return (
     <View
-      style={[styles.media, step.kind === 'placeholder' && !showIllustration && { backgroundColor: tone.field }]}
+      style={[styles.media, step.kind === 'placeholder' && { backgroundColor: tone.field }]}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      {showIllustration ? (
-        <ExpoImage
-          source={illustration.source}
-          style={styles.image}
-          contentFit="cover"
-          onError={() => setIllustrationFailed(true)}
-        />
-      ) : step.kind === 'placeholder' ? (
+      {step.kind === 'placeholder' ? (
         <>
           <View style={[styles.shape, { backgroundColor: tone.shape }]} />
           <Ionicons
@@ -105,7 +91,7 @@ const createStyles = ({ colors, categoryTones, placeTones }: Theme) => ({
   placeTones,
   styles: StyleSheet.create({
     media: {
-      aspectRatio: 2, // gleiche Form und Höhe bei Bild, Illustration und Farbfläche
+      aspectRatio: 2, // gleiche Form und Höhe bei Bild und Farbfläche
       overflow: 'hidden', // schneidet Bild, Kreis und Symbol an
       backgroundColor: colors.surface, // Sand, solange ein Bild lädt
     },

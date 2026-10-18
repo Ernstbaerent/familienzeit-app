@@ -10,9 +10,9 @@ import type { Activity } from './activities';
 import { getActivityText } from './activityDisplay';
 import { AllergenNotice, SafetyNotice } from './ActivityNotices';
 import { FactTiles } from './FactTiles';
-import { getIllustration, getStepIllustrations } from './illustrations';
 import { MaterialChecklist } from './MaterialChecklist';
 import { getAllergens, needsAdults } from './safetyCheck';
+import { getStepImageUris } from './stepImages';
 import { StepList } from './StepList';
 
 // Die ganze Idee zum Lesen (DESIGN.md, Bildschirm 03), von oben nach unten:
@@ -27,14 +27,9 @@ export function ActivityDetails({ activity }: { activity: Activity }) {
   return (
     <View style={styles.root}>
       <View style={styles.hero}>
-        {/* Derselbe Bildbereich wie auf der Karte: `image` der Aktivität, sonst ihre Illustration, sonst die Farbfläche mit großem Symbol. */}
+        {/* Derselbe Bildbereich wie auf der Karte: `image` der Aktivität (aus Supabase), sonst die Farbfläche mit großem Symbol. */}
         <View style={styles.media}>
-          <CardMedia
-            category={activity.category}
-            chain={getCardImageChain(activity)}
-            showPill={false}
-            illustration={getIllustration(activity.id)}
-          />
+          <CardMedia category={activity.category} chain={getCardImageChain(activity)} showPill={false} />
         </View>
         <View style={styles.titleBlock}>
           <Text style={styles.category}>{t(`categories.${activity.category}`)}</Text>
@@ -52,7 +47,7 @@ export function ActivityDetails({ activity }: { activity: Activity }) {
       <SafetyNotice withAdults={needsAdults(activity)} note={text.safetyNote} />
 
       <MaterialChecklist materials={activity.materials} />
-      <StepList steps={text.steps} illustrations={getStepIllustrations(activity.id)} />
+      <StepList steps={text.steps} stepImages={getStepImageUris(activity, text.steps.length)} />
     </View>
   );
 }
